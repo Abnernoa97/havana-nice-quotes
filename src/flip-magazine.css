@@ -1,0 +1,81 @@
+/* HAVANA NICE · Full paper-curl magazine preview, isolated from editor. */
+.hn-demo-switch{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#f9f8f4;border-bottom:1px solid #e6e5dd;padding:10px max(14px,4vw);min-height:64px}
+.hn-demo-back{background:transparent;border:0;color:#233e33;display:flex;align-items:center;gap:8px;font-weight:700;font-size:12px}
+.hn-demo-switcher{display:flex;align-items:center;gap:4px;background:#eaece5;border-radius:6px;padding:4px}
+.hn-demo-switcher button{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:#5d6d62;padding:9px 12px;font-size:11px;font-weight:700;border-radius:4px}
+.hn-demo-switcher button.active{background:#fff;box-shadow:0 1px 5px #152c2318;color:#1c4631}
+.hn-magazine{background:#eeede8;color:#253b31;min-height:calc(100vh - 64px);padding:35px 16px 36px;overflow:hidden}
+.hn-magazine-intro{text-align:center;max-width:700px;margin:0 auto 20px}
+.hn-magazine-kicker{font-size:9px;letter-spacing:.22em;font-weight:700;color:#7d9182}
+.hn-magazine-intro h1{font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,38px);font-weight:400;margin:8px 0}
+.hn-magazine-intro h1 em{color:#7a9581;font-weight:400}
+.hn-magazine-intro p{color:#7a887d;font-size:12px;line-height:1.5}
+.hn-magazine-stage{width:100%;max-width:1130px;min-height:540px;margin:0 auto;display:flex;align-items:center;justify-content:center;overflow:visible}
+.hn-magazine-surface{width:100%;max-width:1130px;height:min(68vw,660px);min-height:500px;display:flex;justify-content:center;align-items:center}
+.hn-flip-host{width:100%;height:100%;margin:auto}
+.hn-leaf{height:100%;width:100%;overflow:hidden;background:#f8f6f0;border:1px solid #d7d5cd;box-shadow:inset 0 0 3px #362a2610;color:#193126;font-family:'DM Sans',sans-serif}
+.hn-magazine-source{display:none}
+.hn-cover-image,.hn-ensemble-cover{height:100%;width:100%;background-position:center;background-size:cover;position:relative;display:flex;flex-direction:column;color:white}
+.hn-cover-top{padding:7.2% 8%;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.hn-cover-top span{font:500 clamp(15px,2vw,24px) 'Playfair Display',serif;letter-spacing:.07em}
+.hn-cover-top small,.hn-cover-number{font-size:8px;letter-spacing:.16em;font-weight:600}
+.hn-cover-bottom{margin:auto 8% 16%;text-align:center}
+.hn-cover-bottom>small{font-size:9px;letter-spacing:.2em;font-weight:700}
+.hn-cover-bottom h2{font:400 clamp(32px,4vw,65px)/1.08 'Playfair Display',serif;letter-spacing:-.055em;margin:17px auto}
+.hn-cover-rule{height:1px;width:45px;background:#eee;margin:18px auto}
+.hn-cover-bottom p{font-size:11px;line-height:1.7;letter-spacing:.12em;text-transform:uppercase}
+.hn-cover-number{position:absolute;bottom:5%;left:8%;font-size:7px}
+.hn-leaf-heading{display:flex;justify-content:space-between;gap:10px;color:#5c7265;font-size:8px;font-weight:700;letter-spacing:.12em;padding:7% 8% 5%}
+.hn-leaf-heading.light{color:#f4f4ef}
+.hn-leaf-foot{display:flex;justify-content:space-between;gap:10px;margin:auto 8% 4%;border-top:1px solid #d6d8cf;padding-top:7px;color:#8a9787;font-size:8px;letter-spacing:.1em;font-weight:700}
+.hn-leaf-foot.light{color:#eee;border-color:#ffffff66}
+.hn-editorial-leaf,.hn-vision-leaf,.hn-investment-leaf,.hn-end-leaf{display:flex;flex-direction:column}
+.hn-editorial-content{padding:3% 9% 0;display:flex;flex-direction:column;flex:1;min-height:0}
+.hn-micro{font-size:8px;letter-spacing:.2em;font-weight:700;color:#889a89}
+.hn-editorial-content h2,.hn-vision-content h2,.hn-investment-body h2,.hn-end-body h2{font-family:'Playfair Display',serif;line-height:1.18;letter-spacing:-.055em;font-weight:400;font-size:clamp(27px,3vw,46px);margin:5% 0}
+.hn-editorial-content h2 em,.hn-vision-content h2 em,.hn-investment-body h2 em,.hn-end-body h2 em{color:#78927a;font-weight:400}
+.hn-editorial-content>p,.hn-end-body>p{font-family:'Playfair Display',serif;font-size:clamp(11px,1.05vw,14px);line-height:1.6;color:#66776a;max-width:375px}
+.hn-editorial-picture{flex:1;min-height:70px;margin-top:5%;background-size:cover;background-position:center}
+.hn-signature{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(17px,2vw,24px);padding:3% 0;color:#283d2f}
+.hn-signature span{display:block;font-style:normal;letter-spacing:.12em;font-size:8px;font-family:'DM Sans',sans-serif;margin-top:3px}
+.hn-vision-content{display:flex;flex-direction:column;min-height:0;flex:1;padding:0 8%}
+.hn-vision-content h2{margin:1% 0 4%}
+.hn-vision-picture{height:30%;background-position:center;background-size:cover;flex-shrink:0}
+.hn-vision-rows{display:flex;flex-direction:column;margin-top:3%;flex:1}
+.hn-vision-rows>div{display:flex;gap:12px;padding:3.5% 0;border-bottom:1px solid #dfe4d8}
+.hn-vision-rows strong{font-family:'Playfair Display',serif;color:#819684;font-size:17px;font-weight:400}
+.hn-vision-rows span{display:flex;flex-direction:column;gap:3px}
+.hn-vision-rows b{font-size:8px;letter-spacing:.13em}
+.hn-vision-rows small{font-size:clamp(9px,1vw,11px);line-height:1.4;color:#768475}
+.hn-ensemble-body{margin:auto 9%;display:flex;flex-direction:column;gap:15px}
+.hn-ensemble-body h2{font:400 clamp(40px,5vw,70px)/1.02 'Playfair Display',serif}
+.hn-ensemble-band{font:400 clamp(16px,2vw,23px) 'Playfair Display',serif}
+.hn-ensemble-list{border-top:1px solid #ffffff8a;border-bottom:1px solid #ffffff8a;display:flex;flex-direction:column;padding:12px 0;gap:10px;font-size:9px;letter-spacing:.12em}
+.hn-ensemble-body p{font-size:12px;opacity:.94}
+.hn-investment-body{padding:6% 9%;display:flex;flex-direction:column;flex:1}
+.hn-investment-body h2{font-size:clamp(37px,5vw,65px);margin:4% 0 7%}
+.hn-investment-body>p{font:400 clamp(14px,1.7vw,18px) 'Playfair Display',serif}
+.hn-investment-total{font:400 clamp(34px,5vw,63px) 'Playfair Display',serif;margin:10% 0 7%}
+.hn-investment-total small{display:block;font:700 8px 'DM Sans',sans-serif;letter-spacing:.18em;margin-top:7px;color:#869788}
+.hn-investment-rule{height:1px;background:#d4d9d0;margin:4% 0}
+.hn-investment-details{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.hn-investment-details span{font-size:9px;letter-spacing:.07em;font-weight:700;color:#7b917e}
+.hn-investment-details strong{font:400 22px 'Playfair Display',serif}
+.hn-investment-copy{font:400 13px/1.5 'DM Sans',sans-serif!important;color:#6b7e70;margin-top:5%;max-height:22%;overflow:hidden}
+.hn-investment-notice{font-size:8px;color:#9b9c91;margin-top:auto;letter-spacing:.08em}
+.hn-end-photo{height:46%;background-position:center;background-size:cover}
+.hn-end-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:4% 9%}
+.hn-end-body h2{font-size:clamp(29px,3vw,44px)}
+.hn-end-body>strong{font:500 15px 'Playfair Display',serif;letter-spacing:.1em;margin-top:8%}
+.hn-magazine-controls{display:flex;gap:20px;align-items:center;justify-content:center;margin:10px auto 0;padding:0 12px}
+.hn-magazine-arrow{display:grid;place-items:center;border:1px solid #cdd4c9;background:#f9faf5;color:#264638;width:48px;height:48px;border-radius:50%}
+.hn-magazine-arrow:disabled{opacity:.35}
+.hn-magazine-progress{width:min(220px,48vw);display:flex;flex-direction:column;align-items:center;gap:5px}
+.hn-magazine-page-number{font-family:'Playfair Display',serif;font-size:18px}
+.hn-magazine-page-number i{font-size:13px;color:#aab7a9;font-style:normal;margin:0 8px}
+.hn-magazine-track{width:100%;height:2px;background:#d5dcd2}
+.hn-magazine-track>div{height:100%;background:#2f5940;transition:width .7s}
+.hn-magazine-progress small{font-size:9px;color:#819080;display:flex;align-items:center;gap:4px}
+.hn-magazine-disclaimer{text-align:center;color:#9da69e;margin:17px auto 0;font-size:9px}
+.hn-magazine-error{background:#fff2e8;border:1px solid #f0cfa6;padding:12px 18px;margin:15px auto;max-width:500px;border-radius:6px;font-size:12px}
+@media(max-width:700px){.hn-demo-switch{padding:8px 12px}.hn-demo-back{font-size:11px}.hn-demo-switcher button{font-size:10px;padding:9px}.hn-magazine{padding:19px 9px 20px}.hn-magazine-intro{margin-bottom:6px}.hn-magazine-intro h1{font-size:24px;margin:6px 0}.hn-magazine-intro p{font-size:11px;max-width:330px;margin:0 auto}.hn-magazine-stage{min-height:0}.hn-magazine-surface{min-height:0;height:min(68vh,620px);max-width:100%}.hn-cover-top{padding-top:8%}.hn-cover-top span{font-size:16px}.hn-cover-top small{font-size:7px}.hn-cover-bottom h2{font-size:38px}.hn-cover-bottom{margin-bottom:24%}.hn-leaf-heading{font-size:7px}.hn-editorial-content h2,.hn-vision-content h2{font-size:34px}.hn-editorial-content>p,.hn-end-body>p{font-size:12px}.hn-investment-body h2{font-size:45px}.hn-vision-rows small{font-size:10px}.hn-vision-picture{height:30%}.hn-ensemble-body h2{font-size:45px}.hn-magazine-controls{margin-top:7px}.hn-magazine-arrow{width:43px;height:43px}}

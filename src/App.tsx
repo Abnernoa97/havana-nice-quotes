@@ -1,8 +1,10 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
+import FlipMagazine from './FlipMagazine';
 import {
   LayoutDashboard,
   FileText,
+  BookOpen,
   Palette,
   MessageCircle,
   Plus,
@@ -145,6 +147,7 @@ function App() {
   const [tab, setTab] = useState('design');
   const [mobileMenu, setMobileMenu] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [previewMode, setPreviewMode] = useState('flip');
   const [mobilePreview, setMobilePreview] = useState(false);
   const [toast, setToast] = useState('');
   const [filter, setFilter] = useState('Todas');
@@ -1053,10 +1056,20 @@ function App() {
   if (preview)
     return (
       <>
-        <div className="preview-label">
-          VISTA DEL CLIENTE · SOLO DEMOSTRACIÓN
-        </div>
-        {clientPage}
+        <header className="hn-demo-switch">
+          <button type="button" className="hn-demo-back" onClick={() => setPreview(false)}>
+            <ChevronLeft size={18} /> Volver al diseñador
+          </button>
+          <div className="hn-demo-switcher" role="group" aria-label="Modo de lectura de la cotización">
+            <button type="button" className={previewMode === 'flip' ? 'active' : ''} onClick={() => setPreviewMode('flip')}>
+              <BookOpen size={15} /> Revista 3D
+            </button>
+            <button type="button" className={previewMode === 'scroll' ? 'active' : ''} onClick={() => setPreviewMode('scroll')}>
+              <FileText size={15} /> Scroll
+            </button>
+          </div>
+        </header>
+        {previewMode === 'flip' ? <FlipMagazine item={item} /> : clientPage}
         {toast && <div className="toast">{toast}</div>}
       </>
     );
