@@ -6,14 +6,16 @@ Aplicación independiente para diseñar propuestas personalizadas y, más adelan
 
 **Fase 1: DEMO VISUAL.** Datos ficticios y fotografías de muestra. No contiene backend, autenticación, envío real, firma legal ni sincronización entre dispositivos.
 
-Este proyecto NO está conectado a AppDeploy y está preparado para desplegarse en **Cloudflare Pages** desde este repositorio GitHub.
+La aplicación definitiva es una **demo visual independiente**, preparada para publicarse en **Cloudflare Workers (Static Assets)** desde el repositorio GitHub de Solo Aplicaciones. No depende de AppDeploy.
 
-### Cloudflare Pages
+### Cloudflare Workers — Solo Aplicaciones
 
 - Framework: React (Vite)
 - Production branch: `main`
 - Build command: `npm run build`
-- Build output directory: `dist`
+- Deploy command: `npx wrangler deploy`
+- Preview command: `npx wrangler preview` (opcional)
+- Static assets: `./dist` (configurado en `wrangler.jsonc`)
 - Root directory: repository root
 
 ### Desarrollo
