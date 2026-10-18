@@ -155,6 +155,72 @@ function App() {
   const [newMessage, setNewMessage] = useState('');
   const [clientMessage, setClientMessage] = useState('');
   const [viewAccept, setViewAccept] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
+  const [standalone, setStandalone] = useState(() =>
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true
+  );
+  useEffect(() => {
+    const onPrompt = event => {
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
+    const onInstalled = () => {
+      setInstallPrompt(null);
+      setStandalone(true);
+      setShowInstallGuide(false);
+    };
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onPrompt);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
+  }, []);
+  const installApplication = async () => {
+    if (standalone) return;
+    if (!installPrompt) {
+      setShowInstallGuide(true);
+      return;
+    }
+    try {
+      await installPrompt.prompt();
+      await installPrompt.userChoice;
+      setInstallPrompt(null);
+    } catch (error) {
+      console.warn('Install prompt unavailable', error);
+      setShowInstallGuide(true);
+    }
+  };
+  const installationGuide = showInstallGuide ? (
+    <div className="hn-install-overlay" role="presentation" onClick={() => setShowInstallGuide(false)}>
+      <section
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="hn-install-title"
+        className="hn-install-sheet"
+        onClick={event => event.stopPropagation()}
+      >
+        <button type="button" aria-label="Cerrar" className="hn-install-close" onClick={() => setShowInstallGuide(false)}>
+          <X size={20} />
+        </button>
+        <div className="hn-install-icon"><img src="/icon-192.png" alt="HAVANA NICE Quotes Studio" /></div>
+        <span className="eyebrow">HAVANA NICE / QUOTES STUDIO</span>
+        <h2 id="hn-install-title">Instalar en tu teléfono</h2>
+        <p>Abre esta página en Chrome o Samsung Internet y añádela como aplicación. Se abrirá con su propio ícono y sin la barra del navegador.</p>
+        <div className="hn-install-instructions">
+          <strong>En Google Chrome (Android)</strong>
+          <p>Menú <b>⋮</b> → <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b> → Confirmar.</p>
+          <strong>En Samsung Internet</strong>
+          <p>Abre el menú <b>☰</b> → <b>Añadir página a</b> → <b>Pantalla de inicio</b>.</p>
+        </div>
+        <p className="hn-install-footnote">Versión de demostración. Los datos siguen guardándose en este dispositivo; todavía no hay nube ni firma real.</p>
+        <button type="button" className="btn primary full" onClick={() => setShowInstallGuide(false)}>Entendido</button>
+      </section>
+    </div>
+  ) : null;
+
   const [copied, setCopied] = useState(false);
   const item = quotes.find(q => q.id === active) || quotes[0];
   useEffect(() => {
@@ -326,6 +392,12 @@ function App() {
               : 'Mensajes'}
       </div>
       <div className="topright">
+        {!standalone && (
+          <button type="button" className="hn-install-button" onClick={installApplication}>
+            <Download size={16} />
+            <span>Instalar app</span>
+          </button>
+        )}
         <span className="demo-tag">DEMO VISUAL</span>
         <div className="avatar topavatar">F&N</div>
       </div>
@@ -1115,6 +1187,7 @@ function App() {
         ))}
       </div>
       {toast && <div className="toast">{toast}</div>}
+      {installationGuide}
     </div>
   );
 }

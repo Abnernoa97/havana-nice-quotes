@@ -1746,3 +1746,76 @@ p {
     max-width: none;
   }
 }
+
+/* Installable PWA controls: isolated from proposal editor and page flip */
+.hn-install-button {
+  border: 1px solid #cbd8cc;
+  background: #edf3ec;
+  color: #214638;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 7px;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 13px;
+  white-space: nowrap;
+}
+.hn-install-button:hover { background: #e3ece1; }
+.hn-install-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #182b25b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+.hn-install-sheet {
+  width: min(440px, 100%);
+  max-height: 90dvh;
+  overflow-y: auto;
+  position: relative;
+  background: #fbfaf6;
+  color: #243c31;
+  border-radius: 15px;
+  padding: 28px;
+  box-shadow: 0 25px 60px #0c201a55;
+}
+.hn-install-close {
+  position: absolute;
+  right: 15px;
+  top: 16px;
+  border: 0;
+  background: none;
+  color: #718476;
+}
+.hn-install-icon img {
+  width: 66px;
+  height: 66px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+}
+.hn-install-sheet h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 27px;
+  font-weight: 400;
+  margin: 10px 0 8px;
+}
+.hn-install-sheet p { line-height: 1.7; font-size: 12px; color: #64796b; margin: 0 0 16px; }
+.hn-install-instructions {
+  background: #eef2ec;
+  border-radius: 8px;
+  padding: 17px 19px;
+  margin: 16px 0;
+}
+.hn-install-instructions strong { display: block; font-size: 12px; margin: 5px 0 6px; }
+.hn-install-instructions p { margin: 0 0 12px; }
+.hn-install-instructions p:last-child { margin-bottom: 0; }
+.hn-install-sheet .hn-install-footnote { font-size: 10px; }
+@media (max-width: 600px) {
+  .hn-install-button { padding: 10px; gap: 5px; }
+  .hn-install-button span { font-size: 10px; }
+  .topright .demo-tag { display: none; }
+}

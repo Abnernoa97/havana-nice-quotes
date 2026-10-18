@@ -38,3 +38,9 @@ npm run build
 Nunca subir credenciales, `.env`, nombres de clientes reales ni documentos firmados al repositorio. La demo usa `localStorage` únicamente en el navegador actual; no sincroniza equipos y no sustituye la plataforma comercial.
 
 **HAVANA NICE · By Fer & Noa**
+
+## Instalación en Android (PWA)
+
+En Chrome Android o Samsung Internet, abrir la URL HTTPS del proyecto y usar **Instalar app** en la barra superior o el menú del navegador (Añadir a pantalla de inicio). La app incluye manifiesto, iconos PNG 192/512 y un Service Worker básico para el shell. La instalación no crea una APK independiente ni habilita sincronización de clientes.
+
+La app conserva la misma origin y la misma clave de `localStorage` (no se migran ni borran datos). No se cachean propuestas ni datos sensibles mediante Service Worker. El acceso público y la demo sin autenticación siguen siendo **exclusivamente para pruebas**.
