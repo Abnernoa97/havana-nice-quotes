@@ -61,7 +61,7 @@ export default function FlipMagazine({ item }) {
         showPageCorners: true,
         disableFlipByClick: false,
       });
-      flip.loadFromHtml(host.querySelectorAll('.hn-leaf'));
+      flip.loadFromHTML(host.querySelectorAll('.hn-leaf'));
       flip.on('flip', e => setPage(Number(e.data || 0)));
       flip.on('changeOrientation', e => setOrientation(String(e.data)));
       flipRef.current = flip;
