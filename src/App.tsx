@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import FlipMagazine from './FlipMagazine';
+import EditorialStyles, { editorialStyles } from './EditorialStyles';
 import {
   LayoutDashboard,
   FileText,
@@ -144,7 +145,7 @@ function App() {
   });
   const [section, setSection] = useState('home');
   const [active, setActive] = useState('hn1');
-  const [tab, setTab] = useState('design');
+  const [tab, setTab] = useState('styles');
   const [mobileMenu, setMobileMenu] = useState(false);
   const [preview, setPreview] = useState(false);
   const [previewMode, setPreviewMode] = useState('flip');
@@ -223,6 +224,7 @@ function App() {
 
   const [copied, setCopied] = useState(false);
   const item = quotes.find(q => q.id === active) || quotes[0];
+  const styleName = editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
   useEffect(() => {
     localStorage.setItem('hn_quotes_visual_v1', JSON.stringify(quotes));
   }, [quotes]);
@@ -236,6 +238,10 @@ function App() {
     setQuotes(list =>
       list.map(q => (q.id === active ? { ...q, [key]: value } : q))
     );
+  const openClientPreview = () => {
+    setPreviewMode(item.readingMode === 'scroll' ? 'scroll' : 'flip');
+    setPreview(true);
+  };
   const navigate = x => {
     setSection(x);
     setPreview(false);
@@ -245,6 +251,8 @@ function App() {
     const id = 'hn' + Date.now();
     const q = {
       ...seed[0],
+      style: 'libre',
+      readingMode: 'flip',
       id,
       name: 'New Couple',
       client: '',
@@ -404,7 +412,7 @@ function App() {
     </header>
   );
   const Proposal = ({ embedded = false }) => (
-    <div className={'proposal ' + (embedded ? 'embedded' : '')}>
+    <div className={'proposal hn-style-' + styleName + ' ' + (embedded ? 'embedded' : '')}>
       <div className="proposal-top">
         <span>HAVANA NICE</span>
         <small>LIVE MUSIC · MEXICO</small>
@@ -686,7 +694,7 @@ function App() {
           </h1>
         </div>
         <div className="editor-actions">
-          <button className="btn subtle" onClick={() => setPreview(true)}>
+          <button className="btn subtle" onClick={openClientPreview}>
             <Eye size={16} /> Vista del cliente
           </button>
           <button className="btn primary" onClick={save}>
@@ -696,12 +704,18 @@ function App() {
       </div>
       <div className="editor-workspace">
         <div className="edit-panel">
-          <div className="edit-tabs">
+          <div className="edit-tabs hn-four-tabs">
             <button
               className={tab === 'details' ? 'active' : ''}
               onClick={() => setTab('details')}
             >
               <PenLine size={16} /> Datos
+            </button>
+            <button
+              className={tab === 'styles' ? 'active' : ''}
+              onClick={() => setTab('styles')}
+            >
+              <BookOpen size={16} /> Estilos
             </button>
             <button
               className={tab === 'design' ? 'active' : ''}
@@ -767,6 +781,17 @@ function App() {
                 />
               </label>
             </div>
+          )}
+          {tab === 'styles' && (
+            <EditorialStyles
+              value={styleName}
+              onChange={style => edit('style', style)}
+              readingMode={item.readingMode === 'scroll' ? 'scroll' : 'flip'}
+              onReadingChange={mode => { edit('readingMode', mode); setPreviewMode(mode); }}
+              onEditFree={() => setTab('design')}
+              onPreview={openClientPreview}
+              photo={item.cover}
+            />
           )}
           {tab === 'design' && (
             <div className="edit-body">
@@ -923,7 +948,7 @@ function App() {
               <Proposal embedded />
             </div>
           </div>
-          <button className="preview-open" onClick={() => setPreview(true)}>
+          <button className="preview-open" onClick={openClientPreview}>
             <ExternalLink size={16} /> Abrir vista completa del cliente
           </button>
         </div>
@@ -1009,7 +1034,7 @@ function App() {
     </div>
   );
   const clientPage = (
-    <div className="client-app">
+    <div className={'client-app hn-style-' + styleName}>
       <div className="client-navbar">
         <div className="client-brand">
           HAVANA NICE <small>LIVE MUSIC FOR YOUR WEDDING</small>
@@ -1141,7 +1166,7 @@ function App() {
             </button>
           </div>
         </header>
-        {previewMode === 'flip' ? <FlipMagazine item={item} /> : clientPage}
+        {previewMode === 'flip' ? <div className={'hn-style-' + styleName}><FlipMagazine item={item} /></div> : clientPage}
         {toast && <div className="toast">{toast}</div>}
       </>
     );

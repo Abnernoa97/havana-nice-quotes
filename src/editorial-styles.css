@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Fraunces:opsz,wght@9..144,400&display=swap');
+.edit-tabs.hn-four-tabs {grid-template-columns:repeat(4,minmax(0,1fr));padding:9px;gap:3px}
+.edit-tabs.hn-four-tabs button {flex-direction:column;padding:10px 2px;gap:6px;font-size:10px;min-width:0}
+.hn-styles-tab{padding:24px 20px 28px}
+.hn-styles-tab h3{font:400 25px/1.15 'Playfair Display',serif;margin:12px 0;letter-spacing:-.05em}
+.hn-styles-lead,.hn-style-customize p{font-size:12px;line-height:1.6;color:#738275;margin-bottom:16px}
+.hn-styles-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.hn-style-card{padding:0;display:flex;flex-direction:column;min-width:0;text-align:left;background:#fff;border:1px solid #e5e8e2;border-radius:7px;overflow:hidden;color:#284436}
+.hn-style-card.selected{border:2px solid #254c3b;box-shadow:0 3px 12px #2346341e}
+.hn-style-card:focus-visible{outline:2px solid #729b80}
+.hn-style-mini{height:174px;display:flex;flex-direction:column;position:relative;overflow:hidden;padding:13px;background:#edece5}
+.hn-mini-photo{position:absolute;inset:0;background-size:cover;background-position:center}
+.hn-card-caption{display:flex;flex-direction:column;gap:5px;padding:10px;flex:1}
+.hn-card-kind{font-size:8px;letter-spacing:.12em;color:#84998a;font-weight:700}
+.hn-card-caption strong{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:12px}
+.hn-card-caption p{font-size:10px;line-height:1.45;color:#6d806f}
+.hn-card-caption>small{font-size:9px;color:#a0a99b;margin-top:auto}
+.hn-mini-libre{color:#325242;background:#e8eee5;justify-content:space-between}
+.hn-mini-square{width:57px;height:73px;border:1px solid #789882;background:linear-gradient(115deg,#b3c3b1 50%,transparent 50%)}
+.hn-mini-libre strong{font:400 29px/1 'Playfair Display',serif;letter-spacing:-.05em;text-align:right}
+.hn-mini-libre small{font-size:7px;letter-spacing:.13em}
+.hn-mini-vogue{color:white;text-align:center;align-items:center;justify-content:space-between;background:#181818}
+.hn-mini-vogue .hn-mini-photo{filter:grayscale(1) brightness(.59)}
+.hn-mini-vogue strong{position:relative;font:400 49px/.77 'Bodoni Moda',Georgia,serif;letter-spacing:-.12em}
+.hn-mini-vogue small{position:relative;font:700 7px 'DM Sans',sans-serif;letter-spacing:.13em}
+.hn-mini-vogue em{position:relative;font:400 22px 'Bodoni Moda',Georgia,serif;margin-bottom:7px}
+.hn-mini-lane{color:#4d473d;background:#eee9dd;align-items:flex-start;justify-content:space-between}
+.hn-mini-lane .hn-mini-photo{inset:45% 0 0 45%;filter:saturate(.5)}
+.hn-mini-lane small,.hn-mini-lane span{position:relative;font-size:7px;letter-spacing:.12em}
+.hn-mini-lane strong{position:relative;font:400 30px/.92 'Cormorant Garamond',Georgia,serif}
+.hn-mini-junebug{color:white;background:#b58b76;justify-content:space-between}
+.hn-mini-junebug .hn-mini-photo{inset:0 20% 22% 0;filter:saturate(.65)}
+.hn-mini-junebug small{position:relative;align-self:flex-end;color:#fff;font-size:7px;letter-spacing:.1em}
+.hn-mini-junebug strong{position:relative;text-shadow:0 1px 9px #473126;font:400 25px/1 'Fraunces',Georgia,serif}
+.hn-mini-junebug span{position:relative;font:700 7px 'DM Sans',sans-serif;letter-spacing:.08em}
+.hn-mini-nyt{background:#f4f0e8;color:#181818;align-items:center;text-align:center;padding:11px}
+.hn-mini-double-rule{width:100%;border-top:3px double #222;height:5px}
+.hn-mini-nyt small{font:700 7px Georgia,serif;letter-spacing:.04em}
+.hn-mini-nyt strong{font:700 20px/1.02 Georgia,serif;margin:10px auto;letter-spacing:-.05em}
+.hn-mini-nyt .newspaper{position:relative;inset:auto;filter:grayscale(1);height:55px;width:100%}
+.hn-mini-nyt p{font:400 6px Georgia,serif;margin-top:8px}
+.hn-style-attribution{font-size:9px;line-height:1.45;color:#8f9b8f;margin:13px 0 19px}
+.hn-style-customize{padding:18px;background:#eff3eb;border-radius:8px;border:1px solid #e3eae1}
+.hn-style-customize h4,.hn-style-reading h4{font:400 21px 'Playfair Display',serif;margin:11px 0}
+.hn-style-customize button{display:flex;justify-content:space-between;align-items:center;width:100%;border:1px solid #d1dfd0;border-radius:5px;padding:13px;background:#fff;color:#224437;font-size:11px;font-weight:700}
+.hn-style-reading{margin-top:22px;padding-top:19px;border-top:1px solid #e5eae2}
+.hn-style-reading-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.hn-style-reading-buttons button{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10px;padding:12px 5px;border:1px solid #d3e0d3;border-radius:5px;background:#fff;color:#5f7564}
+.hn-style-reading-buttons button.on{background:#e9f0e8;border-color:#2c543d;color:#254b38;font-weight:700}
+.hn-style-open-preview{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:14px 8px;border:0;border-radius:5px;background:#214436;color:white;font-size:11px;font-weight:700}
+/* Distinct editorial direction in editor, client scroll, and the 3D magazine. */
+.hn-style-vogue .proposal-top{border-bottom:3px solid #111}
+.hn-style-vogue .proposal-top span{font:500 23px 'Bodoni Moda',Georgia,serif;letter-spacing:-.065em}
+.hn-style-vogue .proposal-photo,.hn-style-vogue .client-hero,.hn-style-vogue .hn-cover-image{background-blend-mode:multiply,luminosity;background-color:#666}
+.hn-style-vogue .hero-content h2,.hn-style-vogue .client-hero h1{font:400 clamp(36px,7vw,80px)/.97 'Bodoni Moda',Georgia,serif;text-transform:uppercase;letter-spacing:-.07em}
+.hn-style-vogue .paper-content,.hn-style-vogue .hn-leaf{background:#fff;color:#191919}
+.hn-style-vogue .paper-content h3,.hn-style-vogue .client-story h2,.hn-style-vogue .hn-leaf h2{font-family:'Bodoni Moda',Georgia,serif}
+.hn-style-vogue .paper-content em,.hn-style-vogue .hn-leaf em{color:#333}
+.hn-style-vogue .hn-cover-bottom h2{font:400 clamp(43px,5vw,77px)/1 'Bodoni Moda',serif;text-transform:uppercase}
+.hn-style-vogue .hn-magazine{background:#dededb}
+.hn-style-lane .proposal-top,.hn-style-lane .client-navbar{background:#f1ede4}
+.hn-style-lane .proposal-top span{font:400 25px 'Cormorant Garamond',Georgia,serif}
+.hn-style-lane .proposal-photo{text-align:left;justify-content:flex-start;min-height:420px}
+.hn-style-lane .hero-content{padding:9%}
+.hn-style-lane .hero-content h2,.hn-style-lane .client-hero h1{font:400 clamp(44px,7vw,83px)/.95 'Cormorant Garamond',Georgia,serif}
+.hn-style-lane .paper-content,.hn-style-lane .hn-leaf{background:#f4efe6;color:#453d34}
+.hn-style-lane.client-app{background:#f4efe6}
+.hn-style-lane .paper-content h3,.hn-style-lane .client-story h2,.hn-style-lane .hn-leaf h2{font-family:'Cormorant Garamond',Georgia,serif}
+.hn-style-lane .hn-leaf em,.hn-style-lane .paper-content em{color:#847861}
+.hn-style-lane .hn-cover-bottom{text-align:left;margin-left:11%}
+.hn-style-lane .hn-cover-rule{margin-left:0}
+.hn-style-lane .hn-cover-bottom h2{font:400 clamp(45px,6vw,84px)/1 'Cormorant Garamond',Georgia,serif}
+.hn-style-lane .hn-magazine{background:#e8e3dc}
+.hn-style-junebug .proposal-top,.hn-style-junebug .client-navbar{background:#fff3e9}
+.hn-style-junebug .proposal-top span{font-family:'Fraunces',Georgia,serif}
+.hn-style-junebug .proposal-photo{border:10px solid #fff6ec;min-height:410px}
+.hn-style-junebug .hero-content h2,.hn-style-junebug .client-hero h1{font:400 clamp(35px,7vw,71px)/1 'Fraunces',Georgia,serif}
+.hn-style-junebug .paper-content,.hn-style-junebug .hn-leaf{background:#fff4e9;color:#634334}
+.hn-style-junebug.client-app{background:#fff4e9}
+.hn-style-junebug .paper-content h3,.hn-style-junebug .client-story h2,.hn-style-junebug .hn-leaf h2{font-family:'Fraunces',Georgia,serif}
+.hn-style-junebug .paper-content em,.hn-style-junebug .hn-leaf em{color:#a77260}
+.hn-style-junebug .hn-cover-bottom{text-align:left}
+.hn-style-junebug .hn-cover-rule{margin-left:0}
+.hn-style-junebug .hn-cover-bottom h2{font:400 clamp(36px,5vw,65px)/1 'Fraunces',serif}
+.hn-style-junebug .hn-magazine{background:#e9dcd2}
+.hn-style-nyt .proposal-top{border-top:5px double #1f1f1f;border-bottom:4px double #1f1f1f;background:#f9f8f4;justify-content:center;color:#181818}
+.hn-style-nyt .proposal-top span{font:700 25px Georgia,serif;letter-spacing:-.04em}
+.hn-style-nyt .proposal-top small{display:none}
+.hn-style-nyt .proposal-photo,.hn-style-nyt .client-hero,.hn-style-nyt .hn-cover-image{background-blend-mode:multiply,luminosity;background-color:#888}
+.hn-style-nyt .hero-content h2,.hn-style-nyt .client-hero h1{font:700 clamp(37px,6vw,72px)/1.1 Georgia,serif;letter-spacing:-.05em}
+.hn-style-nyt .paper-content,.hn-style-nyt .hn-leaf{background:#f9f8f4;color:#282828}
+.hn-style-nyt.client-app{background:#f9f8f4;color:#292929}
+.hn-style-nyt .client-navbar{background:#fff;border-top:4px double #222;border-bottom:3px double #222}
+.hn-style-nyt .paper-content h3,.hn-style-nyt .client-story h2,.hn-style-nyt .hn-leaf h2{font-family:Georgia,serif;font-weight:700}
+.hn-style-nyt .paper-content em,.hn-style-nyt .hn-leaf em{color:#3a3a3a}
+.hn-style-nyt .hn-cover-top{border-bottom:4px double #fff}
+.hn-style-nyt .hn-cover-bottom h2{font:700 clamp(32px,5vw,60px)/1.1 Georgia,serif}
+.hn-style-nyt .hn-magazine{background:#e7e6e0}
+@media(max-width:390px){.hn-style-mini{height:158px}.hn-card-caption p{font-size:9px}.edit-tabs.hn-four-tabs button{font-size:9px}}
+@media(min-width:900px) and (max-width:1160px){.hn-styles-gallery{grid-template-columns:1fr}}
