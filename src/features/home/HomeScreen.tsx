@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import { formatHomeDate, homeGreeting } from './greeting';
+import { findClientActivity } from '../quotes/model';
+import type { Quote } from '../quotes/types';
 import {
   FileText,
   Send,
@@ -10,16 +12,8 @@ import {
   MessageCircle,
 } from 'lucide-react';
 
-type HomeQuote = {
-  id: string;
-  cover: string;
-  name: string;
-  location: string;
-  status: string;
-};
-
 type Props = {
-  quotes: HomeQuote[];
+  quotes: Quote[];
   btnQuote: ReactNode;
   addQuote: () => void;
   navigate: (section: string) => void;
@@ -37,6 +31,7 @@ export default function HomeScreen({
   statusClass,
 }: Props) {
   const today = new Date();
+  const clientActivity = findClientActivity(quotes);
   return (
     <div className="page dashboard">
       <div className="intro-line">
@@ -135,19 +130,22 @@ export default function HomeScreen({
             <MessageCircle size={19} />
           </div>
           <p className="panel-intro">
-            Los mensajes que recibas en el futuro aparecerán aquí en tiempo
-            real.
+            Aquí aparecen los mensajes de prueba de tus propuestas.
           </p>
-          <div className="note-box">
-            <div className="note-avatar">O</div>
-            <div>
-              <strong>Olivia & James</strong>
-              <p>“Can we add music for our welcome party too?”</p>
-              <button onClick={() => selectQuote('hn1', 'messages')}>
-                Abrir conversación <ArrowRight size={13} />
-              </button>
+          {clientActivity ? (
+            <div className="note-box">
+              <div className="note-avatar">{(clientActivity.quote.name || '?')[0]}</div>
+              <div>
+                <strong>{clientActivity.quote.name}</strong>
+                <p>“{clientActivity.message.text}”</p>
+                <button onClick={() => selectQuote(clientActivity.quote.id, 'messages')}>
+                  Abrir conversación <ArrowRight size={13} />
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <p className="panel-intro">Todavía no hay mensajes de prueba.</p>
+          )
         </div>
       </div>
     </div>

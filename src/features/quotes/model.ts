@@ -62,3 +62,14 @@ export function safeQuoteDeposit(input: string): number {
   const value = Number(input);
   return Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
 }
+
+/** Busca el último mensaje del cliente de la primera propuesta con actividad. */
+export function findClientActivity(quotes: Quote[]): { quote: Quote; message: NonNullable<Quote['messages']>[number] } | null {
+  for (const quote of quotes) {
+    const lastClientMessage = [...(quote.messages || [])]
+      .reverse()
+      .find(message => message.from === 'client');
+    if (lastClientMessage) return { quote, message: lastClientMessage };
+  }
+  return null;
+}

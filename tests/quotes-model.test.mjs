@@ -139,3 +139,22 @@ test('Los campos de Precios no generan importes negativos, Infinity ni NaN', () 
   assert.equal(safeQuoteDeposit('101'), 100);
   assert.equal(safeQuoteDeposit('NaN'), 0);
 });
+
+import { findClientActivity } from '../src/features/quotes/model.ts';
+
+test('Inicio presenta una conversación ficticia existente, nunca una pareja fija', () => {
+  const activity = findClientActivity(seed);
+  assert.equal(activity?.quote.id, 'hn1');
+  assert.equal(activity?.quote.name, 'Olivia & James');
+  assert.equal(activity?.message.from, 'client');
+  assert.equal(findClientActivity(seed.map(q => ({ ...q, messages: [] }))), null);
+
+  const custom = { ...seed[1], id: 'hn-custom', name: 'New Pair', messages: [
+    { from: 'admin', text: 'A', time: '1:00 PM' },
+    { from: 'client', text: 'Can we add a welcome party?', time: '1:01 PM' },
+  ] };
+  const next = findClientActivity([custom, ...seed]);
+  assert.equal(next?.quote.id, 'hn-custom');
+  assert.equal(next?.message.text, 'Can we add a welcome party?');
+  assert.equal(custom.messages[1].text, 'Can we add a welcome party?');
+});
