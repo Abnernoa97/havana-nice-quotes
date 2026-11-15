@@ -30,18 +30,19 @@ Esta carpeta es la **fuente de verdad del proyecto**. Permite retomar el desarro
 - **Plataforma:** React + Vite + TypeScript + Cloudflare Workers Static Assets.
 - **Formato actual:** PWA instalable en Android; el usuario confirmó que pudo instalarla.
 - **Presentación:** Estilos editoriales, Scroll y Page Flip 3D.
-- **Última versión publicada comprobada:** commit `4bbeb050c905de02cb1861d824ee2591ba4b9158`; despliegue `08a2f77d-46dd-4360-ad8d-1d7a68b5e66a` (Cloudflare, 100 % del tráfico al 15/11/2026).
+- **Última release de código anterior a QN-00.09:** `79dbca97`, Cloudflare deployment `8f6388f3`. El SHA y la versión de la nueva release se registran en el Issue #3 tras publicar. [Estado vigente](docs/09-ESTADO-VIGENTE-Y-LIMPIEZA.md).
 - **Alcance:** solo demo visual con muestras ficticias. El lector 3D tiene seis hojas fijas; gestor de páginas, editor libre y backend aún no existen.
-- **Higiene pendiente:** `App.tsx` sigue en 1,002 líneas, tres componentes usan `@ts-nocheck`, CSS y formateadores requieren auditoría; falta lockfile de dependencias.
-- **Ramas:** `main` y la rama temporal `work/qn-00-07-modularizacion` tienen los mismos 35 archivos; la temporal aún requiere eliminación en GitHub.
+- **Limpieza QN-00.09 preparada y compilada en Preview:** `src/app/App.tsx` ronda 334 líneas; pantallas, revista 3D, estilos, PWA y CSS organizados por carpetas. Sin `@ts-nocheck`; `bun.lock` versionado; 4 tests y auditoría incluidos en el build. Prueba visual final en Samsung pendiente.
+- **Ramas:** `main` como fuente permanente y `work/qn-00-07-modularizacion` como QA temporal (auto-build desactivado). Su eliminación está pendiente de una acción de GitHub que la herramienta conectada no ofrece.
 
 ## Desarrollo local
 
 ```bash
-npm install
+bun install --frozen-lockfile
 npm run dev
 npm run build
 npm run audit:structure
+npm test
 ```
 
 **Cloudflare:** rama `main`; build `npm run build`; deploy `npx wrangler deploy`; assets `./dist`, definidos en `wrangler.jsonc`.

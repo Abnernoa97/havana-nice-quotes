@@ -1,73 +1,82 @@
-# 09 · Estado vigente y plan de limpieza (QN-00.09)
+# 09 · Estado vigente — Arquitectura preparada (QN-00.09)
 
-**Fecha de verificación:** 15/11/2026. **Este documento prevalece sobre estados históricos de docs/01–08 en caso de contradicción.**
+**Verificado:** 15/11/2026. **Fuente principal del proyecto junto al [Plan Nivel Dios #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3).** No confundir el código compilado, el despliegue publicado y la prueba visual del Samsung.
 
-## Identidad y publicación
+## Qué existe hoy
 
-- **Único proyecto:** `Abnernoa97/havana-nice-quotes` · GitHub (repositorio público).
-- **Rama principal:** `main` · commit verificado `4bbeb050c905de02cb1861d824ee2591ba4b9158`.
-- **Cloudflare:** cuenta Solo Aplicaciones · Worker `havana-nice-quotes` · https://havana-nice-quotes.soloaplicaciones97.workers.dev
-- **Build y deploy comprobados:** build `d9075abf-0410-462a-be61-91720db1be90` (success), deployment `08a2f77d-46dd-4360-ad8d-1d7a68b5e66a`, versión `250131a4-8ff9-4a8c-9622-25f92ec7e292`, 100 % del tráfico.
-- **Último punto de recuperación anterior:** commit `b830cbd003a352e2569c459bcd92a23ac14c3c45`, deployment `fa9fc125-6372-43f0-8b35-04f9e67dbe0a`, versión `01e23943-33b0-4e58-af72-a2fc4ca68ed9`.
+HAVANA NICE Quotes Studio es **un prototipo visual con cotizaciones, parejas, fechas, importes y conversaciones TOTALMENTE FICTICIOS**. El propietario lo confirmó el 15/11/2026. No hay datos reales que respaldar ni es requisito descargar JSON del Samsung para continuar. La herramienta opcional de exportación es parte de la demo. No hay backend, cuentas, autenticación, contratos, envío comercial, firma ni cobros reales.
 
-## Qué es y qué NO es
+- **GitHub:** `Abnernoa97/havana-nice-quotes`, **`main` es única rama permanente prevista**. Puede existir una rama temporal de QA hasta eliminarla; no representa una segunda aplicación.
+- **Cloudflare:** cuenta Solo Aplicaciones, Worker `havana-nice-quotes`, URL https://havana-nice-quotes.soloaplicaciones97.workers.dev
+- **Producción y recuperación:** consultar el SHA de `main` y el último deployment de Cloudflare. Punto anterior al refactor integral: commit `79dbca9709bfdac3129692e31f250f6c5a6f7b78`, deployment `8f6388f3-35dc-4d8c-8008-a654c72476a8`, versión `bc20ca88-bbdd-4fee-9aa5-f6787121f8b7`. No borrar historial.
+- **QA aislada:** commit `785f350d313db6b131269f69aac509c372f8fb9a`, Workers Build `5ce38568-fd4c-4c19-a9f8-303fe09d13aa`, **SUCCESS**, en la rama temporal con `auto_build=false`. `npm run build` ejecutó auditoría, **4 pruebas automáticas**, TypeScript con detección de código sin uso y Vite (**1,601 módulos**). Preview independiente https://work-qn-00-07-modularizacion-havana-nice-quotes.soloaplicaciones97.workers.dev
+- **Lockfile real:** `bun.lock` copiado sin fabricar contenido desde un Workers Build de Preview verificado. Se conserva la misma familia de dependencias; sin paquetes nuevos para tests.
 
-- Prototipo visual React/Vite/PWA. **TODOS los registros actuales son ficticios**. No contiene datos comerciales reales ni contratos.
-- Hay Inicio, Cotizaciones, Datos, Estilos, Diseño, Precios, mensajes simulados, vista cliente Scroll y Page Flip 3D. La vista previa modularizada fue revisada por el usuario y Cloudflare la compiló y publicó.
-- **Sin** backend, usuarios, roles, sincronización, enlaces privados, envío, firma real, editor libre de bloques ni gestor de páginas. La revista 3D conserva seis hojas fijas.
-- La clave de guardado actual es `hn_quotes_visual_v1`; no se requiere obtener JSON del Samsung para seguir limpiando **datos ficticios**. Exportación opcional disponible como demostración.
-- **Prohibido introducir datos reales de clientes** hasta implementar privacidad, autenticación y almacenamiento apropiado.
-
-## Carpetas y deuda comprobadas
+## Arquitectura actual del código
 
 ```text
 src/
-  main.tsx
-  App.tsx                         # composición y estado: 1002 líneas; falta dividir
-  index.css                       # 1831 líneas; auditar cascada sin destruir responsive
-  EditorialStyles.tsx             # cinco estilos; pendiente mover con su CSS
-  editorial-styles.css
-  FlipMagazine.tsx                # 6 hojas fijas; proteger efecto aprobado
-  flip-magazine.css
-  features/editor/
-    QuoteDetailsPanel.tsx
-    QuoteDesignPanel.tsx
-    QuotePricingPanel.tsx
-  features/quotes/demo-data.ts    # tres cotizaciones ficticias
-  shared/lib/formatters.ts        # moneda y fechas
+  main.tsx                                 # entrada React/PWA
+  app/
+    App.tsx                                # ~334 líneas, composición y estado
+    WorkspaceChrome.tsx                    # menú, identidad, topbar
+  features/
+    home/HomeScreen.tsx                    # Inicio
+    quotes/
+      types.ts                             # contrato tipado de cotización ficticia
+      demo-data.ts                         # tres ejemplos
+      model.ts                             # filtrado y estado
+      QuotesScreen.tsx                     # lista / búsqueda
+    editor/
+      QuoteEditorScreen.tsx                # diseñador, vista en vivo
+      QuoteDetailsPanel.tsx
+      QuoteDesignPanel.tsx
+      QuotePricingPanel.tsx
+      styles/
+        EditorialStyles.tsx
+        editorial-styles.css
+    client/
+      Proposal.tsx                         # propuesta embebida
+      ClientPage.tsx                       # lectura Scroll
+    messages/MessagesScreen.tsx            # bandeja simulada
+    magazine/
+      FlipMagazine.tsx                     # efecto 3D original
+      flip-magazine.css                    # CSS ORIGINAL, no retocado
+    pwa/
+      useInstallPrompt.ts
+      InstallGuide.tsx
+  shared/
+    lib/formatters.ts                      # único Intl.NumberFormat
+    styles/index.css                      # CSS original movido sin cambiarlo
+  types/page-flip.d.ts                     # declaración local para TypeScript
+scripts/project-audit.mjs                 # integridad, imports, Page Flip
+tests/quotes-model.test.mjs              # cuatro tests de filtros, estados, USD, fechas
+bun.lock                                   # versiones exactas de Bun
 ```
 
-- **Ya hecho y publicado:** datos ficticios, dos formateadores y paneles Datos/Diseño/Precios separados; 11 iconos no utilizados retirados.
-- **Falta:** fragmentar App (`Inicio`, `Cotizaciones`, `Mensajes`, `Vista cliente`, navegación); revisión contextual CSS; unificar el segundo formateador USD en FlipMagazine; retirar `@ts-nocheck` de App/FlipMagazine/EditorialStyles en pasos seguros; pruebas automatizadas.
-- **Falta lockfile versionado:** no fabricar uno a mano. Generarlo con el gestor real y dependencias comprobadas; los últimos logs de Cloudflare indicaron que no había lockfile para caché de dependencias.
-- **No hay carpetas activas duplicadas `old`, `v2`, etc.** Esto no garantiza que todas las funciones o CSS estén libres de duplicaciones.
+## Protecciones que ya están implementadas
 
-## Git y Cloudflare: ramas, coste y versiones
+- No quedan componentes de raíz `src/App.tsx`, `src/FlipMagazine.tsx`, `src/EditorialStyles.tsx`: sus módulos activos están separados por responsabilidad.
+- **Cero `@ts-nocheck` en `src/`**, TypeScript `strict` y comprobación de variables/imports no usados activada.
+- Modelo de cotizaciones, estado y paneles tipados. Eliminado el segundo formateador USD y la lógica de filtro duplicada.
+- El comando `npm run build` incluye **auditoría de estructura + pruebas automáticas + TypeScript + Vite**. Si falla cualquiera, se detiene la compilación antes del despliegue.
+- Se conservó íntegro el CSS y los parámetros del motor Page Flip: `flippingTime: 1080`, `maxShadowOpacity: 0.72`, `showCover: false`, `usePortrait: true`, `loadFromHTML`. El audit los protege.
+- Se conservan `hn_quotes_visual_v1`, el arranque PWA, los cuatro apartados, los cinco Estilos, Scroll y Flip y las acciones de demostración. No se introdujeron nuevos servicios de pago, bases de datos ni Workers.
 
-- Hay dos ramas Git: `main` y `work/qn-00-07-modularizacion`. Comparación de sus **35 archivos por SHA de blob**: **contenido idéntico**; las historias difieren por el merge tipo *squash*.
-- La rama de trabajo puede eliminarse sin perder contenido activo una vez terminado su uso, pero **todavía NO fue eliminada**. La herramienta GitHub de esta sesión no tiene acción de borrar ramas.
-- El Preview Cloudflare de la rama tiene `auto_build=false`; `main` conserva el despliegue automático por GitHub. Cada publicación en `main` puede consumir minutos de Workers Builds.
-- Conservar versiones y commits históricos para recuperación; **no son código duplicado en producción**.
+## Lo que NO está terminado
 
-## Ejecución Nivel Dios — fuente de tareas
+- **Prueba visual/regresión humana en Samsung** de la versión posterior a esta gran reorganización: no se puede sustituir por un build exitoso.
+- **Retirar rama de pruebas `work/qn-00-07-modularizacion`** tras integrar. El conector GitHub disponible permite crear/actualizar ramas pero no borrarlas; no afirmar que se eliminó.
+- **Auditoría visual CSS:** hay selectores repetidos para distintos breakpoints (1250/950/600 px); no se deben borrar por coincidencia textual. Se preservaron reglas y cascada para evitar regresiones.
+- **Funcionalidad real:** el filtro visual decorativo, mensajes, aceptación, envío, firma y paneles son todavía la demo. La fecha fija de Inicio pertenece al diseño de ejemplo. No confundir limpieza técnica con un producto comercial ya construido.
+- **Gestor de páginas/editor libre:** pendiente. La revista 3D todavía muestra seis páginas estáticas. El siguiente ciclo de producto definirá páginas y bloques versionados, añadir/duplicar/ordenar/eliminar y vincular Vista cliente.
 
-El checklist detallado y la evidencia de cada fase están en [**Issue #3 · Plan maestro «Nivel Dios»**](https://github.com/Abnernoa97/havana-nice-quotes/issues/3). No crear un segundo plan paralelo.
+## Normas para continuar
 
-1. **A. Higiene:** rama única permanente, actualizar docs, lockfile real, auditoría reproducible.
-2. **B. Auditoría:** imports, código muerto, duplicados reales, CSS por breakpoint, lógica demo engañosa.
-3. **C. Modularización:** una pantalla/feature por módulo, sin carpetas decorativas ni reescrituras peligrosas.
-4. **D. Tipos y pruebas:** retirar gradualmente `@ts-nocheck`, tests básicos, CI/build verificables.
-5. **E. Regresión visual:** Samsung y escritorio; Inicio, Cotizaciones, Estilos, Diseño, Precios, Scroll, Page Flip.
-6. **F. Cierre:** un único `main` permanente, documentos actualizados, sin deuda crítica conocida; iniciar páginas editables.
+1. Leer este documento y [Issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3) antes de desarrollar.
+2. Trabajar exclusivamente en este repositorio y Worker. Probar cambios sin crear recursos externos.
+3. No publicar intentos: comprobar primero en la rama/Preview, hacer una sola publicación estable en `main` por hito.
+4. No alterar la animación 3D aprobada, el CSS ni la clave local sin pruebas específicas.
+5. Antes de datos reales, diseñar autenticación, almacenamiento privado, links cliente, permisos y respaldo.
 
-**Criterio de calidad:** no basta compilar o tener carpetas bonitas. Cada traslado mantiene comportamiento, responsividad y animación 3D; no se borra CSS por mera repetición de selector. Solo considerar `hecho` lo comprobado.
-
-## Reglas operativas
-
-- Cambiar solo `Abnernoa97/havana-nice-quotes` y Worker Cloudflare Solo Aplicaciones; no tocar Calendario, ABNEROS ni otras aplicaciones.
-- Un cambio lógico por commit; comprobación antes/después y publicación por hitos, minimizando Workers Builds.
-- **La apariencia, el efecto Page Flip 3D y el almacenamiento local permanecen iguales** durante la limpieza.
-- No instalar dependencias ni crear servicios facturables innecesarios. No incluir credenciales.
-- **Siguiente función real tras la limpieza:** documento versionado y gestor de páginas crear/duplicar/reordenar/eliminar; enlazar la vista cliente y la revista 3D a esas páginas.
-
-**Historial de ejecución:** [Issue #1 · auditoría y refactor](https://github.com/Abnernoa97/havana-nice-quotes/issues/1) · [PR #2 · módulos integrados](https://github.com/Abnernoa97/havana-nice-quotes/pull/2).
+**Resultado previsto de QN-00.09:** base modular y compilada para iniciar el verdadero gestor de páginas. Los límites pendientes se registran sin vender «100% visualmente perfecto» antes de probarlo en Samsung.
