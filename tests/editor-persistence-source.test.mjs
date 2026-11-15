@@ -180,7 +180,7 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.match(template, /<CarolinaCover item=\{item\}\/>[\s\S]*?<CarolinaCollage item=\{item\}\/>[\s\S]*?<CarolinaTerms item=\{item\}\/>/);
   assert.match(proposal, /styleName === 'carolina'/);
   assert.match(design, /onUpdate=\{gallery => edit\('gallery', gallery\)\}/);
-  assert.match(details, /edit\('carolinaCopy'/);
+  assert.doesNotMatch(details, /carolinaCopy|hn-carolina-copy-editor/);
   assert.match(magazine, /item\.style === 'carolina'/);
   assert.match(magazine, /<CarolinaBlankReverse\/>/);
   assert.match(magazine, /flippingTime: 1080/);
