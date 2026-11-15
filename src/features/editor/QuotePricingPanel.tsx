@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { money, quoteCurrency } from '../../shared/lib/formatters';
 import type { QuoteCurrency } from '../../shared/lib/formatters';
-import { safeQuotePrice, safeQuoteDeposit, normalizePriceInput } from '../quotes/model';
+import { safeQuotePrice, normalizePriceInput } from '../quotes/model';
 import './quote-pricing.css';
 
 const DEPOSIT_OPTIONS = [20, 30, 40, 50, 60, 70, 80, 90, 100] as const;
