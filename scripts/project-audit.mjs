@@ -18,6 +18,7 @@ const required = [
   'src/features/home/HomeScreen.tsx',
   'src/features/quotes/types.ts', 'src/features/quotes/demo-data.ts',
   'src/features/quotes/QuotesScreen.tsx',
+  'src/features/quotes/storage.ts', 'src/features/quotes/useQuoteStore.ts',
   'src/features/messages/MessagesScreen.tsx',
   'src/features/client/Proposal.tsx', 'src/features/client/ClientPage.tsx',
   'src/features/editor/QuoteEditorScreen.tsx',
@@ -77,8 +78,13 @@ if (fileSet.has('public/manifest.webmanifest')) {
 }
 if (fileSet.has('src/app/App.tsx')) {
   const app = fs.readFileSync(path.join(ROOT, 'src/app/App.tsx'), 'utf8');
-  check('Clave de guardado preservada', app.includes('hn_quotes_visual_v1'),
-    'Revisar la compatibilidad del almacenamiento de cotizaciones');
+  const storePath = 'src/features/quotes/storage.ts';
+  const storageCode = fileSet.has(storePath)
+    ? fs.readFileSync(path.join(ROOT, storePath), 'utf8')
+    : '';
+  check('Clave de guardado preservada en módulo de cotizaciones',
+    app.includes('useQuoteStore') && storageCode.includes("'hn_quotes_visual_v1'"),
+    'Revisar clave en storage.ts y conexión useQuoteStore en App');
   const lines = app.split('\n').length;
   check('App.tsx por debajo de 500 líneas', lines <= 500,
     'App.tsx concentra ' + lines + ' líneas: revisar separación funcional');
