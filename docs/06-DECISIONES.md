@@ -83,6 +83,15 @@
 - No se borran fotos al publicar esta funcionalidad: únicamente después de que Fer & Noa las seleccionen y acepten la confirmación en el estudio.
 - No usar otra rama ni GitHub Actions, ni mover/eliminar fotografías de módulos externos.
 
+## Papelera unificada · 15/11/2026
+
+- La **Papelera** aparece en el menú lateral con filtros Todo, Cotizaciones, Fotos y Archivos. La sección Archivos se mantiene vacía mientras aún no exista carga de documentos adjuntos; no inventar funcionalidades.
+- Eliminar desde Cotizaciones o Fotos ahora **mueve a Papelera** mediante `deleted_at` en las tablas D1 existentes. Los registros desaparecen del listado normal, pero se conservan completos y recuperables.
+- Las imágenes mantienen el objeto original bajo `quotes-studio/photos/` en el mismo R2, sin copias ni migraciones. Mientras estén en Papelera, la URL normal de galería deja de servir la imagen; solo la Papelera privada puede verla.
+- **Restaurar** reactiva el mismo registro D1 y objeto R2; **Eliminar** desde la Papelera requiere confirmación y borra definitivamente el objeto R2 y su registro D1. No hay borrado automático ni expiración.
+- Las cotizaciones que usaban una portada enviada a Papelera se muestran sin portada, sin referencias rotas. Restaurar la foto no la asigna automáticamente: puede elegirse de nuevo.
+- En esta etapa no se purga ningún elemento existente ni se alteran fotos de otras aplicaciones. Una sola rama `main` y publicación Cloudflare Workers Builds.
+
 ## Decisiones todavía abiertas
 
 1. Confirmar los nombres originales de las referencias editoriales mencionadas fonéticamente como «Deline» y «John Book».

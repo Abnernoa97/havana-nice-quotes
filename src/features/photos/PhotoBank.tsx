@@ -16,10 +16,10 @@ type Props = {
   bytesUsed: number;
   uploading: boolean;
   uploadProgress: { done: number; total: number } | null;
-  deleting: boolean;
+  trashing: boolean;
   error: string;
   uploadPhotos: (files: File[]) => Promise<UploadBatchResult<CloudPhoto>>;
-  deletePhotos: (ids: string[]) => Promise<DeleteResult>;
+  trashPhotos: (ids: string[]) => Promise<DeleteResult>;
   refreshPhotos: () => Promise<void>;
   refreshQuotes: () => Promise<void>;
   viewerId: string | null;
@@ -33,7 +33,7 @@ type Props = {
 
 /** Pure-image gallery; one tap opens full screen, a long press enables deletion. */
 export default function PhotoBank({
-  photos, bytesUsed, uploading, uploadProgress, deleting, error, uploadPhotos, deletePhotos,
+  photos, bytesUsed, uploading, uploadProgress, trashing, error, uploadPhotos, trashPhotos,
   refreshPhotos, refreshQuotes, viewerId, selectionMode, openViewer, changeViewer,
   closeViewer, startSelection, exitSelection,
 }: Props) {
@@ -146,25 +146,25 @@ export default function PhotoBank({
 
   const removeSelection = async () => {
     const ids = [...selected];
-    if (!ids.length || deleting) return;
-    if (!window.confirm('¿Eliminar definitivamente ' + ids.length +
+    if (!ids.length || trashing) return;
+    if (!window.confirm('¿Enviar a la papelera ' + ids.length +
       (ids.length === 1 ? ' fotografía?' : ' fotografías?') +
-      '\nSe borrarán de la nube y no podrán recuperarse.')) return;
+      '\nPodrás recuperarlas desde Papelera.')) return;
     try {
-      const result = await deletePhotos(ids);
+      const result = await trashPhotos(ids);
       if (result.deleted.length) await refreshQuotes();
       if (!result.failures.length) {
         setSelected(new Set());
         exitSelection();
         setMessage(result.deleted.length + (result.deleted.length === 1
-          ? ' fotografía eliminada definitivamente.' : ' fotografías eliminadas definitivamente.'));
+          ? ' fotografía enviada a Papelera.' : ' fotografías enviadas a Papelera.'));
       } else {
         setSelected(new Set(result.failures.map(f => f.id)));
-        setMessage(result.deleted.length + ' eliminadas. ' +
-          result.failures.length + ' no se pudieron eliminar.');
+        setMessage(result.deleted.length + ' enviadas a Papelera. ' +
+          result.failures.length + ' no se pudieron mover.');
       }
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : 'No se pudieron eliminar las fotografías.');
+      setMessage(cause instanceof Error ? cause.message : 'No se pudieron enviar a Papelera.');
     }
   };
 
@@ -190,14 +190,14 @@ export default function PhotoBank({
           <ImagePlus size={17}/>
           {uploading && uploadProgress ? 'Subiendo ' + uploadProgress.done + '/' + uploadProgress.total : 'Subir fotografías'}
           <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
-            multiple hidden disabled={uploading || deleting} onChange={onFile}/>
+            multiple hidden disabled={uploading || trashing} onChange={onFile}/>
         </label>
         <small className="hn-photo-batch-hint">Hasta {MAX_PHOTOS_PER_UPLOAD} fotografías por selección</small>
       </div>
       <div className="hn-photo-bank-meta">
         <div><CloudUpload size={20}/><strong>{photos.length}</strong><span>Fotografías en Quotes Studio</span></div>
         <div><ImageIcon size={20}/><strong>{photoSize(bytesUsed)}</strong><span>Almacenamiento de esta biblioteca</span></div>
-        <button type="button" onClick={() => void refreshPhotos()} disabled={deleting}><RefreshCcw size={16}/> Actualizar biblioteca</button>
+        <button type="button" onClick={() => void refreshPhotos()} disabled={trashing}><RefreshCcw size={16}/> Actualizar biblioteca</button>
       </div>
       {message && <p role="status" className="hn-photo-bank-success"><CheckCircle2 size={17}/>{message}</p>}
       {error && <p role="alert" className="hn-photo-bank-error">{error}</p>}
@@ -206,10 +206,10 @@ export default function PhotoBank({
         <div className="hn-photo-selection-bar" role="toolbar" aria-label="Selección de fotografías">
           <strong>{selected.size} {selected.size === 1 ? 'seleccionada' : 'seleccionadas'}</strong>
           <div>
-            <button type="button" onClick={() => { setSelected(new Set()); exitSelection(); }} disabled={deleting}>Cancelar</button>
+            <button type="button" onClick={() => { setSelected(new Set()); exitSelection(); }} disabled={trashing}>Cancelar</button>
             <button type="button" className="danger" onClick={() => void removeSelection()}
-              disabled={!selected.size || deleting}>
-              <Trash2 size={17}/> {deleting ? 'Eliminando...' : 'Eliminar'}
+              disabled={!selected.size || trashing}>
+              <Trash2 size={17}/> {trashing ? 'Moviendo...' : 'Papelera'}
             </button>
           </div>
         </div>

@@ -35,3 +35,7 @@ npx wrangler deploy
 **Importante:** el esquema está en `migrations/0001_quotes.sql` y `migrations/0002_passwordless_devices.sql`. D1 ya contiene las tablas necesarias; la invitación inicial solo se almacena en forma de hash en la base privada. No ejecutar migraciones destructivas ni guardar enlaces/tokens privados en Git.
 
 **Continuidad:** antes de desarrollar leer este README, el estado vigente y el Plan Maestro, no documentos históricos obsoletos.
+
+## Papelera
+
+El menú lateral incluye Papelera unificada: permite restaurar o borrar definitivamente cotizaciones y fotografías. Las imágenes permanecen en el mismo R2 hasta su purga y no se eliminan automáticamente. La categoría Archivos estará disponible cuando exista gestión de adjuntos.

@@ -23,8 +23,8 @@ interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
 }
 interface SessionRow extends D1Row { token_hash: string; expires_at: number; revoked_at: number | null }
-interface QuoteRow extends D1Row { id: string; payload: string; revision: number }
-interface MediaRow extends D1Row { id: string; filename: string; mime: string; size: number; created_at: number; object_key: string }
+interface QuoteRow extends D1Row { id: string; payload: string; revision: number; deleted_at?: number | null }
+interface MediaRow extends D1Row { id: string; filename: string; mime: string; size: number; created_at: number; object_key: string; deleted_at?: number | null }
 const PHOTOS_PREFIX = 'quotes-studio/photos/';
 const MAX_IMAGE = 12 * 1024 * 1024;
 const COOKIE = 'hn_quotes_device';
@@ -168,7 +168,7 @@ async function api(request: Request, env: Env): Promise<Response> {
 
 
   if (path === '/api/quotes' && method === 'GET') {
-    const rows = await env.DB.prepare('SELECT id, payload, revision FROM quotes ORDER BY updated_at DESC, id DESC')
+    const rows = await env.DB.prepare('SELECT id, payload, revision FROM quotes WHERE deleted_at IS NULL ORDER BY updated_at DESC, id DESC')
       .all<QuoteRow>();
     return json({ quotes: rows.results.map(row => ({ quote: JSON.parse(row.payload), revision: row.revision })) });
   }
@@ -187,7 +187,7 @@ async function api(request: Request, env: Env): Promise<Response> {
         'INSERT INTO quotes (id, payload, revision, updated_at) VALUES (?, ?, 1, unixepoch()) ON CONFLICT(id) DO NOTHING'
       ).bind(id, payload).run()
       : await env.DB.prepare(
-        'UPDATE quotes SET payload = ?, revision = revision + 1, updated_at = unixepoch() WHERE id = ? AND revision = ?'
+        'UPDATE quotes SET payload = ?, revision = revision + 1, updated_at = unixepoch() WHERE id = ? AND revision = ? AND deleted_at IS NULL'
       ).bind(payload, id, expected).run();
     if (result.meta.changes) {
       return json({ quote, revision: expected + 1 });
@@ -198,7 +198,7 @@ async function api(request: Request, env: Env): Promise<Response> {
       revision: current?.revision || 0 }, 409);
   }
   if (path === '/api/media' && method === 'GET') {
-    const rows = await env.DB.prepare('SELECT id, object_key, filename, mime, size, created_at FROM media ORDER BY created_at DESC, id DESC')
+    const rows = await env.DB.prepare('SELECT id, object_key, filename, mime, size, created_at FROM media WHERE deleted_at IS NULL ORDER BY created_at DESC, id DESC')
       .all<MediaRow>();
     return json({
       photos: rows.results.map(mediaPublic),
@@ -233,29 +233,100 @@ async function api(request: Request, env: Env): Promise<Response> {
       .bind(id).first<MediaRow>();
     return json({ photo: mediaPublic(row!) }, 201);
   }
+  if (/^\/api\/quotes\/hn-[a-f0-9-]{20,64}$/.test(path) && method === 'DELETE') {
+    const id = path.slice('/api/quotes/'.length);
+    const result = await env.DB.prepare(
+      'UPDATE quotes SET deleted_at = unixepoch(), revision = revision + 1, updated_at = unixepoch() WHERE id = ? AND deleted_at IS NULL'
+    ).bind(id).run();
+    return result.meta.changes ? json({ trashed: true }) : bad('Cotización no encontrada.', 404);
+  }
+  if (path === '/api/trash' && method === 'GET') {
+    const [quotes, media] = await Promise.all([
+      env.DB.prepare('SELECT id, payload, deleted_at FROM quotes WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC')
+        .all<QuoteRow>(),
+      env.DB.prepare('SELECT id, object_key, filename, mime, size, deleted_at FROM media WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC')
+        .all<MediaRow>(),
+    ]);
+    return json({ items: [
+      ...quotes.results.map(row => ({ id: row.id, kind: 'quote',
+        label: (JSON.parse(row.payload) as Record<string, unknown>).name || 'Cotización',
+        deletedAt: row.deleted_at })),
+      ...media.results.filter(row => row.object_key.startsWith(PHOTOS_PREFIX))
+        .map(row => ({ id: row.id, kind: 'photo', label: row.filename,
+          deletedAt: row.deleted_at, url: '/api/trash/photo/' + row.id })),
+    ].sort((a, b) => Number(b.deletedAt) - Number(a.deletedAt)) });
+  }
+  if (/^\/api\/trash\/(photo|quote)\/[a-f0-9-]+\/restore$/.test(path) && method === 'POST') {
+    const parts = path.split('/');
+    const kind = parts[3], id = parts[4];
+    if (kind === 'quote') {
+      if (!validId(id)) return bad('Cotización no encontrada.', 404);
+      const result = await env.DB.prepare(
+        'UPDATE quotes SET deleted_at = NULL, revision = revision + 1, updated_at = unixepoch() WHERE id = ? AND deleted_at IS NOT NULL'
+      ).bind(id).run();
+      return result.meta.changes ? json({ restored: true }) : bad('Cotización no encontrada.', 404);
+    }
+    const photo = await env.DB.prepare(
+      'SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ? AND deleted_at IS NOT NULL'
+    ).bind(id).first<MediaRow>();
+    if (!photo || !photo.object_key.startsWith(PHOTOS_PREFIX)) return bad('Fotografía no encontrada.', 404);
+    if (!await env.MEDIA.get(photo.object_key)) return bad('El archivo no existe en R2.', 404);
+    const result = await env.DB.prepare(
+      'UPDATE media SET deleted_at = NULL WHERE id = ? AND deleted_at IS NOT NULL'
+    ).bind(id).run();
+    return result.meta.changes ? json({ restored: true }) : bad('Fotografía no encontrada.', 404);
+  }
+  if (/^\/api\/trash\/(photo|quote)\/[a-f0-9-]+$/.test(path) && method === 'DELETE') {
+    const parts = path.split('/');
+    const kind = parts[3], id = parts[4];
+    if (kind === 'quote') {
+      if (!validId(id)) return bad('Cotización no encontrada.', 404);
+      const result = await env.DB.prepare(
+        'DELETE FROM quotes WHERE id = ? AND deleted_at IS NOT NULL'
+      ).bind(id).run();
+      return result.meta.changes ? json({ deleted: true }) : bad('Cotización no encontrada.', 404);
+    }
+    const photo = await env.DB.prepare(
+      'SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ? AND deleted_at IS NOT NULL'
+    ).bind(id).first<MediaRow>();
+    if (!photo || !photo.object_key.startsWith(PHOTOS_PREFIX)) return bad('Fotografía no encontrada.', 404);
+    await env.MEDIA.delete(photo.object_key);
+    await env.DB.prepare(
+      'DELETE FROM media WHERE id = ? AND deleted_at IS NOT NULL AND object_key = ?'
+    ).bind(id, photo.object_key).run();
+    return json({ deleted: true });
+  }
+  if (/^\/api\/trash\/photo\/[a-f0-9-]{36}$/.test(path) && (method === 'GET' || method === 'HEAD')) {
+    const id = path.slice('/api/trash/photo/'.length);
+    const row = await env.DB.prepare(
+      'SELECT id, object_key, filename, mime, size FROM media WHERE id = ? AND deleted_at IS NOT NULL'
+    ).bind(id).first<MediaRow>();
+    if (!row || !row.object_key.startsWith(PHOTOS_PREFIX)) return bad('Fotografía no encontrada.', 404);
+    const object = await env.MEDIA.get(row.object_key);
+    if (!object) return bad('Fotografía no encontrada.', 404);
+    return new Response(method === 'HEAD' ? null : object.body, { headers: {
+      'Content-Type': row.mime, 'Cache-Control': 'private, no-store',
+      'X-Content-Type-Options': 'nosniff',
+    } });
+  }
   if (/^\/api\/media\/[a-f0-9-]{36}$/.test(path) && method === 'DELETE') {
     const id = path.slice('/api/media/'.length);
     const row = await env.DB.prepare(
-      'SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ?'
+      'SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ? AND deleted_at IS NULL'
     ).bind(id).first<MediaRow>();
-    // Never touch another app's R2 prefix, even when passed a valid UUID.
-    if (!row || !row.object_key.startsWith(PHOTOS_PREFIX)) {
-      return bad('Fotografía no encontrada.', 404);
-    }
-    // Remove the actual R2 object. On failure metadata remains for retry.
-    await env.MEDIA.delete(row.object_key);
-    // Existing proposals may use this photo as a cover. Clear the broken URL,
-    // incrementing revisions so edits on another device cannot overwrite it.
+    if (!row || !row.object_key.startsWith(PHOTOS_PREFIX)) return bad('Fotografía no encontrada.', 404);
+    const moved = await env.DB.prepare(
+      'UPDATE media SET deleted_at = unixepoch() WHERE id = ? AND deleted_at IS NULL AND object_key = ?'
+    ).bind(id, row.object_key).run();
+    if (!moved.meta.changes) return bad('Fotografía no encontrada.', 404);
     const cleared = await env.DB.prepare(
-      "UPDATE quotes SET payload = json_set(payload, '$.cover', ''), revision = revision + 1, updated_at = unixepoch() WHERE json_extract(payload, '$.cover') = ?"
+      "UPDATE quotes SET payload = json_set(payload, '$.cover', ''), revision = revision + 1, updated_at = unixepoch() WHERE json_extract(payload, '$.cover') = ? AND deleted_at IS NULL"
     ).bind('/api/media/' + id).run();
-    await env.DB.prepare('DELETE FROM media WHERE id = ? AND object_key = ?')
-      .bind(id, row.object_key).run();
-    return json({ deleted: true, clearedCovers: cleared.meta.changes });
+    return json({ trashed: true, clearedCovers: cleared.meta.changes });
   }
   if (/^\/api\/media\/[a-f0-9-]{36}$/.test(path) && (method === 'GET' || method === 'HEAD')) {
     const id = path.slice('/api/media/'.length);
-    const row = await env.DB.prepare('SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ?')
+    const row = await env.DB.prepare('SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ? AND deleted_at IS NULL')
       .bind(id).first<MediaRow>();
     if (!row || !row.object_key.startsWith(PHOTOS_PREFIX)) return bad('Foto no encontrada.', 404);
     const object = await env.MEDIA.get(row.object_key);

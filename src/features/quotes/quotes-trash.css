@@ -1,0 +1,5 @@
+.hn-quote-row { display: flex; align-items: stretch; border-bottom: 1px solid #f0f0eb; }
+.hn-quote-row .quote-line { flex: 1; min-width: 0; width: auto; border-bottom: 0; }
+.hn-quote-trash-action { flex: 0 0 39px; display: grid; place-items: center; align-self: stretch; background: #fff; color: #9ba89b; border: 0; cursor: pointer; }
+.hn-quote-trash-action:hover,.hn-quote-trash-action:focus-visible { background: #f7efee; color: #9c514b; }
+@media(max-width:600px) { .hn-quote-trash-action { flex-basis: 43px; } }

@@ -20,13 +20,25 @@ function environment() {
         bind(...args) { values = args; return query; },
         async first() {
           if (sql.includes('FROM device_sessions WHERE id = ?')) return sessions.get(values[0]) || null;
-          if (sql.includes('FROM quotes WHERE')) return quotes.get(values[0]) || null;
-          if (sql.includes('FROM media WHERE')) return media.get(values[0]) || null;
+          if (sql.includes('FROM quotes WHERE')) {
+            const row=quotes.get(values[0])||null;
+            if (sql.includes('deleted_at IS NULL') && row?.deleted_at != null) return null;
+            if (sql.includes('deleted_at IS NOT NULL') && row?.deleted_at == null) return null;
+            return row;
+          }
+          if (sql.includes('FROM media WHERE')) {
+            const row=media.get(values[0])||null;
+            if (sql.includes('deleted_at IS NULL') && row?.deleted_at != null) return null;
+            if (sql.includes('deleted_at IS NOT NULL') && row?.deleted_at == null) return null;
+            return row;
+          }
           return null;
         },
         async all() {
-          if (sql.includes('FROM quotes ORDER BY')) return { results: [...quotes.values()] };
-          if (sql.includes('FROM media ORDER BY')) return { results: [...media.values()] };
+          if (sql.includes('FROM quotes')) return { results:[...quotes.values()].filter(row =>
+            sql.includes('deleted_at IS NOT NULL') ? row.deleted_at != null : row.deleted_at == null) };
+          if (sql.includes('FROM media')) return { results:[...media.values()].filter(row =>
+            sql.includes('deleted_at IS NOT NULL') ? row.deleted_at != null : row.deleted_at == null) };
           return { results: [] };
         },
         async run() {
@@ -51,8 +63,32 @@ function environment() {
           }
           if (sql.startsWith('INSERT INTO quotes')) {
             if (quotes.has(values[0])) return { meta: { changes: 0 } };
-            quotes.set(values[0], { id: values[0], payload: values[1], revision: 1 });
+            quotes.set(values[0], { id: values[0], payload: values[1], revision: 1, deleted_at: null });
             return { meta: { changes: 1 } };
+          }
+          if (sql.startsWith('UPDATE quotes SET deleted_at = unixepoch()')) {
+            const row=quotes.get(values[0]); if (!row || row.deleted_at != null) return {meta:{changes:0}};
+            quotes.set(values[0],{...row,deleted_at:1763241000,revision:row.revision+1});
+            return {meta:{changes:1}};
+          }
+          if (sql.startsWith('UPDATE quotes SET deleted_at = NULL')) {
+            const row=quotes.get(values[0]); if (!row || row.deleted_at == null) return {meta:{changes:0}};
+            quotes.set(values[0],{...row,deleted_at:null,revision:row.revision+1});
+            return {meta:{changes:1}};
+          }
+          if (sql.startsWith('DELETE FROM quotes WHERE')) {
+            const row=quotes.get(values[0]); if (!row || row.deleted_at == null) return {meta:{changes:0}};
+            quotes.delete(values[0]);return {meta:{changes:1}};
+          }
+          if (sql.startsWith('UPDATE media SET deleted_at = unixepoch()')) {
+            const row=media.get(values[0]);
+            if (!row || row.deleted_at != null || row.object_key !== values[1]) return {meta:{changes:0}};
+            media.set(values[0],{...row,deleted_at:1763241000});
+            return {meta:{changes:1}};
+          }
+          if (sql.startsWith('UPDATE media SET deleted_at = NULL')) {
+            const row=media.get(values[0]); if (!row || row.deleted_at == null) return {meta:{changes:0}};
+            media.set(values[0],{...row,deleted_at:null});return {meta:{changes:1}};
           }
           if (sql.startsWith('UPDATE quotes SET payload = json_set')) {
             let changed = 0;
@@ -67,20 +103,20 @@ function environment() {
           }
           if (sql.startsWith('UPDATE quotes')) {
             const row = quotes.get(values[1]);
-            if (!row || row.revision !== values[2]) return { meta: { changes: 0 } };
+            if (!row || row.deleted_at != null || row.revision !== values[2]) return { meta: { changes: 0 } };
             quotes.set(values[1], { id: values[1], payload: values[0], revision: row.revision + 1 });
             return { meta: { changes: 1 } };
           }
           if (sql.startsWith('DELETE FROM media WHERE')) {
             const row = media.get(values[0]);
-            if (!row || row.object_key !== values[1]) return { meta: { changes: 0 } };
+            if (!row || row.deleted_at == null || row.object_key !== values[1]) return { meta: { changes: 0 } };
             media.delete(values[0]);
             return { meta: { changes: 1 } };
           }
           if (sql.startsWith('INSERT INTO media')) {
             media.set(values[0], {
               id: values[0], object_key: values[1], filename: values[2],
-              mime: values[3], size: values[4], created_at: 1,
+              mime: values[3], size: values[4], created_at: 1, deleted_at: null,
             });
             return { meta: { changes: 1 } };
           }
@@ -325,9 +361,9 @@ test('Borrado definitivo exige sesión y elimina archivo R2 y registro D1', asyn
     method: 'DELETE', headers: { Cookie: cookie, Origin: origin },
   }), env);
   assert.equal(removed.status, 200);
-  assert.equal((await removed.json()).deleted, true);
-  assert.equal(env.objects.size, 0);
-  assert.equal(env.media.size, 0);
+  assert.equal((await removed.json()).trashed, true);
+  assert.equal(env.objects.size, 1);
+  assert.equal(env.media.size, 1);
   assert.equal((await worker.fetch(request(photo.url, { headers: { Cookie: cookie } }), env)).status, 404);
   assert.equal((await worker.fetch(request(photo.url, {
     method: 'DELETE', headers: { Cookie: cookie, Origin: origin },
@@ -380,10 +416,76 @@ test('Borrado jamás toca imágenes de otras aplicaciones ni elimina metadatos s
   }), env);
   const photo = (await upload.json()).photo;
   env.MEDIA.delete = async () => { throw new Error('R2 temporarily unavailable'); };
-  const failed = await worker.fetch(request(photo.url, {
-    method: 'DELETE', headers: { Cookie: cookie, Origin: origin },
-  }), env);
-  assert.equal(failed.status, 500);
+  await worker.fetch(request(photo.url, {
+    method:'DELETE', headers:{Cookie:cookie,Origin:origin},
+  }),env);
+  const failed = await worker.fetch(request('/api/trash/photo/'+photo.id, {
+    method:'DELETE', headers:{Cookie:cookie,Origin:origin},
+  }),env);
+  assert.equal(failed.status,500);
   assert.equal(env.media.has(photo.id), true);
   assert.equal(env.objects.has('book/v2/optimized/original.webp'), true);
+});
+
+
+test('Papelera recupera y purga fotos reales sin duplicar R2', async () => {
+  const env=environment(),cookie=await authorizeDevice(env);
+  const response=await worker.fetch(request('/api/media',{
+    method:'POST',headers:{Cookie:cookie,Origin:origin,'Content-Type':'image/png'},
+    body:new Uint8Array([137,80,78,71]),
+  }),env);
+  const photo=(await response.json()).photo;
+  await worker.fetch(request(photo.url,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
+  const list=await worker.fetch(request('/api/trash',{headers:{Cookie:cookie}}),env);
+  const entries=(await list.json()).items;
+  assert.equal(entries.length,1);
+  assert.equal(entries[0].kind,'photo');
+  assert.equal((await worker.fetch(request(entries[0].url,{headers:{Cookie:cookie}}),env)).status,200);
+  const restore=await worker.fetch(request('/api/trash/photo/'+photo.id+'/restore',{
+    method:'POST',headers:{Cookie:cookie,Origin:origin},
+  }),env);
+  assert.equal((await restore.json()).restored,true);
+  assert.equal((await worker.fetch(request(photo.url,{headers:{Cookie:cookie}}),env)).status,200);
+  assert.equal(env.objects.size,1);
+  await worker.fetch(request(photo.url,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
+  const purge=await worker.fetch(request('/api/trash/photo/'+photo.id,{
+    method:'DELETE',headers:{Cookie:cookie,Origin:origin},
+  }),env);
+  assert.equal((await purge.json()).deleted,true);
+  assert.equal(env.objects.size,0);
+  assert.equal(env.media.size,0);
+});
+
+test('Papelera recupera cotizaciones sin alterar su contenido original', async () => {
+  const env=environment(), cookie=await authorizeDevice(env);
+  const id='hn-12345678-1234-1234-1234-123456789abc';
+  const quote={id,name:'Client',client:'',email:'',location:'Mexico',date:'',
+    price:6000,deposit:30,status:'Borrador',cover:'',font:'editorial',
+    color:'#18342f',note:'',package:'',desc:''};
+  assert.equal((await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+    {quote,expectedRevision:0},cookie),env)).status,200);
+  const move=await worker.fetch(request('/api/quotes/'+id,{
+    method:'DELETE',headers:{Cookie:cookie,Origin:origin},
+  }),env);
+  assert.equal((await move.json()).trashed,true);
+  const active=await worker.fetch(request('/api/quotes',{headers:{Cookie:cookie}}),env);
+  assert.equal((await active.json()).quotes.length,0);
+  const trash=await worker.fetch(request('/api/trash',{headers:{Cookie:cookie}}),env);
+  assert.equal((await trash.json()).items[0].kind,'quote');
+  const restore=await worker.fetch(request('/api/trash/quote/'+id+'/restore',{
+    method:'POST',headers:{Cookie:cookie,Origin:origin},
+  }),env);
+  assert.equal((await restore.json()).restored,true);
+  assert.deepEqual(JSON.parse(env.quotes.get(id).payload),quote);
+  await worker.fetch(request('/api/quotes/'+id,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
+  const purge=await worker.fetch(request('/api/trash/quote/'+id,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
+  assert.equal((await purge.json()).deleted,true);
+  assert.equal(env.quotes.has(id),false);
+});
+
+test('Papelera requiere una sesión autorizada para restaurar o purgar', async () => {
+  const env=environment();
+  assert.equal((await worker.fetch(request('/api/trash'),env)).status,401);
+  assert.equal((await worker.fetch(request('/api/trash/photo/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/restore',{method:'POST'}),env)).status,401);
+  assert.equal((await worker.fetch(request('/api/trash/quote/hn-12345678-1234-1234-1234-123456789abc',{method:'DELETE'}),env)).status,401);
 });

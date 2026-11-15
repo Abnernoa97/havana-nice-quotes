@@ -12,6 +12,8 @@ import { useDeviceAccess } from '../features/auth/useDeviceAccess';
 import DeviceGate from '../features/auth/DeviceGate';
 import { useMediaLibrary } from '../features/photos/useMediaLibrary';
 import PhotoBank from '../features/photos/PhotoBank';
+import { useTrash } from '../features/trash/useTrash';
+import TrashScreen from '../features/trash/TrashScreen';
 import HomeScreen from '../features/home/HomeScreen';
 import MessagesScreen from '../features/messages/MessagesScreen';
 import ClientPage from '../features/client/ClientPage';
@@ -32,6 +34,7 @@ import {
   ChevronLeft,
   Copy,
   Share2,
+  Trash2,
 } from 'lucide-react';
 
 const pages = [
@@ -40,14 +43,16 @@ const pages = [
   { id: 'editor', label: 'Diseñador', icon: Palette },
   { id: 'messages', label: 'Mensajes', icon: MessageCircle },
   { id: 'photos', label: 'Fotos', icon: Images },
+  { id: 'trash', label: 'Papelera', icon: Trash2 },
 ];
 function App() {
   const auth = useDeviceAccess();
   const enabled = auth.status === 'authorized';
   const { quotes, setQuotes, syncStatus, flush, refresh: refreshQuotes } = useQuoteStore(enabled);
-  const { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, deleting, deletePhotos, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
+  const { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, trashing, trashPhotos, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
   const { view, routeTo, goBack } = useAppHistory(quotes[0]?.id || 'empty');
   const { section, active, tab, mobileMenu, preview, previewMode, mobilePreview, installGuide, photoViewerId, photoSelecting } = view;
+  const trash = useTrash(enabled && section === 'trash');
   const setTab: Dispatch<SetStateAction<string>> = change => {
     const next = typeof change === 'function' ? change(tab) : change;
     if (['details', 'styles', 'design', 'pricing'].includes(next)) routeTo({ tab: next as EditorTab });
@@ -124,6 +129,22 @@ function App() {
     setClientMessage('');
     routeTo({ active: id, tab: 'details', section: 'editor', preview: false, mobileMenu: false });
     setToast('Cotización creada. Guardando en Cloudflare...');
+  };
+  const moveQuoteToTrash = async (id: string) => {
+    const quote = quotes.find(q => q.id === id);
+    if (!quote || !window.confirm('¿Enviar a Papelera la cotización de ' + quote.name +
+      '?\nPodrás restaurarla después.')) return;
+    if (!await flush()) { setToast('No se pudo sincronizar. Comprueba la conexión.'); return; }
+    try {
+      const response = await fetch('/api/quotes/' + encodeURIComponent(id), {
+        method: 'DELETE', credentials: 'same-origin',
+      });
+      if (!response.ok) throw new Error('No se pudo mover la cotización.');
+      await refreshQuotes();
+      setToast('Cotización enviada a Papelera.');
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : 'No se pudo mover la cotización.');
+    }
   };
   const selectQuote = (id: string, target = 'editor') => {
     if (id !== active) {
@@ -241,6 +262,7 @@ function App() {
       setFilter={setFilter}
       selectQuote={selectQuote}
       statusClass={statusClass}
+      moveToTrash={id => void moveQuoteToTrash(id)}
     />
   );
   const editor = item ? (
@@ -292,7 +314,7 @@ function App() {
   ) : null;
   const photoView = (
     <PhotoBank photos={photos} bytesUsed={bytesUsed} uploading={uploading} uploadProgress={uploadProgress}
-      deleting={deleting} deletePhotos={deletePhotos} refreshQuotes={refreshQuotes}
+      trashing={trashing} trashPhotos={trashPhotos} refreshQuotes={refreshQuotes}
       error={mediaError} uploadPhotos={uploadPhotos} refreshPhotos={refreshPhotos}
       viewerId={photoViewerId} selectionMode={photoSelecting}
       openViewer={id => routeTo({ photoViewerId: id })}
@@ -300,6 +322,11 @@ function App() {
       closeViewer={goBack}
       startSelection={() => routeTo({ photoSelecting: true })}
       exitSelection={goBack} />
+  );
+  const trashView = (
+    <TrashScreen items={trash.items} busy={trash.busy} error={trash.error}
+      refresh={trash.refreshTrash} restore={trash.restoreItem} purge={trash.purgeItem}
+      refreshQuotes={refreshQuotes} refreshPhotos={refreshPhotos}/>
   );
   useEffect(() => {
     const onEscape = (event: KeyboardEvent) => {
@@ -363,9 +390,10 @@ function App() {
         {section === 'editor' && editor}
         {section === 'messages' && messagesView}
         {section === 'photos' && photoView}
+        {section === 'trash' && trashView}
       </div>
       <div className="mobile-bottom">
-        {pages.map(p => (
+        {pages.filter(p => p.id !== 'trash').map(p => (
           <button
             key={p.id}
             onClick={() => navigate(p.id)}

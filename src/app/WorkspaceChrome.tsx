@@ -87,6 +87,7 @@ export function Topbar({ section, standalone, installApplication, setMobileMenu,
               ? 'Diseñador'
               : section === 'photos'
                 ? 'Fotos'
+                : section === 'trash' ? 'Papelera'
                 : 'Mensajes'}
       </div>
       <div className="topright">

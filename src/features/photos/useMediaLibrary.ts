@@ -21,8 +21,8 @@ export function useMediaLibrary(enabled: boolean) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
   const uploadLock = useRef(false);
-  const deleteLock = useRef(false);
-  const [deleting, setDeleting] = useState(false);
+  const trashLock = useRef(false);
+  const [trashing, setTrashing] = useState(false);
 
   const refreshPhotos = useCallback(async () => {
     if (!enabled) return;
@@ -94,16 +94,16 @@ export function useMediaLibrary(enabled: boolean) {
     }
   }, [enabled, refreshPhotos]);
 
-  /** Permanent R2 deletion; each successful DELETE also removes its D1 row. */
-  const deletePhotos = useCallback(async (ids: string[]): Promise<{
+  /** Move to the unified Trash. R2 remains until explicitly purged. */
+  const trashPhotos = useCallback(async (ids: string[]): Promise<{
     deleted: string[];
     failures: { id: string; reason: string }[];
   }> => {
     if (!enabled) throw new Error('El teléfono no está vinculado.');
-    if (deleteLock.current || uploadLock.current) throw new Error('Hay otra operación en curso.');
+    if (trashLock.current || uploadLock.current) throw new Error('Hay otra operación en curso.');
     if (!ids.length) return { deleted: [], failures: [] };
-    deleteLock.current = true;
-    setDeleting(true);
+    trashLock.current = true;
+    setTrashing(true);
     setError('');
     const deleted: string[] = [];
     const failures: { id: string; reason: string }[] = [];
@@ -126,10 +126,10 @@ export function useMediaLibrary(enabled: boolean) {
       if (failures.length) setError(failures.length + ' fotografía(s) no se pudieron eliminar. Intenta de nuevo.');
       return { deleted, failures };
     } finally {
-      deleteLock.current = false;
-      setDeleting(false);
+      trashLock.current = false;
+      setTrashing(false);
     }
   }, [enabled, refreshPhotos]);
 
-  return { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, deleting, deletePhotos, refreshPhotos, error };
+  return { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, trashing, trashPhotos, refreshPhotos, error };
 }

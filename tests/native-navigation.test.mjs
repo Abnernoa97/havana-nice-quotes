@@ -145,3 +145,13 @@ test('Native Back exits long-press photo selection without leaving Fotos', () =>
   assert.equal(f.navigator.getView().photoSelecting, false);
   assert.equal(f.navigator.getView().section, 'photos');
 });
+
+
+test('Android Atrás cierra Papelera hacia la sección anterior', () => {
+  const f=fixture();
+  f.navigator.transition({section:'photos'});
+  f.navigator.transition({mobileMenu:true});
+  f.navigator.transition({mobileMenu:false,section:'trash'},'replace');
+  f.navigator.back();
+  assert.equal(f.navigator.getView().section,'photos');
+});

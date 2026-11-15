@@ -124,10 +124,24 @@ test('La selección puede borrar archivos reales y actualizar cotizaciones que u
   const media = src('features/photos/useMediaLibrary.ts');
   const app = src('app/App.tsx');
   const worker = readFileSync(new URL('../worker/index.ts', import.meta.url), 'utf8');
-  assert.match(gallery, /deletePhotos\(ids\)/);
+  assert.match(gallery, /trashPhotos\(ids\)/);
   assert.match(gallery, /await refreshQuotes\(\)/);
   assert.match(media, /method: 'DELETE'/);
-  assert.match(worker, /await env\.MEDIA\.delete\(row\.object_key\)/);
+  assert.match(worker, /SET deleted_at = unixepoch\(\)/);
   assert.match(worker, /json_set\(payload, '\$\.cover', ''\)/);
-  assert.match(app, /deletePhotos=\{deletePhotos\} refreshQuotes=\{refreshQuotes\}/);
+  assert.match(app, /trashPhotos=\{trashPhotos\} refreshQuotes=\{refreshQuotes\}/);
+});
+
+
+test('Papelera visible desde el menú, sin sexta pestaña móvil', () => {
+  const app = src('app/App.tsx');
+  const trash = src('features/trash/TrashScreen.tsx');
+  const worker = readFileSync(new URL('../worker/index.ts', import.meta.url), 'utf8');
+  assert.match(app, /id: 'trash', label: 'Papelera'/);
+  assert.match(app, /pages\.filter\(p => p\.id !== 'trash'\)/);
+  assert.match(trash, /Restaurar/);
+  assert.match(trash, /Eliminar/);
+  assert.match(trash, /Archivos/);
+  assert.match(worker, /deleted_at IS NOT NULL/);
+  assert.match(worker, /await env\.MEDIA\.delete\(photo\.object_key\)/);
 });

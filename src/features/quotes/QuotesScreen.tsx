@@ -1,5 +1,6 @@
 import type { ReactNode, Dispatch, SetStateAction } from 'react';
-import { Search, ArrowUpRight, Image as ImageIcon } from 'lucide-react';
+import { Search, ArrowUpRight, Image as ImageIcon, Trash2 } from 'lucide-react';
+import './quotes-trash.css';
 import { money, dDate } from '../../shared/lib/formatters';
 import type { Quote } from './types';
 import { filterQuotes } from './model';
@@ -13,6 +14,7 @@ type Props = {
   setFilter: Dispatch<SetStateAction<string>>;
   selectQuote: (id: string, target?: string) => void;
   statusClass: (status: string) => string;
+  moveToTrash: (id: string) => void;
 };
 
 /** Sección extraída sin modificar la interfaz ni las acciones del prototipo. */
@@ -25,6 +27,7 @@ export default function QuotesScreen({
   setFilter,
   selectQuote,
   statusClass,
+  moveToTrash,
 }: Props) {
   const visibleQuotes = filterQuotes(quotes, filter, search);
   return (
@@ -72,11 +75,8 @@ export default function QuotesScreen({
           <span></span>
         </div>
         {visibleQuotes.map(q => (
-            <button
-              className="quote-line"
-              key={q.id}
-              onClick={() => selectQuote(q.id)}
-            >
+          <div key={q.id} className="hn-quote-row">
+            <button type="button" className="quote-line" onClick={() => selectQuote(q.id)}>
               <div className="table-couple">
                 {q.cover ? <img src={q.cover} alt="" /> : <span className="quote-cover-empty" aria-hidden="true"><ImageIcon size={19}/></span>}
                 <div>
@@ -91,7 +91,13 @@ export default function QuotesScreen({
               </span>
               <ArrowUpRight size={17} />
             </button>
-          ))}
+            <button type="button" className="hn-quote-trash-action"
+              aria-label={'Enviar a papelera la cotización ' + q.name}
+              title="Enviar a papelera" onClick={() => moveToTrash(q.id)}>
+              <Trash2 size={17}/>
+            </button>
+          </div>
+        ))}
         {visibleQuotes.length === 0 && (
           <div className="empty">No hay cotizaciones con esos filtros.</div>
         )}
