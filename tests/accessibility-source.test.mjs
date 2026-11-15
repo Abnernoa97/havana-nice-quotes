@@ -46,3 +46,23 @@ test('Todos los accesos al historial nativo comparten el mismo navegador y diál
   assert.match(app, /routeTo\(\{ mobileMenu: true \}\)/);
   assert.match(app, /routeTo\(\{ previewMode: next as ReadingView \}, 'replace'\)/);
 });
+
+
+test('Inicio muestra una sola acción para crear cotización, dentro de la tarjeta', () => {
+  const home = source('features/home/HomeScreen.tsx');
+  const app = source('app/App.tsx');
+  assert.equal((home.match(/onClick=\{addQuote\}/g) || []).length, 1);
+  assert.match(home, /<Plus size=\{17\} \/> Nueva cotización/);
+  assert.doesNotMatch(home, /btnQuote|Crear nueva propuesta|Todo lo que necesitas para crear propuestas/);
+  const homeWiring = app.split('const home = (')[1].split('const quotesView = (')[0];
+  assert.doesNotMatch(homeWiring, /btnQuote/);
+  assert.match(app, /<QuotesScreen[\s\S]*?btnQuote=\{btnQuote\}/);
+});
+
+test('Se preservan las dimensiones existentes de la tarjeta principal en escritorio y móvil', () => {
+  const css = readFileSync(new URL('../src/shared/styles/index.css', import.meta.url), 'utf8');
+  assert.match(css, /\.welcome-hero\s*\{\s*height: 340px;/);
+  assert.match(css, /@media \(max-width: 1250px\)[\s\S]*?\.welcome-hero\s*\{\s*height: 320px;/);
+  assert.match(css, /@media \(max-width: 600px\)[\s\S]*?\.welcome-hero\s*\{\s*height: 330px;/);
+  assert.match(css, /\.dashboard \.intro-line\s*\{\s*margin-bottom: 18px;/);
+});
