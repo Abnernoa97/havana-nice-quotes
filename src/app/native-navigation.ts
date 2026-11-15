@@ -40,7 +40,7 @@ export function readNavigationEntry(state: unknown): Entry | null {
   if (entry.__havanaNiceHistory !== 1 ||
       !Number.isSafeInteger(entry.depth) || (entry.depth ?? -1) < 0 ||
       !entry.view || typeof entry.view !== 'object') return null;
-  const view = entry.view as Partial<AppView> & { tab?: EditorTab | 'pricing' };
+  const view = entry.view as Omit<Partial<AppView>, 'tab'> & { tab?: EditorTab | 'pricing' };
   if (!sections.includes(view.section as AppSection) ||
       typeof view.active !== 'string' || !view.active.trim() ||
       !(tabs.includes(view.tab as EditorTab) || view.tab === 'pricing') ||
