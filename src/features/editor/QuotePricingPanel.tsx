@@ -42,7 +42,6 @@ export default function QuotePricingPanel({ item, edit }: Props) {
         inputMode="numeric"
         autoComplete="off"
         className="hn-price-input"
-        placeholder="0"
         value={item.price === 0 ? '' : String(item.price)}
         onFocus={event => event.currentTarget.select()}
         onChange={event => edit('price', safeQuotePrice(normalizePriceInput(event.target.value)))}

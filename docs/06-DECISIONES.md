@@ -122,3 +122,10 @@
 5. Determinar acceso privado del repositorio y medidas de seguridad antes de incorporar datos reales.
 
 **Regla:** cuando cambie una decisión, actualizar este archivo y el Issue correspondiente. No duplicar estados vigentes en documentos históricos.
+
+## Campos vacíos y limpieza de textos de prueba · 15/11/2026
+
+- En **Datos**, los campos de los borradores nuevos ya empezaban vacíos; las frases visibles en las capturas provenían de **cuatro cotizaciones antiguas en D1**. Se limpiaron puntualmente los valores exactos de prueba en esos cuatro registros, conservando el resto de la información y fotografías, sin borrar registros.
+- Se dejaron en cero los importes y anticipos que todavía coincidían con el paquete de ejemplo completo; no se tocaron los precios reales distintos ni los datos personalizados.
+- La plantilla Carolina mantiene la **estructura y las tres páginas originales**, pero sus nueve campos editables de condiciones ya no tienen texto precargado; corresponde a Fer y Noa rellenarlos.
+- El campo de precio tampoco presenta un `0` de ejemplo como placeholder. Los nuevos borradores no importan información ajena.

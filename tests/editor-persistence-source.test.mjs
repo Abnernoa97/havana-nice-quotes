@@ -237,3 +237,20 @@ test('El borrador nuevo no contiene datos ficticios ni importes prellenados', ()
   assert.match(model, /desc: ''/);
   assert.doesNotMatch(quotes, /Olivia & James/);
 });
+
+
+test('Todas las entradas editables empiezan vacías, incluidas las condiciones de Carolina', () => {
+  const model = src('features/quotes/model.ts');
+  const details = src('features/editor/QuoteDetailsPanel.tsx');
+  const template = src('features/templates/CarolinaTemplate.tsx');
+  const prices = src('features/editor/QuotePricingPanel.tsx');
+  for (const key of ['name', 'location', 'note', 'package', 'desc']) {
+    assert.match(model, new RegExp('\\b' + key + ": ''"));
+  }
+  assert.doesNotMatch(details, /placeholder="Olivia|defaultValue=/);
+  const originals = template.split('export const CAROLINA_COPY = {')[1].split('} as const;')[0];
+  const keys = ['performance', 'musicians', 'crew', 'backline', 'logistics',
+    'balance', 'production', 'connections', 'space'];
+  for (const key of keys) assert.match(originals, new RegExp('\\b' + key + ": ''"));
+  assert.doesNotMatch(prices, /placeholder="0"/);
+});

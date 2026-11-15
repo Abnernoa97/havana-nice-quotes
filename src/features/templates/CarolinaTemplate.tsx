@@ -7,15 +7,15 @@ import './carolina-template.css';
 export const CAROLINA_SLOTS = 6;
 
 export const CAROLINA_COPY = {
-  performance: 'From 1 hour to 2.5 hours, beautifully tailored to your celebration',
-  musicians: '5 Cuban musicians performing live',
-  crew: 'Audio engineer and setup staff to make sure everything runs perfectly (2)',
-  backline: 'Instruments, microphones, mixing console',
-  logistics: 'Service includes a minimum of 8 hours covering transportation, setup, soundcheck, live performance, and breakdown.',
-  balance: 'The remaining balance is due 20 days before your wedding.',
-  production: 'Audio to be provided by your specialized vendor.',
-  connections: '2 free XLR channels on the main console, and power for our backline at the place.',
-  space: 'We’re super flexible. We need a minimum of 2×2 meters. A stage is not always required; we adapt to your venue’s layout and specific floor plan.',
+  performance: '',
+  musicians: '',
+  crew: '',
+  backline: '',
+  logistics: '',
+  balance: '',
+  production: '',
+  connections: '',
+  space: '',
 } as const;
 
 export type CarolinaCopy = { [K in keyof typeof CAROLINA_COPY]: string };
