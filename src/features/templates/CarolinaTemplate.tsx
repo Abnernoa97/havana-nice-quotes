@@ -54,23 +54,37 @@ export function CarolinaCover({ item }: { item: Quote }) {
   );
 }
 
-function PhotoCell({ url, position }: { url: string; position: number }) {
-  return (
-    <div className={'hn-carolina-photo hn-carolina-photo-' + position}
-      role="img" aria-label={url ? 'Wedding photograph ' + position : 'Photograph slot ' + position}
-      style={url ? { backgroundImage: 'url("' + url + '")' } : undefined}/>
+function PhotoCell({ url, position, onSelect }: {
+  url: string; position: number; onSelect?: (index: number) => void;
+}) {
+  const className = 'hn-carolina-photo hn-carolina-photo-' + position;
+  const style = url ? { backgroundImage: 'url("' + url + '")' } : undefined;
+  if (onSelect) return (
+    <button type="button" className={className + ' hn-carolina-editable-photo'}
+      aria-label={'Elegir fotografía del recuadro ' + position}
+      onClick={() => onSelect(position - 1)} style={style}>
+      {!url && <span className="hn-carolina-empty-photo">+</span>}
+      <span className="hn-carolina-photo-index">{String(position).padStart(2, '0')}</span>
+    </button>
   );
+  return <div className={className} role="img"
+    aria-label={url ? 'Wedding photograph ' + position : 'Photograph slot ' + position}
+    style={style}/>;
 }
 
-export function CarolinaCollage({ item }: { item: Quote }) {
+export function CarolinaCollage({ item, onSelectPhoto }: {
+  item: Quote; onSelectPhoto?: (index: number) => void;
+}) {
   const images = carolinaPhotos(item);
   return (
     <div className="hn-carolina-page hn-carolina-collage">
       <div className="hn-carolina-photo-column left">
-        {images.slice(0, 2).map((url, i) => <PhotoCell key={i} url={url} position={i + 1}/>)}
+        {images.slice(0, 2).map((url, i) => <PhotoCell key={i} url={url}
+          position={i + 1} onSelect={onSelectPhoto}/>)}
       </div>
       <div className="hn-carolina-photo-column right">
-        {images.slice(2).map((url, i) => <PhotoCell key={i + 2} url={url} position={i + 3}/>)}
+        {images.slice(2).map((url, i) => <PhotoCell key={i + 2} url={url}
+          position={i + 3} onSelect={onSelectPhoto}/>)}
       </div>
     </div>
   );
