@@ -51,3 +51,14 @@ export function editSampleQuote(
 ): Quote[] {
   return quotes.map(q => (q.id === id ? { ...q, [key]: value } : q));
 }
+
+/** Los inputs numéricos pueden producir valores negativos, Infinity o NaN durante la edición. */
+export function safeQuotePrice(input: string): number {
+  const value = Number(input);
+  return Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
+export function safeQuoteDeposit(input: string): number {
+  const value = Number(input);
+  return Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
+}

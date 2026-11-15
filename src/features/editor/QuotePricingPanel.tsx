@@ -1,5 +1,6 @@
 import { Send } from 'lucide-react';
 import { usd } from '../../shared/lib/formatters';
+import { safeQuotePrice, safeQuoteDeposit } from '../quotes/model';
 
 type PricingQuote = {
   package: string;
@@ -35,7 +36,7 @@ export default function QuotePricingPanel({ item, edit, share }: Props) {
                   type="number"
                   min="0"
                   value={item.price}
-                  onChange={e => edit('price', Number(e.target.value))}
+                  onChange={e => edit('price', safeQuotePrice(e.target.value))}
                 />
               </label>
               <label>
@@ -48,7 +49,7 @@ export default function QuotePricingPanel({ item, edit, share }: Props) {
                   onChange={e =>
                     edit(
                       'deposit',
-                      Math.max(0, Math.min(100, Number(e.target.value)))
+                      safeQuoteDeposit(e.target.value)
                     )
                   }
                 />

@@ -122,3 +122,20 @@ test('Inicio adapta saludo a mañana, tarde y noche del dispositivo', () => {
   assert.equal(homeGreeting(new Date(2026, 10, 15, 17, 59)), 'Good afternoon');
   assert.equal(homeGreeting(new Date(2026, 10, 15, 18, 0)), 'Good evening');
 });
+
+import { safeQuotePrice, safeQuoteDeposit } from '../src/features/quotes/model.ts';
+
+test('Los campos de Precios no generan importes negativos, Infinity ni NaN', () => {
+  assert.equal(safeQuotePrice('5900'), 5900);
+  assert.equal(safeQuotePrice('100.25'), 100.25);
+  assert.equal(safeQuotePrice('-5'), 0);
+  assert.equal(safeQuotePrice(''), 0);
+  assert.equal(safeQuotePrice('Infinity'), 0);
+  assert.equal(safeQuotePrice('not-a-number'), 0);
+  assert.equal(safeQuoteDeposit('-1'), 0);
+  assert.equal(safeQuoteDeposit('0'), 0);
+  assert.equal(safeQuoteDeposit('40'), 40);
+  assert.equal(safeQuoteDeposit('100'), 100);
+  assert.equal(safeQuoteDeposit('101'), 100);
+  assert.equal(safeQuoteDeposit('NaN'), 0);
+});
