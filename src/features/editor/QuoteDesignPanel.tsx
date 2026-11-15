@@ -14,12 +14,10 @@ type Props = {
   onOpenBank: () => void;
 };
 
-/** QN-00.07: diseño existente. No cambia subida local, CSS ni clases. */
+/** Visual editing tools for the selected quotation. */
 export default function QuoteDesignPanel({ item, edit, filePicked, cloudPhotos, onOpenBank }: Props) {
   return (
     <div className="edit-body">
-              <span className="eyebrow">VISUAL IDENTITY</span>
-              <h3>Hazla completamente tuya</h3>
               <label>Fotografía de portada</label>
               <div className="photo-options">
                 {cloudPhotos.map(ph => (
@@ -91,9 +89,6 @@ export default function QuoteDesignPanel({ item, edit, filePicked, cloudPhotos, 
                   />
                 </label>
               </div>
-              <p className="helper">
-                Los cambios se reflejan en la propuesta y se guardan en la nube.
-              </p>
             </div>
   );
 }

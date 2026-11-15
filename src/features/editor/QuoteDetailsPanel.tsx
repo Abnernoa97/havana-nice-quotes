@@ -24,8 +24,6 @@ const copyLabels: Record<keyof CarolinaCopy, string> = {
 export default function QuoteDetailsPanel({ item, edit }: Props) {
   return (
     <div className="edit-body">
-              <span className="eyebrow">PROPOSAL DETAILS</span>
-              <h3>Personaliza cada detalle</h3>
               <label>
                 Nombres de la pareja
                 <input

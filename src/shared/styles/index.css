@@ -239,11 +239,6 @@ p {
   font-size: 23px;
 }
 .intro-line p,
-.editor-head p {
-  font-size: 13px;
-  color: #8b938b;
-  line-height: 1.6;
-}
 .btn {
   display: inline-flex;
   align-items: center;
@@ -611,10 +606,6 @@ p {
 .editor-head h1 {
   font-size: 34px;
 }
-.editor-head .italic {
-  font-style: italic;
-  color: #7b947d;
-}
 .editor-actions {
   display: flex;
   gap: 8px;
@@ -658,12 +649,6 @@ p {
 }
 .edit-body {
   padding: 25px 23px 28px;
-}
-.edit-body h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 22px;
-  font-weight: 400;
-  margin: 10px 0 22px;
 }
 .edit-body label {
   font-size: 11px;
