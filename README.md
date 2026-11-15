@@ -1,24 +1,33 @@
-# HAVANA NICE — Quotes Studio
+# HAVANA NICE · Quotes Studio
 
-Aplicación independiente para diseñar propuestas personalizadas y, más adelante, gestionar conversaciones, aceptación y Service Agreements de parejas que celebran su boda en México.
+**Aplicación editorial de cotizaciones de HAVANA NICE.**
 
-## Estado actual
+> **Estado: prototipo funcional / uso exclusivo de demostración.** No hay backend, autenticación, sincronización, envío comercial, aceptación contractual ni firma real. **No introducir datos de clientes reales.**
 
-**Fase 1: DEMO VISUAL.** Datos ficticios y fotografías de muestra. No contiene backend, autenticación, envío real, firma legal ni sincronización entre dispositivos.
+## Empieza aquí
 
-La aplicación definitiva es una **demo visual independiente**, preparada para publicarse en **Cloudflare Workers (Static Assets)** desde el repositorio GitHub de Solo Aplicaciones. No depende de AppDeploy.
+Esta carpeta es la **fuente de verdad del proyecto**. Permite retomar el desarrollo desde otro chat sin reinterpretar decisiones ni modificar aplicaciones ajenas.
 
-### Cloudflare Workers — Solo Aplicaciones
+| Documento | Para qué sirve |
+| --- | --- |
+| [01 · Estado actual](docs/01-ESTADO-ACTUAL.md) | Qué existe, qué se ha comprobado y qué sigue siendo demo |
+| [02 · Arquitectura](docs/02-ARQUITECTURA.md) | Código, dependencias, datos, infraestructura y riesgos |
+| [03 · Visión del producto](docs/03-VISION-DEL-PRODUCTO.md) | Experiencia editorial y libertad del editor |
+| [04 · Roadmap](docs/04-ROADMAP.md) | Fases por prioridad y condiciones de aceptación |
+| [05 · Protocolo de desarrollo](docs/05-PROTOCOLO-DE-DESARROLLO.md) | Cómo cambiar, comprobar, publicar y regresar |
+| [06 · Registro de decisiones](docs/06-DECISIONES.md) | Decisiones tomadas y puntos todavía abiertos |
 
-- Framework: React (Vite)
-- Production branch: `main`
-- Build command: `npm run build`
-- Deploy command: `npx wrangler deploy`
-- Preview command: `npx wrangler preview` (opcional)
-- Static assets: `./dist` (configurado en `wrangler.jsonc`)
-- Root directory: repository root
+## Identidad de este proyecto
 
-### Desarrollo
+- **Repositorio exclusivo:** `Abnernoa97/havana-nice-quotes` (rama `main`).
+- **Publicación existente:** https://havana-nice-quotes.soloaplicaciones97.workers.dev
+- **Cuenta de despliegue:** Cloudflare **Solo Aplicaciones**. No intervenir en otras cuentas ni proyectos.
+- **Plataforma:** React + Vite + TypeScript + Cloudflare Workers Static Assets.
+- **Formato actual:** PWA instalable en Android; el usuario confirmó que pudo instalarla.
+- **Presentación:** Estilos editoriales, Scroll y Page Flip 3D.
+- **Auditoría de código:** 15 de noviembre de 2026, sobre el commit `d129e426`. No se comprobó el despliegue en vivo de esa versión desde el conector.
+
+## Desarrollo local
 
 ```bash
 npm install
@@ -26,24 +35,8 @@ npm run dev
 npm run build
 ```
 
-## Próximas fases
+**Cloudflare:** rama `main`; build `npm run build`; deploy `npx wrangler deploy`; assets `./dist`, definidos en `wrangler.jsonc`.
 
-1. Aprobar la estética visual y la navegación en teléfono.
-2. Crear proyecto nuevo y aislado de Supabase, con permisos privados y autentificación.
-3. Almacenar cotizaciones y activos, mensajería en vivo con autorización.
-4. Incorporar generación de enlaces privados, avisos de entrega, firma de Service Agreement por un proveedor verificable.
+El propósito de esta documentación es **ordenar lo existente, no reescribir la aplicación**. Primero verificar y estabilizar; después evolucionar de forma incremental.
 
-## Privacidad
-
-Nunca subir credenciales, `.env`, nombres de clientes reales ni documentos firmados al repositorio. La demo usa `localStorage` únicamente en el navegador actual; no sincroniza equipos y no sustituye la plataforma comercial.
-
-**HAVANA NICE · By Fer & Noa**
-
-## Instalación en Android (PWA)
-
-En Chrome Android o Samsung Internet, abrir la URL HTTPS del proyecto y usar **Instalar app** en la barra superior o el menú del navegador (Añadir a pantalla de inicio). La app incluye manifiesto, iconos PNG 192/512 y un Service Worker básico para el shell. La instalación no crea una APK independiente ni habilita sincronización de clientes.
-
-La app conserva la misma origin y la misma clave de `localStorage` (no se migran ni borran datos). No se cachean propuestas ni datos sensibles mediante Service Worker. El acceso público y la demo sin autenticación siguen siendo **exclusivamente para pruebas**.
-
-## Estilos editoriales
-Biblioteca con **Estilo libre**, **Vogue**, **The Lane**, **Junebug Weddings** y **The New York Times**. Referencias estéticas independientes, no afiliadas: se usan tipografías de licencia abierta y fotografías de la propia cotización; no se utilizan logotipos ajenos. Cada cotización guarda atributos opcionales `style` y `readingMode` (`flip` o `scroll`); los borradores anteriores permanecen compatibles, guardados en la misma clave `hn_quotes_visual_v1`. La pestaña Diseño mantiene sus controles originales, y en una fase posterior se desarrollarán capas y composición libre por página.
+**HAVANA NICE · Fer & Noa**
