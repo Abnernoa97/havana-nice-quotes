@@ -1,4 +1,5 @@
 import type { Quote } from './types';
+import { seed, photos } from './demo-data.ts';
 
 /** La búsqueda de la demo conserva la combinación pareja + destino. */
 export function filterQuotes(quotes: Quote[], filter: string, search: string): Quote[] {
