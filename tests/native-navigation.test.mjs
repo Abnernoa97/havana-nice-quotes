@@ -99,7 +99,7 @@ test('Native Back restores prior active conversation and opening the final clien
 test('Revisiting the same screen does not create redundant history entries', () => {
   const f = fixture();
   f.navigator.transition({ section: 'home' });
-  f.navigator.transition({ tab: 'styles' });
+  f.navigator.transition({ tab: 'details' });
   assert.equal(f.entries.length, 1);
   f.navigator.transition({ section: 'quotes' });
   f.navigator.transition({ section: 'quotes' });
