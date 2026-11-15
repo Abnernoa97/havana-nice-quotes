@@ -1,6 +1,6 @@
 # QN-00.04 · Respaldo del proyecto y de los borradores
 
-> **Estado vigente (15/11/2026):** el propietario confirma que **todos los datos actuales son ficticios**. Este documento describe una herramienta de exportación opcional y puntos de recuperación del **código**; descargar JSON del Samsung **NO es un requisito ni bloquea el plan Nivel Dios**. Ver [09 · Estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md).
+> **Documento histórico (15/11/2026):** el propietario confirma que **todos los datos actuales son ficticios**. La exportación JSON de la demostración fue retirada durante la limpieza Nivel Dios porque no era necesaria. Las instrucciones de exportación de abajo corresponden únicamente a versiones anteriores. Los puntos de recuperación del **código** siguen disponibles en GitHub y Cloudflare. Ver [09 · Estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md).
 
 Fecha de referencia: **15 de noviembre de 2026**.
 

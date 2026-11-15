@@ -4,7 +4,7 @@
 
 ## Qué existe hoy
 
-HAVANA NICE Quotes Studio es **un prototipo visual con cotizaciones, parejas, fechas, importes y conversaciones TOTALMENTE FICTICIOS**. El propietario lo confirmó el 15/11/2026. No hay datos reales que respaldar ni es requisito descargar JSON del Samsung para continuar. La herramienta opcional de exportación es parte de la demo. No hay backend, cuentas, autenticación, contratos, envío comercial, firma ni cobros reales.
+HAVANA NICE Quotes Studio es **un prototipo visual con cotizaciones, parejas, fechas, importes y conversaciones TOTALMENTE FICTICIOS**. El propietario lo confirmó el 15/11/2026. No hay datos reales que respaldar ni es requisito descargar JSON del Samsung para continuar. La exportación JSON de muestras se retiró durante la limpieza; también se retiró el botón de filtro inactivo, conservando los filtros de estado y la búsqueda. No hay backend, cuentas, autenticación, contratos, envío comercial, firma ni cobros reales.
 
 - **GitHub:** `Abnernoa97/havana-nice-quotes`, **`main` es única rama permanente prevista**. Puede existir una rama temporal de QA hasta eliminarla; no representa una segunda aplicación.
 - **Cloudflare:** cuenta Solo Aplicaciones, Worker `havana-nice-quotes`, URL https://havana-nice-quotes.soloaplicaciones97.workers.dev

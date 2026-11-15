@@ -521,16 +521,6 @@ p {
   width: 100%;
   min-width: 0;
 }
-.filter-btn {
-  border: 1px solid #e5e8e1;
-  background: white;
-  border-radius: 5px;
-  padding: 13px 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-}
 .filters {
   display: flex;
   gap: 10px;
@@ -1189,18 +1179,6 @@ p {
   font-size: 12px;
   max-width: 360px;
 }
-.preview-label {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  background: #dbeddb;
-  color: #345e41;
-  padding: 10px;
-  text-align: center;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-}
 .client-app {
   background: #f9f9f5;
   min-height: 100vh;
@@ -1594,15 +1572,6 @@ p {
   .list-actions {
     gap: 6px;
   }
-  .filter-btn {
-    font-size: 0;
-    gap: 0;
-    padding: 13px;
-  }
-  .filter-btn svg {
-    width: 18px;
-    height: 18px;
-  }
   .filters {
     gap: 1px;
   }
@@ -1820,11 +1789,3 @@ p {
   .topright .demo-tag { display: none; }
 }
 
-/* QN-00.04: exportación local, sin cambios al esquema de cotizaciones */
-.hn-backup-actions {display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
-.hn-backup-btn {border-color:#cad7cc;white-space:nowrap}
-@media (max-width:600px) {
-  .hn-backup-actions {width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .hn-backup-actions .btn {width:100%;padding:12px 7px;min-height:44px;gap:5px;font-size:10px;justify-content:center}
-  .hn-backup-actions .btn svg {width:15px;height:15px;flex-shrink:0}
-}

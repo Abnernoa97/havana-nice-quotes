@@ -1,5 +1,5 @@
 import type { ReactNode, Dispatch, SetStateAction } from 'react';
-import { Download, Search, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
+import { Search, ArrowUpRight } from 'lucide-react';
 import { usd, dDate } from '../../shared/lib/formatters';
 import type { Quote } from './types';
 import { filterQuotes } from './model';
@@ -7,7 +7,6 @@ import { filterQuotes } from './model';
 type Props = {
   quotes: Quote[];
   btnQuote: ReactNode;
-  downloadQuoteBackup: () => void;
   search: string;
   setSearch: Dispatch<SetStateAction<string>>;
   filter: string;
@@ -20,7 +19,6 @@ type Props = {
 export default function QuotesScreen({
   quotes,
   btnQuote,
-  downloadQuoteBackup,
   search,
   setSearch,
   filter,
@@ -39,12 +37,7 @@ export default function QuotesScreen({
             Todas tus propuestas en un mismo lugar, sin perder ningún detalle.
           </p>
         </div>
-        <div className="hn-backup-actions">
-          <button type="button" className="btn subtle hn-backup-btn" onClick={downloadQuoteBackup}>
-            <Download size={16} /> Respaldar datos
-          </button>
-          {btnQuote}
-        </div>
+        {btnQuote}
       </div>
       <div className="panel quotes-panel">
         <div className="list-actions">
@@ -56,9 +49,6 @@ export default function QuotesScreen({
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <button className="filter-btn">
-            <SlidersHorizontal size={16} /> Filtrar
-          </button>
         </div>
         <div className="filters">
           {['Todas', 'Borrador', 'Enviada', 'En revisión', 'Aceptada'].map(

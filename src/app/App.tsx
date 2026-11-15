@@ -5,7 +5,6 @@ import FlipMagazine from '../features/magazine/FlipMagazine';
 import { editorialStyles } from '../features/editor/styles/EditorialStyles';
 import { createSampleDraft, editSampleQuote, statusClass } from '../features/quotes/model';
 import { useQuoteStore } from '../features/quotes/useQuoteStore';
-import { QUOTES_STORAGE_KEY } from '../features/quotes/storage';
 import HomeScreen from '../features/home/HomeScreen';
 import MessagesScreen from '../features/messages/MessagesScreen';
 import ClientPage from '../features/client/ClientPage';
@@ -84,35 +83,6 @@ function App() {
     navigate(target);
   };
 
-  // Descarga exclusivamente local. No modifica ni envía las cotizaciones.
-  const downloadQuoteBackup = () => {
-    try {
-      const payload = {
-        format: 'havana-nice-quotes-backup',
-        schemaVersion: 1,
-        exportedAt: new Date().toISOString(),
-        storageKey: QUOTES_STORAGE_KEY,
-        quotes,
-      };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], {
-        type: 'application/json;charset=utf-8',
-      });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      const date = new Date().toISOString().slice(0, 10);
-      link.href = url;
-      link.download = 'HAVANA_NICE_QUOTES_RESPALDO_' + date + '.json';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      // Retrasar la liberación evita interrumpir el gestor de descargas móvil.
-      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
-      setToast('Respaldo preparado. Comprueba que el archivo aparezca en Descargas.');
-    } catch (error) {
-      console.error('No fue posible generar el respaldo local', error);
-      setToast('No se pudo descargar. Tus cotizaciones permanecen sin cambios.');
-    }
-  };
   const save = () => setToast(storageError
     ? 'No se pudo guardar en este navegador. Revisa el almacenamiento disponible.'
     : 'Borrador visual guardado en este navegador');
@@ -189,7 +159,6 @@ function App() {
     <QuotesScreen
       quotes={quotes}
       btnQuote={btnQuote}
-      downloadQuoteBackup={downloadQuoteBackup}
       search={search}
       setSearch={setSearch}
       filter={filter}
