@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import FlipMagazine from './FlipMagazine';
 import EditorialStyles, { editorialStyles } from './EditorialStyles';
+import { photos, seed } from './features/quotes/demo-data';
+import { usd, dDate } from './shared/lib/formatters';
 import {
   LayoutDashboard,
   FileText,
@@ -45,95 +47,12 @@ import {
   WandSparkles,
 } from 'lucide-react';
 
-const photos = [
-  'https://images.unsplash.com/photo-1519741497674-611481863552?w=1500&q=85&fit=crop',
-  'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1500&q=85&fit=crop',
-  'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1500&q=85&fit=crop',
-  'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1500&q=85&fit=crop',
-];
-const seed = [
-  {
-    id: 'hn1',
-    name: 'Olivia & James',
-    client: 'Olivia',
-    email: '',
-    location: 'San Miguel de Allende',
-    date: '2027-05-22',
-    price: 6500,
-    deposit: 30,
-    status: 'En revisión',
-    cover: photos[0],
-    font: 'editorial',
-    color: '#18342f',
-    note: 'Live music for a day that feels completely yours.',
-    package: 'Signature Live Band',
-    desc: 'An intimate welcome, a beautiful cocktail hour, and a reception filled with your favorite songs.',
-    messages: [
-      {
-        from: 'client',
-        text: 'Can we add music for our welcome party too?',
-        time: '10:42 AM',
-      },
-    ],
-  },
-  {
-    id: 'hn2',
-    name: 'Sophie & Daniel',
-    client: 'Sophie',
-    email: '',
-    location: 'Los Cabos',
-    date: '2027-06-12',
-    price: 7900,
-    deposit: 30,
-    status: 'Enviada',
-    cover: photos[1],
-    font: 'editorial',
-    color: '#18342f',
-    note: 'A little more music. A lot more love.',
-    package: 'Full Wedding Experience',
-    desc: 'Live music thoughtfully planned around the moments that matter most.',
-    messages: [],
-  },
-  {
-    id: 'hn3',
-    name: 'Emma & Lucas',
-    client: 'Emma',
-    email: '',
-    location: 'Mexico City',
-    date: '2027-09-18',
-    price: 5400,
-    deposit: 30,
-    status: 'Aceptada',
-    cover: photos[2],
-    font: 'modern',
-    color: '#18342f',
-    note: 'Together, every step of the way.',
-    package: 'Cocktail & Reception',
-    desc: 'Real instruments, real musicians, and songs everyone loves.',
-    messages: [],
-  },
-];
 const pages = [
   { id: 'home', label: 'Inicio', icon: LayoutDashboard },
   { id: 'quotes', label: 'Cotizaciones', icon: FileText },
   { id: 'editor', label: 'Diseñador', icon: Palette },
   { id: 'messages', label: 'Mensajes', icon: MessageCircle },
 ];
-const usd = n =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(Number(n || 0));
-const dDate = str =>
-  str
-    ? new Date(str + 'T12:00:00').toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : 'Date to be confirmed';
-
 function App() {
   const [quotes, setQuotes] = useState(() => {
     try {
