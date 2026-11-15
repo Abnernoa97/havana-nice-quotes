@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import { useAppHistory } from './useAppHistory';
+import type { AppSection, EditorTab, ReadingView } from './native-navigation';
 import type { ChangeEvent } from 'react';
 import type { Quote } from '../features/quotes/types';
 import FlipMagazine from '../features/magazine/FlipMagazine';
@@ -32,21 +35,33 @@ const pages = [
 ];
 function App() {
   const { quotes, setQuotes, storageError } = useQuoteStore();
-  const [section, setSection] = useState('home');
-  const [active, setActive] = useState(() => quotes[0].id);
-  const [tab, setTab] = useState('styles');
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [preview, setPreview] = useState(false);
-  const [previewMode, setPreviewMode] = useState('flip');
-  const [mobilePreview, setMobilePreview] = useState(false);
+  const { view, routeTo, goBack } = useAppHistory(quotes[0].id);
+  const { section, active, tab, mobileMenu, preview, previewMode, mobilePreview, installGuide } = view;
+  const setTab: Dispatch<SetStateAction<string>> = change => {
+    const next = typeof change === 'function' ? change(tab) : change;
+    if (['details', 'styles', 'design', 'pricing'].includes(next)) routeTo({ tab: next as EditorTab });
+  };
+  const setMobilePreview: Dispatch<SetStateAction<boolean>> = change => {
+    const next = typeof change === 'function' ? change(mobilePreview) : change;
+    routeTo({ mobilePreview: next });
+  };
+  const setPreviewMode: Dispatch<SetStateAction<string>> = change => {
+    const next = typeof change === 'function' ? change(previewMode) : change;
+    if (next === 'flip' || next === 'scroll') routeTo({ previewMode: next as ReadingView }, 'replace');
+  };
+  const setMobileMenu: Dispatch<SetStateAction<boolean>> = change => {
+    const next = typeof change === 'function' ? change(mobileMenu) : change;
+    if (next && !mobileMenu) routeTo({ mobileMenu: true });
+    else if (!next && mobileMenu) goBack();
+  };
   const [toast, setToast] = useState('');
   const [filter, setFilter] = useState('Todas');
   const [search, setSearch] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [clientMessage, setClientMessage] = useState('');
-  const { standalone, installApplication, showInstallGuide, setShowInstallGuide } = useInstallPrompt();
-  const installationGuide = showInstallGuide ? (
-    <InstallGuide onClose={() => setShowInstallGuide(false)} />
+  const { standalone, installApplication } = useInstallPrompt(() => routeTo({ installGuide: true }));
+  const installationGuide = installGuide ? (
+    <InstallGuide onClose={goBack} />
   ) : null;
 
   const item = quotes.find(q => q.id === active) || quotes[0];
@@ -60,32 +75,48 @@ function App() {
   const edit = (key: keyof Quote, value: Quote[keyof Quote]) =>
     setQuotes(list => editSampleQuote(list, active, key, value));
   const openClientPreview = () => {
-    setPreviewMode(item.readingMode === 'scroll' ? 'scroll' : 'flip');
-    setPreview(true);
+    routeTo({
+      previewMode: item.readingMode === 'scroll' ? 'scroll' : 'flip',
+      preview: true,
+      mobileMenu: false,
+    });
   };
   const navigate = (x: string) => {
-    setSection(x);
-    setPreview(false);
-    setMobileMenu(false);
+    const target = (pages.some(page => page.id === x) ? x : 'home') as AppSection;
+    const next = { section: target, preview: false, mobileMenu: false, installGuide: false };
+    if (mobileMenu) {
+      // Replace drawer entry so native Back goes to the preceding section, not an open drawer.
+      if (section === target && !preview) goBack();
+      else routeTo(next, 'replace');
+    } else routeTo(next);
   };
   // No arrastrar mensajes sin enviar de una pareja a otra.
   const activateQuote = (id: string) => {
-    setActive(id);
+    if (id === active) return;
     setNewMessage('');
     setClientMessage('');
+    routeTo({ active: id });
   };
   const addQuote = () => {
     const id = 'hn-' + crypto.randomUUID();
     const q = createSampleDraft(id);
     setQuotes(list => [q, ...list]);
-    activateQuote(id);
-    setTab('details');
-    navigate('editor');
+    setNewMessage('');
+    setClientMessage('');
+    routeTo({ active: id, tab: 'details', section: 'editor', preview: false, mobileMenu: false });
     setToast('Nuevo borrador creado en este dispositivo');
   };
   const selectQuote = (id: string, target = 'editor') => {
-    activateQuote(id);
-    navigate(target);
+    if (id !== active) {
+      setNewMessage('');
+      setClientMessage('');
+    }
+    routeTo({
+      active: id,
+      section: (pages.some(page => page.id === target) ? target : 'editor') as AppSection,
+      preview: false,
+      mobileMenu: false,
+    });
   };
 
   const save = () => setToast(storageError
@@ -207,11 +238,22 @@ function App() {
       updateStatus={updateStatus}
     />
   );
+  useEffect(() => {
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && (installGuide || mobileMenu || preview)) {
+        event.preventDefault();
+        goBack();
+      }
+    };
+    window.addEventListener('keydown', onEscape);
+    return () => window.removeEventListener('keydown', onEscape);
+  }, [installGuide, mobileMenu, preview, goBack]);
+
   if (preview)
     return (
       <>
         <header className="hn-demo-switch">
-          <button type="button" className="hn-demo-back" onClick={() => setPreview(false)}>
+          <button type="button" className="hn-demo-back" onClick={goBack}>
             <ChevronLeft size={18} /> Volver al diseñador
           </button>
           <div className="hn-demo-switcher" role="group" aria-label="Modo de lectura de la cotización">

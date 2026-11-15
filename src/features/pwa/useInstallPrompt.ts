@@ -5,9 +5,8 @@ type InstallPromptEvent = Event & {
   userChoice: Promise<unknown>;
 };
 
-export function useInstallPrompt() {
+export function useInstallPrompt(openInstallGuide: () => void) {
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
-  const [showInstallGuide, setShowInstallGuide] = useState(false);
   const [standalone, setStandalone] = useState(() =>
     window.matchMedia('(display-mode: standalone)').matches ||
     (window.navigator as Navigator & { standalone?: boolean }).standalone === true
@@ -21,7 +20,6 @@ export function useInstallPrompt() {
     const onInstalled = () => {
       setInstallPrompt(null);
       setStandalone(true);
-      setShowInstallGuide(false);
     };
     window.addEventListener('beforeinstallprompt', onPrompt);
     window.addEventListener('appinstalled', onInstalled);
@@ -34,7 +32,7 @@ export function useInstallPrompt() {
   const installApplication = async () => {
     if (standalone) return;
     if (!installPrompt) {
-      setShowInstallGuide(true);
+      openInstallGuide();
       return;
     }
     try {
@@ -43,9 +41,9 @@ export function useInstallPrompt() {
       setInstallPrompt(null);
     } catch (error) {
       console.warn('Install prompt unavailable', error);
-      setShowInstallGuide(true);
+      openInstallGuide();
     }
   };
 
-  return { standalone, installApplication, showInstallGuide, setShowInstallGuide };
+  return { standalone, installApplication };
 }

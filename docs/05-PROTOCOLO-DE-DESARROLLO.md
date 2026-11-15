@@ -14,6 +14,14 @@
 - Para cada cambio: modificar solo lo solicitado, probar, confirmar en los logs de Cloudflare el build correcto y comprobar el deployment de la nueva versión al 100 %. Si no se puede completar un paso, informar exactamente qué faltó, sin pedir al usuario trabajo manual.
 - **Eliminar significa eliminar**, no esconder con CSS o mantener lógica duplicada. Preservar diseños, dimensiones y efectos aprobados cuando el usuario no pida cambiarlos.
 
+## Navegación nativa de Android · 15/11/2026
+
+- Un controlador común de historial para Inicio, Cotizaciones, Diseñador, Mensajes, cotización activa, pestañas de edición, menú lateral, ayuda de instalación, vista previa de cliente y simulación de móvil.
+- Atrás del sistema y «Volver al diseñador» utilizan el historial del navegador/PWA. Al llegar a Inicio no se bloquea la salida normal de Android.
+- Cambiar Scroll/Revista 3D no crea pasos redundantes; las ediciones de campos y los filtros no se consideran navegación.
+- El historial contiene únicamente IDs y opciones de vista, nunca textos de mensajes, fotografías, precios ni datos privados.
+- La comprobación automatizada usa popstate/historial simulado. La validación táctil con el botón físico o gesto de Android sigue pendiente hasta probarla sobre el dispositivo.
+
 ## Orden de trabajo
 
 1. Leer [estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md), [roadmap](04-ROADMAP.md) e [Issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3).
