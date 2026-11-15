@@ -8,6 +8,8 @@ import QuotePricingPanel from './features/editor/QuotePricingPanel';
 import QuoteDetailsPanel from './features/editor/QuoteDetailsPanel';
 import QuoteDesignPanel from './features/editor/QuoteDesignPanel';
 import HomeScreen from './features/home/HomeScreen';
+import MessagesScreen from './features/messages/MessagesScreen';
+import QuotesScreen from './features/quotes/QuotesScreen';
 import {
   LayoutDashboard,
   FileText,
@@ -15,11 +17,9 @@ import {
   Palette,
   MessageCircle,
   Plus,
-  Search,
   ArrowUpRight,
   Eye,
   Save,
-  SlidersHorizontal,
   DollarSign,
   Check,
   Send,
@@ -430,98 +430,17 @@ function App() {
     />
   );
   const quotesView = (
-    <div className="page">
-      <div className="intro-line">
-        <div>
-          <span className="eyebrow">YOUR QUOTES</span>
-          <h1>Cotizaciones</h1>
-          <p>
-            Todas tus propuestas en un mismo lugar, sin perder ningún detalle.
-          </p>
-        </div>
-        <div className="hn-backup-actions">
-          <button type="button" className="btn subtle hn-backup-btn" onClick={downloadQuoteBackup}>
-            <Download size={16} /> Respaldar datos
-          </button>
-          {btnQuote}
-        </div>
-      </div>
-      <div className="panel quotes-panel">
-        <div className="list-actions">
-          <div className="search-box">
-            <Search size={17} />
-            <input
-              placeholder="Buscar por pareja o destino..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-          <button className="filter-btn">
-            <SlidersHorizontal size={16} /> Filtrar
-          </button>
-        </div>
-        <div className="filters">
-          {['Todas', 'Borrador', 'Enviada', 'En revisión', 'Aceptada'].map(
-            s => (
-              <button
-                className={filter === s ? 'filter active' : 'filter'}
-                onClick={() => setFilter(s)}
-                key={s}
-              >
-                {s}
-              </button>
-            )
-          )}
-        </div>
-        <div className="table-header">
-          <span>PAREJA / DESTINO</span>
-          <span>FECHA</span>
-          <span>INVERSIÓN</span>
-          <span>ESTADO</span>
-          <span></span>
-        </div>
-        {quotes
-          .filter(
-            q =>
-              (filter === 'Todas' || q.status === filter) &&
-              [q.name, q.location]
-                .join(' ')
-                .toLowerCase()
-                .includes(search.toLowerCase())
-          )
-          .map(q => (
-            <button
-              className="quote-line"
-              key={q.id}
-              onClick={() => selectQuote(q.id)}
-            >
-              <div className="table-couple">
-                <img src={q.cover} />
-                <div>
-                  <strong>{q.name}</strong>
-                  <small>{q.location}</small>
-                </div>
-              </div>
-              <span className="table-date">{dDate(q.date)}</span>
-              <span className="table-price">{usd(q.price)}</span>
-              <span>
-                <i className={'pill ' + statusClass(q.status)}>{q.status}</i>
-              </span>
-              <ArrowUpRight size={17} />
-            </button>
-          ))}
-        {quotes.filter(
-          q =>
-            (filter === 'Todas' || q.status === filter) &&
-            [q.name, q.location]
-              .join(' ')
-              .toLowerCase()
-              .includes(search.toLowerCase())
-        ).length === 0 && (
-          <div className="empty">No hay cotizaciones con esos filtros.</div>
-        )}
-      </div>
-    </div>
+    <QuotesScreen
+      quotes={quotes}
+      btnQuote={btnQuote}
+      downloadQuoteBackup={downloadQuoteBackup}
+      search={search}
+      setSearch={setSearch}
+      filter={filter}
+      setFilter={setFilter}
+      selectQuote={selectQuote}
+      statusClass={statusClass}
+    />
   );
   const editor = (
     <div className="page editor-page">
@@ -632,82 +551,15 @@ function App() {
     </div>
   );
   const messagesView = (
-    <div className="page">
-      <div className="intro-line">
-        <div>
-          <span className="eyebrow">CONVERSATIONS</span>
-          <h1>Mensajes de clientes</h1>
-          <p>Conversaciones organizadas por cotización.</p>
-        </div>
-        <span className="demo-tag">DATOS DE EJEMPLO</span>
-      </div>
-      <div className="chat-layout panel">
-        <div className="chat-list">
-          <span className="eyebrow">CLIENT CONVERSATIONS</span>
-          <h3>Bandeja</h3>
-          {quotes.map(q => (
-            <button
-              className={
-                q.id === active ? 'chat-list-item active' : 'chat-list-item'
-              }
-              onClick={() => setActive(q.id)}
-              key={q.id}
-            >
-              <span className="chat-avatar">{(q.name || '?')[0]}</span>
-              <div>
-                <strong>{q.name}</strong>
-                <small>
-                  {q.messages?.length
-                    ? q.messages[q.messages.length - 1].text
-                    : 'Sin mensajes todavía'}
-                </small>
-              </div>
-            </button>
-          ))}
-        </div>
-        <div className="chat-content">
-          <div className="chat-person">
-            <div className="chat-avatar">{(item.name || '?')[0]}</div>
-            <div>
-              <strong>{item.name}</strong>
-              <small>Conversación de prueba</small>
-            </div>
-          </div>
-          <div className="chat-bubbles">
-            {!(item.messages || []).length && (
-              <div className="chat-empty">
-                Todavía no hay mensajes para esta propuesta.
-              </div>
-            )}
-            {(item.messages || []).map((msg, i) => (
-              <div
-                className={
-                  'bubble ' + (msg.from === 'admin' ? 'outgoing' : 'incoming')
-                }
-                key={i}
-              >
-                <small>{msg.from === 'admin' ? 'Fer & Noa' : 'CLIENT'}</small>
-                <p>{msg.text}</p>
-                <time>{msg.time}</time>
-              </div>
-            ))}
-          </div>
-          <div className="compose">
-            <input
-              placeholder="Escribe una respuesta de prueba..."
-              value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
-              onKeyDown={e => {
-                if (e.key === 'Enter') sendAdmin();
-              }}
-            />
-            <button className="btn primary" onClick={sendAdmin}>
-              <Send size={17} />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <MessagesScreen
+      quotes={quotes}
+      item={item}
+      active={active}
+      setActive={setActive}
+      newMessage={newMessage}
+      setNewMessage={setNewMessage}
+      sendAdmin={sendAdmin}
+    />
   );
   const clientPage = (
     <div className={'client-app hn-style-' + styleName}>
