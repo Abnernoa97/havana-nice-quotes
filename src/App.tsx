@@ -7,6 +7,7 @@ import HomeScreen from './features/home/HomeScreen';
 import MessagesScreen from './features/messages/MessagesScreen';
 import ClientPage from './features/client/ClientPage';
 import QuoteEditorScreen from './features/editor/QuoteEditorScreen';
+import { Sidebar, Topbar } from './app/WorkspaceChrome';
 import QuotesScreen from './features/quotes/QuotesScreen';
 import {
   LayoutDashboard,
@@ -18,11 +19,7 @@ import {
   ArrowUpRight,
   Send,
   X,
-  Menu,
   ChevronLeft,
-  Sparkles,
-  Settings2,
-  Download,
 } from 'lucide-react';
 
 const pages = [
@@ -260,83 +257,16 @@ function App() {
         : s === 'Enviada'
           ? 'blue'
           : 'gray';
-  const Logo = () => (
-    <div className="brand">
-      <div>HAVANA NICE</div>
-      <span>Q U O T E S &nbsp; S T U D I O</span>
-    </div>
-  );
   const btnQuote = (
     <button className="btn primary" onClick={addQuote}>
       <Plus size={16} /> Nueva cotización
     </button>
   );
   const sidebar = (
-    <aside className="sidebar">
-      <Logo />
-      <div className="brand-divider"></div>
-      <div className="sidebar-caption">WORKSPACE</div>
-      <nav>
-        {pages.map(p => (
-          <button
-            key={p.id}
-            onClick={() => navigate(p.id)}
-            className={section === p.id ? 'navitem selected' : 'navitem'}
-          >
-            <p.icon size={18} />
-            <span>{p.label}</span>
-            {p.id === 'messages' &&
-              quotes.some(q => q.messages?.some(m => m.from === 'client')) && (
-                <i className="navdot" />
-              )}
-          </button>
-        ))}
-      </nav>
-      <div className="side-bottom">
-        <div className="private-note">
-          <Sparkles size={17} />
-          <span>
-            Made for Fer & Noa
-            <br />
-            <small>Visual prototype · v0.1</small>
-          </span>
-        </div>
-        <div className="identity">
-          <div className="avatar">F&N</div>
-          <span>
-            Fer & Noa<small>HAVANA NICE Studio</small>
-          </span>
-          <Settings2 size={16} />
-        </div>
-      </div>
-    </aside>
+    <Sidebar pages={pages} quotes={quotes} navigate={navigate} section={section} />
   );
   const topbar = (
-    <header className="topbar">
-      <button className="menubtn" onClick={() => setMobileMenu(true)}>
-        <Menu size={22} />
-      </button>
-      <div className="breadcrumb">
-        HAVANA NICE <span>/</span>{' '}
-        {section === 'home'
-          ? 'Inicio'
-          : section === 'quotes'
-            ? 'Cotizaciones'
-            : section === 'editor'
-              ? 'Diseñador'
-              : 'Mensajes'}
-      </div>
-      <div className="topright">
-        {!standalone && (
-          <button type="button" className="hn-install-button" onClick={installApplication}>
-            <Download size={16} />
-            <span>Instalar app</span>
-          </button>
-        )}
-        <span className="demo-tag">DEMO VISUAL</span>
-        <div className="avatar topavatar">F&N</div>
-      </div>
-    </header>
+    <Topbar section={section} standalone={standalone} installApplication={installApplication} setMobileMenu={setMobileMenu} />
   );
   const home = (
     <HomeScreen
