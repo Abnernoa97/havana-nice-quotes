@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import FlipMagazine from './FlipMagazine';
 import EditorialStyles, { editorialStyles } from './EditorialStyles';
 import { photos, seed } from './features/quotes/demo-data';
-import { usd, dDate } from './shared/lib/formatters';
 import QuotePricingPanel from './features/editor/QuotePricingPanel';
 import QuoteDetailsPanel from './features/editor/QuoteDetailsPanel';
 import QuoteDesignPanel from './features/editor/QuoteDesignPanel';
 import HomeScreen from './features/home/HomeScreen';
 import MessagesScreen from './features/messages/MessagesScreen';
+import ClientPage from './features/client/ClientPage';
+import Proposal from './features/client/Proposal';
 import QuotesScreen from './features/quotes/QuotesScreen';
 import {
   LayoutDashboard,
@@ -21,7 +22,6 @@ import {
   Eye,
   Save,
   DollarSign,
-  Check,
   Send,
   X,
   Menu,
@@ -31,9 +31,7 @@ import {
   ExternalLink,
   Monitor,
   Smartphone,
-  CheckCircle2,
   Settings2,
-  Heart,
   Download,
 } from 'lucide-react';
 
@@ -350,74 +348,8 @@ function App() {
       </div>
     </header>
   );
-  const Proposal = ({ embedded = false }) => (
-    <div className={'proposal hn-style-' + styleName + ' ' + (embedded ? 'embedded' : '')}>
-      <div className="proposal-top">
-        <span>HAVANA NICE</span>
-        <small>LIVE MUSIC · MEXICO</small>
-      </div>
-      <div
-        className="proposal-photo"
-        style={{
-          backgroundImage:
-            'linear-gradient(180deg,rgba(10,24,20,.04) 16%,rgba(10,24,20,.33) 60%,rgba(10,24,20,.67)), url(' +
-            item.cover +
-            ')',
-        }}
-      >
-        <div className="hero-content">
-          <div className="eyebrow light">A PERSONAL PROPOSAL FOR</div>
-          <h2 className={item.font === 'modern' ? 'modern' : ''}>
-            {item.name}
-          </h2>
-          <div className="little-line" />
-          <p>{item.note}</p>
-          <small>
-            {item.location} · {dDate(item.date)}
-          </small>
-        </div>
-      </div>
-      <div className="paper-content">
-        <div className="paper-eyebrow">01 / THE EXPERIENCE</div>
-        <h3>
-          Beautiful moments.
-          <br />
-          <em>Real live music.</em>
-        </h3>
-        <p>{item.desc}</p>
-        <div className="paper-rule" />
-        <div className="package-intro">
-          <span>YOUR EXPERIENCE</span>
-          <strong>{item.package}</strong>
-        </div>
-        <div className="packages">
-          <div>
-            <Check size={16} /> Live musicians, playing together
-          </div>
-          <div>
-            <Check size={16} /> Curated music for your celebration
-          </div>
-          <div>
-            <Check size={16} /> Personal planning with Fer & Noa
-          </div>
-        </div>
-        <div className="paper-rule" />
-        <div className="price-row">
-          <div>
-            <small>TOTAL PROPOSAL</small>
-            <strong>{usd(item.price)}</strong>
-          </div>
-          <div>
-            <small>TO RESERVE · {item.deposit}%</small>
-            <strong>{usd((item.price * item.deposit) / 100)}</strong>
-          </div>
-        </div>
-        <div className="paper-end">
-          With love & care,<strong>Fer & Noa</strong>
-          <small>HAVANA NICE</small>
-        </div>
-      </div>
-    </div>
+  const Proposal = (
+    <Proposal item={item} styleName={styleName} />
   );
   const home = (
     <HomeScreen
@@ -540,7 +472,7 @@ function App() {
             }
           >
             <div style={{ '--paper-accent': item.color }}>
-              <Proposal embedded />
+              <Proposal item={item} styleName={styleName} embedded />
             </div>
           </div>
           <button className="preview-open" onClick={openClientPreview}>
@@ -562,121 +494,17 @@ function App() {
     />
   );
   const clientPage = (
-    <div className={'client-app hn-style-' + styleName}>
-      <div className="client-navbar">
-        <div className="client-brand">
-          HAVANA NICE <small>LIVE MUSIC FOR YOUR WEDDING</small>
-        </div>
-        <button onClick={() => setPreview(false)} className="close-preview">
-          <ChevronLeft size={17} /> Volver al editor
-        </button>
-      </div>
-      <div
-        className="client-hero"
-        style={{
-          backgroundImage:
-            'linear-gradient(90deg,rgba(19,35,30,.48),rgba(19,35,30,.05)),url(' +
-            item.cover +
-            ')',
-        }}
-      >
-        <div>
-          <span className="eyebrow light">
-            CURATED WITH CARE · MADE JUST FOR YOU
-          </span>
-          <h1>{item.name}</h1>
-          <p>{item.note}</p>
-        </div>
-      </div>
-      <div className="client-layout">
-        <div className="client-story">
-          <span className="eyebrow">HAVANA NICE · YOUR CELEBRATION</span>
-          <h2>
-            We would love to
-            <br />
-            <em>be part of your day.</em>
-          </h2>
-          <p>{item.desc}</p>
-          <div className="client-divider" />
-          <span className="eyebrow">YOUR LIVE MUSIC EXPERIENCE</span>
-          <h3>{item.package}</h3>
-          <div className="client-inclusions">
-            <p>
-              <Check size={17} /> Live musicians, no backing tracks
-            </p>
-            <p>
-              <Check size={17} /> Music selected around your celebration
-            </p>
-            <p>
-              <Check size={17} /> Personal planning with Fer & Noa
-            </p>
-          </div>
-          <div className="client-divider" />
-          <div className="client-total">
-            <div>
-              <small>TOTAL INVESTMENT</small>
-              <strong>{usd(item.price)}</strong>
-            </div>
-            <div>
-              <small>{item.deposit}% RESERVATION DEPOSIT</small>
-              <strong>{usd((item.price * item.deposit) / 100)}</strong>
-            </div>
-          </div>
-          <small className="tiny">
-            Demonstration only. This is not a formal quote, agreement, or
-            payment request.
-          </small>
-        </div>
-        <div className="client-actions">
-          <div className="client-card">
-            <span className="eyebrow">LET'S TALK</span>
-            <h3>Have a question?</h3>
-            <p>
-              Tell us what you're imagining. We can adjust the proposal
-              together.
-            </p>
-            <textarea
-              placeholder="Hi Fer & Noa! We'd love to ask..."
-              rows={4}
-              value={clientMessage}
-              onChange={e => setClientMessage(e.target.value)}
-            />
-            <button className="btn primary full" onClick={sendClient}>
-              <MessageCircle size={16} /> Send a sample message
-            </button>
-          </div>
-          <div className="client-card">
-            <span className="eyebrow">NEXT STEP</span>
-            <h3>Love what you see?</h3>
-            <p>
-              Accepting this demo only changes the sample status. No electronic
-              signature is collected.
-            </p>
-            {viewAccept ? (
-              <div className="demo-success">
-                <CheckCircle2 size={25} />
-                <strong>Acceptance simulated</strong>
-                <small>This is only a visual preview.</small>
-              </div>
-            ) : (
-              <button
-                className="btn outline full"
-                onClick={() => {
-                  setViewAccept(true);
-                  updateStatus('Aceptada');
-                }}
-              >
-                <Heart size={16} /> Simulate acceptance
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-      <footer className="client-footer">
-        HAVANA NICE · SERVING LOVE THROUGH LIVE MUSIC{' '}
-        <span>VISUAL DEMO ONLY</span>
-      </footer>
-    </div>
+    <ClientPage
+      item={item}
+      styleName={styleName}
+      setPreview={setPreview}
+      clientMessage={clientMessage}
+      setClientMessage={setClientMessage}
+      sendClient={sendClient}
+      viewAccept={viewAccept}
+      setViewAccept={setViewAccept}
+      updateStatus={updateStatus}
+    />
   );
   if (preview)
     return (
