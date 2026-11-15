@@ -75,7 +75,7 @@ test('La biblioteca de Quotes Studio solo muestra fotos cargadas en su propia ap
   assert.match(app, /cloudPhotos=\{photos\}/);
   assert.match(bank, /photos\.map\(photo =>/);
   assert.match(bank, /type="file"/);
-  assert.match(bank, /multiple hidden disabled=\{uploading \|\| deleting\}/);
+  assert.match(bank, /multiple hidden disabled=\{uploading \|\| trashing\}/);
   assert.match(bank, /Actualizar biblioteca/);
   assert.match(bank, /Una biblioteca lista para tus fotografías/);
   assert.match(css, /grid-template-columns: repeat\(2, minmax\(0,1fr\)\)/);
@@ -93,7 +93,7 @@ test('Fotos y Diseño admiten diez archivos por selección, sin limitar el total
   const hook = src('features/photos/useMediaLibrary.ts');
   const batch = src('features/photos/photo-batch.ts');
   const app = src('app/App.tsx');
-  assert.match(bank, /multiple hidden disabled=\{uploading \|\| deleting\}/);
+  assert.match(bank, /multiple hidden disabled=\{uploading \|\| trashing\}/);
   assert.match(design, /type="file"\s+multiple/);
   assert.match(batch, /MAX_PHOTOS_PER_UPLOAD = 10/);
   assert.match(hook, /await processPhotoBatch\(files,/);

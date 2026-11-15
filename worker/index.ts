@@ -256,7 +256,7 @@ async function api(request: Request, env: Env): Promise<Response> {
           deletedAt: row.deleted_at, url: '/api/trash/photo/' + row.id })),
     ].sort((a, b) => Number(b.deletedAt) - Number(a.deletedAt)) });
   }
-  if (/^\/api\/trash\/(photo|quote)\/[a-f0-9-]+\/restore$/.test(path) && method === 'POST') {
+  if (/^\/api\/trash\/(photo|quote)\/[a-z0-9-]+\/restore$/.test(path) && method === 'POST') {
     const parts = path.split('/');
     const kind = parts[3], id = parts[4];
     if (kind === 'quote') {
@@ -276,7 +276,7 @@ async function api(request: Request, env: Env): Promise<Response> {
     ).bind(id).run();
     return result.meta.changes ? json({ restored: true }) : bad('Fotografía no encontrada.', 404);
   }
-  if (/^\/api\/trash\/(photo|quote)\/[a-f0-9-]+$/.test(path) && method === 'DELETE') {
+  if (/^\/api\/trash\/(photo|quote)\/[a-z0-9-]+$/.test(path) && method === 'DELETE') {
     const parts = path.split('/');
     const kind = parts[3], id = parts[4];
     if (kind === 'quote') {
