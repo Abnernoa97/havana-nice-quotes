@@ -114,7 +114,7 @@ export default function HomeScreen({
               key={q.id}
               onClick={() => selectQuote(q.id)}
             >
-              <img src={q.cover} />
+              <img src={q.cover} alt="" />
               <div>
                 <strong>{q.name}</strong>
                 <small>{q.location}</small>

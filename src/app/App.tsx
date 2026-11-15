@@ -234,13 +234,13 @@ function App() {
         <div className="menu-overlay">
           <div className="mobile-sidebar">
             {sidebar}
-            <button className="menu-close" onClick={() => setMobileMenu(false)}>
+            <button type="button" className="menu-close" aria-label="Cerrar menú" onClick={() => setMobileMenu(false)}>
               <X />
             </button>
           </div>
           <button
             className="overlay-close"
-            aria-label="Close"
+            aria-label="Cerrar menú"
             onClick={() => setMobileMenu(false)}
           ></button>
         </div>

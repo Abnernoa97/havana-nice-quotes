@@ -71,7 +71,7 @@ export function Sidebar({ pages, quotes, navigate, section }: SidebarProps) {
 export function Topbar({ section, standalone, installApplication, setMobileMenu }: TopbarProps) {
   return (
     <header className="topbar">
-      <button className="menubtn" onClick={() => setMobileMenu(true)}>
+      <button type="button" className="menubtn" aria-label="Abrir menú" onClick={() => setMobileMenu(true)}>
         <Menu size={22} />
       </button>
       <div className="breadcrumb">

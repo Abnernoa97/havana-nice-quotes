@@ -115,6 +115,8 @@ export default function QuoteEditorScreen({
                 className={!mobilePreview ? 'active' : ''}
                 onClick={() => setMobilePreview(false)}
                 title="Vista de escritorio"
+                aria-label="Vista de escritorio"
+                aria-pressed={!mobilePreview}
               >
                 <Monitor size={18} />
               </button>
@@ -122,6 +124,8 @@ export default function QuoteEditorScreen({
                 className={mobilePreview ? 'active' : ''}
                 onClick={() => setMobilePreview(true)}
                 title="Vista móvil"
+                aria-label="Vista móvil"
+                aria-pressed={mobilePreview}
               >
                 <Smartphone size={18} />
               </button>

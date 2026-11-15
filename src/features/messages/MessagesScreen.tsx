@@ -86,13 +86,14 @@ export default function MessagesScreen({
           <div className="compose">
             <input
               placeholder="Escribe una respuesta de prueba..."
+              aria-label="Respuesta de prueba"
               value={newMessage}
               onChange={e => setNewMessage(e.target.value)}
               onKeyDown={e => {
                 if (e.key === 'Enter') sendAdmin();
               }}
             />
-            <button className="btn primary" onClick={sendAdmin}>
+            <button type="button" className="btn primary" aria-label="Enviar respuesta de prueba" onClick={sendAdmin}>
               <Send size={17} />
             </button>
           </div>

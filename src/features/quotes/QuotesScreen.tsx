@@ -45,6 +45,7 @@ export default function QuotesScreen({
             <Search size={17} />
             <input
               placeholder="Buscar por pareja o destino..."
+              aria-label="Buscar cotizaciones"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -77,7 +78,7 @@ export default function QuotesScreen({
               onClick={() => selectQuote(q.id)}
             >
               <div className="table-couple">
-                <img src={q.cover} />
+                <img src={q.cover} alt="" />
                 <div>
                   <strong>{q.name}</strong>
                   <small>{q.location}</small>
