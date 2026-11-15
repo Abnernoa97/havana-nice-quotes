@@ -68,17 +68,23 @@ function App() {
     setPreview(false);
     setMobileMenu(false);
   };
+  // No arrastrar mensajes sin enviar de una pareja a otra.
+  const activateQuote = (id: string) => {
+    setActive(id);
+    setNewMessage('');
+    setClientMessage('');
+  };
   const addQuote = () => {
     const id = 'hn' + Date.now();
     const q = createSampleDraft(id);
     setQuotes(list => [q, ...list]);
-    setActive(id);
+    activateQuote(id);
     setTab('details');
     navigate('editor');
     setToast('Nuevo borrador creado en este dispositivo');
   };
   const selectQuote = (id: string, target = 'editor') => {
-    setActive(id);
+    activateQuote(id);
     navigate(target);
   };
 
@@ -186,7 +192,7 @@ function App() {
       quotes={quotes}
       item={item}
       active={active}
-      setActive={setActive}
+      setActive={activateQuote}
       newMessage={newMessage}
       setNewMessage={setNewMessage}
       sendAdmin={sendAdmin}

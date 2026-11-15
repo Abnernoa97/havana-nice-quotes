@@ -6,7 +6,7 @@ type Props = {
   quotes: Quote[];
   item: Quote;
   active: string;
-  setActive: Dispatch<SetStateAction<string>>;
+  setActive: (id: string) => void;
   newMessage: string;
   setNewMessage: Dispatch<SetStateAction<string>>;
   sendAdmin: () => void;

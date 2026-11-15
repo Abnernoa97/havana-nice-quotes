@@ -22,3 +22,11 @@ test('Conmutador escritorio/móvil expone su estado a lectores de pantalla', () 
   assert.match(editor, /aria-pressed=\{!mobilePreview\}/);
   assert.match(editor, /aria-pressed=\{mobilePreview\}/);
 });
+
+test('La selección de otra pareja limpia borradores de mensaje sin enviar', () => {
+  const app = source('app/App.tsx');
+  const messages = source('features/messages/MessagesScreen.tsx');
+  assert.match(app, /const activateQuote = \(id: string\) => \{\s*setActive\(id\);\s*setNewMessage\(''\);\s*setClientMessage\(''\);\s*\}/);
+  assert.match(app, /setActive=\{activateQuote\}/);
+  assert.match(messages, /setActive: \(id: string\) => void;/);
+});
