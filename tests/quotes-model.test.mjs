@@ -35,3 +35,43 @@ test('Fecha estadounidense de la propuesta y valor vacío', () => {
   assert.equal(dDate('2027-05-22'), 'May 22, 2027');
   assert.equal(dDate(''), 'Date to be confirmed');
 });
+
+import { createSampleDraft, editSampleQuote } from '../src/features/quotes/model.ts';
+import { seed } from '../src/features/quotes/demo-data.ts';
+import { parseStoredQuotes, QUOTES_STORAGE_KEY } from '../src/features/quotes/storage.ts';
+
+test('Datos ficticios: nunca se inicia con una lista vacía o corrupta', () => {
+  assert.equal(QUOTES_STORAGE_KEY, 'hn_quotes_visual_v1');
+  for (const raw of [null, '', '[]', '{', '{}', '[null]', '[{}]', '[1,2,3]']) {
+    assert.equal(parseStoredQuotes(raw, seed), seed);
+  }
+});
+
+test('Los borradores válidos se recuperan sin modificar su contenido ni su orden', () => {
+  const drafts = [createSampleDraft('hn-custom'), ...seed];
+  const result = parseStoredQuotes(JSON.stringify(drafts), seed);
+  assert.deepEqual(result, drafts);
+  assert.equal(result[0].style, 'libre');
+  assert.equal(result[0].readingMode, 'flip');
+});
+
+test('Se rechazan importes no numéricos y registros incompletos sin bloquear la interfaz', () => {
+  const badPrice = { ...seed[0], price: 'abc' };
+  const badName = { ...seed[0], name: null };
+  assert.equal(parseStoredQuotes(JSON.stringify([badPrice]), seed), seed);
+  assert.equal(parseStoredQuotes(JSON.stringify([badName]), seed), seed);
+});
+
+test('Crear y editar no cambia otras cotizaciones ficticias', () => {
+  const draft = createSampleDraft('hn-new');
+  assert.equal(draft.price, 5900);
+  assert.equal(draft.status, 'Borrador');
+  assert.equal(draft.deposit, seed[0].deposit);
+  assert.equal(draft.cover, seed[0].cover);
+  const list = [draft, ...seed];
+  const changed = editSampleQuote(list, 'hn-new', 'price', 7200);
+  assert.equal(changed[0].price, 7200);
+  assert.equal(list[0].price, 5900);
+  assert.equal(changed[1], seed[0]);
+  assert.equal(editSampleQuote(list, 'missing', 'price', 12)[0], draft);
+});

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import type { Quote } from '../features/quotes/types';
-import { statusClass } from '../features/quotes/model';
 import FlipMagazine from '../features/magazine/FlipMagazine';
 import { editorialStyles } from '../features/editor/styles/EditorialStyles';
-import { photos, seed } from '../features/quotes/demo-data';
+import { createSampleDraft, editSampleQuote, statusClass } from '../features/quotes/model';
+import { useQuoteStore } from '../features/quotes/useQuoteStore';
+import { QUOTES_STORAGE_KEY } from '../features/quotes/storage';
 import HomeScreen from '../features/home/HomeScreen';
 import MessagesScreen from '../features/messages/MessagesScreen';
 import ClientPage from '../features/client/ClientPage';
@@ -31,14 +32,7 @@ const pages = [
   { id: 'messages', label: 'Mensajes', icon: MessageCircle },
 ];
 function App() {
-  const [quotes, setQuotes] = useState<Quote[]>(() => {
-    try {
-      const s = localStorage.getItem('hn_quotes_visual_v1');
-      return s ? JSON.parse(s) : seed;
-    } catch {
-      return seed;
-    }
-  });
+  const { quotes, setQuotes, storageError } = useQuoteStore();
   const [section, setSection] = useState('home');
   const [active, setActive] = useState('hn1');
   const [tab, setTab] = useState('styles');
@@ -60,18 +54,13 @@ function App() {
   const item = quotes.find(q => q.id === active) || quotes[0];
   const styleName = item.style && editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
   useEffect(() => {
-    localStorage.setItem('hn_quotes_visual_v1', JSON.stringify(quotes));
-  }, [quotes]);
-  useEffect(() => {
     if (toast) {
       const t = setTimeout(() => setToast(''), 3600);
       return () => clearTimeout(t);
     }
   }, [toast]);
   const edit = (key: keyof Quote, value: Quote[keyof Quote]) =>
-    setQuotes(list =>
-      list.map(q => (q.id === active ? { ...q, [key]: value } : q))
-    );
+    setQuotes(list => editSampleQuote(list, active, key, value));
   const openClientPreview = () => {
     setPreviewMode(item.readingMode === 'scroll' ? 'scroll' : 'flip');
     setPreview(true);
@@ -83,24 +72,7 @@ function App() {
   };
   const addQuote = () => {
     const id = 'hn' + Date.now();
-    const q = {
-      ...seed[0],
-      style: 'libre',
-      readingMode: 'flip',
-      id,
-      name: 'New Couple',
-      client: '',
-      email: '',
-      location: 'Destination, Mexico',
-      date: '',
-      price: 5900,
-      status: 'Borrador',
-      messages: [],
-      cover: photos[0],
-      note: 'Your celebration, your way.',
-      package: 'Signature Live Band',
-      desc: 'Live music planned with care for every moment of your celebration.',
-    };
+    const q = createSampleDraft(id);
     setQuotes(list => [q, ...list]);
     setActive(id);
     setTab('details');
@@ -119,7 +91,7 @@ function App() {
         format: 'havana-nice-quotes-backup',
         schemaVersion: 1,
         exportedAt: new Date().toISOString(),
-        storageKey: 'hn_quotes_visual_v1',
+        storageKey: QUOTES_STORAGE_KEY,
         quotes,
       };
       const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -141,7 +113,9 @@ function App() {
       setToast('No se pudo descargar. Tus cotizaciones permanecen sin cambios.');
     }
   };
-  const save = () => setToast('Borrador visual guardado en este navegador');
+  const save = () => setToast(storageError
+    ? 'No se pudo guardar en este navegador. Revisa el almacenamiento disponible.'
+    : 'Borrador visual guardado en este navegador');
   const share = () =>
     setToast(
       'Demo visual: el envío real se activará cuando conectemos la nube.'

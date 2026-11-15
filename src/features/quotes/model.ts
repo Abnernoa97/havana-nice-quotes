@@ -21,3 +21,32 @@ export function statusClass(s: string): string {
         ? 'blue'
         : 'gray';
 }
+
+/** Alta de borrador ficticio: mismas propiedades y valores del prototipo. */
+export function createSampleDraft(id: string): Quote {
+  return {
+    ...seed[0],
+    style: 'libre',
+    readingMode: 'flip',
+    id,
+    name: 'New Couple',
+    client: '',
+    email: '',
+    location: 'Destination, Mexico',
+    date: '',
+    price: 5900,
+    status: 'Borrador',
+    messages: [],
+    cover: photos[0],
+    note: 'Your celebration, your way.',
+    package: 'Signature Live Band',
+    desc: 'Live music planned with care for every moment of your celebration.',
+  };
+}
+
+/** Devuelve una nueva lista y no toca los demás borradores. */
+export function editSampleQuote(
+  quotes: Quote[], id: string, key: keyof Quote, value: Quote[keyof Quote]
+): Quote[] {
+  return quotes.map(q => (q.id === id ? { ...q, [key]: value } : q));
+}
