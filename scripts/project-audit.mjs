@@ -14,7 +14,7 @@ const required = [
   'index.html', 'package.json', 'tsconfig.json', 'vite.config.ts',
   'wrangler.jsonc', 'public/manifest.webmanifest', 'public/sw.js',
   'public/icon-192.png', 'public/icon-512.png',
-  'src/main.tsx', 'src/App.tsx', 'src/index.css',
+  'src/main.tsx', 'src/app/App.tsx', 'src/shared/styles/index.css',
   'src/features/home/HomeScreen.tsx',
   'src/features/quotes/types.ts', 'src/features/quotes/demo-data.ts',
   'src/features/quotes/QuotesScreen.tsx',
@@ -75,8 +75,8 @@ if (fileSet.has('public/manifest.webmanifest')) {
     }
   } catch (error) { report.issues.push('Manifiesto PWA inválido: ' + error.message); }
 }
-if (fileSet.has('src/App.tsx')) {
-  const app = fs.readFileSync(path.join(ROOT, 'src/App.tsx'), 'utf8');
+if (fileSet.has('src/app/App.tsx')) {
+  const app = fs.readFileSync(path.join(ROOT, 'src/app/App.tsx'), 'utf8');
   check('Clave de guardado preservada', app.includes('hn_quotes_visual_v1'),
     'Revisar la compatibilidad del almacenamiento de cotizaciones');
   const lines = app.split('\n').length;
