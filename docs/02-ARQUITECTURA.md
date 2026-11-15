@@ -1,5 +1,7 @@
 # 02 · Arquitectura actual
 
+> **Nota histórica:** este archivo describe el inventario previo a la modularización del 15/11. Para la estructura real y los identificadores de Cloudflare, leer primero [09 · Estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md).
+
 ## Mapa simple
 
 ```text
@@ -25,7 +27,7 @@ localStorage del dispositivo
 | Archivo | Responsabilidad actual |
 | --- | --- |
 | `src/main.tsx` | Arranque React y registro HTTPS del Service Worker |
-| `src/App.tsx` | Estado principal, navegación, editor, cotizaciones, vista cliente y simulaciones (aprox. 40 KB) |
+| `src/App.tsx` | Estado y composición principal: aprox. 33 KB, 1,002 líneas; todavía pendiente de dividir |
 | `src/EditorialStyles.tsx` | Selector y metadatos de cinco estilos |
 | `src/editorial-styles.css` | Miniaturas y reglas visuales de estilos; incluye sobreescrituras sobre otras vistas |
 | `src/FlipMagazine.tsx` | Lector 3D de seis páginas; implementación con `page-flip` 2.0.7 |
@@ -37,6 +39,14 @@ localStorage del dispositivo
 | `public/_headers`, `public/robots.txt` | Directivas HTTP y robots |
 | `wrangler.jsonc` | Despliegue Cloudflare Workers con assets de `dist` |
 | `package.json` | React 19, Vite 6, TypeScript, lucide-react, page-flip |
+
+## Módulos publicados en QN-00.08
+
+- `src/features/editor/QuoteDetailsPanel.tsx`, `QuoteDesignPanel.tsx`, `QuotePricingPanel.tsx`: los tres paneles ya están extraídos.
+- `src/features/quotes/demo-data.ts`: muestra de cotizaciones y fotos **ficticias**.
+- `src/shared/lib/formatters.ts`: formato de fechas y dólares.
+- `FlipMagazine.tsx` conserva otro formateador USD; su unificación aún está pendiente.
+- GitHub `main`: `4bbeb050`; Cloudflare despliegue `08a2f77d-46dd-4360-ad8d-1d7a68b5e66a` verificado.
 
 ## Datos actuales
 

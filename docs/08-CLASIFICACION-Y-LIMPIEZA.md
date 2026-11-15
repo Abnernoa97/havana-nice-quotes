@@ -1,5 +1,7 @@
 # 08 · Clasificación de carpetas y limpieza controlada
 
+> **Nota histórica:** este archivo describe el inventario previo a la modularización del 15/11. Para la estructura real y los identificadores de Cloudflare, leer primero [09 · Estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md).
+
 **Punto:** QN-00.05 · **Corte:** 15/11/2026 · **Base verificada:** `f3f83e5c6e83b20d7bff757f29cb23523cf1dced`.
 
 Este documento es el **inventario de trabajo** para cada limpieza posterior. No confundir el aspecto ordenado de las carpetas con la eliminación indiscriminada de código. La app ya está instalada y sus cotizaciones existen en `localStorage`: cambios de origen, clave, estructura del documento o caché pueden comprometer el acceso a borradores.
@@ -108,6 +110,6 @@ Mover archivos a esta estructura **no es objetivo inmediato**: primero se debe v
 
 ## 6. Próximo punto concreto
 
-**QN-00.06 — respaldo de datos verificado y preparación del primer traslado de código.** Hasta que se compruebe el JSON exportado del teléfono, únicamente realizar auditorías y orden documental/configuración segura.
+**Estado nuevo:** QN-00.06–00.08 modularizaron y publicaron paneles Datos, Diseño y Precios, datos ficticios y formateadores. Sigue pendiente la auditoría y limpieza integral del [plan Nivel Dios, QN-00.09](https://github.com/Abnernoa97/havana-nice-quotes/issues/3). El respaldo JSON ficticio no es bloqueo.
 
 **Referencia de recuperación antes de cambios estructurales:** commit `f3f83e5`; Cloudflare debe conservarse verificado por ID de despliegue antes de modificar código.

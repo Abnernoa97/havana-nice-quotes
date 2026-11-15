@@ -4,6 +4,8 @@
 
 **Clasificación QN-00.05:** [inventario y reglas de limpieza](08-CLASIFICACION-Y-LIMPIEZA.md).
 
+**Prioridad vigente:** [Plan maestro Nivel Dios · issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3) y [estado actual](09-ESTADO-VIGENTE-Y-LIMPIEZA.md). La modularización QN-00.08 **ya está publicada**. Todo el contenido actual sigue siendo ficticio; la descarga JSON del Samsung NO bloquea el desarrollo. Las casillas antiguas siguientes se preservan como historial de planificación; no son la lista principal de ejecución.
+
 El desarrollo avanza **en incrementos pequeños y publicables**, con prueba manual después de cada uno. Las fases siguientes son propuestas de trabajo; **no indican funcionalidades terminadas**.
 
 ## Fase 0 — Línea base y seguridad (prioridad inmediata)
@@ -76,4 +78,4 @@ El desarrollo avanza **en incrementos pequeños y publicables**, con prueba manu
 
 ## Orden de la próxima sesión
 
-**Un solo objetivo:** Fase 0, pasar de un prototipo funcional a una **base validada y respaldable**. Después comenzar el gestor de páginas (Fase 1). Evitar desarrollar funcionalidades de varias fases en paralelo.
+**Objetivo vigente:** ejecutar A→F del [plan QN-00.09](https://github.com/Abnernoa97/havana-nice-quotes/issues/3), dejando limpia y comprobada la base. Después iniciar el gestor de páginas (Fase 1). **No bloquear por exportación de datos ficticios**.

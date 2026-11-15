@@ -1,5 +1,7 @@
 # QN-00.04 · Respaldo del proyecto y de los borradores
 
+> **Estado vigente (15/11/2026):** el propietario confirma que **todos los datos actuales son ficticios**. Este documento describe una herramienta de exportación opcional y puntos de recuperación del **código**; descargar JSON del Samsung **NO es un requisito ni bloquea el plan Nivel Dios**. Ver [09 · Estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md).
+
 Fecha de referencia: **15 de noviembre de 2026**.
 
 ## A. Código fuente — punto de recuperación
@@ -59,4 +61,4 @@ El archivo contiene todas las propuestas del dispositivo desde el que se pulse e
 - [ ] Usuario descargó un ZIP de código en un soporte externo.
 - [ ] Implementar restauración no destructiva antes de cualquier migración de datos.
 
-Este punto está **en proceso** hasta verificar los dos archivos externos.
+La exportación de muestras y su descarga externa quedan **opcionales** mientras solo existan datos ficticios. Para recuperación del código existen commits en GitHub y versiones Cloudflare; no confundirlos con respaldos de datos reales. Una estrategia de respaldo de producción sí será obligatoria **antes** de usar información comercial real.

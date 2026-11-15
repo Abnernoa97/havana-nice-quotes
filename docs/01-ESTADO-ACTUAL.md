@@ -1,6 +1,6 @@
 # 01 · Estado actual
 
-**Actualización 15/11/2026:** la exportación local de JSON se publicó correctamente en Cloudflare (commit `f3f83e5`, versión `b8ab531d-cace-466a-ae5a-7e874ed0bf14`); su descarga en Samsung todavía está pendiente de confirmación. La clasificación de archivos QN-00.05 está documentada en [08-CLASIFICACION-Y-LIMPIEZA](08-CLASIFICACION-Y-LIMPIEZA.md).
+**ACTUALIZACIÓN VIGENTE 15/11/2026:** [09 · Estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md) prevalece sobre este inventario histórico. `main` publicado: `4bbeb050`, Cloudflare versión `250131a4-8ff9-4a8c-9622-25f92ec7e292`. Las cotizaciones actuales son **solo ficticias**; no hay bloqueo por respaldo JSON del Samsung. La exportación de JSON se añadió como función opcional. La clasificación de archivos QN-00.05 está documentada en [08-CLASIFICACION-Y-LIMPIEZA](08-CLASIFICACION-Y-LIMPIEZA.md).
 
 **Corte:** 15 de noviembre de 2026. **Base de código inspeccionada:** `d129e4261b9dbe2b7b32670f306e763032dca31f` (`main`). El repositorio quedó sin commits posteriores a la biblioteca de Estilos al realizar la auditoría. Se distingue abajo lo visto en código de lo comprobado por el usuario.
 
@@ -46,4 +46,4 @@
 
 ## Punto de control
 
-**Antes de desarrollar nuevas funciones:** revisar compilación y versión publicada, probar los flujos existentes en Android, confirmar visibilidad del repositorio y establecer respaldo/exportación de la demo si contiene trabajo que se quiera conservar.
+**Estado actual (15/11):** compilación integral y publicación de QN-00.08 confirmadas, revisión del Preview aprobada por el usuario. Sigue pendiente la limpieza Nivel Dios del [issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3). No exigir respaldo de registros ficticios para continuar; revisar producción y nuevas funciones con pruebas reales.
