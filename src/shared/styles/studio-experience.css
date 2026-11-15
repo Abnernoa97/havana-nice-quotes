@@ -1,0 +1,335 @@
+/* HAVANA NICE · Studio experience. Presentation-only layer; the 3D page engine is unchanged. */
+.editor-page {
+  --studio-forest: #204334;
+  --studio-gold: #ad9364;
+  --studio-line: #e4e9e0;
+}
+.editor-page .editor-head { align-items: flex-end; margin-bottom: 24px; }
+.editor-page .editor-head h1 {
+  max-width: 800px;
+  font: 400 clamp(28px, 3.4vw, 42px)/1.14 'Playfair Display', Georgia, serif;
+  letter-spacing: -.045em;
+  overflow-wrap: anywhere;
+  margin-top: 7px;
+}
+.studio-editor-subtitle {
+  margin-top: 11px;
+  color: #728375;
+  line-height: 1.6;
+  font-size: 12px;
+}
+.editor-page .editor-actions { flex-wrap: wrap; align-items: center; }
+.editor-page .editor-actions .btn { min-height: 42px; border-radius: 8px; padding-inline: 16px; }
+.editor-page .editor-workspace {
+  grid-template-columns: minmax(295px, 380px) minmax(0, 1fr);
+  gap: 18px;
+}
+.editor-page .edit-panel, .editor-page .preview-side {
+  border: 1px solid var(--studio-line);
+  border-radius: 15px;
+  box-shadow: 0 12px 42px #233e3210;
+}
+.editor-page .edit-panel { background: #fff; }
+.editor-page .edit-tabs.hn-four-tabs {
+  padding: 12px;
+  background: #fcfcf9;
+  gap: 6px;
+  border-bottom: 1px solid #e9eee8;
+}
+.editor-page .edit-tabs.hn-four-tabs button {
+  min-height: 61px;
+  padding: 10px 3px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font-size: 11px;
+  line-height: 1.15;
+  color: #647b6a;
+  transition: background-color .2s, border-color .2s, color .2s;
+}
+.editor-page .edit-tabs.hn-four-tabs button.active {
+  color: #214735;
+  background: #e9f0e9;
+  border-color: #d8e6d8;
+}
+.editor-page .edit-tabs.hn-four-tabs button:focus-visible,
+.editor-page .preview-switch button:focus-visible,
+.editor-page .preview-open:focus-visible,
+.client-editorial-reader button:focus-visible,
+.client-editorial-reader summary:focus-visible {
+  outline: 3px solid #ab9364;
+  outline-offset: 3px;
+}
+.editor-page .edit-body { padding: 28px 25px 32px; }
+.editor-page .edit-body h3 { font-size: 25px; letter-spacing: -.025em; line-height: 1.2; margin-bottom: 22px; }
+.editor-page .edit-body label {
+  margin: 18px 0 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #3a5847;
+}
+.editor-page .edit-body input:not([type='color']),
+.editor-page .edit-body textarea {
+  padding: 13px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  border-color: #dfe8de;
+  border-radius: 8px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.editor-page .edit-body input:focus,
+.editor-page .edit-body textarea:focus {
+  border-color: #5e876e;
+  box-shadow: 0 0 0 3px #bad3bb50;
+}
+.editor-page .edit-separator { margin: 28px 0; }
+.editor-page .photo-option { border-radius: 9px; height: 75px; }
+.editor-page .photo-option.chosen { border-color: var(--studio-gold); outline: 1px solid var(--studio-gold); }
+.editor-page .upload-btn { border-radius: 9px; min-height: 48px; }
+.editor-page .font-options button { border-radius: 9px; min-height: 77px; }
+.editor-page .investment-box { border-radius: 10px; background: #eef3ec; }
+.editor-page .preview-side { padding: 24px; background: #f1f1ea; }
+.editor-page .preview-heading h3 { font-size: 25px; letter-spacing: -.025em; }
+.editor-page .preview-switch { border-radius: 9px; }
+.editor-page .preview-switch button { min-width: 38px; min-height: 38px; border-radius: 7px; }
+.editor-page .preview-viewport {
+  height: min(76vh, 850px);
+  min-height: 470px;
+  max-width: 790px;
+  border-radius: 8px;
+  box-shadow: 0 18px 52px #1b342625;
+  scrollbar-color: #a9b8a6 #f7f8f3;
+}
+.editor-page .preview-viewport.mobile-frame {
+  max-width: 350px;
+  border: 7px solid #24372e;
+  border-radius: 28px;
+}
+.editor-page .preview-open {
+  width: 100%;
+  max-width: 790px;
+  margin: 19px auto 0;
+  justify-content: center;
+  padding: 13px;
+  border: 1px solid #cbdccc;
+  border-radius: 9px;
+  background: white;
+  color: #214b35;
+  font-size: 12px;
+  transition: background .2s;
+}
+.editor-page .preview-open:hover { background: #e7f0e7; }
+
+/* Lightweight cover representation. The actual 3D motion only runs in full preview. */
+.studio-magazine-preview {
+  min-height: 100%;
+  background: #e9e7df;
+  padding: clamp(15px, 3.8vw, 38px) clamp(11px, 2vw, 24px);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+.studio-magazine-cover {
+  width: min(100%, 390px);
+  aspect-ratio: 410 / 580;
+  color: #fff;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 8px 13px 24px #1b282b3b, inset -4px 0 8px #00000019;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid #f2f0e855;
+}
+.studio-magazine-cover-top {
+  padding: 7% 8%;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+}
+.studio-magazine-cover-top strong {
+  font: 500 clamp(13px, 2vw, 22px) 'Playfair Display', Georgia, serif;
+  letter-spacing: .05em;
+}
+.studio-magazine-cover-top span,
+.studio-magazine-cover-bottom>span,
+.studio-magazine-cover>small {
+  font-size: clamp(7px, .8vw, 9px);
+  letter-spacing: .13em;
+}
+.studio-magazine-cover-bottom {
+  margin: auto 8% 13%;
+  text-align: center;
+}
+.studio-magazine-cover-bottom h2 {
+  font: 400 clamp(33px, 4vw, 55px)/1.07 'Playfair Display', Georgia, serif;
+  margin: 16px 0;
+  overflow-wrap: anywhere;
+}
+.studio-magazine-cover-bottom h2.modern { font-family: 'DM Sans', sans-serif; font-weight: 600; }
+.studio-magazine-cover-rule { width: 45px; height: 1px; background: #fff; margin: 18px auto; }
+.studio-magazine-cover-bottom p { font-size: 11px; line-height: 1.6; text-transform: uppercase; }
+.studio-magazine-cover>small { position: absolute; bottom: 4%; left: 8%; }
+.studio-magazine-preview-note {
+  margin-top: 22px;
+  color: #667566;
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 320px;
+}
+.studio-magazine-preview.hn-style-vogue .studio-magazine-cover { filter: grayscale(.9); }
+.studio-magazine-preview.hn-style-vogue .studio-magazine-cover-bottom h2 { font-family: 'Bodoni Moda', Georgia, serif; text-transform: uppercase; }
+.studio-magazine-preview.hn-style-lane { background: #e8e3dc; }
+.studio-magazine-preview.hn-style-lane .studio-magazine-cover-bottom h2 { font-family: 'Cormorant Garamond', Georgia, serif; }
+.studio-magazine-preview.hn-style-junebug { background: #e9dcd2; }
+.studio-magazine-preview.hn-style-junebug .studio-magazine-cover-bottom h2 { font-family: 'Fraunces', Georgia, serif; }
+.studio-magazine-preview.hn-style-nyt { background: #e7e6e0; }
+.studio-magazine-preview.hn-style-nyt .studio-magazine-cover-bottom h2 { font-family: Georgia, serif; font-weight: 700; }
+
+/* The same proposal component is displayed in both the editor and full client Scroll view. */
+.client-editorial-reader {
+  --reader-ink: var(--paper-accent, #18342f);
+  background: #ebece6;
+  min-height: 100vh;
+}
+.client-reader-masthead {
+  min-height: 53px;
+  padding: 14px max(20px, calc((100% - 1010px)/2));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  color: #667769;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .17em;
+}
+.client-reader-masthead span:first-child { color: #254b37; font-family: 'Playfair Display', Georgia, serif; font-size: 16px; letter-spacing: .05em; }
+.client-reader-document {
+  width: min(100% - 40px, 990px);
+  margin: 0 auto;
+  box-shadow: 0 24px 70px #172f2518;
+}
+.client-reader-document .proposal { --paper-accent: var(--reader-ink); }
+.client-reader-document .proposal-top { height: 78px; padding: 0 clamp(20px, 4vw, 46px); }
+.client-reader-document .proposal-top span { font-size: 26px; }
+.client-reader-document .proposal-photo { min-height: clamp(440px, 64vw, 630px); }
+.client-reader-document .hero-content { padding: 65px 24px; }
+.client-reader-document .hero-content h2 {
+  font-size: clamp(51px, 6.5vw, 94px);
+  max-width: 750px;
+  margin-inline: auto;
+  overflow-wrap: anywhere;
+}
+.client-reader-document .hero-content p { font-size: clamp(17px, 2vw, 24px); }
+.client-reader-document .hero-content small { font-size: 10px; }
+.client-reader-document .paper-content {
+  padding: clamp(40px, 7vw, 100px) clamp(25px, 10vw, 130px);
+}
+.client-reader-document .paper-content h3 { font-size: clamp(33px, 5vw, 53px); letter-spacing: -.045em; }
+.client-reader-document .paper-content > p { font-size: 15px; line-height: 2; }
+.client-reader-document .paper-eyebrow,
+.client-reader-document .package-intro span { font-size: 10px; }
+.client-reader-document .paper-rule { margin: 40px 0; }
+.client-reader-document .package-intro strong { font-size: 28px; }
+.client-reader-document .packages { margin-top: 22px; }
+.client-reader-document .packages div { font-size: 14px; margin: 15px 0; gap: 14px; }
+.client-reader-document .price-row { gap: 35px; flex-wrap: wrap; }
+.client-reader-document .price-row strong { font-size: clamp(29px, 4vw, 46px); }
+.client-reader-document .price-row small { font-size: 10px; }
+.client-reader-document .paper-end { margin-top: 74px; font-size: 20px; }
+.client-reader-document .paper-end strong { font-size: 29px; }
+.client-reader-afterword {
+  text-align: center;
+  padding: clamp(45px, 6vw, 85px) 22px 60px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.client-reader-afterword h2 {
+  font: 400 clamp(32px, 5vw, 48px)/1.2 'Playfair Display', Georgia, serif;
+  letter-spacing: -.04em;
+  margin: 15px 0 17px;
+}
+.client-reader-afterword h2 em { color: #7c987f; font-weight: 400; }
+.client-reader-afterword > p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #758578;
+  margin: 0 auto 24px;
+  max-width: 460px;
+}
+.client-reader-signoff { font: italic 24px 'Playfair Display', Georgia, serif; color: #284b38; }
+.client-reader-signoff small {
+  display: block;
+  font: 700 9px 'DM Sans', sans-serif;
+  letter-spacing: .2em;
+  margin-top: 8px;
+  color: #8b9989;
+}
+.client-preview-testing { width: min(100% - 40px, 990px); margin: 0 auto 35px; border-top: 1px solid #d5ddd3; }
+.client-preview-testing summary {
+  cursor: pointer;
+  color: #8a978b;
+  font-size: 11px;
+  padding: 16px 0;
+  line-height: 1.5;
+}
+.client-preview-testing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 6px 0 20px; }
+.client-preview-testing .client-card { padding: 22px; border-radius: 12px; }
+.client-preview-testing .client-card h3 { font-size: 23px; }
+.client-preview-testing .client-card textarea { font-size: 13px; line-height: 1.5; }
+.client-demo-investment { margin-top: 18px; }
+.client-reader-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid #d4dbd1;
+  padding: 24px max(20px, calc((100% - 990px)/2));
+  color: #829083;
+  letter-spacing: .14em;
+  font-size: 10px;
+}
+
+/* Small screens: editing stays first; full-page client preview is one tap away. */
+@media (max-width: 950px) {
+  .editor-page .editor-workspace { grid-template-columns: 1fr; }
+  .editor-page .preview-viewport { height: 620px; }
+  .client-preview-testing-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .editor-page .editor-head { align-items: flex-start; }
+  .editor-page .editor-head h1 { font-size: 29px; }
+  .editor-page .editor-actions { width: 100%; }
+  .editor-page .editor-actions .btn { flex: 1; justify-content: center; padding-inline: 10px; }
+  .editor-page .edit-body { padding: 23px 18px 28px; }
+  .editor-page .edit-tabs.hn-four-tabs { padding: 8px; gap: 3px; }
+  .editor-page .edit-tabs.hn-four-tabs button { min-height: 56px; font-size: 10px; padding: 7px 1px; }
+  .editor-page .preview-side { padding: 15px; }
+  .editor-page .preview-heading h3 { font-size: 21px; }
+  .editor-page .preview-viewport { height: 550px; min-height: 450px; }
+  .studio-magazine-cover-bottom h2 { font-size: clamp(28px, 9vw, 44px); }
+  .client-reader-masthead { padding: 13px 19px; }
+  .client-reader-masthead span:last-child { font-size: 8px; text-align: right; }
+  .client-reader-document { width: 100%; box-shadow: none; }
+  .client-reader-document .proposal-top { height: 65px; }
+  .client-reader-document .proposal-top span { font-size: 18px; }
+  .client-reader-document .proposal-top small { font-size: 7px; }
+  .client-reader-document .proposal-photo { min-height: 480px; }
+  .client-reader-document .hero-content { padding: 60px 19px; }
+  .client-reader-document .hero-content h2 { font-size: clamp(44px, 11vw, 64px); }
+  .client-reader-document .paper-content { padding: 46px 25px 54px; }
+  .client-reader-document .paper-content h3 { font-size: 34px; }
+  .client-reader-document .paper-content > p { font-size: 13px; }
+  .client-reader-document .packages div { font-size: 12px; }
+  .client-reader-document .price-row { flex-direction: column; gap: 27px; }
+  .client-reader-document .price-row strong { font-size: 34px; }
+  .client-reader-afterword { padding: 50px 24px; }
+  .client-reader-footer { flex-direction: column; text-align: center; align-items: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .editor-page .edit-tabs.hn-four-tabs button,
+  .editor-page .edit-body input,
+  .editor-page .edit-body textarea { transition: none; }
+}

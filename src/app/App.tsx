@@ -202,7 +202,6 @@ function App() {
     <ClientPage
       item={item}
       styleName={styleName}
-      setPreview={setPreview}
       clientMessage={clientMessage}
       setClientMessage={setClientMessage}
       sendClient={sendClient}

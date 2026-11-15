@@ -1,105 +1,59 @@
-import type { Dispatch, SetStateAction } from 'react';
-import { ChevronLeft, Check, MessageCircle, CheckCircle2, Heart } from 'lucide-react';
+import type { CSSProperties } from 'react';
+import { CheckCircle2, Heart, MessageCircle } from 'lucide-react';
 import { usd } from '../../shared/lib/formatters';
 import type { Quote } from '../quotes/types';
+import Proposal from './Proposal';
 
 type Props = {
   item: Quote;
   styleName: string;
-  setPreview: Dispatch<SetStateAction<boolean>>;
   clientMessage: string;
-  setClientMessage: Dispatch<SetStateAction<string>>;
+  setClientMessage: (value: string) => void;
   sendClient: () => void;
   updateStatus: (status: string) => void;
 };
 
-/** Mismo JSX que el prototipo original, sin rediseños. */
+/**
+ * The complete scroll proposal uses the same document as the editor preview.
+ * Preview-only actions stay collapsed outside the client-facing document.
+ */
 export default function ClientPage({
   item,
   styleName,
-  setPreview,
   clientMessage,
   setClientMessage,
   sendClient,
   updateStatus,
 }: Props) {
   return (
-    <div className={'client-app hn-style-' + styleName}>
-      <div className="client-navbar">
-        <div className="client-brand">
-          HAVANA NICE <small>LIVE MUSIC FOR YOUR WEDDING</small>
-        </div>
-        <button onClick={() => setPreview(false)} className="close-preview">
-          <ChevronLeft size={17} /> Volver al editor
-        </button>
+    <div className={'client-app client-editorial-reader hn-style-' + styleName} style={{ '--paper-accent': item.color } as CSSProperties}>
+      <div className="client-reader-masthead">
+        <span>HAVANA NICE</span>
+        <span>LIVE MUSIC · MEXICO</span>
       </div>
-      <div
-        className="client-hero"
-        style={{
-          backgroundImage:
-            'linear-gradient(90deg,rgba(19,35,30,.48),rgba(19,35,30,.05)),url(' +
-            item.cover +
-            ')',
-        }}
-      >
-        <div>
-          <span className="eyebrow light">
-            CURATED WITH CARE · MADE JUST FOR YOU
-          </span>
-          <h1>{item.name}</h1>
-          <p>{item.note}</p>
-        </div>
-      </div>
-      <div className="client-layout">
-        <div className="client-story">
-          <span className="eyebrow">HAVANA NICE · YOUR CELEBRATION</span>
-          <h2>
-            We would love to
-            <br />
-            <em>be part of your day.</em>
-          </h2>
-          <p>{item.desc}</p>
-          <div className="client-divider" />
-          <span className="eyebrow">YOUR LIVE MUSIC EXPERIENCE</span>
-          <h3>{item.package}</h3>
-          <div className="client-inclusions">
-            <p>
-              <Check size={17} /> Live musicians, no backing tracks
-            </p>
-            <p>
-              <Check size={17} /> Music selected around your celebration
-            </p>
-            <p>
-              <Check size={17} /> Personal planning with Fer & Noa
-            </p>
-          </div>
-          <div className="client-divider" />
-          <div className="client-total">
-            <div>
-              <small>TOTAL INVESTMENT</small>
-              <strong>{usd(item.price)}</strong>
-            </div>
-            <div>
-              <small>{item.deposit}% RESERVATION DEPOSIT</small>
-              <strong>{usd((item.price * item.deposit) / 100)}</strong>
-            </div>
-          </div>
-          <small className="tiny">
-            Demonstration only. This is not a formal quote, agreement, or
-            payment request.
-          </small>
-        </div>
-        <div className="client-actions">
+
+      <main className="client-reader-document" aria-label={'Propuesta personalizada para ' + item.name}>
+        <Proposal item={item} styleName={styleName} />
+      </main>
+
+      <section className="client-reader-afterword">
+        <span className="eyebrow">A NOTE FROM US</span>
+        <h2>Questions? <em>We're right here.</em></h2>
+        <p>Have a question or want to adjust a detail? We'd be happy to talk it through with you.</p>
+        <div className="client-reader-signoff">Fer & Noa <small>HAVANA NICE</small></div>
+      </section>
+
+      <details className="client-preview-testing">
+        <summary>Herramientas de prueba del prototipo · no visibles en una cotización final</summary>
+        <div className="client-preview-testing-grid">
           <div className="client-card">
-            <span className="eyebrow">LET'S TALK</span>
-            <h3>Have a question?</h3>
-            <p>
-              Tell us what you're imagining. We can adjust the proposal
-              together.
-            </p>
+            <span className="eyebrow">DEMO MESSAGE</span>
+            <h3>Test a message</h3>
+            <p>Solo prueba local. Este mensaje no se envía a nadie.</p>
             <textarea
+              aria-label="Mensaje de prueba"
               placeholder="Hi Fer & Noa! We'd love to ask..."
-              rows={4}
+              rows={3}
               value={clientMessage}
               onChange={e => setClientMessage(e.target.value)}
             />
@@ -108,12 +62,9 @@ export default function ClientPage({
             </button>
           </div>
           <div className="client-card">
-            <span className="eyebrow">NEXT STEP</span>
-            <h3>Love what you see?</h3>
-            <p>
-              Accepting this demo only changes the sample status. No electronic
-              signature is collected.
-            </p>
+            <span className="eyebrow">DEMO STATUS</span>
+            <h3>Test acceptance</h3>
+            <p>Esta acción solo cambia el estado local. No hay firma ni contratación.</p>
             {item.status === 'Aceptada' ? (
               <div className="demo-success">
                 <CheckCircle2 size={25} />
@@ -121,19 +72,18 @@ export default function ClientPage({
                 <small>This is only a visual preview.</small>
               </div>
             ) : (
-              <button
-                className="btn outline full"
-                onClick={() => updateStatus('Aceptada')}
-              >
+              <button className="btn outline full" onClick={() => updateStatus('Aceptada')}>
                 <Heart size={16} /> Simulate acceptance
               </button>
             )}
+            <p className="client-demo-investment">Total mostrado: {usd(item.price)}</p>
           </div>
         </div>
-      </div>
-      <footer className="client-footer">
-        HAVANA NICE · SERVING LOVE THROUGH LIVE MUSIC{' '}
-        <span>VISUAL DEMO ONLY</span>
+      </details>
+
+      <footer className="client-reader-footer">
+        <span>HAVANA NICE</span>
+        <span>LIVE MUSIC FOR YOUR CELEBRATION</span>
       </footer>
     </div>
   );

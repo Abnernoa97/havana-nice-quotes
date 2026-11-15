@@ -43,8 +43,9 @@ export default function QuoteEditorScreen({
         <div>
           <div className="eyebrow">QUOTE DESIGNER / DEMO</div>
           <h1>
-            Diseña tu propuesta <span className="italic">a tu manera.</span>
+            {item.name || 'Tu propuesta'} <span className="italic">· estudio</span>
           </h1>
+          <p className="studio-editor-subtitle">Personaliza la propuesta y revisa los cambios antes de compartirla.</p>
         </div>
         <div className="editor-actions">
           <button className="btn subtle" onClick={openClientPreview}>
@@ -107,8 +108,8 @@ export default function QuoteEditorScreen({
         <div className="preview-side">
           <div className="preview-heading">
             <div>
-              <span className="eyebrow">LIVE PREVIEW</span>
-              <h3>Así lo verá la pareja</h3>
+              <span className="eyebrow">{item.readingMode === 'scroll' ? 'VISTA PREVIA · SCROLL' : 'VISTA PREVIA · REVISTA 3D'}</span>
+              <h3>{item.readingMode === 'scroll' ? 'La propuesta de la pareja' : 'La portada de la revista'}</h3>
             </div>
             <div className="preview-switch">
               <button
@@ -138,12 +139,28 @@ export default function QuoteEditorScreen({
                 : 'preview-viewport'
             }
           >
-            <div style={{ '--paper-accent': item.color } as CSSProperties}>
-              <Proposal item={item} styleName={styleName} embedded />
-            </div>
+            {item.readingMode === 'scroll' ? (
+              <div style={{ '--paper-accent': item.color } as CSSProperties}>
+                <Proposal item={item} styleName={styleName} embedded />
+              </div>
+            ) : (
+              <div className={'studio-magazine-preview hn-style-' + styleName} style={{ '--paper-accent': item.color } as CSSProperties}>
+                <div className="studio-magazine-cover" style={{ backgroundImage: 'linear-gradient(180deg, rgba(7,19,16,.24), rgba(7,19,16,.03) 36%, rgba(7,19,16,.73)), url(' + item.cover + ')' }}>
+                  <div className="studio-magazine-cover-top"><strong>HAVANA NICE</strong><span>THE PRIVATE EDITION</span></div>
+                  <div className="studio-magazine-cover-bottom">
+                    <span>A PRIVATE LIVE MUSIC PROPOSAL</span>
+                    <h2 className={item.font === 'modern' ? 'modern' : ''}>{item.name}</h2>
+                    <div className="studio-magazine-cover-rule" />
+                    <p>{item.location} · {item.date ? new Date(item.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'DATE TO BE CONFIRMED'}</p>
+                  </div>
+                  <small>ISSUE 001 · MEXICO</small>
+                </div>
+                <p className="studio-magazine-preview-note">Portada estática. Abre la revista para comprobar el doblez y todas las páginas.</p>
+              </div>
+            )}
           </div>
           <button className="preview-open" onClick={openClientPreview}>
-            <ExternalLink size={16} /> Abrir vista completa del cliente
+            <ExternalLink size={16} /> Abrir vista completa de la pareja
           </button>
         </div>
       </div>
