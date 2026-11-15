@@ -1,5 +1,5 @@
 /** Browser and Android PWA Back navigation, independent of any visual components. */
-export type AppSection = 'home' | 'quotes' | 'editor' | 'messages';
+export type AppSection = 'home' | 'quotes' | 'editor' | 'messages' | 'photos';
 export type EditorTab = 'details' | 'styles' | 'design' | 'pricing';
 export type ReadingView = 'flip' | 'scroll';
 export type AppView = {
@@ -20,7 +20,7 @@ export type BrowserHistoryPort = {
   replaceState(data: unknown, unused: string): void;
   back(): void;
 };
-const sections: AppSection[] = ['home', 'quotes', 'editor', 'messages'];
+const sections: AppSection[] = ['home', 'quotes', 'editor', 'messages', 'photos'];
 const tabs: EditorTab[] = ['details', 'styles', 'design', 'pricing'];
 const modes: ReadingView[] = ['flip', 'scroll'];
 

@@ -1,45 +1,36 @@
 # HAVANA NICE · Quotes Studio
 
-**Cotizaciones editoriales de HAVANA NICE — prototipo exclusivamente visual.** Todas las parejas, conversaciones, montos y cotizaciones actuales son ficticios. **No usar datos reales de clientes:** todavía no hay autenticación, backend, firma, pagos, enlaces privados ni envío comercial.
+**Estudio privado de cotizaciones con sincronización Cloudflare**. Interfaz interna en español y propuestas editoriales para parejas estadounidenses en inglés.
 
-## Primero leer estos documentos
+## Acceso y publicación
+- **Aplicación:** https://havana-nice-quotes.soloaplicaciones97.workers.dev
+- **Repositorio:** `Abnernoa97/havana-nice-quotes` (`main`); GitHub solo conserva código. **Build y deployment por Cloudflare Workers Builds, NO GitHub Actions.**
+- **Acceso privado:** contraseña del estudio; sesión segura HttpOnly/SameSite=Strict, validada en Worker. La contraseña no está en el código. **No compartir credenciales de acceso con clientes.**
+- **Almacenamiento:** D1 `havana-nice-quotes-sync` guarda cotizaciones por ID y revisión; R2 privado existente `havana-nice-v2-media`, prefijo exclusivo `quotes-studio/photos/`, guarda imágenes. No se tocan archivos de Book v2 ni Calendario.
+- **Datos iniciales:** cero cotizaciones y cero fotografías de Quotes Studio. No se importan ejemplos ni se leen borradores de `localStorage`. La biblioteca de fotos arranca vacía; se llena desde Fotos o Diseño.
+- **Sincronización:** edición con auto-guardado, lectura cada 15 s y control de versión. Si otro teléfono modifica una cotización concurrentemente, no se sobrescribe en silencio: se muestra una incidencia para resolver. No dar por guardado si la nube está fuera de línea.
+- **Banco de fotografías:** imágenes JPG, PNG, WebP, GIF, HEIC/HEIF hasta 12 MB; cuenta y tamaño total se refieren **solo a los objetos subidos para Quotes Studio**, no a toda la cuenta R2.
+- **Aún NO disponible:** envío real a clientes, acceso público por propuesta, notificación de lectura, firma, mensajería externa o permisos individuales. La vista cliente sigue siendo previa interna.
+- **No hay borrados automáticos de los antiguos datos locales**; la aplicación nueva simplemente no los utiliza. No borrar información de otros proyectos.
 
-| Documento vigente | Para qué sirve |
-| --- | --- |
-| **[Estado actual y estructura](docs/09-ESTADO-VIGENTE-Y-LIMPIEZA.md)** | Qué existe realmente y qué sigue pendiente |
-| [Visión del producto](docs/03-VISION-DEL-PRODUCTO.md) | Qué queremos construir y qué NO existe aún |
-| [Roadmap](docs/04-ROADMAP.md) | Próximas fases, separadas de la limpieza |
-| [Protocolo de desarrollo](docs/05-PROTOCOLO-DE-DESARROLLO.md) | Reglas para editar, probar, publicar y recuperar |
-| [Decisiones](docs/06-DECISIONES.md) | Restricciones y elecciones confirmadas |
-| [Índice histórico](docs/HISTORIAL.md) | Documentos retirados del árbol activo, recuperables desde Git |
-| **[Issue #3 · Plan Nivel Dios](https://github.com/Abnernoa97/havana-nice-quotes/issues/3)** | Checklist comprobable y registro de ejecución |
+## Documentos
+- [Estado vigente](docs/09-ESTADO-VIGENTE-Y-LIMPIEZA.md)
+- [Visión](docs/03-VISION-DEL-PRODUCTO.md)
+- [Roadmap](docs/04-ROADMAP.md)
+- [Protocolo de desarrollo](docs/05-PROTOCOLO-DE-DESARROLLO.md)
+- [Decisiones](docs/06-DECISIONES.md)
+- [Plan Maestro](https://github.com/Abnernoa97/havana-nice-quotes/issues/3)
 
-**Un solo repositorio:** `Abnernoa97/havana-nice-quotes`. **Una sola rama:** `main`.  
-**Producción:** https://havana-nice-quotes.soloaplicaciones97.workers.dev — Cloudflare, cuenta **Solo Aplicaciones**, Worker `havana-nice-quotes`.
-
-## Estado técnico verificado (15 nov 2026)
-
-- React 19 + Vite + TypeScript estricto + PWA + Cloudflare Workers Static Assets.
-- Inicio, Cotizaciones, Editor, Mensajes y Vista cliente separados por módulos.
-- Cinco estilos editoriales, lectura Scroll y revista Page Flip 3D de **seis hojas fijas**.
-- Persistencia **solo local** bajo `hn_quotes_visual_v1`; cotizaciones y mensajes **simulados**.
-- `App.tsx` de 279 líneas; `bun.lock` versionado; sin `@ts-nocheck`; sin formateador USD duplicado.
-- **23/23 pruebas** y compilación Cloudflare aprobadas para el último cambio de aplicación `38c71ab94a78a553214f6db34e9ccab0a7ef57ca`. La versión del HEAD puede ser posterior por cambios documentales.
-- **La revisión visual/táctil en Samsung y escritorio NO está cerrada**. El comportamiento del doblez 3D se optimizará después, no durante esta limpieza.
-- Solo existe `main`; la rama temporal de QA y su preview fueron eliminados manualmente y comprobados el 15/11/2026.
-
-## Desarrollo local
+## Desarrollo
 
 ```bash
 bun install --frozen-lockfile
-npm run dev
 npm run build
+npx wrangler deploy
 ```
 
-`npm run build` ejecuta auditoría de estructura, tests, TypeScript y Vite. También se pueden ejecutar `npm test` y `npm run audit:structure` por separado.
+`npm run build` ejecuta auditoría de código, tests y TypeScript antes de generar assets. Para producción se utiliza **exclusivamente Cloudflare** y solo un Worker.
 
-**Publicación:** cambios de `main` disparan Workers Builds. Revisar el resultado real del build y la versión Cloudflare; cada commit puede consumir minutos de compilación. No generar builds por cambios triviales ni crear Workers adicionales.
+**Importante:** el schema está en `migrations/0001_quotes.sql`. La base D1 ya fue creada y las tablas inicializadas desde la API de Cloudflare. No ejecutar migraciones destructivas ni regenerar la credencial sin autorización. Ningún secreto, token o passphrase debe subirse al repositorio.
 
-**Qué sigue:** terminar la validación de uso y, cuando se decida, diseñar **páginas editables** (añadir, duplicar, reordenar y eliminar) sin reescribir el motor 3D. La velocidad, detalles de animación y rediseños están pospuestos.
-
-**Regla:** trabajar desde este `README`, estado vigente e Issue #3; no desde documentos históricos. Los archivos borrados de `docs/` siguen recuperables en el historial Git.
+**Continuidad:** antes de desarrollar leer este README, el estado vigente y el Plan Maestro, no documentos históricos obsoletos.

@@ -2,6 +2,17 @@
 
 **Alcance:** HAVANA NICE Quotes Studio, prototipo con datos ficticios. El control de limpieza está en [Issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3) y el estado real en [09 · Estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md). Este documento describe **desarrollo futuro**, no tareas ya entregadas.
 
+## Fase activa: nube privada y banco de fotos · 15/11/2026
+
+**Decisión nueva:** antes de continuar con el editor libre, permitir trabajar en todos los teléfonos con la misma información.
+
+- D1 propio para las cotizaciones (cero datos de prueba iniciales), versión por propuesta y autosave protegido contra escrituras obsoletas.
+- R2 existente `havana-nice-v2-media` para la biblioteca privada de Quotes Studio, sin modificar recursos de Book v2 o Calendario.
+- Contraseña privada para Fer & Noa, cookies seguras y API interna; fotos por URL autenticada.
+- Navegación "Fotos", selección de portada desde el banco y métricas del tamaño de los archivos propios.
+- Sin importar muestras locales antiguas, sin enviar correos reales ni recopilar aperturas/ubicaciones.
+- **Pendiente de QA manual:** subir/seleccionar una foto desde Samsung, iniciar sesión desde otro teléfono, comprobar que una cotización nueva aparece y que el botón Atrás funciona.
+
 ## Prioridad vigente · Diseño completo antes del envío (15/11/2026)
 
 **Decisión de Fer & Noa:** terminar la presentación del diseñador y la experiencia que verá la pareja, en móvil y escritorio, antes de invertir tiempo en envío, avisos, ubicación o seguimiento.
@@ -9,7 +20,7 @@
 1. Un solo documento editorial para edición en vivo y lectura Scroll del cliente. La primera mejora se publicó en `fb76f9c`. La revista 3D mantiene su motor de hojas independiente.
 2. Completar los controles de composición visual, personalización de cada página y consistencia de los cinco estilos; no prometer editor libre mientras las hojas sigan siendo fijas.
 3. Probar de forma visual la creación, edición, vista de cliente, portada, scroll y revista en Samsung y escritorio; corregir únicamente defectos reales.
-4. **Posteriormente:** backend privado, envío por enlace, saber si el enlace se abrió y notificaciones. La apertura del enlace no demuestra por sí sola que el destinatario recibió un mensaje. La ubicación precisa no se recopilará sin necesidad y consentimiento expreso.
+4. **Posteriormente:** enlaces privados para clientes, avisos de apertura y notificaciones. La apertura del enlace no demuestra por sí sola que el destinatario recibió un mensaje. La ubicación precisa no se recopilará sin necesidad y consentimiento expreso.
 
 **Estado:** mejoras de interfaz en curso; publicación visual y compilación no equivalen a aprobación manual en dispositivos. Los envíos y eventos reales no están implementados.
 

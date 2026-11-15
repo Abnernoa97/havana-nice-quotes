@@ -1,9 +1,25 @@
 {
   "name": "havana-nice-quotes",
+  "main": "./worker/index.ts",
   "compatibility_date": "2026-10-16",
   "previews": {},
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "havana-nice-quotes-sync",
+      "database_id": "4c8403ed-94f3-4989-9016-4409fabf0f47"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "havana-nice-v2-media"
+    }
+  ]
 }

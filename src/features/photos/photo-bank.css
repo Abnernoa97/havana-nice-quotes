@@ -1,0 +1,35 @@
+/* Private cloud photo library. Matches the existing HAVANA NICE studio design. */
+.hn-photo-upload { cursor: pointer; }
+.hn-photo-upload.busy { opacity: .65; }
+.hn-photo-bank-meta { display: flex; flex-wrap: wrap; gap: 14px; align-items: stretch; margin-bottom: 24px; }
+.hn-photo-bank-meta>div {
+  display: flex; gap: 12px; align-items: center; padding: 17px 21px;
+  background: #fff; border: 1px solid #e8ece5; border-radius: 10px; min-height: 75px;
+}
+.hn-photo-bank-meta>div svg { color: #7c9686; }
+.hn-photo-bank-meta strong { font: 400 24px 'Playfair Display',Georgia,serif; color: #254437; }
+.hn-photo-bank-meta span { font-size: 11px; color: #89968a; max-width: 126px; line-height: 1.4; }
+.hn-photo-bank-meta>button {
+  display: flex; align-items: center; gap: 8px; border: 1px solid #dce6db;
+  background: #fff; border-radius: 10px; padding: 12px 16px; color: #365944;
+  font-size: 12px; cursor: pointer;
+}
+.hn-photo-bank-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(180px,1fr)); gap: 17px; }
+.hn-photo-bank-item { margin: 0; background: white; border: 1px solid #e9ece6; border-radius: 12px; overflow: hidden; }
+.hn-photo-bank-item img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #e9eee7; }
+.hn-photo-bank-item figcaption { padding: 12px; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.hn-photo-bank-item figcaption strong { color: #294536; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hn-photo-bank-item figcaption span { color: #8d9d8d; font-size: 10px; white-space: nowrap; }
+.hn-photo-bank-empty { display: grid; justify-items: center; text-align: center; padding: clamp(45px, 9vw, 95px) 18px; border: 1px dashed #cbd9cb; border-radius: 12px; color: #7d9281; background: #f3f5ef; }
+.hn-photo-bank-empty h2 { font: 400 25px 'Playfair Display',Georgia,serif; color: #2e503d; margin: 18px 0 9px; }
+.hn-photo-bank-empty p { max-width: 405px; font-size: 13px; line-height: 1.75; }
+.hn-photo-bank-success,.hn-photo-bank-error { margin: 13px 0 24px; padding: 12px 15px; border-radius: 8px; font-size: 12px; line-height: 1.5; display: flex; gap: 10px; align-items: center; }
+.hn-photo-bank-success { color: #2d6941; background: #e9f4e9; }
+.hn-photo-bank-error { color: #8f3d37; background: #fff0ed; }
+@media(max-width: 600px) {
+  .hn-photo-bank .intro-line { gap: 17px; }
+  .hn-photo-upload { width: 100%; }
+  .hn-photo-bank-meta>div { flex: 1 1 150px; padding: 14px; gap: 9px; }
+  .hn-photo-bank-meta span { font-size: 10px; }
+  .hn-photo-bank-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+}

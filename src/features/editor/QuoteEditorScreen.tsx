@@ -5,6 +5,7 @@ import type { Quote } from '../quotes/types';
 import Proposal from '../client/Proposal';
 import QuoteDetailsPanel from './QuoteDetailsPanel';
 import QuoteDesignPanel from './QuoteDesignPanel';
+import type { CloudPhoto } from '../photos/useMediaLibrary';
 import QuotePricingPanel from './QuotePricingPanel';
 
 type Props = {
@@ -20,6 +21,8 @@ type Props = {
   mobilePreview: boolean;
   setMobilePreview: Dispatch<SetStateAction<boolean>>;
   share: () => void;
+  cloudPhotos: CloudPhoto[];
+  onOpenBank: () => void;
 };
 
 /** El mismo diseñador de la demo, extraído sin rediseñar el JSX. */
@@ -36,12 +39,14 @@ export default function QuoteEditorScreen({
   mobilePreview,
   setMobilePreview,
   share,
+  cloudPhotos,
+  onOpenBank,
 }: Props) {
   return (
     <div className="page editor-page">
       <div className="editor-head">
         <div>
-          <div className="eyebrow">QUOTE DESIGNER / DEMO</div>
+          <div className="eyebrow">QUOTE DESIGNER · CLOUD</div>
           <h1>
             {item.name || 'Tu propuesta'} <span className="italic">· estudio</span>
           </h1>
@@ -99,7 +104,8 @@ export default function QuoteEditorScreen({
             />
           )}
           {tab === 'design' && (
-            <QuoteDesignPanel item={item} edit={edit} filePicked={filePicked} />
+            <QuoteDesignPanel item={item} edit={edit} filePicked={filePicked}
+              cloudPhotos={cloudPhotos} onOpenBank={onOpenBank}/>
           )}
           {tab === 'pricing' && (
             <QuotePricingPanel item={item} edit={edit} share={share} />

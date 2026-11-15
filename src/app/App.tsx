@@ -8,6 +8,10 @@ import FlipMagazine from '../features/magazine/FlipMagazine';
 import { editorialStyles } from '../features/editor/styles/EditorialStyles';
 import { createSampleDraft, editSampleQuote, statusClass } from '../features/quotes/model';
 import { useQuoteStore } from '../features/quotes/useQuoteStore';
+import { useCloudAuth } from '../features/auth/useCloudAuth';
+import CloudLogin from '../features/auth/CloudLogin';
+import { useMediaLibrary } from '../features/photos/useMediaLibrary';
+import PhotoBank from '../features/photos/PhotoBank';
 import HomeScreen from '../features/home/HomeScreen';
 import MessagesScreen from '../features/messages/MessagesScreen';
 import ClientPage from '../features/client/ClientPage';
@@ -22,6 +26,7 @@ import {
   BookOpen,
   Palette,
   MessageCircle,
+  Images,
   Plus,
   X,
   ChevronLeft,
@@ -32,10 +37,14 @@ const pages = [
   { id: 'quotes', label: 'Cotizaciones', icon: FileText },
   { id: 'editor', label: 'Diseñador', icon: Palette },
   { id: 'messages', label: 'Mensajes', icon: MessageCircle },
+  { id: 'photos', label: 'Fotos', icon: Images },
 ];
 function App() {
-  const { quotes, setQuotes, storageError } = useQuoteStore();
-  const { view, routeTo, goBack } = useAppHistory(quotes[0].id);
+  const auth = useCloudAuth();
+  const enabled = auth.status === 'authenticated';
+  const { quotes, setQuotes, storageError, syncStatus, flush } = useQuoteStore(enabled);
+  const { photos, bytesUsed, uploadPhoto, uploading, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
+  const { view, routeTo, goBack } = useAppHistory(quotes[0]?.id || 'empty');
   const { section, active, tab, mobileMenu, preview, previewMode, mobilePreview, installGuide } = view;
   const setTab: Dispatch<SetStateAction<string>> = change => {
     const next = typeof change === 'function' ? change(tab) : change;
@@ -65,7 +74,12 @@ function App() {
   ) : null;
 
   const item = quotes.find(q => q.id === active) || quotes[0];
-  const styleName = item.style && editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
+  const styleName = item?.style && editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
+  useEffect(() => {
+    if (enabled && syncStatus !== 'loading' && quotes.length && !quotes.some(q => q.id === active)) {
+      routeTo({ active: quotes[0].id }, 'replace');
+    }
+  }, [enabled, syncStatus, quotes, active, routeTo]);
   useEffect(() => {
     if (toast) {
       const t = setTimeout(() => setToast(''), 3600);
@@ -76,7 +90,7 @@ function App() {
     setQuotes(list => editSampleQuote(list, active, key, value));
   const openClientPreview = () => {
     routeTo({
-      previewMode: item.readingMode === 'scroll' ? 'scroll' : 'flip',
+      previewMode: item?.readingMode === 'scroll' ? 'scroll' : 'flip',
       preview: true,
       mobileMenu: false,
     });
@@ -104,7 +118,7 @@ function App() {
     setNewMessage('');
     setClientMessage('');
     routeTo({ active: id, tab: 'details', section: 'editor', preview: false, mobileMenu: false });
-    setToast('Nuevo borrador creado en este dispositivo');
+    setToast('Cotización creada. Guardando en Cloudflare...');
   };
   const selectQuote = (id: string, target = 'editor') => {
     if (id !== active) {
@@ -119,9 +133,11 @@ function App() {
     });
   };
 
-  const save = () => setToast(storageError
-    ? 'No se pudo guardar en este navegador. Revisa el almacenamiento disponible.'
-    : 'Borrador visual guardado en este navegador');
+  const save = () => {
+    void flush().then(ok => setToast(ok
+      ? 'Cotización guardada y sincronizada en Cloudflare'
+      : 'No se pudo guardar ahora. Tus cambios siguen abiertos; comprueba la conexión.'));
+  };
   const share = () =>
     setToast(
       'Demo visual: el envío real se activará cuando conectemos la nube.'
@@ -155,19 +171,13 @@ function App() {
     setToast('Respuesta de prueba guardada');
   };
   const filePicked = (e: ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    if (!f.type.startsWith('image/')) {
-      setToast('Selecciona una fotografía');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result !== 'string') return;
-      edit('cover', reader.result);
-      setToast('Foto aplicada. Esta carga es solo visual.');
-    };
-    reader.readAsDataURL(f);
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    void uploadPhoto(file).then(photo => {
+      edit('cover', photo.url);
+      setToast('Fotografía subida a R2 y seleccionada como portada.');
+    }).catch(error => setToast(error instanceof Error ? error.message : 'Error al subir la foto.'));
   };
   const btnQuote = (
     <button className="btn primary" onClick={addQuote}>
@@ -175,10 +185,10 @@ function App() {
     </button>
   );
   const sidebar = (
-    <Sidebar pages={pages} quotes={quotes} navigate={navigate} section={section} />
+    <Sidebar pages={pages} quotes={quotes} navigate={navigate} section={section} onLogout={() => void auth.logout()} />
   );
   const topbar = (
-    <Topbar section={section} standalone={standalone} installApplication={installApplication} setMobileMenu={setMobileMenu} />
+    <Topbar section={section} standalone={standalone} installApplication={installApplication} setMobileMenu={setMobileMenu} syncStatus={syncStatus} />
   );
   const home = (
     <HomeScreen
@@ -201,7 +211,7 @@ function App() {
       statusClass={statusClass}
     />
   );
-  const editor = (
+  const editor = item ? (
     <QuoteEditorScreen
       item={item}
       tab={tab}
@@ -215,9 +225,17 @@ function App() {
       mobilePreview={mobilePreview}
       setMobilePreview={setMobilePreview}
       share={share}
+      cloudPhotos={photos}
+      onOpenBank={() => navigate('photos')}
     />
+  ) : (
+    <div className="page hn-cloud-empty">
+      <h1>Tus cotizaciones empiezan aquí.</h1>
+      <p>Todavía no hay propuestas guardadas en la nube.</p>
+      <button className="btn primary" onClick={addQuote}><Plus size={17}/> Nueva cotización</button>
+    </div>
   );
-  const messagesView = (
+  const messagesView = item ? (
     <MessagesScreen
       quotes={quotes}
       item={item}
@@ -227,8 +245,10 @@ function App() {
       setNewMessage={setNewMessage}
       sendAdmin={sendAdmin}
     />
+  ) : (
+    <div className="page hn-cloud-empty"><h1>Mensajes</h1><p>Aún no hay cotizaciones ni conversaciones.</p></div>
   );
-  const clientPage = (
+  const clientPage = item ? (
     <ClientPage
       item={item}
       styleName={styleName}
@@ -237,6 +257,10 @@ function App() {
       sendClient={sendClient}
       updateStatus={updateStatus}
     />
+  ) : null;
+  const photoView = (
+    <PhotoBank photos={photos} bytesUsed={bytesUsed} uploading={uploading}
+      error={mediaError} uploadPhoto={uploadPhoto} refreshPhotos={refreshPhotos}/>
   );
   useEffect(() => {
     const onEscape = (event: KeyboardEvent) => {
@@ -249,7 +273,13 @@ function App() {
     return () => window.removeEventListener('keydown', onEscape);
   }, [installGuide, mobileMenu, preview, goBack]);
 
-  if (preview)
+  if (!enabled) return (
+    <CloudLogin checking={auth.status === 'checking'} error={auth.error} login={auth.login} />
+  );
+  if (syncStatus === 'loading') return (
+    <div className="hn-cloud-loading" role="status">Conectando tus cotizaciones con Cloudflare...</div>
+  );
+  if (preview && item)
     return (
       <>
         <header className="hn-demo-switch">
@@ -293,9 +323,10 @@ function App() {
         {section === 'quotes' && quotesView}
         {section === 'editor' && editor}
         {section === 'messages' && messagesView}
+        {section === 'photos' && photoView}
         <div className="footer-demo">
-          <span>HAVANA NICE Quotes Studio · Visual prototype v0.1</span>
-          <span>No client data is transmitted · Saved only on this device</span>
+          <span>HAVANA NICE Quotes Studio · Cloudflare D1 + R2</span>
+          <span>{storageError ? 'Sincronización pendiente · Comprueba la conexión' : 'Datos protegidos y sincronizados en la nube'}</span>
         </div>
       </div>
       <div className="mobile-bottom">

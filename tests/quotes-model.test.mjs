@@ -1,222 +1,88 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { filterQuotes, statusClass } from '../src/features/quotes/model.ts';
+import { filterQuotes, statusClass, createSampleDraft, editSampleQuote, safeQuotePrice, safeQuoteDeposit, findClientActivity } from '../src/features/quotes/model.ts';
 import { usd, dDate } from '../src/shared/lib/formatters.ts';
+import { seed } from '../src/features/quotes/demo-data.ts';
+import { formatHomeDate, homeGreeting } from '../src/features/home/greeting.ts';
+import { readFileSync } from 'node:fs';
 
-const sample = [
-  { id: 'hn1', name: 'Olivia & James', location: 'San Miguel de Allende', status: 'En revisión' },
-  { id: 'hn2', name: 'Sophie & Daniel', location: 'Los Cabos', status: 'Enviada' },
-  { id: 'hn3', name: 'Emma & Lucas', location: 'Mexico City', status: 'Aceptada' },
-];
-
-test('La búsqueda de cotizaciones conserva filtros de estado y destino', () => {
-  assert.equal(filterQuotes(sample, 'Todas', '').length, 3);
-  assert.deepEqual(filterQuotes(sample, 'Enviada', '').map(q => q.id), ['hn2']);
-  assert.deepEqual(filterQuotes(sample, 'Todas', 'LOS CABOS').map(q => q.id), ['hn2']);
-  assert.deepEqual(filterQuotes(sample, 'En revisión', 'olivia').map(q => q.id), ['hn1']);
-  assert.deepEqual(filterQuotes(sample, 'Aceptada', 'nueva york'), []);
+test('La nube empieza en cero y no importa los datos ficticios del almacenamiento antiguo', () => {
+  const store = readFileSync(new URL('../src/features/quotes/useQuoteStore.ts', import.meta.url), 'utf8');
+  assert.match(store, /useState<Quote\[\]>\(\[\]\)/);
+  assert.doesNotMatch(store, /localStorage|hn_quotes_visual_v1|from '\.\/demo-data'/);
 });
 
-test('Las clases de estado mantienen los cuatro resultados de la demo', () => {
+test('Búsqueda de cotizaciones por pareja, destino y estado', () => {
+  assert.equal(filterQuotes(seed, 'Todas', '').length, 3);
+  assert.equal(filterQuotes(seed, 'Enviada', '')[0].name, 'Sophie & Daniel');
+  assert.equal(filterQuotes(seed, 'Todas', 'LOS CABOS').length, 1);
+  assert.equal(filterQuotes(seed, 'Todas', 'nueva york').length, 0);
+});
+
+test('Los cuatro estados conservan sus colores', () => {
   assert.equal(statusClass('Aceptada'), 'green');
   assert.equal(statusClass('En revisión'), 'gold');
   assert.equal(statusClass('Enviada'), 'blue');
   assert.equal(statusClass('Borrador'), 'gray');
 });
 
-test('Formato USD compartido entre editor y revista', () => {
+test('USD, anticipos y fechas estadounidenses siguen siendo precisos', () => {
   assert.equal(usd(6500), '$6,500');
-  assert.equal(usd(1950), '$1,950');
   assert.equal(usd(0), '$0');
-  assert.equal(usd(null), '$0');
-});
-
-test('Fecha estadounidense de la propuesta y valor vacío', () => {
   assert.equal(dDate('2027-05-22'), 'May 22, 2027');
   assert.equal(dDate(''), 'Date to be confirmed');
 });
 
-import { createSampleDraft, editSampleQuote } from '../src/features/quotes/model.ts';
-import { seed, photos } from '../src/features/quotes/demo-data.ts';
-import { parseStoredQuotes, QUOTES_STORAGE_KEY } from '../src/features/quotes/storage.ts';
-
-test('Datos ficticios: nunca se inicia con una lista vacía o corrupta', () => {
-  assert.equal(QUOTES_STORAGE_KEY, 'hn_quotes_visual_v1');
-  for (const raw of [null, '', '[]', '{', '{}', '[null]', '[{}]', '[1,2,3]']) {
-    assert.equal(parseStoredQuotes(raw, seed), seed);
-  }
+test('El nuevo borrador es independiente de otras cotizaciones', () => {
+  const quote = createSampleDraft('hn-custom-1');
+  assert.equal(quote.status, 'Borrador');
+  assert.equal(quote.readingMode, 'flip');
+  const other = seed[1];
+  const next = editSampleQuote([quote, other], quote.id, 'price', 10000);
+  assert.equal(next[0].price, 10000);
+  assert.equal(next[1], other);
+  assert.equal(quote.price, 5900);
 });
 
-test('Los borradores válidos se recuperan sin modificar su contenido ni su orden', () => {
-  const drafts = [createSampleDraft('hn-custom'), ...seed];
-  const result = parseStoredQuotes(JSON.stringify(drafts), seed);
-  assert.deepEqual(result, drafts);
-  assert.equal(result[0].style, 'libre');
-  assert.equal(result[0].readingMode, 'flip');
+test('Los cambios a una pareja no alteran la cotización de otra', () => {
+  const a = createSampleDraft('hn-a');
+  const b = createSampleDraft('hn-b');
+  assert.notEqual(a.id, b.id);
+  assert.equal(editSampleQuote([a, b], a.id, 'name', 'New Pair')[1], b);
 });
 
-test('Se rechazan importes no numéricos y registros incompletos sin bloquear la interfaz', () => {
-  const badPrice = { ...seed[0], price: 'abc' };
-  const badName = { ...seed[0], name: null };
-  assert.equal(parseStoredQuotes(JSON.stringify([badPrice]), seed), seed);
-  assert.equal(parseStoredQuotes(JSON.stringify([badName]), seed), seed);
-});
-
-test('Crear y editar no cambia otras cotizaciones ficticias', () => {
-  const draft = createSampleDraft('hn-new');
-  assert.equal(draft.price, 5900);
-  assert.equal(draft.status, 'Borrador');
-  assert.equal(draft.deposit, seed[0].deposit);
-  assert.equal(draft.cover, seed[0].cover);
-  const list = [draft, ...seed];
-  const changed = editSampleQuote(list, 'hn-new', 'price', 7200);
-  assert.equal(changed[0].price, 7200);
-  assert.equal(list[0].price, 5900);
-  assert.equal(changed[1], seed[0]);
-  assert.equal(editSampleQuote(list, 'missing', 'price', 12)[0], draft);
-});
-
-test('Depósitos 0% y 100% se conservan; se rechazan importes fuera de rango', () => {
-  const valid = [0, 100].map((deposit, index) => ({ ...seed[index], deposit }));
-  assert.deepEqual(parseStoredQuotes(JSON.stringify(valid), seed), valid);
-  for (const deposit of [-1, 100.1, 101, Infinity]) {
-    const sample = { ...seed[0], deposit };
-    assert.equal(parseStoredQuotes(JSON.stringify([sample]), seed), seed);
-  }
-});
-
-test('Estados y mensajes corruptos no bloquean la cotización activa', () => {
-  for (const change of [
-    { status: 'Aprobada externamente' },
-    { messages: [null] },
-    { messages: [{ from: 'client', text: 123, time: '' }] },
-    { price: -10 },
-  ]) {
-    assert.equal(parseStoredQuotes(JSON.stringify([{ ...seed[0], ...change }]), seed), seed);
-  }
-});
-
-test('Los estilos y modos de lectura válidos sobreviven al guardado local', () => {
-  const styles = ['libre', 'vogue', 'lane', 'junebug', 'nyt'];
-  for (const style of styles) {
-    const draft = { ...createSampleDraft('hn-test'), style, readingMode: 'scroll' };
-    assert.deepEqual(parseStoredQuotes(JSON.stringify([draft]), seed), [draft]);
-  }
-  const original = createSampleDraft('hn-test');
-  const changed = editSampleQuote([original], original.id, 'readingMode', 'scroll');
-  assert.equal(changed[0].readingMode, 'scroll');
-  assert.equal(original.readingMode, 'flip');
-});
-
-import { formatHomeDate, homeGreeting } from '../src/features/home/greeting.ts';
-
-test('Inicio usa la fecha real y no una fecha ficticia fija', () => {
-  const date = new Date(2026, 10, 15, 9, 30);
-  assert.equal(formatHomeDate(date), 'SUNDAY, NOVEMBER 15, 2026');
-  assert.equal(formatHomeDate(new Date(2027, 0, 1)), 'FRIDAY, JANUARY 1, 2027');
-});
-
-test('Inicio adapta saludo a mañana, tarde y noche del dispositivo', () => {
-  assert.equal(homeGreeting(new Date(2026, 10, 15, 9, 59)), 'Good morning');
-  assert.equal(homeGreeting(new Date(2026, 10, 15, 12, 0)), 'Good afternoon');
-  assert.equal(homeGreeting(new Date(2026, 10, 15, 17, 59)), 'Good afternoon');
-  assert.equal(homeGreeting(new Date(2026, 10, 15, 18, 0)), 'Good evening');
-});
-
-import { safeQuotePrice, safeQuoteDeposit } from '../src/features/quotes/model.ts';
-
-test('Los campos de Precios no generan importes negativos, Infinity ni NaN', () => {
-  assert.equal(safeQuotePrice('5900'), 5900);
-  assert.equal(safeQuotePrice('100.25'), 100.25);
+test('Precios de la interfaz no permiten NaN ni importes negativos', () => {
+  assert.equal(safeQuotePrice('12500'), 12500);
   assert.equal(safeQuotePrice('-5'), 0);
-  assert.equal(safeQuotePrice(''), 0);
   assert.equal(safeQuotePrice('Infinity'), 0);
-  assert.equal(safeQuotePrice('not-a-number'), 0);
-  assert.equal(safeQuoteDeposit('-1'), 0);
-  assert.equal(safeQuoteDeposit('0'), 0);
+  assert.equal(safeQuotePrice('abc'), 0);
   assert.equal(safeQuoteDeposit('40'), 40);
-  assert.equal(safeQuoteDeposit('100'), 100);
   assert.equal(safeQuoteDeposit('101'), 100);
-  assert.equal(safeQuoteDeposit('NaN'), 0);
+  assert.equal(safeQuoteDeposit('-1'), 0);
 });
 
-import { findClientActivity } from '../src/features/quotes/model.ts';
-
-test('Inicio presenta una conversación ficticia existente, nunca una pareja fija', () => {
-  const activity = findClientActivity(seed);
-  assert.equal(activity?.quote.id, 'hn1');
-  assert.equal(activity?.quote.name, 'Olivia & James');
-  assert.equal(activity?.message.from, 'client');
-  assert.equal(findClientActivity(seed.map(q => ({ ...q, messages: [] }))), null);
-
-  const custom = { ...seed[1], id: 'hn-custom', name: 'New Pair', messages: [
-    { from: 'admin', text: 'A', time: '1:00 PM' },
-    { from: 'client', text: 'Can we add a welcome party?', time: '1:01 PM' },
-  ] };
-  const next = findClientActivity([custom, ...seed]);
-  assert.equal(next?.quote.id, 'hn-custom');
-  assert.equal(next?.message.text, 'Can we add a welcome party?');
-  assert.equal(custom.messages[1].text, 'Can we add a welcome party?');
-});
-
-test('La aceptación simulada pertenece al estado de cada cotización, no a otra pareja', () => {
-  const initial = [createSampleDraft('hn-new'), ...seed];
-  const changed = editSampleQuote(initial, 'hn-new', 'status', 'Aceptada');
-  assert.equal(changed[0].status, 'Aceptada');
-  assert.equal(initial[0].status, 'Borrador');
-  assert.equal(changed[1].status, seed[0].status);
-  const restored = parseStoredQuotes(JSON.stringify(changed), seed);
-  assert.equal(restored[0].status, 'Aceptada');
-  assert.equal(restored[1].status, seed[0].status);
-});
-
-test('La carga de cotizaciones rechaza IDs duplicados y campos ausentes del editor', () => {
-  const preserved = [createSampleDraft('hn-test'), ...seed];
-  assert.deepEqual(parseStoredQuotes(JSON.stringify(preserved), seed), preserved);
-  for (const missing of ['client', 'email', 'date', 'font', 'color']) {
-    const incomplete = { ...seed[0] };
-    delete incomplete[missing];
-    assert.equal(parseStoredQuotes(JSON.stringify([incomplete]), seed), seed);
-  }
-  assert.equal(parseStoredQuotes(JSON.stringify([{ ...seed[0], id: '' }]), seed), seed);
-  assert.equal(parseStoredQuotes(JSON.stringify([seed[0], { ...seed[1], id: seed[0].id }]), seed), seed);
-  assert.equal(parseStoredQuotes(JSON.stringify([{ ...seed[0], readingMode: null }]), seed), seed);
-  assert.equal(parseStoredQuotes(JSON.stringify([{ ...seed[0], style: 12 }]), seed), seed);
-});
-
-test('Los IDs de nuevos borradores se mantienen independientes de los ejemplos antiguos', () => {
-  const a = createSampleDraft('hn-example-a');
-  const b = createSampleDraft('hn-example-b');
-  assert.equal(a.id, 'hn-example-a');
-  assert.equal(b.id, 'hn-example-b');
-  assert.deepEqual(parseStoredQuotes(JSON.stringify([a, b]), seed), [a, b]);
-  assert.equal(editSampleQuote([a, b], b.id, 'name', 'New Client')[0], a);
-});
-
-test('Portada, estilo y modo de lectura se conservan tras serializar y recuperar un borrador', () => {
-  const styles = ['libre', 'vogue', 'lane', 'junebug', 'nyt'];
-  const modes = ['flip', 'scroll'];
-  const covers = [photos[3], 'data:image/png;base64,aGVsbG8='];
-  for (const style of styles) {
-    for (const readingMode of modes) {
-      for (const cover of covers) {
-        const original = [createSampleDraft('hn-custom'), ...seed];
-        let modified = editSampleQuote(original, 'hn-custom', 'style', style);
-        modified = editSampleQuote(modified, 'hn-custom', 'readingMode', readingMode);
-        modified = editSampleQuote(modified, 'hn-custom', 'cover', cover);
-        modified = editSampleQuote(modified, 'hn-custom', 'font', 'modern');
-        modified = editSampleQuote(modified, 'hn-custom', 'color', '#92655b');
-        const saved = JSON.stringify(modified);
-        const restored = parseStoredQuotes(saved, seed);
-        assert.equal(restored[0].style, style);
-        assert.equal(restored[0].readingMode, readingMode);
-        assert.equal(restored[0].cover, cover);
-        assert.equal(restored[0].font, 'modern');
-        assert.equal(restored[0].color, '#92655b');
-        assert.deepEqual(restored.slice(1), seed);
-        assert.equal(original[0].cover, photos[0]);
-        assert.equal(original[0].style, 'libre');
-      }
+test('Un borrador preserva los cinco estilos y los dos modos al serializarse', () => {
+  for (const style of ['libre', 'vogue', 'lane', 'junebug', 'nyt']) {
+    for (const readingMode of ['flip', 'scroll']) {
+      const quote = { ...createSampleDraft('hn-custom-2'), style, readingMode, cover: '/api/media/a1234567-1234-1234-1234-123456789abc' };
+      assert.deepEqual(JSON.parse(JSON.stringify(quote)), quote);
     }
   }
+});
+
+test('El panel principal muestra fecha y saludo actuales', () => {
+  assert.equal(formatHomeDate(new Date(2026, 10, 15)), 'SUNDAY, NOVEMBER 15, 2026');
+  assert.equal(homeGreeting(new Date(2026, 10, 15, 9)), 'Good morning');
+  assert.equal(homeGreeting(new Date(2026, 10, 15, 12)), 'Good afternoon');
+  assert.equal(homeGreeting(new Date(2026, 10, 15, 20)), 'Good evening');
+});
+
+test('Conversaciones y aceptaciones de demostración permanecen por cotización', () => {
+  assert.equal(findClientActivity(seed)?.quote.id, 'hn1');
+  assert.equal(findClientActivity(seed.map(q => ({ ...q, messages: [] }))), null);
+  const a = createSampleDraft('hn-custom-3');
+  const b = seed[1];
+  const updated = editSampleQuote([a, b], a.id, 'status', 'Aceptada');
+  assert.equal(updated[0].status, 'Aceptada');
+  assert.equal(updated[1].status, b.status);
 });

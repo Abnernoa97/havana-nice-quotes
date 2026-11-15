@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import { Check, UploadCloud } from 'lucide-react';
-import { photos } from '../quotes/demo-data';
+import type { CloudPhoto } from '../photos/useMediaLibrary';
 
 type DesignQuote = {
   cover: string;
@@ -12,36 +12,42 @@ type Props = {
   item: DesignQuote;
   edit: (key: DesignField, value: string) => void;
   filePicked: (event: ChangeEvent<HTMLInputElement>) => void;
+  cloudPhotos: CloudPhoto[];
+  onOpenBank: () => void;
 };
 
 /** QN-00.07: diseño existente. No cambia subida local, CSS ni clases. */
-export default function QuoteDesignPanel({ item, edit, filePicked }: Props) {
+export default function QuoteDesignPanel({ item, edit, filePicked, cloudPhotos, onOpenBank }: Props) {
   return (
     <div className="edit-body">
               <span className="eyebrow">VISUAL IDENTITY</span>
               <h3>Hazla completamente tuya</h3>
               <label>Fotografía de portada</label>
               <div className="photo-options">
-                {photos.map((ph, i) => (
-                  <button
-                    key={i}
-                    className={
-                      item.cover === ph ? 'photo-option chosen' : 'photo-option'
-                    }
-                    onClick={() => edit('cover', ph)}
-                    style={{ backgroundImage: 'url(' + ph + ')' }}
+                {cloudPhotos.map(ph => (
+                  <button type="button" aria-label={'Usar ' + ph.name + ' de portada'}
+                    key={ph.id} title={ph.name}
+                    className={item.cover === ph.url ? 'photo-option chosen' : 'photo-option'}
+                    onClick={() => edit('cover', ph.url)}
+                    style={{ backgroundImage: 'url(' + ph.url + ')' }}
                   >
-                    {item.cover === ph && <Check size={17} />}
+                    {item.cover === ph.url && <Check size={17}/>}
                   </button>
                 ))}
               </div>
+              {!cloudPhotos.length && (
+                <p className="hn-photo-picker-empty">Tu banco de fotos está vacío. Sube la primera y aparecerá aquí en todos los dispositivos.</p>
+              )}
+              <button type="button" className="hn-photo-bank-link" onClick={onOpenBank}>
+                Abrir banco de fotografías
+              </button>
               <label className="upload-btn">
                 <UploadCloud size={18} />
                 <span>Subir una fotografía</span>
                 <input
                   hidden
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
                   onChange={filePicked}
                 />
               </label>
@@ -83,7 +89,7 @@ export default function QuoteDesignPanel({ item, edit, filePicked }: Props) {
                 </label>
               </div>
               <p className="helper">
-                Los cambios se reflejan inmediatamente en la vista previa.
+                Los cambios se reflejan en la propuesta y se guardan en la nube.
               </p>
             </div>
   );

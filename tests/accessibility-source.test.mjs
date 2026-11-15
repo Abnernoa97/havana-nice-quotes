@@ -33,7 +33,7 @@ test('Cambiar de pareja limpia borradores sin enviar y registra la selección en
 
 test('La selección inicial utiliza la primera cotización y no un ID fijo', () => {
   const app = source('app/App.tsx');
-  assert.match(app, /useAppHistory\(quotes\[0\]\.id\)/);
+  assert.match(app, /useAppHistory\(quotes\[0\]\?\.id \|\| 'empty'\)/);
   assert.match(app, /const id = 'hn-' \+ crypto\.randomUUID\(\)/);
   assert.doesNotMatch(app, /useState\('hn1'\)/);
 });

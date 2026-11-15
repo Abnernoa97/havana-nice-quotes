@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Sparkles, Settings2, Menu, Download } from 'lucide-react';
+import { Sparkles, LogOut, Menu, Download, Cloud, CloudOff } from 'lucide-react';
 import type { Quote } from '../features/quotes/types';
 
 export type NavItem = { id: string; label: string; icon: LucideIcon };
@@ -8,12 +8,14 @@ type SidebarProps = {
   quotes: Quote[];
   navigate: (section: string) => void;
   section: string;
+  onLogout: () => void;
 };
 type TopbarProps = {
   section: string;
   standalone: boolean;
   installApplication: () => void;
   setMobileMenu: (open: boolean) => void;
+  syncStatus: string;
 };
 
 function Logo() {
@@ -25,7 +27,7 @@ function Logo() {
   );
 }
 
-export function Sidebar({ pages, quotes, navigate, section }: SidebarProps) {
+export function Sidebar({ pages, quotes, navigate, section, onLogout }: SidebarProps) {
   return (
     <aside className="sidebar">
       <Logo />
@@ -53,7 +55,7 @@ export function Sidebar({ pages, quotes, navigate, section }: SidebarProps) {
           <span>
             Made for Fer & Noa
             <br />
-            <small>Visual prototype · v0.1</small>
+            <small>Cloudflare · Private Studio</small>
           </span>
         </div>
         <div className="identity">
@@ -61,14 +63,15 @@ export function Sidebar({ pages, quotes, navigate, section }: SidebarProps) {
           <span>
             Fer & Noa<small>HAVANA NICE Studio</small>
           </span>
-          <Settings2 size={16} />
+          <button type="button" className="hn-cloud-logout" onClick={onLogout} title="Cerrar sesión"
+            aria-label="Cerrar sesión de la nube"><LogOut size={18}/></button>
         </div>
       </div>
     </aside>
   );
 }
 
-export function Topbar({ section, standalone, installApplication, setMobileMenu }: TopbarProps) {
+export function Topbar({ section, standalone, installApplication, setMobileMenu, syncStatus }: TopbarProps) {
   return (
     <header className="topbar">
       <button type="button" className="menubtn" aria-label="Abrir menú" onClick={() => setMobileMenu(true)}>
@@ -82,7 +85,9 @@ export function Topbar({ section, standalone, installApplication, setMobileMenu 
             ? 'Cotizaciones'
             : section === 'editor'
               ? 'Diseñador'
-              : 'Mensajes'}
+              : section === 'photos'
+                ? 'Fotos'
+                : 'Mensajes'}
       </div>
       <div className="topright">
         {!standalone && (
@@ -91,7 +96,10 @@ export function Topbar({ section, standalone, installApplication, setMobileMenu 
             <span>Instalar app</span>
           </button>
         )}
-        <span className="demo-tag">DEMO VISUAL</span>
+        <span className={'demo-tag hn-cloud-indicator ' + syncStatus} role="status">
+          {syncStatus === 'synced' ? <Cloud size={14}/> : <CloudOff size={14}/>}
+          <span>{syncStatus === 'synced' ? 'EN LA NUBE' : syncStatus === 'saving' ? 'GUARDANDO' : syncStatus === 'conflict' ? 'REVISAR CAMBIOS' : 'SIN CONEXIÓN'}</span>
+        </span>
         <div className="avatar topavatar">F&N</div>
       </div>
     </header>

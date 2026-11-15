@@ -96,6 +96,7 @@ export default function HomeScreen({
               Ver todas <ArrowRight size={15} />
             </button>
           </div>
+          {!quotes.length && <p className="panel-intro">Todavía no hay propuestas. Tu primera cotización se guardará en Cloudflare.</p>}
           {quotes.slice(0, 3).map(q => (
             <button
               className="recent-row"

@@ -1,0 +1,25 @@
+.hn-cloud-login {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  background: radial-gradient(ellipse at 50% 15%, #f5f4ee, #e6eae0 90%);
+  color: #213e30; padding: 37px 18px;
+}
+.hn-cloud-login-top { text-align: center; }
+.hn-cloud-login-brand { font: 400 30px 'Playfair Display',Georgia,serif; letter-spacing: .08em; }
+.hn-cloud-login-top>span { font: 700 9px 'DM Sans',sans-serif; letter-spacing: .4em; color: #8f9b8a; }
+.hn-cloud-login-card {
+  width: min(100%, 460px); margin: auto 0; padding: clamp(28px,6vw,51px);
+  border: 1px solid #e5e9e0; border-radius: 17px; box-shadow: 0 25px 70px #27473717;
+  background: #fff;
+}
+.hn-cloud-login-kicker { font: 700 10px 'DM Sans',sans-serif; display: flex; align-items: center; gap: 9px; color: #879b8c; letter-spacing: .13em; }
+.hn-cloud-login-card h1 { font: 400 43px/1.1 'Playfair Display',Georgia,serif; margin: 21px 0; letter-spacing: -.05em; }
+.hn-cloud-login-card h1 em { color: #73947e; font-weight: 400; }
+.hn-cloud-login-card>p { font-size: 13px; line-height: 1.75; color: #758678; }
+.hn-cloud-login-card label { display: block; font-weight: 700; font-size: 12px; margin: 29px 0 10px; }
+.hn-cloud-login-input { border: 1px solid #dae5da; border-radius: 9px; display: flex; align-items: center; gap: 10px; color: #79927e; padding: 0 14px; min-height: 51px; }
+.hn-cloud-login-input input { border: 0; background: transparent; width: 100%; min-height: 49px; font-size: 14px; outline: none; }
+.hn-cloud-login-input:focus-within { outline: 2px solid #86a68d; outline-offset: 2px; }
+.hn-cloud-login-card button { width: 100%; margin-top: 21px; justify-content: center; }
+.hn-cloud-login-card small { display: block; margin-top: 20px; font-size: 10px; line-height: 1.6; color: #a0aaa0; text-align: center; }
+.hn-cloud-login-card .hn-cloud-login-error { padding: 12px; border-radius: 8px; background: #fff0ed; color: #ad4a3b; margin-top: 15px; }

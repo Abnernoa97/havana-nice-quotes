@@ -7,13 +7,13 @@
 - **HAVANA NICE Quotes Studio**: herramienta propia para propuestas editoriales de música en vivo destinada a bodas premium; editor interno en español y material público/cliente en inglés estadounidense.
 - **Infraestructura:** GitHub `Abnernoa97/havana-nice-quotes` + Cloudflare Workers Static Assets (**Solo Aplicaciones**). No AppDeploy; no servicios de pago adicionales por defecto.
 - **Una rama permanente:** `main`. La rama `work/qn-00-07-modularizacion` y su Preview se eliminaron y verificaron el 15/11/2026; **no volver a tratarlas como activas**.
-- **Todo el contenido actual es ficticio.** Sin backend, login ni datos comerciales reales. El JSON de respaldo de la demo se eliminó por innecesario; no bloquea la evolución del prototipo.
+- **Datos:** la nube comienza vacía. Existe backend privado D1 + R2; los envíos y confirmaciones de cliente siguen sin implementar.
 - **Diseño:** revista editorial propia (no Canva ni PDF genérico). Page Flip 3D aprobado con hoja curvada, esquina y sombras. **No rediseñar el efecto ni ajustar velocidad durante la limpieza.**
 - **Lectura:** conservar Scroll y Flip. Las seis hojas actuales son **fijas**; páginas libres y transiciones por bloque siguen pendientes.
 - **Estilos:** cinco opciones internas (Libre, Vogue, The Lane, Junebug Weddings, New York Times). Son orientaciones visuales, no identidad oficial de terceros.
 - **Código:** separar por `src/app/`, `src/features/`, `src/shared/` y `tests/`; evitar funciones duplicadas, archivos muertos, `@ts-nocheck` y ramas/implementaciones paralelas.
-- **Guardado de la demo:** almacenamiento local `hn_quotes_visual_v1`; no borrar automáticamente cotizaciones locales ni credenciales.
-- **Prioridad actual:** terminar orden técnico/documental; optimización de velocidad, doblez y microdetalles **pospuesta a otra etapa** por decisión del propietario.
+- **Guardado:** D1 con control de revisión. La clave anterior `hn_quotes_visual_v1` ya no se lee; no borrar automáticamente los datos históricos del navegador.
+- **Prioridad actual:** sincronización en la nube y banco de fotografías para usar Quotes Studio desde varios teléfonos; después seguir con editor libre. El doblez 3D se conserva.
 
 ## Estado técnicamente demostrado
 
@@ -21,16 +21,26 @@
 
 ## Cambio de prioridad · 15/11/2026
 
-- La prioridad ya no es exclusivamente la limpieza: **estudio de edición y experiencia visual del cliente completos primero**. Backend, notificaciones de recepción, estado de apertura y eventual información de procedencia se evaluarán después.
+- La prioridad ya no es exclusivamente la limpieza: **estudio de edición y experiencia visual del cliente completos primero**. La infraestructura interna de sincronización ya se aprobó. Las notificaciones de recepción, el estado de apertura y la ubicación se evaluarán después.
 - La vista Scroll de la pareja y la vista previa en el editor deben renderizar el **mismo documento**. Para la Revista 3D el panel usa una portada liviana y el lector completo conserva PageFlip.
 - Los cambios de apariencia no autorizan inventar envío, lectura de mensajes ni aceptación reales. Antes de producción comercial deberán resolverse la privacidad y el guardado seguro.
+
+## Nueva prioridad: sincronización Cloudflare · 15/11/2026
+
+- **Autorizado por Fer & Noa:** comenzar las cotizaciones y biblioteca de fotos de Quotes Studio completamente **desde cero**, sin importar las pruebas locales. No borrar ni migrar los datos de otros productos.
+- **Cuenta Cloudflare existente:** `Solo Aplicaciones`, Worker `havana-nice-quotes`; mantener una sola app y publicar vía Workers Builds, no GitHub Actions.
+- **D1 dedicado:** `havana-nice-quotes-sync` (ID `4c8403ed-94f3-4989-9016-4409fabf0f47`); **NO** usar `havana-events-sync` ni `havana-nice-v2-dev`.
+- **R2 reutilizado sin borrar:** `havana-nice-v2-media` con prefijo privado `quotes-studio/photos/`. El dominio público R2.dev está deshabilitado.
+- **Acceso protegido:** Cloudflare Access no estaba habilitado en la cuenta; login propio del estudio con hash de alta entropía almacenado en D1 privado, sesión firmada HttpOnly/SameSite=Strict. La credencial en claro no se almacena en código ni documentación.
+- Cotizaciones se guardan de forma independiente con revisión en D1 y sincronización periódica. No dar por completado un guardado si el servidor no confirma; los conflictos quedan sin sobreescribir.
+- Banco de fotos disponible desde menú y editor; nuevo panel de espacio usado refiere a la biblioteca propia, no a toda la cuenta R2. Mensajería/aceptación real, envío por enlace, analítica y alertas posteriores.
 
 ## Decisiones todavía abiertas
 
 1. Confirmar los nombres originales de las referencias editoriales mencionadas fonéticamente como «Deline» y «John Book».
 2. Definir esquema de páginas y bloques y política de deshacer/rehacer antes del editor libre.
 3. Validar visual/táctil en Samsung y escritorio antes de retocar CSS o la revista.
-4. Elegir backend, privacidad, autenticación, enlaces y límites de costo **solo cuando se apruebe una etapa comercial real**.
+4. Revisar costos, respaldos, permisos personales y enlaces privados antes de habilitar el envío real a clientes.
 5. Determinar acceso privado del repositorio y medidas de seguridad antes de incorporar datos reales.
 
 **Regla:** cuando cambie una decisión, actualizar este archivo y el Issue correspondiente. No duplicar estados vigentes en documentos históricos.
