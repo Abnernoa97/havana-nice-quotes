@@ -20,10 +20,12 @@ test('Plantilla real y cinco estilos mantienen ambos modos editor/cliente', () =
 test('La biblioteca R2 y las fotos subidas alimentan la portada', () => {
   const design = src('features/editor/QuoteDesignPanel.tsx');
   const app = src('app/App.tsx');
-  assert.match(design, /cloudPhotos\.map\(ph =>/);
-  assert.match(design, /edit\('cover', ph\.url\)/);
-  assert.match(app, /uploadPhotos\(selected\)/);
-  assert.match(app, /edit\('cover', result\.uploaded\[0\]\.url\)/);
+  const canvas = src('features/editor/TemplateCanvasEditor.tsx');
+  assert.match(design, /<TemplateCanvasEditor item=\{item\}/);
+  assert.match(canvas, /photos\.map\(photo =>/);
+  assert.match(canvas, /edit\('cover', url\)/);
+  assert.match(app, /uploadPhotos\(\[file\]\)/);
+  assert.match(app, /onUploadPhoto=\{uploadDesignPhoto\}/);
   assert.doesNotMatch(app, /readAsDataURL|localStorage/);
 });
 
@@ -100,7 +102,9 @@ test('Fotos y Diseño admiten diez archivos por selección, sin limitar el total
   const batch = src('features/photos/photo-batch.ts');
   const app = src('app/App.tsx');
   assert.match(bank, /multiple hidden disabled=\{uploading \|\| trashing\}/);
-  assert.match(design, /type="file"\s+multiple/);
+  const canvas = src('features/editor/TemplateCanvasEditor.tsx');
+  assert.match(canvas, /type="file" accept="image\/jpeg/);
+  assert.match(canvas, /onUploadPhoto\(file, target\)/);
   assert.match(batch, /MAX_PHOTOS_PER_UPLOAD = 10/);
   assert.match(hook, /await processPhotoBatch\(files,/);
   assert.match(hook, /if \(result\.uploaded\.length\) await refreshPhotos\(\)/);
@@ -179,7 +183,10 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.match(template, /export function CarolinaTerms/);
   assert.match(template, /<CarolinaCover item=\{item\}\/>[\s\S]*?<CarolinaCollage item=\{item\}\/>[\s\S]*?<CarolinaTerms item=\{item\}\/>/);
   assert.match(proposal, /styleName === 'carolina'/);
-  assert.match(design, /onUpdate=\{gallery => edit\('gallery', gallery\)\}/);
+  const canvas = src('features/editor/TemplateCanvasEditor.tsx');
+  assert.match(design, /<TemplateCanvasEditor item=\{item\}/);
+  assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
+  assert.match(canvas, /edit\('gallery', gallery\)/);
   assert.doesNotMatch(details, /carolinaCopy|hn-carolina-copy-editor/);
   assert.match(magazine, /item\.style === 'carolina'/);
   assert.match(magazine, /<CarolinaBlankReverse\/>/);
@@ -269,4 +276,24 @@ test('Datos: fecha directa sin calendario nativo, anticipo solo por menú de nue
   assert.doesNotMatch(pricing, /id="hn-quote-deposit"|type="number"|Elegir porcentaje<\/span>/);
   assert.match(pricing, /className="hn-deposit-row"/);
   assert.match(css, /position:absolute; top:calc\(100% \+ 6px\)/);
+});
+
+
+test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadro, sin widgets antiguos', () => {
+  const design = src('features/editor/QuoteDesignPanel.tsx');
+  const canvas = src('features/editor/TemplateCanvasEditor.tsx');
+  const template = src('features/templates/CarolinaTemplate.tsx');
+  const app = src('app/App.tsx');
+  const stylesheet = readFileSync(new URL('../src/shared/styles/index.css', import.meta.url),'utf8');
+  assert.match(canvas, /const pages = \['Portada', 'Collage', 'Propuesta'\]/);
+  assert.match(canvas, /<CarolinaCover item=\{item\}\/>/);
+  assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
+  assert.match(canvas, /<CarolinaTerms item=\{item\}\/>/);
+  assert.match(canvas, /Mi teléfono/);
+  assert.match(canvas, /Banco de fotos/);
+  assert.match(canvas, /photos\.map\(photo =>/);
+  assert.match(template, /onSelectPhoto\?: \(index: number\) => void/);
+  assert.match(app, /gallery\[target\] = saved\.url/);
+  assert.doesNotMatch(design, /font-options|swatches|photo-options|CarolinaGalleryEditor|upload-btn/);
+  assert.doesNotMatch(stylesheet, /\.photo-options \{|\.font-options \{|\.swatches \{/);
 });

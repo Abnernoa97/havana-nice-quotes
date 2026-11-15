@@ -1,0 +1,39 @@
+/* Page-centered editing canvas; the reader components remain the source of truth. */
+.hn-canvas{padding:16px 10px 26px;background:#f6f8f4}
+.hn-canvas-pages{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:0 0 16px}
+.hn-canvas-pages button{display:flex;align-items:center;gap:7px;padding:10px 12px;background:#fff;border:1px solid #dfe9de;border-radius:9px;color:#69816d;font-size:12px;cursor:pointer}
+.hn-canvas-pages button.selected{background:#254937;color:#fff;border-color:#254937}
+.hn-canvas-pages small{opacity:.7;font-size:10px}
+.hn-canvas-sheet{width:min(100%,620px);min-width:0;margin:auto;background:#fff;box-shadow:0 12px 32px #21382916}
+.hn-canvas-cover{position:relative;aspect-ratio:612/792}
+.hn-canvas-cover .hn-carolina-page{height:100%;width:100%}
+.hn-canvas-cover-button{position:absolute;inset:0;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:#fff}
+.hn-canvas-cover-button span{display:flex;align-items:center;gap:8px;padding:13px 17px;background:#204333c7;border:1px solid #fff8;border-radius:12px;font-size:13px}
+.hn-canvas-cover-button:hover{box-shadow:inset 0 0 0 3px #c2ad82}
+.hn-carolina-editable-photo{appearance:none;display:flex;align-items:center;justify-content:center;border:0;padding:0;cursor:pointer;color:#668a70}
+.hn-carolina-editable-photo:hover{box-shadow:inset 0 0 0 3px #c2ad82}
+.hn-carolina-empty-photo{font-size:clamp(27px,7cqw,47px);opacity:.6}
+.hn-carolina-photo-index{position:absolute;bottom:7px;right:7px;padding:5px 6px;border-radius:5px;background:#254937d9;color:white;font-size:10px;font-weight:700}
+.hn-canvas-pager{display:flex;justify-content:center;align-items:center;gap:16px;margin:17px 0;color:#56745d;font-size:12px}
+.hn-canvas-pager button{width:40px;height:40px;display:grid;place-items:center;border:1px solid #d9e4d7;border-radius:9px;background:#fff;color:#315840;cursor:pointer}
+.hn-canvas-pager button:disabled{opacity:.35;cursor:default}
+.hn-canvas-editorial{padding:12px 5px}
+.hn-canvas-editorial>button{margin:16px auto;display:flex;align-items:center;gap:8px;border:0;border-radius:8px;background:#254937;color:#fff;padding:12px;cursor:pointer}
+.hn-canvas-shade{position:fixed;inset:0;z-index:75;background:#142c236d;display:flex;justify-content:center;align-items:flex-end;padding:12px}
+.hn-canvas-picker{width:min(100%,570px);max-height:80vh;overflow:auto;border-radius:18px;background:#fff;padding:17px;box-shadow:0 18px 50px #0c241d4d}
+.hn-canvas-picker header{display:flex;align-items:center;justify-content:space-between;color:#2a4e3a;margin-bottom:14px}
+.hn-canvas-picker header button{border:0;padding:8px;background:transparent;color:#4e6c56;cursor:pointer}
+.hn-canvas-sources{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hn-canvas-source{position:relative;min-height:84px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;background:#f5f8f4;color:#31553d;border:1px solid #d9e5d7;border-radius:12px;font-weight:700;font-size:12px;cursor:pointer}
+.hn-canvas-source.selected{background:#254937;color:#fff}
+.hn-canvas-source input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.hn-canvas-bank{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:15px}
+.hn-canvas-bank button:not(.hn-canvas-remove){position:relative;aspect-ratio:1;border:0;border-radius:8px;padding:0;overflow:hidden;background:#edf3ee;cursor:pointer}
+.hn-canvas-bank button img{width:100%;height:100%;object-fit:cover}
+.hn-canvas-bank button svg{position:absolute;top:5px;right:5px;background:#254937;border-radius:50%;color:#fff}
+.hn-canvas-bank p{grid-column:1/-1;color:#83968b;text-align:center;font-size:12px}
+.hn-canvas-remove{grid-column:1/-1;padding:11px;border-radius:8px;border:1px solid #dee6da;background:#fff;color:#607f66;cursor:pointer}
+.hn-canvas-message,.hn-canvas-error{text-align:center;font-size:12px;color:#31583e}
+.hn-canvas-error{color:#a14b43}
+.hn-canvas button:focus-visible,.hn-canvas label:focus-within{outline:3px solid #bfa373;outline-offset:2px}
+@media(max-width:550px){.hn-canvas{padding:12px 6px 22px}.hn-canvas-shade{padding:7px}.hn-canvas-picker{padding:14px;border-radius:16px}}

@@ -1,10 +1,11 @@
-import type { ChangeEvent, Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { Save, PenLine, BookOpen, Palette, Send } from 'lucide-react';
 import type { Quote } from '../quotes/types';
 import type { CloudPhoto } from '../photos/useMediaLibrary';
 import EditorialStyles from './styles/EditorialStyles';
 import QuoteDetailsPanel from './QuoteDetailsPanel';
 import QuoteDesignPanel from './QuoteDesignPanel';
+import type { PhotoTarget } from './TemplateCanvasEditor';
 import QuotePublishPanel from './QuotePublishPanel';
 
 type Props = {
@@ -15,15 +16,14 @@ type Props = {
   edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
   openClientPreview: () => void;
   save: () => void;
-  filePicked: (event: ChangeEvent<HTMLInputElement>) => void;
   cloudPhotos: CloudPhoto[];
-  onOpenBank: () => void;
+  onUploadPhoto: (file: File, target: PhotoTarget) => Promise<void>;
 };
 
 /** One editor: details (including investment), template, design and final review. */
 export default function QuoteEditorScreen({
   item, tab, setTab, styleName, edit, openClientPreview, save,
-  filePicked, cloudPhotos, onOpenBank,
+  cloudPhotos, onUploadPhoto,
 }: Props) {
   return (
     <div className="page editor-page">
@@ -64,8 +64,8 @@ export default function QuoteEditorScreen({
               onChange={style => edit('style', style)} photo={item.cover}/>
           )}
           {tab === 'design' && (
-            <QuoteDesignPanel item={item} edit={edit} filePicked={filePicked}
-              cloudPhotos={cloudPhotos} onOpenBank={onOpenBank}/>
+            <QuoteDesignPanel item={item} edit={edit}
+              cloudPhotos={cloudPhotos} onUploadPhoto={onUploadPhoto}/>
           )}
           {tab === 'publish' && (
             <QuotePublishPanel item={item} styleName={styleName} edit={edit}

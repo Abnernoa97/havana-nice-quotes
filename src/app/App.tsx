@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { useAppHistory } from './useAppHistory';
 import type { AppSection, EditorTab, ReadingView } from './native-navigation';
-import type { ChangeEvent } from 'react';
 import type { Quote } from '../features/quotes/types';
 import FlipMagazine from '../features/magazine/FlipMagazine';
 import { editorialStyles } from '../features/editor/styles/EditorialStyles';
@@ -18,6 +17,7 @@ import HomeScreen from '../features/home/HomeScreen';
 import MessagesScreen from '../features/messages/MessagesScreen';
 import ClientPage from '../features/client/ClientPage';
 import QuoteEditorScreen from '../features/editor/QuoteEditorScreen';
+import type { PhotoTarget } from '../features/editor/TemplateCanvasEditor';
 import { Sidebar, Topbar } from './WorkspaceChrome';
 import { useInstallPrompt } from '../features/pwa/useInstallPrompt';
 import InstallGuide from '../features/pwa/InstallGuide';
@@ -188,20 +188,20 @@ function App() {
     setNewMessage('');
     setToast('Respuesta de prueba guardada');
   };
-  const filePicked = (event: ChangeEvent<HTMLInputElement>) => {
-    const selected = Array.from(event.target.files || []);
-    event.target.value = '';
-    if (!selected.length) return;
-    void uploadPhotos(selected).then(result => {
-      if (result.uploaded.length) {
-        edit('cover', result.uploaded[0].url);
-        setToast(result.uploaded.length + (result.uploaded.length === 1
-          ? ' foto guardada y aplicada como portada.'
-          : ' fotos guardadas. La primera quedó de portada.'));
-      } else {
-        setToast('No se pudo subir ninguna fotografía. Revisa los detalles en Fotos.');
-      }
-    }).catch(cause => setToast(cause instanceof Error ? cause.message : 'Error al subir fotografías.'));
+  const uploadDesignPhoto = async (file: File, target: PhotoTarget): Promise<void> => {
+    const quoteId = item?.id;
+    if (!quoteId) throw new Error('Selecciona una cotización.');
+    const result = await uploadPhotos([file]);
+    const saved = result.uploaded[0];
+    if (!saved) throw new Error('No se pudo guardar la fotografía en R2.');
+    setQuotes(current => current.map(quote => {
+      if (quote.id !== quoteId) return quote;
+      if (target === 'cover') return { ...quote, cover: saved.url };
+      const gallery = Array.from({ length: 6 }, (_, i) => quote.gallery?.[i] || '');
+      gallery[target] = saved.url;
+      return { ...quote, gallery };
+    }));
+    setToast('Fotografía guardada y aplicada a su recuadro.');
   };
   const btnQuote = (
     <button className="btn primary" onClick={addQuote}>
@@ -268,9 +268,8 @@ function App() {
       edit={edit}
       openClientPreview={openClientPreview}
       save={save}
-      filePicked={filePicked}
+      onUploadPhoto={uploadDesignPhoto}
       cloudPhotos={photos}
-      onOpenBank={() => navigate('photos')}
     />
   ) : (
     <div className="page hn-cloud-empty">
