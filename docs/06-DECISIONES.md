@@ -59,6 +59,13 @@
 - Conservar: selector de la galería nativa del teléfono, subida manual, conteo propio de fotografías, espacio utilizado, «Actualizar biblioteca», estado vacío aprobado y galería de dos columnas en móvil.
 - La gestión de límites, carpetas y organización global de R2 se pospone para otra etapa. No crear infraestructura adicional ahora.
 
+## Subida de fotografías en lote · 15/11/2026
+
+- Selector nativo de archivos del teléfono con `multiple` en Fotos y Diseño; hasta **10 fotografías por selección**, sin limitar la cantidad total de imágenes de la biblioteca.
+- Subida secuencial a R2 para limitar uso de red/memoria en móvil; indicador de progreso, resumen de éxitos y errores individuales. Las fotos ya cargadas se conservan si otra falla.
+- La biblioteca se consulta una sola vez al terminar el lote; Diseño aplica la primera foto subida como portada y guarda el resto en la misma biblioteca.
+- Se conservan el límite de **12 MB por fotografía**, la biblioteca aislada por aplicación y el diseño de dos columnas.
+
 ## Decisiones todavía abiertas
 
 1. Confirmar los nombres originales de las referencias editoriales mencionadas fonéticamente como «Deline» y «John Book».

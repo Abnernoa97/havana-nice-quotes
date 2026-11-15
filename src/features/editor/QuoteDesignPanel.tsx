@@ -1,6 +1,7 @@
 import type { ChangeEvent } from 'react';
 import { Check, UploadCloud } from 'lucide-react';
 import type { CloudPhoto } from '../photos/useMediaLibrary';
+import { MAX_PHOTOS_PER_UPLOAD } from '../photos/photo-batch';
 
 type DesignQuote = {
   cover: string;
@@ -43,10 +44,11 @@ export default function QuoteDesignPanel({ item, edit, filePicked, cloudPhotos, 
               </button>
               <label className="upload-btn">
                 <UploadCloud size={18} />
-                <span>Subir una fotografía</span>
+                <span>Subir hasta {MAX_PHOTOS_PER_UPLOAD} fotografías</span>
                 <input
                   hidden
                   type="file"
+                  multiple
                   accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
                   onChange={filePicked}
                 />

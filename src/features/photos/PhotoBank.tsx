@@ -3,26 +3,33 @@ import type { ChangeEvent } from 'react';
 import { CloudUpload, ImagePlus, ImageIcon, CheckCircle2, RefreshCcw } from 'lucide-react';
 import type { CloudPhoto } from './useMediaLibrary';
 import { photoSize } from './useMediaLibrary';
+import { MAX_PHOTOS_PER_UPLOAD } from './photo-batch';
+import type { UploadBatchResult } from './photo-batch';
 type Props = {
   photos: CloudPhoto[];
   bytesUsed: number;
   uploading: boolean;
+  uploadProgress: { done: number; total: number } | null;
   error: string;
-  uploadPhoto: (file: File) => Promise<CloudPhoto>;
+  uploadPhotos: (files: File[]) => Promise<UploadBatchResult<CloudPhoto>>;
   refreshPhotos: () => Promise<void>;
 };
-export default function PhotoBank({ photos, bytesUsed, uploading, error, uploadPhoto, refreshPhotos }: Props) {
+export default function PhotoBank({ photos, bytesUsed, uploading, uploadProgress, error, uploadPhotos, refreshPhotos }: Props) {
   const [message, setMessage] = useState('');
   const onFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const files = Array.from(event.target.files || []);
     event.target.value = '';
-    if (!file) return;
+    if (!files.length) return;
     setMessage('');
     try {
-      await uploadPhoto(file);
-      setMessage('Fotografía guardada y disponible en todos tus dispositivos.');
-    } catch {
-      setMessage('');
+      const result = await uploadPhotos(files);
+      if (result.uploaded.length) {
+        setMessage(result.uploaded.length + (result.uploaded.length === 1
+          ? ' fotografía guardada y sincronizada.'
+          : ' fotografías guardadas y sincronizadas.'));
+      }
+    } catch (cause) {
+      setMessage(cause instanceof Error ? cause.message : 'No se pudieron subir las fotografías.');
     }
   };
   return (
@@ -35,17 +42,18 @@ export default function PhotoBank({ photos, bytesUsed, uploading, error, uploadP
         </div>
         <label className={'btn primary hn-photo-upload' + (uploading ? ' busy' : '')}>
           <ImagePlus size={17}/>
-          {uploading ? 'Subiendo...' : 'Subir fotografía'}
-          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" hidden
-            disabled={uploading} onChange={onFile}/>
+          {uploading && uploadProgress ? 'Subiendo ' + uploadProgress.done + '/' + uploadProgress.total : 'Subir fotografías'}
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
+            multiple hidden disabled={uploading} onChange={onFile}/>
         </label>
+        <small className="hn-photo-batch-hint">Hasta {MAX_PHOTOS_PER_UPLOAD} fotografías por selección</small>
       </div>
       <div className="hn-photo-bank-meta">
         <div><CloudUpload size={20}/><strong>{photos.length}</strong><span>Fotografías en Quotes Studio</span></div>
         <div><ImageIcon size={20}/><strong>{photoSize(bytesUsed)}</strong><span>Almacenamiento de esta biblioteca</span></div>
         <button type="button" onClick={() => void refreshPhotos()}><RefreshCcw size={16}/> Actualizar biblioteca</button>
       </div>
-      {message && <p role="status" className="hn-photo-bank-success"><CheckCircle2 size={17}/>{message}</p>}
+      {message && <p role="status" className={message.startsWith('Selecciona') || message.startsWith('No se') ? 'hn-photo-bank-error' : 'hn-photo-bank-success'}><CheckCircle2 size={17}/>{message}</p>}
       {error && <p role="alert" className="hn-photo-bank-error">{error}</p>}
       {photos.length ? (
         <div className="hn-photo-bank-grid">

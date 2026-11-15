@@ -33,3 +33,10 @@
   .hn-photo-bank-meta span { font-size: 10px; }
   .hn-photo-bank-grid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
 }
+.hn-photo-batch-hint {
+  display: block;
+  margin-top: 9px;
+  color: #8b9c8e;
+  font-size: 11px;
+  line-height: 1.5;
+}

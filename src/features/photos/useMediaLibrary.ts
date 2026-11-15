@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { processPhotoBatch } from './photo-batch';
+import type { UploadBatchResult } from './photo-batch';
 
 export type CloudPhoto = {
   id: string;
@@ -17,6 +19,8 @@ export function useMediaLibrary(enabled: boolean) {
   const [bytesUsed, setBytesUsed] = useState(0);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
+  const uploadLock = useRef(false);
 
   const refreshPhotos = useCallback(async () => {
     if (!enabled) return;
@@ -43,33 +47,50 @@ export function useMediaLibrary(enabled: boolean) {
     return () => clearInterval(interval);
   }, [enabled, refreshPhotos]);
 
-  const uploadPhoto = useCallback(async (file: File): Promise<CloudPhoto> => {
-    if (!enabled) throw new Error('Inicia sesión para subir fotografías.');
-    if (!file.type.startsWith('image/')) throw new Error('Selecciona una imagen.');
-    if (file.size > 12 * 1024 * 1024) throw new Error('La foto supera 12 MB.');
+  const uploadPhotos = useCallback(async (files: File[]): Promise<UploadBatchResult<CloudPhoto>> => {
+    if (!enabled) throw new Error('El teléfono no está vinculado con el estudio.');
+    if (uploadLock.current) throw new Error('Ya hay una subida en curso.');
+    // Validate the batch before sending even one object to R2.
+    if (files.length > 10) throw new Error('Selecciona como máximo 10 fotografías a la vez.');
+    if (!files.length) return { uploaded: [], failures: [] };
+    uploadLock.current = true;
     setUploading(true);
+    setUploadProgress({ done: 0, total: files.length });
     setError('');
     try {
-      const response = await fetch('/api/media', {
-        method: 'POST', credentials: 'same-origin',
-        headers: {
-          'Content-Type': file.type,
-          'X-File-Name': encodeURIComponent(file.name),
-        },
-        body: file,
-      });
-      const data = await response.json() as { photo?: CloudPhoto; error?: string };
-      if (!response.ok || !data.photo) throw new Error(data.error || 'No se pudo subir la fotografía.');
-      await refreshPhotos();
-      return data.photo;
-    } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'Error al subir.';
-      setError(message);
-      throw cause;
+      const result = await processPhotoBatch(files, async file => {
+        if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'].includes(file.type)) {
+          throw new Error('Formato de imagen no compatible.');
+        }
+        if (!file.size || file.size > 12 * 1024 * 1024) {
+          throw new Error('Cada fotografía debe pesar menos de 12 MB.');
+        }
+        const response = await fetch('/api/media', {
+          method: 'POST', credentials: 'same-origin',
+          headers: {
+            'Content-Type': file.type,
+            'X-File-Name': encodeURIComponent(file.name),
+          },
+          body: file,
+        });
+        const data = await response.json() as { photo?: CloudPhoto; error?: string };
+        if (!response.ok || !data.photo) {
+          throw new Error(data.error || 'No se pudo subir la fotografía.');
+        }
+        return data.photo;
+      }, (done, total) => setUploadProgress({ done, total }));
+      // One refresh after the whole batch, not ten requests for the gallery.
+      if (result.uploaded.length) await refreshPhotos();
+      if (result.failures.length) {
+        setError(result.failures.map(f => f.filename + ': ' + f.reason).join(' · '));
+      }
+      return result;
     } finally {
+      uploadLock.current = false;
       setUploading(false);
+      setUploadProgress(null);
     }
   }, [enabled, refreshPhotos]);
 
-  return { photos, bytesUsed, uploadPhoto, uploading, refreshPhotos, error };
+  return { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, refreshPhotos, error };
 }

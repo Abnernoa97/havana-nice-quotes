@@ -19,8 +19,8 @@ test('La biblioteca R2 y las fotos subidas alimentan la portada', () => {
   const app = src('app/App.tsx');
   assert.match(design, /cloudPhotos\.map\(ph =>/);
   assert.match(design, /edit\('cover', ph\.url\)/);
-  assert.match(app, /uploadPhoto\(file\)/);
-  assert.match(app, /edit\('cover', photo\.url\)/);
+  assert.match(app, /uploadPhotos\(selected\)/);
+  assert.match(app, /edit\('cover', result\.uploaded\[0\]\.url\)/);
   assert.doesNotMatch(app, /readAsDataURL|localStorage/);
 });
 
@@ -61,7 +61,7 @@ test('El acceso a la nube es por dispositivo autorizado, sin formulario de contr
   assert.match(app, /<DeviceGate checking=\{auth\.status === 'checking'\}/);
   assert.match(app, /onInvite=\{\(\) => void invitePhone\(\)\}/);
   assert.match(photos, /bytesUsed/);
-  assert.match(photos, /uploadPhoto\(file\)/);
+  assert.match(photos, /uploadPhotos\(files\)/);
 });
 
 
@@ -75,6 +75,7 @@ test('La biblioteca de Quotes Studio solo muestra fotos cargadas en su propia ap
   assert.match(app, /cloudPhotos=\{photos\}/);
   assert.match(bank, /photos\.map\(p =>/);
   assert.match(bank, /type="file"/);
+  assert.match(bank, /multiple hidden disabled=\{uploading\}/);
   assert.match(bank, /Actualizar biblioteca/);
   assert.match(bank, /Una biblioteca lista para tus fotografías/);
   assert.match(css, /grid-template-columns: repeat\(2, minmax\(0,1fr\)\)/);
@@ -83,4 +84,20 @@ test('La biblioteca de Quotes Studio solo muestra fotos cargadas en su propia ap
   }
   assert.doesNotMatch(app, /footer-demo|Cloudflare D1 \+ R2|Datos protegidos y sincronizados en la nube/);
   assert.doesNotMatch(styles, /\.footer-demo/);
+});
+
+
+test('Fotos y Diseño admiten diez archivos por selección, sin limitar el total de la biblioteca', () => {
+  const bank = src('features/photos/PhotoBank.tsx');
+  const design = src('features/editor/QuoteDesignPanel.tsx');
+  const hook = src('features/photos/useMediaLibrary.ts');
+  const batch = src('features/photos/photo-batch.ts');
+  const app = src('app/App.tsx');
+  assert.match(bank, /multiple hidden disabled=\{uploading\}/);
+  assert.match(design, /type="file"\s+multiple/);
+  assert.match(batch, /MAX_PHOTOS_PER_UPLOAD = 10/);
+  assert.match(hook, /await processPhotoBatch\(files,/);
+  assert.match(hook, /if \(result\.uploaded\.length\) await refreshPhotos\(\)/);
+  assert.match(app, /uploadPhotos\(selected\)/);
+  assert.doesNotMatch(hook, /uploadPhoto\(/);
 });

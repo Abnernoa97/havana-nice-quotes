@@ -45,7 +45,7 @@ function App() {
   const auth = useDeviceAccess();
   const enabled = auth.status === 'authorized';
   const { quotes, setQuotes, syncStatus, flush } = useQuoteStore(enabled);
-  const { photos, bytesUsed, uploadPhoto, uploading, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
+  const { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
   const { view, routeTo, goBack } = useAppHistory(quotes[0]?.id || 'empty');
   const { section, active, tab, mobileMenu, preview, previewMode, mobilePreview, installGuide } = view;
   const setTab: Dispatch<SetStateAction<string>> = change => {
@@ -172,14 +172,20 @@ function App() {
     setNewMessage('');
     setToast('Respuesta de prueba guardada');
   };
-  const filePicked = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    void uploadPhoto(file).then(photo => {
-      edit('cover', photo.url);
-      setToast('Fotografía subida a R2 y seleccionada como portada.');
-    }).catch(error => setToast(error instanceof Error ? error.message : 'Error al subir la foto.'));
+  const filePicked = (event: ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(event.target.files || []);
+    event.target.value = '';
+    if (!selected.length) return;
+    void uploadPhotos(selected).then(result => {
+      if (result.uploaded.length) {
+        edit('cover', result.uploaded[0].url);
+        setToast(result.uploaded.length + (result.uploaded.length === 1
+          ? ' foto guardada y aplicada como portada.'
+          : ' fotos guardadas. La primera quedó de portada.'));
+      } else {
+        setToast('No se pudo subir ninguna fotografía. Revisa los detalles en Fotos.');
+      }
+    }).catch(cause => setToast(cause instanceof Error ? cause.message : 'Error al subir fotografías.'));
   };
   const btnQuote = (
     <button className="btn primary" onClick={addQuote}>
@@ -284,8 +290,8 @@ function App() {
     />
   ) : null;
   const photoView = (
-    <PhotoBank photos={photos} bytesUsed={bytesUsed} uploading={uploading}
-      error={mediaError} uploadPhoto={uploadPhoto} refreshPhotos={refreshPhotos} />
+    <PhotoBank photos={photos} bytesUsed={bytesUsed} uploading={uploading} uploadProgress={uploadProgress}
+      error={mediaError} uploadPhotos={uploadPhotos} refreshPhotos={refreshPhotos} />
   );
   useEffect(() => {
     const onEscape = (event: KeyboardEvent) => {
