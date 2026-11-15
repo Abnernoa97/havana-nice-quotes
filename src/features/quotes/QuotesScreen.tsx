@@ -2,6 +2,7 @@ import type { ReactNode, Dispatch, SetStateAction } from 'react';
 import { Download, Search, SlidersHorizontal, ArrowUpRight } from 'lucide-react';
 import { usd, dDate } from '../../shared/lib/formatters';
 import type { Quote } from './types';
+import { filterQuotes } from './model';
 
 type Props = {
   quotes: Quote[];
@@ -27,6 +28,7 @@ export default function QuotesScreen({
   selectQuote,
   statusClass,
 }: Props) {
+  const visibleQuotes = filterQuotes(quotes, filter, search);
   return (
     <div className="page">
       <div className="intro-line">
@@ -78,16 +80,7 @@ export default function QuotesScreen({
           <span>ESTADO</span>
           <span></span>
         </div>
-        {quotes
-          .filter(
-            q =>
-              (filter === 'Todas' || q.status === filter) &&
-              [q.name, q.location]
-                .join(' ')
-                .toLowerCase()
-                .includes(search.toLowerCase())
-          )
-          .map(q => (
+        {visibleQuotes.map(q => (
             <button
               className="quote-line"
               key={q.id}
@@ -108,14 +101,7 @@ export default function QuotesScreen({
               <ArrowUpRight size={17} />
             </button>
           ))}
-        {quotes.filter(
-          q =>
-            (filter === 'Todas' || q.status === filter) &&
-            [q.name, q.location]
-              .join(' ')
-              .toLowerCase()
-              .includes(search.toLowerCase())
-        ).length === 0 && (
+        {visibleQuotes.length === 0 && (
           <div className="empty">No hay cotizaciones con esos filtros.</div>
         )}
       </div>

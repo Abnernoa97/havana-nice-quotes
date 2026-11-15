@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import type { Quote } from './features/quotes/types';
+import { statusClass } from './features/quotes/model';
 import FlipMagazine from './features/magazine/FlipMagazine';
 import { editorialStyles } from './features/editor/styles/EditorialStyles';
 import { photos, seed } from './features/quotes/demo-data';
@@ -189,14 +190,6 @@ function App() {
     };
     reader.readAsDataURL(f);
   };
-  const statusClass = (s: string) =>
-    s === 'Aceptada'
-      ? 'green'
-      : s === 'En revisión'
-        ? 'gold'
-        : s === 'Enviada'
-          ? 'blue'
-          : 'gray';
   const btnQuote = (
     <button className="btn primary" onClick={addQuote}>
       <Plus size={16} /> Nueva cotización

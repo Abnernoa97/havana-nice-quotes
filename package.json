@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "audit:structure": "node scripts/project-audit.mjs"
+    "audit:structure": "node scripts/project-audit.mjs",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "4.3.4",
