@@ -1,68 +1,53 @@
-# 05 · Protocolo de desarrollo sin perder el control
+# 05 · Protocolo de desarrollo y publicación
 
-## Alcance estricto
+## Proyecto autorizado
 
-- **Único repo autorizado:** `Abnernoa97/havana-nice-quotes`.
-- **Único destino:** Cloudflare Workers, cuenta **Solo Aplicaciones**, Worker `havana-nice-quotes`.
-- No tocar ABNEROS, Calendario, otras apps, dominios ni proveedores.
-- No sustituir infraestructura ni activar servicios de pago sin aprobación expresa.
+- **Repositorio único:** `Abnernoa97/havana-nice-quotes`; rama principal y única permanente `main`.
+- **Publicación única:** Cloudflare cuenta **Solo Aplicaciones**, Worker `havana-nice-quotes`.
+- No intervenir en Calendario, ABNEROS, otras apps, proveedores o cuentas.
+- No habilitar recursos de pago, dependencias importantes ni nuevos servicios sin autorización.
 
-## Antes de cambiar algo
+## Orden de trabajo
 
-1. Leer `README.md` y el documento de estado.
-2. Verificar `main` y el commit desplegado (no asumir que GitHub = Cloudflare).
-3. Precisar **qué pantalla/función** cambia y cuáles no se tocarán.
-4. Guardar punto de regreso, considerar respaldo de `localStorage` cuando haya cambios de datos.
-5. Hacer **un cambio lógico por commit**, sin acumular intentos ni CSS experimental no usado.
+1. Leer [estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md), [roadmap](04-ROADMAP.md) e [Issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3).
+2. Verificar **por separado** HEAD de GitHub y versión del Worker en Cloudflare. No asumir que estar en `main` equivale a estar publicado.
+3. Precisar el problema y los archivos involucrados. No mezclar limpieza con mejoras de animación.
+4. Mantener un cambio lógico por commit, con una sola implementación vigente por función.
+5. Para cambios de código, ejecutar auditoría, tests, TypeScript y build; revisar logs. Un build correcto **no reemplaza** pruebas reales de interfaz.
+6. Publicar únicamente cambios verificados, preferiblemente agrupando ediciones documentales para no gastar minutos en builds superfluos.
+7. Registrar SHA, build, deployment y resultados en el Issue correspondiente. Si falla, corregir la causa antes de nuevos cambios.
 
-## Durante el desarrollo
-
-- Trabajar preferentemente en componentes pequeños y aislados.
-- Preservar la clave de `localStorage` y los campos existentes hasta diseñar una migración segura.
-- No borrar cotizaciones locales ni reemplazar fotografías sin consentimiento.
-- No duplicar componentes o mantener múltiples implementaciones de la misma función.
-- No crear cuentas o servicios externos por conveniencia.
-- Mantener español en el editor interno e inglés estadounidense natural en la propuesta final, salvo decisiones explícitas.
-- Separar los estados: **hecho en código / build comprobado / desplegado / probado por el usuario**.
-
-## Comprobación mínima antes de publicar
+## Comandos de validación
 
 ```bash
-npm install
+bun install --frozen-lockfile
+npm run audit:structure
+npm test
 npm run build
 ```
 
-Comprobar manualmente:
-- [ ] Abre en Android y en escritorio.
-- [ ] Inicio y menú inferior.
-- [ ] Crear cotización de prueba, modificarla, guardar y reabrir.
-- [ ] Datos, Estilos, Diseño y Precios.
-- [ ] Vista del cliente con Scroll.
-- [ ] Revista 3D: adelante/atrás, esquinas, sombra, último folio, regresar al editor.
-- [ ] Cambio de estilo sin alterar nombre, presupuesto o descripción.
-- [ ] Prueba de actualización con PWA instalada.
-- [ ] No hay regresiones visuales ni textos que aparenten firma/envío real.
+`npm run build` incluye auditoría, pruebas, `tsc --noEmit` y `vite build`. Las versiones de dependencias están en `bun.lock`. No inventar lockfiles ni editar resoluciones a mano.
 
-La ausencia de un paso de pruebas debe declararse, no darse por superado.
+## Seguridad de la demo
 
-## Publicación y verificación
+- Todas las cotizaciones son **ficticias**. El repositorio es público y la app no tiene login: **no ingresar clientes reales**.
+- Persistencia bajo `hn_quotes_visual_v1`; no cambiar clave/esquema sin una migración validada.
+- Envío, mensajes y aceptación son simulaciones; no describirlos como contratos o firmas reales.
+- No limpiar datos/caché del Samsung sin necesidad ni consentimiento: la PWA guarda borradores locales.
+- Conservar historial Git y deployments Workers para rollback. No crear archivos `*-old.tsx`, `backup.css`, carpetas `v2` ni ramas de respaldo permanente.
 
-1. Subir el commit al repo.
-2. Verificar el resultado del build de Cloudflare (compilación + deploy), sin asumir éxito.
-3. Comprobar la versión publicada en la URL conocida, preferiblemente también en el móvil instalado.
-4. Validar el objetivo del commit y dejar registro del resultado.
-5. Si falla: revisar logs **antes de introducir cambios adicionales**. Volver a un commit conocido si procede, sin borrar datos locales.
+## Prueba visual y funcional (pendiente hasta comprobarla)
 
-**Importante:** al instalarse como PWA, el Service Worker puede conservar recursos estáticos antiguos. Diferenciar versión publicada, caché del cliente y fallos de compilación. No recomendar borrar datos/caché indiscriminadamente: allí viven las cotizaciones locales.
+- Inicio, navegación y botón atrás, Cotizaciones, nueva/editar/reabrir, búsqueda y filtros.
+- Datos, cinco estilos, fotografía, fuente, color, Precios USD/anticipo y vista cliente Scroll.
+- Revista 3D en Samsung/escritorio: arrastre, esquinas, frente/reverso, sombra, primer/último folio y regreso al editor.
+- Estados vacíos, mensajes demo, recarga, caché PWA, accesibilidad, anchos móviles y consola.
+- Comparar capturas antes/después en cambios visuales. **Si algo no se pudo probar, dejarlo como pendiente.**
 
-## Política de costos y privacidad
+## Ramas y costos
 
-- No asumir que existen cuotas gratuitas ni que se ha verificado la facturación; consultar los límites vigentes antes de habilitar servicios.
-- No gastar recursos de proyectos ajenos.
-- No guardar API keys en cliente, GitHub ni capturas.
-- Repositorio público y app sin login: **solo muestras ficticias**.
-- No presentar mensajes, aceptación, contratos o pagos simulados como operaciones reales.
+Actualmente **solo existe `main`**; la rama temporal anterior y su Preview se eliminaron. Si un cambio futuro necesita QA aislada, decidir una rama **estrictamente temporal**, no activar builds automáticos innecesarios y retirarla después de integrar; no dar por hecho que la conexión GitHub puede eliminar ramas. Mantener solo una fuente de producción.
 
-## Convención de versiones de trabajo
+## Continuidad
 
-Usar una referencia legible por sesión: `QN-00` línea base auditada, `QN-01` páginas, `QN-02` editor libre, etc. Estas etiquetas documentales **no son tags de Git ni versiones desplegadas**. El SHA de Git y el ID del despliegue son los identificadores verificables.
+El estado de una tarea siempre distingue cuatro niveles: **código escrito → build probado → versión publicada → interfaz comprobada**. No llamar `100 %` a una etapa que solo ha compilado.
