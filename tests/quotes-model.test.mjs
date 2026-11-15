@@ -37,7 +37,7 @@ test('Fecha estadounidense de la propuesta y valor vacío', () => {
 });
 
 import { createSampleDraft, editSampleQuote } from '../src/features/quotes/model.ts';
-import { seed } from '../src/features/quotes/demo-data.ts';
+import { seed, photos } from '../src/features/quotes/demo-data.ts';
 import { parseStoredQuotes, QUOTES_STORAGE_KEY } from '../src/features/quotes/storage.ts';
 
 test('Datos ficticios: nunca se inicia con una lista vacía o corrupta', () => {
@@ -191,4 +191,32 @@ test('Los IDs de nuevos borradores se mantienen independientes de los ejemplos a
   assert.equal(b.id, 'hn-example-b');
   assert.deepEqual(parseStoredQuotes(JSON.stringify([a, b]), seed), [a, b]);
   assert.equal(editSampleQuote([a, b], b.id, 'name', 'New Client')[0], a);
+});
+
+test('Portada, estilo y modo de lectura se conservan tras serializar y recuperar un borrador', () => {
+  const styles = ['libre', 'vogue', 'lane', 'junebug', 'nyt'];
+  const modes = ['flip', 'scroll'];
+  const covers = [photos[3], 'data:image/png;base64,aGVsbG8='];
+  for (const style of styles) {
+    for (const readingMode of modes) {
+      for (const cover of covers) {
+        const original = [createSampleDraft('hn-custom'), ...seed];
+        let modified = editSampleQuote(original, 'hn-custom', 'style', style);
+        modified = editSampleQuote(modified, 'hn-custom', 'readingMode', readingMode);
+        modified = editSampleQuote(modified, 'hn-custom', 'cover', cover);
+        modified = editSampleQuote(modified, 'hn-custom', 'font', 'modern');
+        modified = editSampleQuote(modified, 'hn-custom', 'color', '#92655b');
+        const saved = JSON.stringify(modified);
+        const restored = parseStoredQuotes(saved, seed);
+        assert.equal(restored[0].style, style);
+        assert.equal(restored[0].readingMode, readingMode);
+        assert.equal(restored[0].cover, cover);
+        assert.equal(restored[0].font, 'modern');
+        assert.equal(restored[0].color, '#92655b');
+        assert.deepEqual(restored.slice(1), seed);
+        assert.equal(original[0].cover, photos[0]);
+        assert.equal(original[0].style, 'libre');
+      }
+    }
+  }
 });
