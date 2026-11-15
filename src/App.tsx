@@ -2,6 +2,11 @@
 import { useEffect, useState } from 'react';
 import FlipMagazine from './FlipMagazine';
 import EditorialStyles, { editorialStyles } from './EditorialStyles';
+import { photos, seed } from './features/quotes/demo-data';
+import { usd, dDate } from './shared/lib/formatters';
+import QuotePricingPanel from './features/editor/QuotePricingPanel';
+import QuoteDetailsPanel from './features/editor/QuoteDetailsPanel';
+import QuoteDesignPanel from './features/editor/QuoteDesignPanel';
 import {
   LayoutDashboard,
   FileText,
@@ -15,125 +20,30 @@ import {
   Eye,
   Save,
   SlidersHorizontal,
-  UploadCloud,
-  Image as ImageIcon,
-  Type,
   DollarSign,
-  CalendarDays,
   Clock3,
   Check,
   Send,
   X,
   Menu,
   ChevronLeft,
-  Copy,
-  ChevronDown,
-  MessageSquareText,
   Sparkles,
-  Archive,
   PenLine,
   ExternalLink,
   Monitor,
   Smartphone,
   CheckCircle2,
-  Bell,
   Settings2,
   Heart,
   Download,
-  Link as LinkIcon,
-  FileCheck2,
-  WandSparkles,
 } from 'lucide-react';
 
-const photos = [
-  'https://images.unsplash.com/photo-1519741497674-611481863552?w=1500&q=85&fit=crop',
-  'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1500&q=85&fit=crop',
-  'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1500&q=85&fit=crop',
-  'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1500&q=85&fit=crop',
-];
-const seed = [
-  {
-    id: 'hn1',
-    name: 'Olivia & James',
-    client: 'Olivia',
-    email: '',
-    location: 'San Miguel de Allende',
-    date: '2027-05-22',
-    price: 6500,
-    deposit: 30,
-    status: 'En revisión',
-    cover: photos[0],
-    font: 'editorial',
-    color: '#18342f',
-    note: 'Live music for a day that feels completely yours.',
-    package: 'Signature Live Band',
-    desc: 'An intimate welcome, a beautiful cocktail hour, and a reception filled with your favorite songs.',
-    messages: [
-      {
-        from: 'client',
-        text: 'Can we add music for our welcome party too?',
-        time: '10:42 AM',
-      },
-    ],
-  },
-  {
-    id: 'hn2',
-    name: 'Sophie & Daniel',
-    client: 'Sophie',
-    email: '',
-    location: 'Los Cabos',
-    date: '2027-06-12',
-    price: 7900,
-    deposit: 30,
-    status: 'Enviada',
-    cover: photos[1],
-    font: 'editorial',
-    color: '#18342f',
-    note: 'A little more music. A lot more love.',
-    package: 'Full Wedding Experience',
-    desc: 'Live music thoughtfully planned around the moments that matter most.',
-    messages: [],
-  },
-  {
-    id: 'hn3',
-    name: 'Emma & Lucas',
-    client: 'Emma',
-    email: '',
-    location: 'Mexico City',
-    date: '2027-09-18',
-    price: 5400,
-    deposit: 30,
-    status: 'Aceptada',
-    cover: photos[2],
-    font: 'modern',
-    color: '#18342f',
-    note: 'Together, every step of the way.',
-    package: 'Cocktail & Reception',
-    desc: 'Real instruments, real musicians, and songs everyone loves.',
-    messages: [],
-  },
-];
 const pages = [
   { id: 'home', label: 'Inicio', icon: LayoutDashboard },
   { id: 'quotes', label: 'Cotizaciones', icon: FileText },
   { id: 'editor', label: 'Diseñador', icon: Palette },
   { id: 'messages', label: 'Mensajes', icon: MessageCircle },
 ];
-const usd = n =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(Number(n || 0));
-const dDate = str =>
-  str
-    ? new Date(str + 'T12:00:00').toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : 'Date to be confirmed';
-
 function App() {
   const [quotes, setQuotes] = useState(() => {
     try {
@@ -766,56 +676,7 @@ function App() {
             </button>
           </div>
           {tab === 'details' && (
-            <div className="edit-body">
-              <span className="eyebrow">PROPOSAL DETAILS</span>
-              <h3>Personaliza cada detalle</h3>
-              <label>
-                Nombres de la pareja
-                <input
-                  value={item.name}
-                  onChange={e => edit('name', e.target.value)}
-                  placeholder="Olivia & James"
-                />
-              </label>
-              <label>
-                Destino / Venue
-                <input
-                  value={item.location}
-                  onChange={e => edit('location', e.target.value)}
-                />
-              </label>
-              <label>
-                Fecha de la celebración
-                <input
-                  type="date"
-                  value={item.date}
-                  onChange={e => edit('date', e.target.value)}
-                />
-              </label>
-              <label>
-                Mensaje en la portada
-                <textarea
-                  rows={3}
-                  value={item.note}
-                  onChange={e => edit('note', e.target.value)}
-                />
-              </label>
-              <label>
-                Nombre del servicio
-                <input
-                  value={item.package}
-                  onChange={e => edit('package', e.target.value)}
-                />
-              </label>
-              <label>
-                Descripción
-                <textarea
-                  rows={4}
-                  value={item.desc}
-                  onChange={e => edit('desc', e.target.value)}
-                />
-              </label>
-            </div>
+            <QuoteDetailsPanel item={item} edit={edit} />
           )}
           {tab === 'styles' && (
             <EditorialStyles
@@ -829,124 +690,10 @@ function App() {
             />
           )}
           {tab === 'design' && (
-            <div className="edit-body">
-              <span className="eyebrow">VISUAL IDENTITY</span>
-              <h3>Hazla completamente tuya</h3>
-              <label>Fotografía de portada</label>
-              <div className="photo-options">
-                {photos.map((ph, i) => (
-                  <button
-                    key={i}
-                    className={
-                      item.cover === ph ? 'photo-option chosen' : 'photo-option'
-                    }
-                    onClick={() => edit('cover', ph)}
-                    style={{ backgroundImage: 'url(' + ph + ')' }}
-                  >
-                    {item.cover === ph && <Check size={17} />}
-                  </button>
-                ))}
-              </div>
-              <label className="upload-btn">
-                <UploadCloud size={18} />
-                <span>Subir una fotografía</span>
-                <input
-                  hidden
-                  type="file"
-                  accept="image/*"
-                  onChange={filePicked}
-                />
-              </label>
-              <div className="edit-separator" />
-              <label>Tipografía del título</label>
-              <div className="font-options">
-                <button
-                  className={item.font === 'editorial' ? 'selected' : ''}
-                  onClick={() => edit('font', 'editorial')}
-                >
-                  <span className="font-sample">Aa</span>Editorial Serif
-                </button>
-                <button
-                  className={item.font === 'modern' ? 'selected' : ''}
-                  onClick={() => edit('font', 'modern')}
-                >
-                  <span className="font-sample sans">Aa</span>Modern Clean
-                </button>
-              </div>
-              <label>Color principal</label>
-              <div className="swatches">
-                {['#18342f', '#3e5240', '#8c735d', '#302d2b', '#92655b'].map(
-                  c => (
-                    <button
-                      aria-label={'Choose ' + c}
-                      onClick={() => edit('color', c)}
-                      key={c}
-                      style={{ backgroundColor: c }}
-                      className={item.color === c ? 'swatch on' : 'swatch'}
-                    ></button>
-                  )
-                )}
-                <label className="color-circle">
-                  <input
-                    type="color"
-                    value={item.color}
-                    onChange={e => edit('color', e.target.value)}
-                  />
-                </label>
-              </div>
-              <p className="helper">
-                Los cambios se reflejan inmediatamente en la vista previa.
-              </p>
-            </div>
+            <QuoteDesignPanel item={item} edit={edit} filePicked={filePicked} />
           )}
           {tab === 'pricing' && (
-            <div className="edit-body">
-              <span className="eyebrow">THE INVESTMENT</span>
-              <h3>Servicios e inversión</h3>
-              <label>
-                Nombre del paquete
-                <input
-                  value={item.package}
-                  onChange={e => edit('package', e.target.value)}
-                />
-              </label>
-              <label>
-                Precio total (USD)
-                <input
-                  type="number"
-                  min="0"
-                  value={item.price}
-                  onChange={e => edit('price', Number(e.target.value))}
-                />
-              </label>
-              <label>
-                Anticipo (%)
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={item.deposit}
-                  onChange={e =>
-                    edit(
-                      'deposit',
-                      Math.max(0, Math.min(100, Number(e.target.value)))
-                    )
-                  }
-                />
-              </label>
-              <div className="investment-box">
-                <small>ANTICIPO CALCULADO</small>
-                <strong>{usd((item.price * item.deposit) / 100)}</strong>
-              </div>
-              <div className="edit-separator" />
-              <button className="btn primary full" onClick={share}>
-                <Send size={16} /> Preparar envío
-              </button>
-              <p className="helper">
-                El envío y las firmas reales se activarán después de configurar
-                seguridad y sincronización.
-              </p>
-            </div>
+            <QuotePricingPanel item={item} edit={edit} share={share} />
           )}
         </div>
         <div className="preview-side">
