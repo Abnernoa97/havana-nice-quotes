@@ -58,7 +58,7 @@ function App() {
   ) : null;
 
   const item = quotes.find(q => q.id === active) || quotes[0];
-  const styleName = editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
+  const styleName = item.style && editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
   useEffect(() => {
     localStorage.setItem('hn_quotes_visual_v1', JSON.stringify(quotes));
   }, [quotes]);
