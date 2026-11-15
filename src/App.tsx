@@ -6,6 +6,7 @@ import { photos, seed } from './features/quotes/demo-data';
 import { usd, dDate } from './shared/lib/formatters';
 import QuotePricingPanel from './features/editor/QuotePricingPanel';
 import QuoteDetailsPanel from './features/editor/QuoteDetailsPanel';
+import QuoteDesignPanel from './features/editor/QuoteDesignPanel';
 import {
   LayoutDashboard,
   FileText,
@@ -19,7 +20,6 @@ import {
   Eye,
   Save,
   SlidersHorizontal,
-  UploadCloud,
   DollarSign,
   Clock3,
   Check,
@@ -690,75 +690,7 @@ function App() {
             />
           )}
           {tab === 'design' && (
-            <div className="edit-body">
-              <span className="eyebrow">VISUAL IDENTITY</span>
-              <h3>Hazla completamente tuya</h3>
-              <label>Fotografía de portada</label>
-              <div className="photo-options">
-                {photos.map((ph, i) => (
-                  <button
-                    key={i}
-                    className={
-                      item.cover === ph ? 'photo-option chosen' : 'photo-option'
-                    }
-                    onClick={() => edit('cover', ph)}
-                    style={{ backgroundImage: 'url(' + ph + ')' }}
-                  >
-                    {item.cover === ph && <Check size={17} />}
-                  </button>
-                ))}
-              </div>
-              <label className="upload-btn">
-                <UploadCloud size={18} />
-                <span>Subir una fotografía</span>
-                <input
-                  hidden
-                  type="file"
-                  accept="image/*"
-                  onChange={filePicked}
-                />
-              </label>
-              <div className="edit-separator" />
-              <label>Tipografía del título</label>
-              <div className="font-options">
-                <button
-                  className={item.font === 'editorial' ? 'selected' : ''}
-                  onClick={() => edit('font', 'editorial')}
-                >
-                  <span className="font-sample">Aa</span>Editorial Serif
-                </button>
-                <button
-                  className={item.font === 'modern' ? 'selected' : ''}
-                  onClick={() => edit('font', 'modern')}
-                >
-                  <span className="font-sample sans">Aa</span>Modern Clean
-                </button>
-              </div>
-              <label>Color principal</label>
-              <div className="swatches">
-                {['#18342f', '#3e5240', '#8c735d', '#302d2b', '#92655b'].map(
-                  c => (
-                    <button
-                      aria-label={'Choose ' + c}
-                      onClick={() => edit('color', c)}
-                      key={c}
-                      style={{ backgroundColor: c }}
-                      className={item.color === c ? 'swatch on' : 'swatch'}
-                    ></button>
-                  )
-                )}
-                <label className="color-circle">
-                  <input
-                    type="color"
-                    value={item.color}
-                    onChange={e => edit('color', e.target.value)}
-                  />
-                </label>
-              </div>
-              <p className="helper">
-                Los cambios se reflejan inmediatamente en la vista previa.
-              </p>
-            </div>
+            <QuoteDesignPanel item={item} edit={edit} filePicked={filePicked} />
           )}
           {tab === 'pricing' && (
             <QuotePricingPanel item={item} edit={edit} share={share} />
