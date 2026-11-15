@@ -64,59 +64,35 @@
 .hn-pricing input.hn-price-input {
   font-variant-numeric: tabular-nums;
 }
-.hn-deposit-picker { margin-top: 12px; }
+.hn-deposit-row { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:26px 0 18px; }
+.hn-deposit-label { font-weight:600; font-size:13px; color:#365744; }
+.hn-deposit-picker { flex:0 0 auto; min-width:133px; position:relative; }
 .hn-deposit-picker summary {
-  list-style: none;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-  padding: 11px 13px;
-  min-height: 43px;
-  border: 1px solid #e0e8de;
-  border-radius: 10px;
-  background: #f7f9f5;
-  color: #44654f;
-  font-size: 12px;
-  font-weight: 600;
+  display:flex; align-items:center; justify-content:space-between; list-style:none;
+  min-height:45px; padding:4px; border:1px solid #d8e4d8; border-radius:12px;
+  background:#f1f4ef; cursor:pointer; gap:4px;
 }
-.hn-deposit-picker summary::-webkit-details-marker { display: none; }
+.hn-deposit-picker summary::-webkit-details-marker { display:none; }
 .hn-deposit-picker-selected {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  color: #214836;
+  display:flex; min-width:79px; min-height:35px; align-items:center; justify-content:center;
+  border-radius:8px; padding:7px 11px; background:#e8eee6; color:#647d69;
+  font-size:13px; font-variant-numeric:tabular-nums; font-weight:700;
 }
-.hn-deposit-picker[open] .hn-deposit-picker-selected svg { transform: rotate(180deg); }
-.hn-deposit-picker-selected svg { transition: transform .2s ease; }
+.hn-deposit-picker-selected.chosen { color:#fff; background:#244a37; box-shadow:0 2px 7px #17312326; }
+.hn-deposit-picker summary>svg { color:#56745c; margin-right:7px; transition:transform .2s ease; }
+.hn-deposit-picker[open] summary>svg { transform:rotate(180deg); }
 .hn-deposit-options {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  padding: 12px 0 4px;
+  position:absolute; top:calc(100% + 6px); right:0; z-index:6; width:252px;
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; padding:10px;
+  background:#fff; border:1px solid #dce6db; border-radius:13px; box-shadow:0 12px 26px #193b2821;
 }
-.hn-deposit-options button {
-  cursor: pointer;
-  min-height: 43px;
-  padding: 9px 6px;
-  border: 1px solid #e0e8de;
-  border-radius: 9px;
-  background: #fff;
-  color: #3f5f4b;
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-.hn-deposit-options button.selected {
-  color: #fff;
-  background: #244a37;
-  border-color: #244a37;
-}
-.hn-deposit-options button:hover:not(.selected) { background: #eaf1e8; }
+.hn-deposit-options button { min-height:41px; cursor:pointer; border:1px solid #e0e8de;
+  border-radius:9px; background:#f9fbf8; color:#42634e; font-size:12px;
+  font-weight:700; font-variant-numeric:tabular-nums; }
+.hn-deposit-options button.selected { color:#fff; background:#244a37; border-color:#244a37; }
+.hn-deposit-options button:hover:not(.selected){background:#eaf1e8}
+@media(max-width:400px){.hn-deposit-options{width:231px}}
 @media (prefers-reduced-motion: reduce) {
   .hn-currency-switch::before, .hn-currency-switch button,
-  .hn-deposit-picker-selected svg { transition: none; }
+  .hn-deposit-picker summary>svg { transition: none; }
 }

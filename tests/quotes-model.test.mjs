@@ -137,3 +137,20 @@ test('Los borradores nuevos no incorporan ninguna portada ajena', () => {
     assert.equal(quote.status, 'Borrador');
   }
 });
+
+
+test('La fecha manual se reconoce por día, mes y año y calcula el día correcto', async () => {
+  const {parseWeddingDate, displayWeddingDate, weddingWeekday} =
+    await import('../src/shared/lib/wedding-date.ts');
+  assert.equal(parseWeddingDate('15/11/2026'), '2026-11-15');
+  assert.equal(parseWeddingDate('15 de noviembre de 2026'), '2026-11-15');
+  assert.equal(parseWeddingDate('2027-05-22'), '2027-05-22');
+  assert.equal(parseWeddingDate('29/02/2028'), '2028-02-29');
+  assert.equal(parseWeddingDate('29/02/2027'), null);
+  assert.equal(parseWeddingDate('31/04/2027'), null);
+  assert.equal(parseWeddingDate(''), null);
+  assert.equal(displayWeddingDate('2026-11-15'), '15/11/2026');
+  assert.match(weddingWeekday('2026-11-15'), /domingo/i);
+  assert.match(weddingWeekday('2027-05-22'), /sábado/i);
+  assert.equal(weddingWeekday(''), '');
+});

@@ -1,24 +1,10 @@
 import type { Quote } from '../quotes/types';
-import { CAROLINA_COPY, carolinaCopy } from '../templates/CarolinaTemplate';
-import type { CarolinaCopy } from '../templates/CarolinaTemplate';
-import '../templates/carolina-editor.css';
+import QuoteDateField from './QuoteDateField';
 import QuotePricingPanel from './QuotePricingPanel';
 
 type Props = {
   item: Quote;
   edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
-};
-
-const copyLabels: Record<keyof CarolinaCopy, string> = {
-  performance: 'Duración y formato de la presentación',
-  musicians: 'Músicos en escenario',
-  crew: 'Equipo y personal',
-  backline: 'Instrumentos y backline',
-  logistics: 'Logística y horas de servicio',
-  balance: 'Fecha del pago restante',
-  production: 'Producción de audio',
-  connections: 'Requerimientos XLR y electricidad',
-  space: 'Espacio y escenario',
 };
 
 export default function QuoteDetailsPanel({ item, edit }: Props) {
@@ -38,14 +24,8 @@ export default function QuoteDetailsPanel({ item, edit }: Props) {
                   onChange={e => edit('location', e.target.value)}
                 />
               </label>
-              <label>
-                Fecha de la celebración
-                <input
-                  type="date"
-                  value={item.date}
-                  onChange={e => edit('date', e.target.value)}
-                />
-              </label>
+              <QuoteDateField quoteId={item.id} value={item.date}
+                onChange={date => edit('date', date)} />
               <label>
                 Mensaje en la portada
                 <textarea
@@ -70,23 +50,6 @@ export default function QuoteDetailsPanel({ item, edit }: Props) {
                 />
               </label>
               <QuotePricingPanel item={item} edit={(key, value) => edit(key, value)} />
-              {item.style === 'carolina' && (
-                <details className="hn-carolina-copy-editor">
-                  <summary>Textos de la plantilla Carolina · Editar condiciones</summary>
-                  <div className="hn-carolina-copy-fields">
-                    {(Object.keys(CAROLINA_COPY) as (keyof CarolinaCopy)[]).map(key => (
-                      <label key={key}>
-                        {copyLabels[key]}
-                        <textarea rows={2} value={carolinaCopy(item)[key]}
-                          onChange={event => edit('carolinaCopy', {
-                            ...item.carolinaCopy,
-                            [key]: event.target.value,
-                          })}/>
-                      </label>
-                    ))}
-                  </div>
-                </details>
-              )}
             </div>
   );
 }

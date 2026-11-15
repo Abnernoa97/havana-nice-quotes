@@ -254,3 +254,19 @@ test('Todas las entradas editables empiezan vacías, incluidas las condiciones d
   for (const key of keys) assert.match(originals, new RegExp('\\b' + key + ": ''"));
   assert.doesNotMatch(prices, /placeholder="0"/);
 });
+
+
+test('Datos: fecha directa sin calendario nativo, anticipo solo por menú de nueve opciones', () => {
+  const details=src('features/editor/QuoteDetailsPanel.tsx');
+  const date=src('features/editor/QuoteDateField.tsx');
+  const pricing=src('features/editor/QuotePricingPanel.tsx');
+  const css=src('features/editor/quote-pricing.css');
+  assert.match(details, /<QuoteDateField quoteId=\{item\.id\}/);
+  assert.doesNotMatch(details, /type="date"|CAROLINA_COPY|hn-carolina-copy-editor/);
+  assert.match(date, /type="text" inputMode="text"/);
+  assert.match(date, /weddingWeekday\(iso\)/);
+  assert.match(pricing, /DEPOSIT_OPTIONS = \[20, 30, 40, 50, 60, 70, 80, 90, 100\]/);
+  assert.doesNotMatch(pricing, /id="hn-quote-deposit"|type="number"|Elegir porcentaje<\/span>/);
+  assert.match(pricing, /className="hn-deposit-row"/);
+  assert.match(css, /position:absolute; top:calc\(100% \+ 6px\)/);
+});

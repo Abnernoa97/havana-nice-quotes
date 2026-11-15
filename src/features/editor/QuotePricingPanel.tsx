@@ -47,39 +47,30 @@ export default function QuotePricingPanel({ item, edit }: Props) {
         onChange={event => edit('price', safeQuotePrice(normalizePriceInput(event.target.value)))}
       />
 
-      <label htmlFor="hn-quote-deposit">Anticipo (%)</label>
-      <input
-        id="hn-quote-deposit"
-        type="number"
-        inputMode="numeric"
-        min="0"
-        max="100"
-        step="1"
-        value={item.deposit === 0 ? '' : item.deposit}
-        onChange={event => edit('deposit', safeQuoteDeposit(event.target.value))}
-      />
-      <details className="hn-deposit-picker" ref={depositPicker}>
-        <summary>
-          <span>Elegir porcentaje</span>
-          <span className="hn-deposit-picker-selected">{item.deposit ? item.deposit + '%' : 'Seleccionar'} <ChevronDown size={17}/></span>
-        </summary>
-        <div className="hn-deposit-options" role="group" aria-label="Porcentajes de anticipo">
-          {DEPOSIT_OPTIONS.map(percent => (
-            <button
-              key={percent}
-              type="button"
-              className={item.deposit === percent ? 'selected' : ''}
-              aria-pressed={item.deposit === percent}
-              onClick={() => {
-                edit('deposit', percent);
-                if (depositPicker.current) depositPicker.current.open = false;
-              }}
-            >
-              {percent}%
-            </button>
-          ))}
-        </div>
-      </details>
+      <div className="hn-deposit-row">
+        <span className="hn-deposit-label">Anticipo</span>
+        <details className="hn-deposit-picker" ref={depositPicker}>
+          <summary aria-label="Elegir porcentaje de anticipo">
+            <span className={'hn-deposit-picker-selected' + (item.deposit ? ' chosen' : '')}>
+              {item.deposit ? item.deposit + '%' : 'Elegir'}
+            </span>
+            <ChevronDown size={17}/>
+          </summary>
+          <div className="hn-deposit-options" role="group" aria-label="Porcentajes de anticipo">
+            {DEPOSIT_OPTIONS.map(percent => (
+              <button key={percent} type="button"
+                className={item.deposit === percent ? 'selected' : ''}
+                aria-pressed={item.deposit === percent}
+                onClick={() => {
+                  edit('deposit', percent);
+                  if (depositPicker.current) depositPicker.current.open = false;
+                }}>
+                {percent}%
+              </button>
+            ))}
+          </div>
+        </details>
+      </div>
 
       {item.price > 0 && item.deposit > 0 && (
         <div className="investment-box">
