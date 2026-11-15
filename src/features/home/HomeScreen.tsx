@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import { formatHomeDate, homeGreeting } from './greeting';
 import { findClientActivity } from '../quotes/model';
 import type { Quote } from '../quotes/types';
@@ -9,12 +8,12 @@ import {
   CheckCircle2,
   ArrowUpRight,
   ArrowRight,
+  Plus,
   MessageCircle,
 } from 'lucide-react';
 
 type Props = {
   quotes: Quote[];
-  btnQuote: ReactNode;
   addQuote: () => void;
   navigate: (section: string) => void;
   selectQuote: (id: string, target?: string) => void;
@@ -24,7 +23,6 @@ type Props = {
 /** Panel Inicio del prototipo. Conserva el JSX y las acciones originales. */
 export default function HomeScreen({
   quotes,
-  btnQuote,
   addQuote,
   navigate,
   selectQuote,
@@ -40,12 +38,7 @@ export default function HomeScreen({
           <h1>
             {homeGreeting(today)}, Fer & Noa <span className="handwave">✳</span>
           </h1>
-          <p>
-            Todo lo que necesitas para crear propuestas que se sientan
-            personales.
-          </p>
         </div>
-        {btnQuote}
       </div>
       <div className="welcome-hero">
         <div className="hero-shade">
@@ -59,7 +52,7 @@ export default function HomeScreen({
           </h2>
           <p>Diseña, comparte y conecta con cada pareja desde un solo lugar.</p>
           <button onClick={addQuote} className="btn ivory">
-            Crear nueva propuesta <ArrowUpRight size={17} />
+            <Plus size={17} /> Nueva cotización
           </button>
         </div>
       </div>

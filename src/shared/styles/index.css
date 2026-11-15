@@ -1789,3 +1789,8 @@ p {
   .topright .demo-tag { display: none; }
 }
 
+
+/* Inicio: un único botón sobre la imagen; acercar la tarjeta sin modificar su tamaño. */
+.dashboard .intro-line {
+  margin-bottom: 18px;
+}

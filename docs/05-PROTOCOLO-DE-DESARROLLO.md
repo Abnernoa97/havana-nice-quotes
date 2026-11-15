@@ -7,6 +7,13 @@
 - No intervenir en Calendario, ABNEROS, otras apps, proveedores o cuentas.
 - No habilitar recursos de pago, dependencias importantes ni nuevos servicios sin autorización.
 
+## Regla operativa con Fer & Noa · 15/11/2026
+
+- **Fer & Noa dan la instrucción; el asistente implementa de principio a fin.** Nunca devolver tareas técnicas para que copien, peguen, editen, ejecuten comandos o publiquen. No ofrecer «código listo para copiar» como sustituto de una ejecución autorizada.
+- **Publicación exclusivamente en Cloudflare Workers** mediante el flujo conectado del proyecto; GitHub es únicamente la fuente de código y se puede actualizar mediante su API, sin usar **GitHub Actions** ni consumir minutos de sus runners. No crear flujos de GitHub Actions, Workers nuevos ni servicios de pago.
+- Para cada cambio: modificar solo lo solicitado, probar, confirmar en los logs de Cloudflare el build correcto y comprobar el deployment de la nueva versión al 100 %. Si no se puede completar un paso, informar exactamente qué faltó, sin pedir al usuario trabajo manual.
+- **Eliminar significa eliminar**, no esconder con CSS o mantener lógica duplicada. Preservar diseños, dimensiones y efectos aprobados cuando el usuario no pida cambiarlos.
+
 ## Orden de trabajo
 
 1. Leer [estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md), [roadmap](04-ROADMAP.md) e [Issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3).

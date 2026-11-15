@@ -152,7 +152,6 @@ function App() {
   const home = (
     <HomeScreen
       quotes={quotes}
-      btnQuote={btnQuote}
       addQuote={addQuote}
       navigate={navigate}
       selectQuote={selectQuote}
