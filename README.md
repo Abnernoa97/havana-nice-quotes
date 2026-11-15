@@ -16,6 +16,7 @@ Esta carpeta es la **fuente de verdad del proyecto**. Permite retomar el desarro
 | [04 · Roadmap](docs/04-ROADMAP.md) | Fases por prioridad y condiciones de aceptación |
 | [05 · Protocolo de desarrollo](docs/05-PROTOCOLO-DE-DESARROLLO.md) | Cómo cambiar, comprobar, publicar y regresar |
 | [06 · Registro de decisiones](docs/06-DECISIONES.md) | Decisiones tomadas y puntos todavía abiertos |
+| [07 · Respaldo y recuperación](docs/07-RESPALDO.md) | Commit protegido, exportación del Samsung y verificación pendiente |
 
 ## Identidad de este proyecto
 

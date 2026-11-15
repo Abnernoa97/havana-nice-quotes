@@ -1,5 +1,7 @@
 # 04 · Roadmap priorizado
 
+**Respaldo QN-00.04:** [procedimiento y punto de recuperación](07-RESPALDO.md).
+
 El desarrollo avanza **en incrementos pequeños y publicables**, con prueba manual después de cada uno. Las fases siguientes son propuestas de trabajo; **no indican funcionalidades terminadas**.
 
 ## Fase 0 — Línea base y seguridad (prioridad inmediata)
@@ -10,7 +12,10 @@ El desarrollo avanza **en incrementos pequeños y publicables**, con prueba manu
 - [ ] Verificar la última implementación activa de Cloudflare y guardar su commit.
 - [ ] Probar Android instalado: Inicio, Cotizaciones, Datos, Diseño, Estilos, Precios, Scroll y Revista 3D.
 - [ ] Revisar repo público y cambiarlo a privado con autorización/gestión de su propietario.
-- [ ] Asegurar respaldo/exportación local de la demo **antes** de migrar o reestructurar almacenamiento.
+- [x] Añadir exportación local sin modificar la estructura de datos.
+- [ ] Descargar y verificar un archivo JSON desde la PWA del Samsung.
+- [ ] Descargar y conservar por separado el ZIP de código del commit de referencia.
+- [ ] Diseñar restauración no destructiva antes de cualquier migración.
 - [ ] Establecer build y comprobaciones reproducibles; versionar lockfile.
 
 **Terminado cuando:** existe una versión de referencia identificada, se prueban los flujos principales y no se ponen en riesgo datos ni otras aplicaciones.

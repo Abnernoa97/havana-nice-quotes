@@ -277,6 +277,36 @@ function App() {
     setActive(id);
     navigate(target);
   };
+
+  // Descarga exclusivamente local. No modifica ni envía las cotizaciones.
+  const downloadQuoteBackup = () => {
+    try {
+      const payload = {
+        format: 'havana-nice-quotes-backup',
+        schemaVersion: 1,
+        exportedAt: new Date().toISOString(),
+        storageKey: 'hn_quotes_visual_v1',
+        quotes,
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {
+        type: 'application/json;charset=utf-8',
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const date = new Date().toISOString().slice(0, 10);
+      link.href = url;
+      link.download = 'HAVANA_NICE_QUOTES_RESPALDO_' + date + '.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      // Retrasar la liberación evita interrumpir el gestor de descargas móvil.
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+      setToast('Respaldo preparado. Comprueba que el archivo aparezca en Descargas.');
+    } catch (error) {
+      console.error('No fue posible generar el respaldo local', error);
+      setToast('No se pudo descargar. Tus cotizaciones permanecen sin cambios.');
+    }
+  };
   const save = () => setToast('Borrador visual guardado en este navegador');
   const share = () =>
     setToast(
@@ -605,7 +635,12 @@ function App() {
             Todas tus propuestas en un mismo lugar, sin perder ningún detalle.
           </p>
         </div>
-        {btnQuote}
+        <div className="hn-backup-actions">
+          <button type="button" className="btn subtle hn-backup-btn" onClick={downloadQuoteBackup}>
+            <Download size={16} /> Respaldar datos
+          </button>
+          {btnQuote}
+        </div>
       </div>
       <div className="panel quotes-panel">
         <div className="list-actions">

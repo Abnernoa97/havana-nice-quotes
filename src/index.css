@@ -1819,3 +1819,12 @@ p {
   .hn-install-button span { font-size: 10px; }
   .topright .demo-tag { display: none; }
 }
+
+/* QN-00.04: exportación local, sin cambios al esquema de cotizaciones */
+.hn-backup-actions {display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
+.hn-backup-btn {border-color:#cad7cc;white-space:nowrap}
+@media (max-width:600px) {
+  .hn-backup-actions {width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .hn-backup-actions .btn {width:100%;padding:12px 7px;min-height:44px;gap:5px;font-size:10px;justify-content:center}
+  .hn-backup-actions .btn svg {width:15px;height:15px;flex-shrink:0}
+}
