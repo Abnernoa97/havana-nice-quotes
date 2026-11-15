@@ -48,7 +48,7 @@ test('Editor tabs restore in the reverse order without modifying quote data', ()
   f.navigator.transition({ section: 'editor', tab: 'details' });
   f.navigator.transition({ tab: 'styles' });
   f.navigator.transition({ tab: 'design' });
-  f.navigator.transition({ tab: 'pricing' });
+  f.navigator.transition({ tab: 'publish' });
   f.navigator.back();
   assert.equal(f.navigator.getView().tab, 'design');
   f.navigator.back();
@@ -82,17 +82,18 @@ test('Native Back dismisses mobile drawer, install guide and client preview', ()
   assert.equal(f.navigator.getView().section, 'editor');
 });
 
-test('Native Back restores prior active conversation and device preview mode', () => {
+test('Native Back restores prior active conversation and opening the final client preview', () => {
   const f = fixture();
   f.navigator.transition({ section: 'messages' });
   f.navigator.transition({ active: 'hn2' });
   f.navigator.transition({ active: 'hn3' });
   f.navigator.back();
   assert.equal(f.navigator.getView().active, 'hn2');
-  f.navigator.transition({ section: 'editor' });
-  f.navigator.transition({ mobilePreview: true });
+  f.navigator.transition({ section: 'editor', tab: 'publish' });
+  f.navigator.transition({ preview: true, previewMode: 'flip' });
   f.navigator.back();
-  assert.equal(f.navigator.getView().mobilePreview, false);
+  assert.equal(f.navigator.getView().preview, false);
+  assert.equal(f.navigator.getView().tab, 'publish');
 });
 
 test('Revisiting the same screen does not create redundant history entries', () => {
@@ -110,7 +111,7 @@ test('Refresh restores the active view and invalid state is rejected', () => {
   f.navigator.transition({ section: 'editor', active: 'hn2', tab: 'pricing' });
   const restored = createAppNavigator(f.browser, 'hn1', () => {});
   assert.equal(restored.getView().active, 'hn2');
-  assert.equal(restored.getView().tab, 'pricing');
+  assert.equal(restored.getView().tab, 'details');
   assert.equal(readNavigationEntry({ __havanaNiceHistory: 1, depth: -1 }), null);
   assert.equal(readNavigationEntry({ __havanaNiceHistory: 1, depth: 1, view: {} }), null);
 });
@@ -154,4 +155,15 @@ test('Android Atrás cierra Papelera hacia la sección anterior', () => {
   f.navigator.transition({mobileMenu:false,section:'trash'},'replace');
   f.navigator.back();
   assert.equal(f.navigator.getView().section,'photos');
+});
+
+
+test('La pestaña Publicar sobrevive a la recarga y Atrás vuelve a Diseño', () => {
+  const f = fixture();
+  f.navigator.transition({ section: 'editor', tab: 'design' });
+  f.navigator.transition({ tab: 'publish' });
+  const restored = createAppNavigator(f.browser, 'hn1', () => {});
+  assert.equal(restored.getView().tab, 'publish');
+  f.navigator.back();
+  assert.equal(f.navigator.getView().tab, 'design');
 });

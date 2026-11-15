@@ -12,19 +12,13 @@
   overflow-wrap: anywhere;
   margin-top: 7px;
 }
-.studio-editor-subtitle {
-  margin-top: 11px;
-  color: #728375;
-  line-height: 1.6;
-  font-size: 12px;
-}
 .editor-page .editor-actions { flex-wrap: wrap; align-items: center; }
 .editor-page .editor-actions .btn { min-height: 42px; border-radius: 8px; padding-inline: 16px; }
 .editor-page .editor-workspace {
-  grid-template-columns: minmax(295px, 380px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
 }
-.editor-page .edit-panel, .editor-page .preview-side {
+.editor-page .edit-panel {
   border: 1px solid var(--studio-line);
   border-radius: 15px;
   box-shadow: 0 12px 42px #233e3210;
@@ -52,8 +46,6 @@
   border-color: #d8e6d8;
 }
 .editor-page .edit-tabs.hn-four-tabs button:focus-visible,
-.editor-page .preview-switch button:focus-visible,
-.editor-page .preview-open:focus-visible,
 .client-editorial-reader button:focus-visible,
 .client-editorial-reader summary:focus-visible {
   outline: 3px solid #ab9364;
@@ -87,108 +79,6 @@
 .editor-page .upload-btn { border-radius: 9px; min-height: 48px; }
 .editor-page .font-options button { border-radius: 9px; min-height: 77px; }
 .editor-page .investment-box { border-radius: 10px; background: #eef3ec; }
-.editor-page .preview-side { padding: 24px; background: #f1f1ea; }
-.editor-page .preview-heading h3 { font-size: 25px; letter-spacing: -.025em; }
-.editor-page .preview-switch { border-radius: 9px; }
-.editor-page .preview-switch button { min-width: 38px; min-height: 38px; border-radius: 7px; }
-.editor-page .preview-viewport {
-  height: min(76vh, 850px);
-  min-height: 470px;
-  max-width: 790px;
-  border-radius: 8px;
-  box-shadow: 0 18px 52px #1b342625;
-  scrollbar-color: #a9b8a6 #f7f8f3;
-}
-.editor-page .preview-viewport.mobile-frame {
-  max-width: 350px;
-  border: 7px solid #24372e;
-  border-radius: 28px;
-}
-.editor-page .preview-open {
-  width: 100%;
-  max-width: 790px;
-  margin: 19px auto 0;
-  justify-content: center;
-  padding: 13px;
-  border: 1px solid #cbdccc;
-  border-radius: 9px;
-  background: white;
-  color: #214b35;
-  font-size: 12px;
-  transition: background .2s;
-}
-.editor-page .preview-open:hover { background: #e7f0e7; }
-
-/* Lightweight cover representation. The actual 3D motion only runs in full preview. */
-.studio-magazine-preview {
-  min-height: 100%;
-  background: #e9e7df;
-  padding: clamp(15px, 3.8vw, 38px) clamp(11px, 2vw, 24px);
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
-}
-.studio-magazine-cover {
-  background-color: #173c2e;
-  width: min(100%, 390px);
-  aspect-ratio: 410 / 580;
-  color: #fff;
-  background-size: cover;
-  background-position: center;
-  box-shadow: 8px 13px 24px #1b282b3b, inset -4px 0 8px #00000019;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  border: 1px solid #f2f0e855;
-}
-.studio-magazine-cover-top {
-  padding: 7% 8%;
-  display: flex;
-  gap: 8px;
-  justify-content: space-between;
-  align-items: center;
-}
-.studio-magazine-cover-top strong {
-  font: 500 clamp(13px, 2vw, 22px) 'Playfair Display', Georgia, serif;
-  letter-spacing: .05em;
-}
-.studio-magazine-cover-top span,
-.studio-magazine-cover-bottom>span,
-.studio-magazine-cover>small {
-  font-size: clamp(7px, .8vw, 9px);
-  letter-spacing: .13em;
-}
-.studio-magazine-cover-bottom {
-  margin: auto 8% 13%;
-  text-align: center;
-}
-.studio-magazine-cover-bottom h2 {
-  font: 400 clamp(33px, 4vw, 55px)/1.07 'Playfair Display', Georgia, serif;
-  margin: 16px 0;
-  overflow-wrap: anywhere;
-}
-.studio-magazine-cover-bottom h2.modern { font-family: 'DM Sans', sans-serif; font-weight: 600; }
-.studio-magazine-cover-rule { width: 45px; height: 1px; background: #fff; margin: 18px auto; }
-.studio-magazine-cover-bottom p { font-size: 11px; line-height: 1.6; text-transform: uppercase; }
-.studio-magazine-cover>small { position: absolute; bottom: 4%; left: 8%; }
-.studio-magazine-preview-note {
-  margin-top: 22px;
-  color: #667566;
-  font-size: 11px;
-  line-height: 1.6;
-  text-align: center;
-  max-width: 320px;
-}
-.studio-magazine-preview.hn-style-vogue .studio-magazine-cover { filter: grayscale(.9); }
-.studio-magazine-preview.hn-style-vogue .studio-magazine-cover-bottom h2 { font-family: 'Bodoni Moda', Georgia, serif; text-transform: uppercase; }
-.studio-magazine-preview.hn-style-lane { background: #e8e3dc; }
-.studio-magazine-preview.hn-style-lane .studio-magazine-cover-bottom h2 { font-family: 'Cormorant Garamond', Georgia, serif; }
-.studio-magazine-preview.hn-style-junebug { background: #e9dcd2; }
-.studio-magazine-preview.hn-style-junebug .studio-magazine-cover-bottom h2 { font-family: 'Fraunces', Georgia, serif; }
-.studio-magazine-preview.hn-style-nyt { background: #e7e6e0; }
-.studio-magazine-preview.hn-style-nyt .studio-magazine-cover-bottom h2 { font-family: Georgia, serif; font-weight: 700; }
-
 /* The same proposal component is displayed in both the editor and full client Scroll view. */
 .client-editorial-reader {
   --reader-ink: var(--paper-accent, #18342f);
@@ -296,7 +186,6 @@
 /* Small screens: editing stays first; full-page client preview is one tap away. */
 @media (max-width: 950px) {
   .editor-page .editor-workspace { grid-template-columns: 1fr; }
-  .editor-page .preview-viewport { height: 620px; }
   .client-preview-testing-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 600px) {
@@ -307,10 +196,6 @@
   .editor-page .edit-body { padding: 23px 18px 28px; }
   .editor-page .edit-tabs.hn-four-tabs { padding: 8px; gap: 3px; }
   .editor-page .edit-tabs.hn-four-tabs button { min-height: 56px; font-size: 10px; padding: 7px 1px; }
-  .editor-page .preview-side { padding: 15px; }
-  .editor-page .preview-heading h3 { font-size: 21px; }
-  .editor-page .preview-viewport { height: 550px; min-height: 450px; }
-  .studio-magazine-cover-bottom h2 { font-size: clamp(28px, 9vw, 44px); }
   .client-reader-masthead { padding: 13px 19px; }
   .client-reader-masthead span:last-child { font-size: 8px; text-align: right; }
   .client-reader-document { width: 100%; box-shadow: none; }

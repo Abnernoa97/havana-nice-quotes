@@ -103,6 +103,16 @@
 - **No alterar** fotografías reales, montos ni cotizaciones guardadas al incorporar el estilo. No convertir USD/MX automáticamente. Evitar imágenes de stock, clientes ficticios o importaciones cruzadas de otras aplicaciones.
 - Repetir esta arquitectura modular con los siguientes PDF de cotizaciones reales.
 
+## Reorganización del Diseñador · 15/11/2026
+
+- **Pestañas definitivas:** Datos, Estilos, Diseño y Publicar. Se elimina la pestaña Precios y se integra el editor de moneda, precio total y anticipo directamente en Datos, sin repetir «Nombre del servicio».
+- **Estilos:** solo plantillas. Dos acordeones independientes: «Plantillas originales» y «Estilos editoriales especiales»; se eliminan sus textos instructivos, bloque «Libertad creativa», enlace «Editar diseño», selector de lectura y herramientas de vista previa, así como los estilos CSS que habían quedado asociados.
+- **Diseño:** solo herramientas de edición visual/fotografías. Se elimina la vista previa lateral o inferior redundante y todos sus estilos del editor.
+- **Publicar:** una última pestaña con el documento real de Scroll o Revista 3D, acceso a vista completa y selección del modo de lectura. **No hay envío ni publicación comercial activados todavía**; no inventar un botón funcional ni mensajes falsos.
+- **Borradores nuevos:** campos comerciales vacíos (pareja, venue, fecha, nota, servicio, descripción, precio y anticipo); conservar solamente los ajustes técnicos del documento (estilo Carolina, tipografía/color de marca, moneda USD y estado Borrador). Los datos existentes en D1 no se cambian.
+- **Navegación:** Atrás nativo y recuperación al recargar; la ruta histórica «pricing» se redirige a Datos, sin conservar una pantalla obsoleta.
+- **Código:** una sola rama `main`; eliminar las secciones JSX/CSS innecesarias en origen en vez de ocultarlas; publicar por Cloudflare Workers Builds sin GitHub Actions.
+
 ## Decisiones todavía abiertas
 
 1. Confirmar los nombres originales de las referencias editoriales mencionadas fonéticamente como «Deline» y «John Book».

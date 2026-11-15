@@ -2,8 +2,6 @@
 .edit-tabs.hn-four-tabs {grid-template-columns:repeat(4,minmax(0,1fr));padding:9px;gap:3px}
 .edit-tabs.hn-four-tabs button {flex-direction:column;padding:10px 2px;gap:6px;font-size:10px;min-width:0}
 .hn-styles-tab{padding:24px 20px 28px}
-.hn-styles-tab h3{font:400 25px/1.15 'Playfair Display',serif;margin:12px 0;letter-spacing:-.05em}
-.hn-styles-lead,.hn-style-customize p{font-size:12px;line-height:1.6;color:#738275;margin-bottom:16px}
 .hn-styles-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .hn-style-card{padding:0;display:flex;flex-direction:column;min-width:0;text-align:left;background:#fff;border:1px solid #e5e8e2;border-radius:7px;overflow:hidden;color:#284436}
 .hn-style-card.selected{border:2px solid #254c3b;box-shadow:0 3px 12px #2346341e}
@@ -11,10 +9,7 @@
 .hn-style-mini{height:174px;display:flex;flex-direction:column;position:relative;overflow:hidden;padding:13px;background:#edece5}
 .hn-mini-photo{position:absolute;inset:0;background-size:cover;background-position:center}
 .hn-card-caption{display:flex;flex-direction:column;gap:5px;padding:10px;flex:1}
-.hn-card-kind{font-size:8px;letter-spacing:.12em;color:#84998a;font-weight:700}
 .hn-card-caption strong{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:12px}
-.hn-card-caption p{font-size:10px;line-height:1.45;color:#6d806f}
-.hn-card-caption>small{font-size:9px;color:#a0a99b;margin-top:auto}
 .hn-mini-libre{color:#325242;background:#e8eee5;justify-content:space-between}
 .hn-mini-square{width:57px;height:73px;border:1px solid #789882;background:linear-gradient(115deg,#b3c3b1 50%,transparent 50%)}
 .hn-mini-libre strong{font:400 29px/1 'Playfair Display',serif;letter-spacing:-.05em;text-align:right}
@@ -39,15 +34,6 @@
 .hn-mini-nyt strong{font:700 20px/1.02 Georgia,serif;margin:10px auto;letter-spacing:-.05em}
 .hn-mini-nyt .newspaper{position:relative;inset:auto;filter:grayscale(1);height:55px;width:100%}
 .hn-mini-nyt p{font:400 6px Georgia,serif;margin-top:8px}
-.hn-style-attribution{font-size:9px;line-height:1.45;color:#8f9b8f;margin:13px 0 19px}
-.hn-style-customize{padding:18px;background:#eff3eb;border-radius:8px;border:1px solid #e3eae1}
-.hn-style-customize h4,.hn-style-reading h4{font:400 21px 'Playfair Display',serif;margin:11px 0}
-.hn-style-customize button{display:flex;justify-content:space-between;align-items:center;width:100%;border:1px solid #d1dfd0;border-radius:5px;padding:13px;background:#fff;color:#224437;font-size:11px;font-weight:700}
-.hn-style-reading{margin-top:22px;padding-top:19px;border-top:1px solid #e5eae2}
-.hn-style-reading-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-.hn-style-reading-buttons button{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10px;padding:12px 5px;border:1px solid #d3e0d3;border-radius:5px;background:#fff;color:#5f7564}
-.hn-style-reading-buttons button.on{background:#e9f0e8;border-color:#2c543d;color:#254b38;font-weight:700}
-.hn-style-open-preview{width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:14px 8px;border:0;border-radius:5px;background:#214436;color:white;font-size:11px;font-weight:700}
 /* Distinct editorial direction in editor, client scroll, and the 3D magazine. */
 .hn-style-vogue .proposal-top{border-bottom:3px solid #111}
 .hn-style-vogue .proposal-top span{font:500 23px 'Bodoni Moda',Georgia,serif;letter-spacing:-.065em}
@@ -96,11 +82,10 @@
 .hn-style-nyt .hn-cover-top{border-bottom:4px double #fff}
 .hn-style-nyt .hn-cover-bottom h2{font:700 clamp(32px,5vw,60px)/1.1 Georgia,serif}
 .hn-style-nyt .hn-magazine{background:#e7e6e0}
-@media(max-width:390px){.hn-style-mini{height:158px}.hn-card-caption p{font-size:9px}.edit-tabs.hn-four-tabs button{font-size:9px}}
+@media(max-width:390px){.hn-style-mini{height:158px}.hn-card-caption p{font-size:9px}}
 @media(min-width:900px) and (max-width:1160px){.hn-styles-gallery{grid-template-columns:1fr}}
 
 /* Primary real HAVANA NICE layouts are separate from editorial experiments. */
-.hn-styles-category-heading { display: block; margin: 24px 0 12px; }
 .hn-styles-original { grid-template-columns: 1fr; }
 .hn-styles-original .hn-style-card { display: grid; grid-template-columns: minmax(135px,44%) 1fr; }
 .hn-styles-original .hn-style-mini { height: 190px; }
@@ -129,3 +114,18 @@
   .hn-mini-carolina > strong { font-size: 23px; }
   .hn-mini-carolina > em { font-size: 16px; }
 }
+
+
+/* Two expandable groups. Original templates first. */
+.hn-styles-tab{padding:18px;display:grid;gap:12px}
+.hn-style-accordion{min-width:0;border:1px solid #e3eae2;border-radius:12px;overflow:hidden;background:#fff}
+.hn-style-accordion>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:62px;padding:19px 17px;gap:12px;cursor:pointer;color:#284b39;font:600 14px/1.4 'DM Sans',sans-serif;background:#f9fbf7}
+.hn-style-accordion>summary::-webkit-details-marker{display:none}
+.hn-style-accordion[open]>summary{border-bottom:1px solid #e8eee7}
+.hn-style-accordion>summary svg{flex-shrink:0;transition:transform .18s ease}
+.hn-style-accordion[open]>summary svg{transform:rotate(180deg)}
+.hn-style-accordion>summary:focus-visible{outline:3px solid #ad9364;outline-offset:-3px}
+.hn-style-accordion-content{padding:16px}
+.hn-card-caption{min-height:48px;justify-content:center}
+.hn-card-caption strong{font-size:13px}
+@media(prefers-reduced-motion:reduce){.hn-style-accordion>summary svg{transition:none}}

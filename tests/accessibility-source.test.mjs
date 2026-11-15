@@ -18,10 +18,14 @@ test('Navegación móvil y envío demo tienen nombres accesibles', () => {
   assert.match(source('features/quotes/QuotesScreen.tsx'), /aria-label="Buscar cotizaciones"/);
 });
 
-test('Conmutador escritorio/móvil expone su estado a lectores de pantalla', () => {
+test('Pestañas de edición y modo de lectura exponen sus estados a lectores de pantalla', () => {
   const editor = source('features/editor/QuoteEditorScreen.tsx');
-  assert.match(editor, /aria-pressed=\{!mobilePreview\}/);
-  assert.match(editor, /aria-pressed=\{mobilePreview\}/);
+  const publish = source('features/editor/QuotePublishPanel.tsx');
+  assert.match(editor, /role="tablist"/);
+  assert.match(editor, /aria-selected=\{tab === 'details'\}/);
+  assert.match(editor, /aria-selected=\{tab === 'publish'\}/);
+  assert.match(publish, /aria-pressed=\{mode === 'flip'\}/);
+  assert.match(publish, /aria-pressed=\{mode === 'scroll'\}/);
 });
 
 test('Cambiar de pareja limpia borradores sin enviar y registra la selección en el historial', () => {

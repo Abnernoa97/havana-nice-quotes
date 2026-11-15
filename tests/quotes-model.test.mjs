@@ -48,7 +48,13 @@ test('El nuevo borrador es independiente de otras cotizaciones', () => {
   const next = editSampleQuote([quote, other], quote.id, 'price', 10000);
   assert.equal(next[0].price, 10000);
   assert.equal(next[1], other);
-  assert.equal(quote.price, 5900);
+  assert.equal(quote.price, 0);
+  assert.equal(quote.deposit, 0);
+  assert.equal(quote.name, '');
+  assert.equal(quote.location, '');
+  assert.equal(quote.package, '');
+  assert.equal(quote.note, '');
+  assert.equal(quote.desc, '');
   assert.equal(quote.cover, '');
 });
 

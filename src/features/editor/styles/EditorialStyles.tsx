@@ -1,22 +1,18 @@
-import { Check, ChevronRight, BookOpen, AlignJustify, Palette, Eye } from 'lucide-react';
+import { Check, ChevronRight, ChevronDown } from 'lucide-react';
 import './editorial-styles.css';
 
 export const editorialStyles = [
-  {id:'carolina',name:'HAVANA NICE Original · Carolina',category:'PLANTILLA REAL · CANVA',desc:'Nuestra cotización real: portada, seis fotografías y página de servicios.',features:'3 páginas · Editable · HAVANA NICE'},
-  {id:'libre',name:'Estilo libre',category:'TU PROPIO LENGUAJE',desc:'Una composición abierta para crear tu propio lenguaje visual.',features:'Personalizable · HAVANA NICE'},
-  {id:'vogue',name:'Vogue',category:'FASHION EDITORIAL',desc:'Grandes títulos, fotografías dominantes y alto contraste editorial.',features:'Bodoni · Contraste · Moda'},
-  {id:'lane',name:'The Lane',category:'MODERN LUXURY',desc:'Arquitectura, fotografía delicada, aire y composiciones asimétricas.',features:'Cormorant · Marfil · Espacio'},
-  {id:'junebug',name:'Junebug Weddings',category:'WEDDING STORIES',desc:'Narrativa fotográfica espontánea con detalles y carácter cálido.',features:'Fraunces · Terracota · Collage'},
-  {id:'nyt',name:'The New York Times',category:'NEWSPAPER EDITORIAL',desc:'Historias, columnas y titulares con la estructura de un periódico.',features:'Georgia · Tinta · Líneas'},
+  {id:'carolina',name:'HAVANA NICE Original · Carolina'},
+  {id:'libre',name:'Estilo libre'},
+  {id:'vogue',name:'Vogue'},
+  {id:'lane',name:'The Lane'},
+  {id:'junebug',name:'Junebug Weddings'},
+  {id:'nyt',name:'The New York Times'},
 ];
 
 type Props = {
   value: string;
   onChange: (style: string) => void;
-  readingMode: string;
-  onReadingChange: (mode: 'flip' | 'scroll') => void;
-  onEditFree: () => void;
-  onPreview: () => void;
   photo: string;
 };
 
@@ -47,47 +43,35 @@ function StyleCard({s, value, onChange, photo}: {s: StyleOption; value: string; 
               )}
             </div>
             <div className="hn-card-caption">
-              <span className="hn-card-kind">{s.category}</span>
               <strong>{s.name}{s.id===value?<Check size={16}/>:<ChevronRight size={15}/>}</strong>
-              <p>{s.desc}</p><small>{s.features}</small>
             </div>
           </button>
   );
 }
-export default function EditorialStyles({value, onChange, readingMode, onReadingChange, onEditFree, onPreview, photo}: Props) {
+/** Two independent collapsible template groups. */
+export default function EditorialStyles({value, onChange, photo}: Props) {
   return (
     <div className="hn-styles-tab">
-      <span className="eyebrow">HAVANA NICE / LIBRERÍA DE DISEÑOS</span>
-      <h3>Empieza con nuestras cotizaciones reales.</h3>
-      <p className="hn-styles-lead">Primero, nuestras plantillas de Canva. Después, los diseños editoriales especiales. Puedes cambiar de estilo sin perder la información.</p>
-      <span className="eyebrow hn-styles-category-heading">PLANTILLAS ORIGINALES</span>
-      <div className="hn-styles-gallery hn-styles-original">
-        {editorialStyles.filter(s => s.id === 'carolina').map(s => (
-          <StyleCard key={s.id} s={s} value={value} onChange={onChange} photo={photo}/>
-        ))}
-      </div>
-      <span className="eyebrow hn-styles-category-heading">ESTILOS EDITORIALES ESPECIALES</span>
-      <div className="hn-styles-gallery">
-        {editorialStyles.filter(s => s.id !== 'carolina').map(s => (
-          <StyleCard key={s.id} s={s} value={value} onChange={onChange} photo={photo}/>
-        ))}
-      </div>
-      <p className="hn-style-attribution">Estilos originales de HAVANA NICE inspirados en lenguajes editoriales. No representan diseños oficiales ni afiliación con las publicaciones.</p>
-      <div className="hn-style-customize">
-        <span className="eyebrow">LIBERTAD CREATIVA</span>
-        <h4>El estilo es un punto de partida.</h4>
-        <p>Personaliza la portada, la tipografía y los colores. Los datos de la cotización permanecen intactos al cambiar de estilo.</p>
-        <button type="button" onClick={onEditFree}><Palette size={17}/> Editar diseño <ChevronRight size={16}/></button>
-      </div>
-      <div className="hn-style-reading">
-        <span className="eyebrow">MODO DE LECTURA · ESTA COTIZACIÓN</span>
-        <h4>¿Cómo la verá el cliente?</h4>
-        <div className="hn-style-reading-buttons">
-          <button className={readingMode==='flip'?'on':''} onClick={()=>onReadingChange('flip')}><BookOpen size={17}/> Revista 3D</button>
-          <button className={readingMode==='scroll'?'on':''} onClick={()=>onReadingChange('scroll')}><AlignJustify size={17}/> Scroll</button>
+      <details className="hn-style-accordion" open>
+        <summary><span>Plantillas originales</span><ChevronDown size={19}/></summary>
+        <div className="hn-style-accordion-content">
+          <div className="hn-styles-gallery hn-styles-original">
+            {editorialStyles.filter(s => s.id === 'carolina').map(s => (
+              <StyleCard key={s.id} s={s} value={value} onChange={onChange} photo={photo}/>
+            ))}
+          </div>
         </div>
-        <button className="hn-style-open-preview" onClick={onPreview}><Eye size={17}/> Probar vista del cliente <ChevronRight size={17}/></button>
-      </div>
+      </details>
+      <details className="hn-style-accordion">
+        <summary><span>Estilos editoriales especiales</span><ChevronDown size={19}/></summary>
+        <div className="hn-style-accordion-content">
+          <div className="hn-styles-gallery">
+            {editorialStyles.filter(s => s.id !== 'carolina').map(s => (
+              <StyleCard key={s.id} s={s} value={value} onChange={onChange} photo={photo}/>
+            ))}
+          </div>
+        </div>
+      </details>
     </div>
   );
 }

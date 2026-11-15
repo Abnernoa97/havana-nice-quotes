@@ -1,0 +1,19 @@
+/* The final reader has a single home: Publicar. */
+.hn-publish { padding: 22px; min-width: 0; background: #f7f8f4; }
+.hn-publish-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+.hn-publish-head h3 { font: 400 clamp(23px,3vw,32px)/1.2 'Playfair Display', Georgia, serif; color: #284838; margin: 0; }
+.hn-publish-mode { display: flex; align-items: center; gap: 5px; border-radius: 10px; padding: 4px; background: #e9efe7; }
+.hn-publish-mode button { display: flex; align-items: center; gap: 7px; background: transparent; color: #68816d; border: 0; border-radius: 8px; padding: 11px 12px; cursor: pointer; font-size: 12px; }
+.hn-publish-mode button.selected { color: #254837; background: #fff; box-shadow: 0 1px 7px #22392e13; font-weight: 700; }
+.hn-publish-document { min-width: 0; max-width: 980px; margin: 0 auto; }
+.hn-publish-document > .hn-magazine { min-height: 0; border-radius: 14px; }
+.hn-publish-document > .hn-carolina-document { max-width: 720px; }
+.hn-publish-open { margin: 22px auto 0; width: min(100%, 720px); min-height: 49px; display:flex; align-items:center; justify-content:center; gap: 10px; background: #214738; color: #fff; border: 0; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.hn-publish-open:focus-visible,.hn-publish-mode button:focus-visible { outline: 3px solid #ad9364; outline-offset: 2px; }
+@media(max-width:600px) {
+  .hn-publish { padding: 14px 8px 22px; }
+  .hn-publish-head { padding: 8px; }
+  .hn-publish-mode { width: 100%; }
+  .hn-publish-mode button { flex:1; justify-content:center; }
+  .hn-publish-document > .hn-magazine { padding-inline: 0; }
+}

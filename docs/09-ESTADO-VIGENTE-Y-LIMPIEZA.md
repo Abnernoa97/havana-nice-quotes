@@ -1,3 +1,7 @@
+## Diseñador reorganizado · 15/11/2026
+
+Datos incluye precio/moneda/anticipo sin duplicación; Estilos tiene dos acordeones sin explicaciones; Diseño conserva edición visual; Publicar contiene la vista real Scroll/3D con acciones de envío pendientes. Los borradores nuevos arrancan sin contenido ficticio. El código obsoleto de previsualización lateral fue eliminado; historial de Android preservado y mapeo de pestaña anterior Precios hacia Datos.
+
 # 09 · Estado vigente y limpieza
 
 **Actualizado 15/11/2026 · Cambio de prototipo local a sincronización privada cloud.**

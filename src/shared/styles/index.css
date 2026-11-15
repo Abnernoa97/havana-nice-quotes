@@ -621,12 +621,11 @@ p {
 }
 .editor-workspace {
   display: grid;
-  grid-template-columns: minmax(285px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
-.edit-panel,
-.preview-side {
+.edit-panel {
   border-radius: 8px;
   background: #fff;
   border: 1px solid #e6e8e1;
@@ -806,68 +805,6 @@ p {
   font-family: 'Playfair Display', serif;
   font-size: 29px;
   color: #274d36;
-}
-.preview-side {
-  padding: 23px;
-  background: #f0f1eb;
-}
-.preview-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 19px;
-}
-.preview-heading h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 21px;
-  font-weight: 400;
-  margin: 6px 0;
-}
-.preview-switch {
-  border: 1px solid #dfe5da;
-  display: flex;
-  background: #fff;
-  border-radius: 5px;
-  padding: 4px;
-  gap: 3px;
-}
-.preview-switch button {
-  border: 0;
-  background: transparent;
-  color: #a9b4aa;
-  padding: 8px;
-  border-radius: 4px;
-}
-.preview-switch button.active {
-  background: #e9f1e8;
-  color: #254238;
-}
-.preview-viewport {
-  height: 680px;
-  overflow: auto;
-  box-shadow: 0 9px 26px #2645351a;
-  margin: auto;
-  max-width: 680px;
-  background: #fff;
-  border-radius: 3px;
-  transition: max-width 0.2s;
-}
-.preview-viewport.mobile-frame {
-  max-width: 344px;
-  border: 7px solid #25342f;
-  border-radius: 27px;
-}
-.preview-open {
-  display: flex;
-  margin: 20px auto 0;
-  color: #426b4e;
-  align-items: center;
-  gap: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  border: 0;
-  background: none;
 }
 .proposal {
   background: #fff;
@@ -1417,9 +1354,6 @@ p {
   .edit-body {
     max-width: 100%;
   }
-  .preview-viewport {
-    max-width: 650px;
-  }
   .menu-overlay {
     display: block;
     position: fixed;
@@ -1601,15 +1535,6 @@ p {
   }
   .editor-actions > .btn {
     flex: 1;
-  }
-  .preview-heading h3 {
-    font-size: 17px;
-  }
-  .preview-side {
-    padding: 13px;
-  }
-  .preview-viewport {
-    height: 560px;
   }
   .proposal-photo {
     min-height: 310px;

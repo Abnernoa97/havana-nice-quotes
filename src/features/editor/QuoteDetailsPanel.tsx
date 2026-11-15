@@ -2,6 +2,7 @@ import type { Quote } from '../quotes/types';
 import { CAROLINA_COPY, carolinaCopy } from '../templates/CarolinaTemplate';
 import type { CarolinaCopy } from '../templates/CarolinaTemplate';
 import '../templates/carolina-editor.css';
+import QuotePricingPanel from './QuotePricingPanel';
 
 type Props = {
   item: Quote;
@@ -30,7 +31,6 @@ export default function QuoteDetailsPanel({ item, edit }: Props) {
                 <input
                   value={item.name}
                   onChange={e => edit('name', e.target.value)}
-                  placeholder="Olivia & James"
                 />
               </label>
               <label>
@@ -71,6 +71,7 @@ export default function QuoteDetailsPanel({ item, edit }: Props) {
                   onChange={e => edit('desc', e.target.value)}
                 />
               </label>
+              <QuotePricingPanel item={item} edit={(key, value) => edit(key, value)} />
               {item.style === 'carolina' && (
                 <details className="hn-carolina-copy-editor">
                   <summary>Textos de la plantilla Carolina · Editar condiciones</summary>

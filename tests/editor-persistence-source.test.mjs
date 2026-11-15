@@ -9,7 +9,10 @@ test('Plantilla real y cinco estilos mantienen ambos modos editor/cliente', () =
   const styles = src('features/editor/styles/EditorialStyles.tsx');
   for (const id of ['carolina', 'libre', 'vogue', 'lane', 'junebug', 'nyt']) assert.ok(styles.includes("id:'" + id + "'"));
   assert.match(editor, /onChange=\{style => edit\('style', style\)\}/);
-  assert.match(editor, /onReadingChange=\{mode => \{ edit\('readingMode', mode\); setPreviewMode\(mode\); \}\}/);
+  const publish = src('features/editor/QuotePublishPanel.tsx');
+  assert.match(editor, /<QuotePublishPanel item=\{item\}/);
+  assert.match(publish, /onClick=\{\(\) => edit\('readingMode', 'flip'\)\}/);
+  assert.match(publish, /onClick=\{\(\) => edit\('readingMode', 'scroll'\)\}/);
   assert.match(app, /previewMode === 'flip' \?/);
   assert.match(app, /<FlipMagazine item=\{item\}/);
 });
@@ -34,12 +37,15 @@ test('El guardado entre dispositivos usa Cloudflare D1 y no localStorage', () =>
   assert.doesNotMatch(sw, /hn_quotes_visual_v1|localStorage/);
 });
 
-test('La vista previa Scroll reutiliza la propuesta editorial de la pareja', () => {
+test('Publicar reutiliza el documento real Scroll y la revista 3D sin duplicar el lector', () => {
   const editor = src('features/editor/QuoteEditorScreen.tsx');
+  const publish = src('features/editor/QuotePublishPanel.tsx');
   const client = src('features/client/ClientPage.tsx');
-  assert.match(editor, /<Proposal item=\{item\} styleName=\{styleName\} embedded/);
+  assert.match(editor, /<QuotePublishPanel item=\{item\}/);
+  assert.match(publish, /<Proposal item=\{item\} styleName=\{styleName\} embedded\/>/);
+  assert.match(publish, /<FlipMagazine item=\{item\}\/>/);
   assert.match(client, /<Proposal item=\{item\} styleName=\{styleName\}/);
-  assert.match(client, /<details className="client-preview-testing">/);
+  assert.doesNotMatch(editor, /preview-side|studio-magazine-preview|<CarolinaCover/);
 });
 
 test('La revista mantiene intactos los parámetros de plegado 3D', () => {
@@ -152,10 +158,10 @@ test('Carolina es la plantilla real principal y separada de los estilos editoria
   const types = src('features/quotes/types.ts');
   const editor = src('features/editor/QuoteEditorScreen.tsx');
   assert.match(styles, /name:'HAVANA NICE Original · Carolina'/);
-  assert.match(styles, /PLANTILLAS ORIGINALES/);
-  assert.match(styles, /ESTILOS EDITORIALES ESPECIALES/);
+  assert.match(styles, /Plantillas originales/);
+  assert.match(styles, /Estilos editoriales especiales/);
   assert.match(types, /'carolina' \| 'libre'/);
-  assert.match(editor, /<CarolinaCover item=\{item\}\/>/);
+  assert.match(editor, /<EditorialStyles value=\{styleName\}/);
 });
 
 test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF incrustado', () => {
@@ -179,4 +185,55 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.match(magazine, /<CarolinaBlankReverse\/>/);
   assert.match(magazine, /flippingTime: 1080/);
   assert.doesNotMatch(template, /<iframe|<embed|<object|\.pdf/);
+});
+
+
+test('Datos reúne detalles, inversión, moneda y anticipo sin duplicar el paquete', () => {
+  const editor = src('features/editor/QuoteEditorScreen.tsx');
+  const details = src('features/editor/QuoteDetailsPanel.tsx');
+  const prices = src('features/editor/QuotePricingPanel.tsx');
+  assert.match(editor, /tab === 'details' && <QuoteDetailsPanel item=\{item\} edit=\{edit\}/);
+  assert.match(details, /<QuotePricingPanel item=\{item\}/);
+  assert.match(prices, /data-currency=\{currency\}/);
+  assert.match(prices, /DEPOSIT_OPTIONS = \[20, 30, 40, 50, 60, 70, 80, 90, 100\]/);
+  assert.equal((details.match(/Nombre del servicio/g) || []).length, 1);
+  assert.doesNotMatch(prices, /Nombre del paquete|Preparar envío|<Send|share|envío y las firmas/);
+  assert.doesNotMatch(editor, /tab === 'pricing'|Precios <\/button>|studio-editor-subtitle/);
+});
+
+test('Estilos contiene solamente dos acordeones de plantillas y ningún bloque ajeno', () => {
+  const styles = src('features/editor/styles/EditorialStyles.tsx');
+  const css = src('features/editor/styles/editorial-styles.css');
+  assert.equal((styles.match(/className="hn-style-accordion"/g) || []).length, 2);
+  assert.match(styles, /<summary><span>Plantillas originales/);
+  assert.match(styles, /<summary><span>Estilos editoriales especiales/);
+  assert.doesNotMatch(styles, /LIBERTAD CREATIVA|Libertad creativa|onEditFree|onReadingChange|readingMode|hn-style-customize|hn-style-reading|Primero, nuestras plantillas|Editar diseño/);
+  assert.doesNotMatch(css, /\.hn-style-customize|\.hn-style-reading/);
+  assert.doesNotMatch(styles, /s\.desc|s\.features|s\.category/);
+});
+
+test('Publicar es la cuarta pestaña y no envía mensajes ni propuestas de forma ficticia', () => {
+  const editor = src('features/editor/QuoteEditorScreen.tsx');
+  const publish = src('features/editor/QuotePublishPanel.tsx');
+  const app = src('app/App.tsx');
+  const nav = src('app/native-navigation.ts');
+  assert.match(editor, /<Send size=\{16\}\/> Publicar/);
+  assert.match(editor, /role="tablist"/);
+  assert.match(nav, /'details' \| 'styles' \| 'design' \| 'publish'/);
+  assert.match(publish, /Ver a pantalla completa/);
+  assert.doesNotMatch(publish, /Preparar envío|onClick=\{share\}|enviar|sendClient/);
+  assert.doesNotMatch(app, /share=\{share\}|setMobilePreview|mobilePreview/);
+});
+
+test('El borrador nuevo no contiene datos ficticios ni importes prellenados', () => {
+  const model = src('features/quotes/model.ts');
+  const quotes = src('features/editor/QuoteDetailsPanel.tsx');
+  assert.match(model, /name: ''/);
+  assert.match(model, /location: ''/);
+  assert.match(model, /price: 0/);
+  assert.match(model, /deposit: 0/);
+  assert.match(model, /note: ''/);
+  assert.match(model, /package: ''/);
+  assert.match(model, /desc: ''/);
+  assert.doesNotMatch(quotes, /Olivia & James/);
 });

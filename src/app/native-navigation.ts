@@ -41,10 +41,10 @@ export function readNavigationEntry(state: unknown): Entry | null {
   if (entry.__havanaNiceHistory !== 1 ||
       !Number.isSafeInteger(entry.depth) || (entry.depth ?? -1) < 0 ||
       !entry.view || typeof entry.view !== 'object') return null;
-  const view = entry.view as Partial<AppView>;
+  const view = entry.view as Partial<AppView> & { tab?: EditorTab | 'pricing' };
   if (!sections.includes(view.section as AppSection) ||
       typeof view.active !== 'string' || !view.active.trim() ||
-      !tabs.includes(view.tab as EditorTab) ||
+      !(tabs.includes(view.tab as EditorTab) || view.tab === 'pricing') ||
       !modes.includes(view.previewMode as ReadingView) ||
       typeof view.preview !== 'boolean' ||
       typeof view.mobilePreview !== 'boolean' ||
@@ -52,7 +52,7 @@ export function readNavigationEntry(state: unknown): Entry | null {
       typeof view.installGuide !== 'boolean' ||
       (view.photoViewerId !== null && typeof view.photoViewerId !== 'string') ||
       typeof view.photoSelecting !== 'boolean') return null;
-  return { depth: entry.depth!, view: { ...view } as AppView };
+  return { depth: entry.depth!, view: { ...view, tab: view.tab === 'pricing' ? 'details' : view.tab } as AppView };
 }
 const stamp = (entry: Entry): Stamped => ({ __havanaNiceHistory: 1, ...entry });
 const sameView = (a: AppView, b: AppView): boolean =>

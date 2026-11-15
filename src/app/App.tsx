@@ -51,15 +51,11 @@ function App() {
   const { quotes, setQuotes, syncStatus, flush, refresh: refreshQuotes } = useQuoteStore(enabled);
   const { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, trashing, trashPhotos, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
   const { view, routeTo, goBack } = useAppHistory(quotes[0]?.id || 'empty');
-  const { section, active, tab, mobileMenu, preview, previewMode, mobilePreview, installGuide, photoViewerId, photoSelecting } = view;
+  const { section, active, tab, mobileMenu, preview, previewMode, installGuide, photoViewerId, photoSelecting } = view;
   const trash = useTrash(enabled && section === 'trash');
   const setTab: Dispatch<SetStateAction<string>> = change => {
     const next = typeof change === 'function' ? change(tab) : change;
-    if (['details', 'styles', 'design', 'pricing'].includes(next)) routeTo({ tab: next as EditorTab });
-  };
-  const setMobilePreview: Dispatch<SetStateAction<boolean>> = change => {
-    const next = typeof change === 'function' ? change(mobilePreview) : change;
-    routeTo({ mobilePreview: next });
+    if (['details', 'styles', 'design', 'publish'].includes(next)) routeTo({ tab: next as EditorTab });
   };
   const setPreviewMode: Dispatch<SetStateAction<string>> = change => {
     const next = typeof change === 'function' ? change(previewMode) : change;
@@ -164,8 +160,6 @@ function App() {
       ? 'Cotización guardada y sincronizada en Cloudflare'
       : 'No se pudo guardar ahora. Tus cambios siguen abiertos; comprueba la conexión.'));
   };
-  const share = () =>
-    setToast('El envío real de propuestas a clientes sigue pendiente.');
   const updateStatus = (status: string) => {
     edit('status', status);
     setToast('Estado de demostración actualizado');
@@ -272,13 +266,9 @@ function App() {
       setTab={setTab}
       styleName={styleName}
       edit={edit}
-      setPreviewMode={setPreviewMode}
       openClientPreview={openClientPreview}
       save={save}
       filePicked={filePicked}
-      mobilePreview={mobilePreview}
-      setMobilePreview={setMobilePreview}
-      share={share}
       cloudPhotos={photos}
       onOpenBank={() => navigate('photos')}
     />

@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { ChevronDown, Send } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { money, quoteCurrency } from '../../shared/lib/formatters';
 import type { QuoteCurrency } from '../../shared/lib/formatters';
 import { safeQuotePrice, safeQuoteDeposit, normalizePriceInput } from '../quotes/model';
@@ -8,7 +8,6 @@ import './quote-pricing.css';
 const DEPOSIT_OPTIONS = [20, 30, 40, 50, 60, 70, 80, 90, 100] as const;
 
 type PricingQuote = {
-  package: string;
   price: number;
   deposit: number;
   currency?: QuoteCurrency;
@@ -16,26 +15,17 @@ type PricingQuote = {
 
 type Props = {
   item: PricingQuote;
-  edit: (key: 'package' | 'price' | 'deposit' | 'currency', value: string | number) => void;
-  share: () => void;
+  edit: (key: 'price' | 'deposit' | 'currency', value: string | number) => void;
 };
 
 /** Currency only labels amounts; it never converts exchange rates. */
-export default function QuotePricingPanel({ item, edit, share }: Props) {
+export default function QuotePricingPanel({ item, edit }: Props) {
   const depositPicker = useRef<HTMLDetailsElement>(null);
   const currency = quoteCurrency(item.currency);
 
   return (
-    <div className="edit-body hn-pricing">
-      <span className="eyebrow">THE INVESTMENT</span>
-      <h3>Servicios e inversión</h3>
-
-      <label htmlFor="hn-quote-package">Nombre del paquete</label>
-      <input
-        id="hn-quote-package"
-        value={item.package}
-        onChange={event => edit('package', event.target.value)}
-      />
+    <section className="hn-pricing">
+      <h4>Inversión</h4>
 
       <div className="hn-pricing-heading">
         <label htmlFor="hn-quote-price">Precio total</label>
@@ -66,13 +56,13 @@ export default function QuotePricingPanel({ item, edit, share }: Props) {
         min="0"
         max="100"
         step="1"
-        value={item.deposit}
+        value={item.deposit === 0 ? '' : item.deposit}
         onChange={event => edit('deposit', safeQuoteDeposit(event.target.value))}
       />
       <details className="hn-deposit-picker" ref={depositPicker}>
         <summary>
           <span>Elegir porcentaje</span>
-          <span className="hn-deposit-picker-selected">{item.deposit}% <ChevronDown size={17}/></span>
+          <span className="hn-deposit-picker-selected">{item.deposit ? item.deposit + '%' : 'Seleccionar'} <ChevronDown size={17}/></span>
         </summary>
         <div className="hn-deposit-options" role="group" aria-label="Porcentajes de anticipo">
           {DEPOSIT_OPTIONS.map(percent => (
@@ -92,18 +82,12 @@ export default function QuotePricingPanel({ item, edit, share }: Props) {
         </div>
       </details>
 
-      <div className="investment-box">
-        <small>ANTICIPO CALCULADO · {currency}</small>
-        <strong>{money(item.price * item.deposit / 100, currency)}</strong>
-      </div>
-      <div className="edit-separator" />
-      <button className="btn primary full" onClick={share}>
-        <Send size={16} /> Preparar envío
-      </button>
-      <p className="helper">
-        El envío y las firmas reales se activarán después de configurar
-        seguridad y sincronización.
-      </p>
-    </div>
+      {item.price > 0 && item.deposit > 0 && (
+        <div className="investment-box">
+          <small>ANTICIPO CALCULADO · {currency}</small>
+          <strong>{money(item.price * item.deposit / 100, currency)}</strong>
+        </div>
+      )}
+    </section>
   );
 }
