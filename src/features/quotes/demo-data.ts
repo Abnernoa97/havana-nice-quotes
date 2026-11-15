@@ -1,11 +1,12 @@
 // Datos exclusivamente ficticios del prototipo. No incluyen información real de clientes.
+import type { Quote } from './types';
 export const photos = [
   'https://images.unsplash.com/photo-1519741497674-611481863552?w=1500&q=85&fit=crop',
   'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1500&q=85&fit=crop',
   'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1500&q=85&fit=crop',
   'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1500&q=85&fit=crop',
 ];
-export const seed = [
+export const seed: Quote[] = [
   {
     id: 'hn1',
     name: 'Olivia & James',

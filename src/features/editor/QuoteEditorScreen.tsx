@@ -1,7 +1,7 @@
 import type { ChangeEvent, Dispatch, SetStateAction, CSSProperties } from 'react';
 import { Eye, Save, PenLine, BookOpen, Palette, DollarSign, Monitor, Smartphone, ExternalLink } from 'lucide-react';
 import EditorialStyles from './styles/EditorialStyles';
-import type { Quote, QuoteMessage } from '../quotes/types';
+import type { Quote } from '../quotes/types';
 import Proposal from '../client/Proposal';
 import QuoteDetailsPanel from './QuoteDetailsPanel';
 import QuoteDesignPanel from './QuoteDesignPanel';
@@ -12,7 +12,7 @@ type Props = {
   tab: string;
   setTab: Dispatch<SetStateAction<string>>;
   styleName: string;
-  edit: (key: string, value: string | number | QuoteMessage[]) => void;
+  edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
   setPreviewMode: Dispatch<SetStateAction<string>>;
   openClientPreview: () => void;
   save: () => void;

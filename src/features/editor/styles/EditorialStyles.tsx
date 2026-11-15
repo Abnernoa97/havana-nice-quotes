@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Check, ChevronRight, BookOpen, AlignJustify, Palette, Eye } from 'lucide-react';
 import './editorial-styles.css';
 
@@ -10,7 +9,16 @@ export const editorialStyles = [
   {id:'nyt',name:'The New York Times',category:'NEWSPAPER EDITORIAL',desc:'Historias, columnas y titulares con la estructura de un periódico.',features:'Georgia · Tinta · Líneas'},
 ];
 
-export default function EditorialStyles({value, onChange, readingMode, onReadingChange, onEditFree, onPreview, photo}) {
+type Props = {
+  value: string;
+  onChange: (style: string) => void;
+  readingMode: string;
+  onReadingChange: (mode: 'flip' | 'scroll') => void;
+  onEditFree: () => void;
+  onPreview: () => void;
+  photo: string;
+};
+export default function EditorialStyles({value, onChange, readingMode, onReadingChange, onEditFree, onPreview, photo}: Props) {
   return (
     <div className="hn-styles-tab">
       <span className="eyebrow">HAVANA NICE / EDITORIAL LIBRARY</span>

@@ -1,11 +1,12 @@
-// @ts-nocheck
 import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import type { Quote } from '../quotes/types';
 import { PageFlip } from 'page-flip';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
 import { usd } from '../../shared/lib/formatters';
 import './flip-magazine.css';
 
-function MagazineLeaf({ children, className = '' }) {
+function MagazineLeaf({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <div className={'hn-leaf ' + className} data-density="soft">{children}</div>;
 }
 
@@ -15,10 +16,10 @@ function MagazineLeaf({ children, className = '' }) {
  * The source leaves are kept outside the flip container so a React
  * StrictMode remount always gets fresh page nodes.
  */
-export default function FlipMagazine({ item }) {
-  const mountRef = useRef(null);
-  const sourceRef = useRef(null);
-  const flipRef = useRef(null);
+export default function FlipMagazine({ item }: { item: Quote }) {
+  const mountRef = useRef<HTMLDivElement | null>(null);
+  const sourceRef = useRef<HTMLDivElement | null>(null);
+  const flipRef = useRef<PageFlip | null>(null);
   const [page, setPage] = useState(0);
   const [orientation, setOrientation] = useState('portrait');
   const [failure, setFailure] = useState(false);
@@ -28,8 +29,8 @@ export default function FlipMagazine({ item }) {
     const mount = mountRef.current;
     const source = sourceRef.current;
     if (!mount || !source) return;
-    let flip;
-    let host;
+    let flip: PageFlip | undefined;
+    let host: HTMLDivElement | undefined;
     try {
       host = document.createElement('div');
       host.className = 'hn-flip-host';
@@ -55,7 +56,7 @@ export default function FlipMagazine({ item }) {
         showPageCorners: true,
         disableFlipByClick: false,
       });
-      flip.loadFromHTML(host.querySelectorAll('.hn-leaf'));
+      flip.loadFromHTML(host.querySelectorAll<HTMLElement>('.hn-leaf'));
       flip.on('flip', e => setPage(Number(e.data || 0)));
       flip.on('changeOrientation', e => setOrientation(String(e.data)));
       flipRef.current = flip;
@@ -72,7 +73,7 @@ export default function FlipMagazine({ item }) {
     };
   }, [item.id, item.cover, item.name, item.note, item.package, item.price, item.location, item.deposit, item.desc, item.date]);
 
-  const changePage = direction => {
+  const changePage = (direction: 'next' | 'prev') => {
     const flip = flipRef.current;
     if (!flip) return;
     if (direction === 'next' && page < total - 1) flip.flipNext('bottom');

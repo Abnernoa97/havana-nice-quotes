@@ -1,5 +1,6 @@
-// @ts-nocheck
 import { useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import type { Quote } from './features/quotes/types';
 import FlipMagazine from './features/magazine/FlipMagazine';
 import { editorialStyles } from './features/editor/styles/EditorialStyles';
 import { photos, seed } from './features/quotes/demo-data';
@@ -18,8 +19,6 @@ import {
   Palette,
   MessageCircle,
   Plus,
-  ArrowUpRight,
-  Send,
   X,
   ChevronLeft,
 } from 'lucide-react';
@@ -31,7 +30,7 @@ const pages = [
   { id: 'messages', label: 'Mensajes', icon: MessageCircle },
 ];
 function App() {
-  const [quotes, setQuotes] = useState(() => {
+  const [quotes, setQuotes] = useState<Quote[]>(() => {
     try {
       const s = localStorage.getItem('hn_quotes_visual_v1');
       return s ? JSON.parse(s) : seed;
@@ -57,7 +56,6 @@ function App() {
     <InstallGuide onClose={() => setShowInstallGuide(false)} />
   ) : null;
 
-  const [copied, setCopied] = useState(false);
   const item = quotes.find(q => q.id === active) || quotes[0];
   const styleName = editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
   useEffect(() => {
@@ -69,7 +67,7 @@ function App() {
       return () => clearTimeout(t);
     }
   }, [toast]);
-  const edit = (key, value) =>
+  const edit = (key: keyof Quote, value: Quote[keyof Quote]) =>
     setQuotes(list =>
       list.map(q => (q.id === active ? { ...q, [key]: value } : q))
     );
@@ -77,7 +75,7 @@ function App() {
     setPreviewMode(item.readingMode === 'scroll' ? 'scroll' : 'flip');
     setPreview(true);
   };
-  const navigate = x => {
+  const navigate = (x: string) => {
     setSection(x);
     setPreview(false);
     setMobileMenu(false);
@@ -108,7 +106,7 @@ function App() {
     navigate('editor');
     setToast('Nuevo borrador creado en este dispositivo');
   };
-  const selectQuote = (id, target = 'editor') => {
+  const selectQuote = (id: string, target = 'editor') => {
     setActive(id);
     navigate(target);
   };
@@ -147,7 +145,7 @@ function App() {
     setToast(
       'Demo visual: el envío real se activará cuando conectemos la nube.'
     );
-  const updateStatus = status => {
+  const updateStatus = (status: string) => {
     edit('status', status);
     setToast('Estado de demostración actualizado');
   };
@@ -176,7 +174,7 @@ function App() {
     setNewMessage('');
     setToast('Respuesta de prueba guardada');
   };
-  const filePicked = e => {
+  const filePicked = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
     if (!f.type.startsWith('image/')) {
@@ -185,12 +183,13 @@ function App() {
     }
     const reader = new FileReader();
     reader.onload = () => {
+      if (typeof reader.result !== 'string') return;
       edit('cover', reader.result);
       setToast('Foto aplicada. Esta carga es solo visual.');
     };
     reader.readAsDataURL(f);
   };
-  const statusClass = s =>
+  const statusClass = (s: string) =>
     s === 'Aceptada'
       ? 'green'
       : s === 'En revisión'
