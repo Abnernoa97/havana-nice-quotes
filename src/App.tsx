@@ -1,13 +1,12 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
-import FlipMagazine from './FlipMagazine';
-import { editorialStyles } from './EditorialStyles';
+import FlipMagazine from './features/magazine/FlipMagazine';
+import { editorialStyles } from './features/editor/styles/EditorialStyles';
 import { photos, seed } from './features/quotes/demo-data';
 import HomeScreen from './features/home/HomeScreen';
 import MessagesScreen from './features/messages/MessagesScreen';
 import ClientPage from './features/client/ClientPage';
 import QuoteEditorScreen from './features/editor/QuoteEditorScreen';
-import Proposal from './features/client/Proposal';
 import QuotesScreen from './features/quotes/QuotesScreen';
 import {
   LayoutDashboard,
@@ -338,9 +337,6 @@ function App() {
         <div className="avatar topavatar">F&N</div>
       </div>
     </header>
-  );
-  const Proposal = (
-    <Proposal item={item} styleName={styleName} />
   );
   const home = (
     <HomeScreen

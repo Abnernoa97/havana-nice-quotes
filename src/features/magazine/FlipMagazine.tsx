@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { PageFlip } from 'page-flip';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
-import { usd } from './shared/lib/formatters';
+import { usd } from '../../shared/lib/formatters';
 import './flip-magazine.css';
 
 function MagazineLeaf({ children, className = '' }) {

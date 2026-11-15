@@ -1,6 +1,6 @@
 import type { ChangeEvent, Dispatch, SetStateAction, CSSProperties } from 'react';
 import { Eye, Save, PenLine, BookOpen, Palette, DollarSign, Monitor, Smartphone, ExternalLink } from 'lucide-react';
-import EditorialStyles from '../../EditorialStyles';
+import EditorialStyles from './styles/EditorialStyles';
 import type { Quote, QuoteMessage } from '../quotes/types';
 import Proposal from '../client/Proposal';
 import QuoteDetailsPanel from './QuoteDetailsPanel';
