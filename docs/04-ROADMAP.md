@@ -2,6 +2,17 @@
 
 **Alcance:** HAVANA NICE Quotes Studio, prototipo con datos ficticios. El control de limpieza está en [Issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3) y el estado real en [09 · Estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md). Este documento describe **desarrollo futuro**, no tareas ya entregadas.
 
+## Prioridad vigente · Diseño completo antes del envío (15/11/2026)
+
+**Decisión de Fer & Noa:** terminar la presentación del diseñador y la experiencia que verá la pareja, en móvil y escritorio, antes de invertir tiempo en envío, avisos, ubicación o seguimiento.
+
+1. Un solo documento editorial para edición en vivo y lectura Scroll del cliente. La primera mejora se publicó en `fb76f9c`. La revista 3D mantiene su motor de hojas independiente.
+2. Completar los controles de composición visual, personalización de cada página y consistencia de los cinco estilos; no prometer editor libre mientras las hojas sigan siendo fijas.
+3. Probar de forma visual la creación, edición, vista de cliente, portada, scroll y revista en Samsung y escritorio; corregir únicamente defectos reales.
+4. **Posteriormente:** backend privado, envío por enlace, saber si el enlace se abrió y notificaciones. La apertura del enlace no demuestra por sí sola que el destinatario recibió un mensaje. La ubicación precisa no se recopilará sin necesidad y consentimiento expreso.
+
+**Estado:** mejoras de interfaz en curso; publicación visual y compilación no equivalen a aprobación manual en dispositivos. Los envíos y eventos reales no están implementados.
+
 ## Etapa actual · Cierre de limpieza
 
 **Confirmado:** separación de pantallas por funcionalidad, una sola rama `main`, lockfile reproducible, TypeScript estricto, un único formateador USD, estados y datos demo validados, 23 pruebas automatizadas, build publicado. Instrucciones obsoletas retiradas de la documentación activa.

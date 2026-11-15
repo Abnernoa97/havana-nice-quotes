@@ -333,3 +333,16 @@
   .editor-page .edit-body input,
   .editor-page .edit-body textarea { transition: none; }
 }
+
+/* The same personal design choices are honored by the 3D reader. No engine or curl settings altered. */
+.hn-magazine.hn-font-modern .hn-cover-bottom h2 {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: -.04em;
+}
+.hn-style-libre .hn-magazine .hn-editorial-content h2 em,
+.hn-style-libre .hn-magazine .hn-vision-content h2 em,
+.hn-style-libre .hn-magazine .hn-investment-body h2 em,
+.hn-style-libre .hn-magazine .hn-end-body h2 em {
+  color: var(--paper-accent, #78927a);
+}

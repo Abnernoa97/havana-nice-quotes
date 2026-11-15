@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { Quote } from '../quotes/types';
 import { PageFlip } from 'page-flip';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
@@ -85,11 +85,11 @@ export default function FlipMagazine({ item }: { item: Quote }) {
     : 'DATE TO BE CONFIRMED';
 
   return (
-    <section className="hn-magazine" aria-label="Vista revista con páginas que se doblan">
+    <section className={'hn-magazine hn-font-' + item.font} style={{ '--paper-accent': item.color } as CSSProperties} aria-label="Propuesta de música en vivo en formato revista">
       <header className="hn-magazine-intro">
         <span className="hn-magazine-kicker">HAVANA NICE / THE PRIVATE EDITION</span>
-        <h1>La experiencia <em>revista real.</em></h1>
-        <p>Prueba el efecto sobre la portada: arrastra la esquina inferior derecha o desliza la página hacia la izquierda.</p>
+        <h1>A proposal for <em>{item.name}.</em></h1>
+        <p>Turn a page or use the arrows to explore your proposal.</p>
       </header>
 
       <div className="hn-magazine-stage">
@@ -115,7 +115,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
           <ArrowRight size={19} />
         </button>
       </div>
-      <p className="hn-magazine-disclaimer">Demostración del movimiento de papel. Sin envío, contrato ni firma real.</p>
+      <p className="hn-magazine-disclaimer">Design preview only · Delivery and acceptance are not active.</p>
 
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
         <MagazineLeaf className="hn-cover-leaf">
@@ -135,7 +135,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
           <div className="hn-editorial-content">
             <span className="hn-micro">FOR {item.name.toUpperCase()}</span>
             <h2>Live music.<br/><em>Made personal.</em></h2>
-            <p>We created this proposal with your celebration in mind. Here is how HAVANA NICE can bring real live music to your favorite moments.</p>
+            <p>{item.note}</p>
             <div className="hn-editorial-picture" style={{backgroundImage:"url(https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1000&q=80)"}}></div>
             <div className="hn-signature">Fer & Noa<span>HAVANA NICE</span></div>
           </div>

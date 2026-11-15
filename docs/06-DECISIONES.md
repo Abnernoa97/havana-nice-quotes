@@ -19,6 +19,12 @@
 
 Último código verificado: `38c71ab94a78a553214f6db34e9ccab0a7ef57ca`; pasó 23/23 tests, `tsc`, Vite y deploy Cloudflare. Más detalles y caveats en [09 · Estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md).
 
+## Cambio de prioridad · 15/11/2026
+
+- La prioridad ya no es exclusivamente la limpieza: **estudio de edición y experiencia visual del cliente completos primero**. Backend, notificaciones de recepción, estado de apertura y eventual información de procedencia se evaluarán después.
+- La vista Scroll de la pareja y la vista previa en el editor deben renderizar el **mismo documento**. Para la Revista 3D el panel usa una portada liviana y el lector completo conserva PageFlip.
+- Los cambios de apariencia no autorizan inventar envío, lectura de mensajes ni aceptación reales. Antes de producción comercial deberán resolverse la privacidad y el guardado seguro.
+
 ## Decisiones todavía abiertas
 
 1. Confirmar los nombres originales de las referencias editoriales mencionadas fonéticamente como «Deline» y «John Book».
