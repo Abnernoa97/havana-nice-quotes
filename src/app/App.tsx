@@ -43,7 +43,7 @@ function App() {
   const auth = useCloudAuth();
   const enabled = auth.status === 'authenticated';
   const { quotes, setQuotes, storageError, syncStatus, flush } = useQuoteStore(enabled);
-  const { photos, bytesUsed, uploadPhoto, uploading, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
+  const { photos, brandPhotos, bytesUsed, uploadPhoto, uploading, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
   const { view, routeTo, goBack } = useAppHistory(quotes[0]?.id || 'empty');
   const { section, active, tab, mobileMenu, preview, previewMode, mobilePreview, installGuide } = view;
   const setTab: Dispatch<SetStateAction<string>> = change => {
@@ -225,7 +225,7 @@ function App() {
       mobilePreview={mobilePreview}
       setMobilePreview={setMobilePreview}
       share={share}
-      cloudPhotos={photos}
+      cloudPhotos={[...photos, ...brandPhotos]}
       onOpenBank={() => navigate('photos')}
     />
   ) : (
@@ -259,8 +259,14 @@ function App() {
     />
   ) : null;
   const photoView = (
-    <PhotoBank photos={photos} bytesUsed={bytesUsed} uploading={uploading}
-      error={mediaError} uploadPhoto={uploadPhoto} refreshPhotos={refreshPhotos}/>
+    <PhotoBank photos={photos} brandPhotos={brandPhotos} bytesUsed={bytesUsed} uploading={uploading}
+      error={mediaError} uploadPhoto={uploadPhoto} refreshPhotos={refreshPhotos}
+      canUsePhoto={!!item} onUsePhoto={url => {
+        if (!item) return;
+        edit('cover', url);
+        routeTo({ section: 'editor', tab: 'design' });
+        setToast('Fotografía de HAVANA NICE v2 aplicada como portada.');
+      }}/>
   );
   useEffect(() => {
     const onEscape = (event: KeyboardEvent) => {

@@ -9,7 +9,7 @@
 - **Almacenamiento:** D1 `havana-nice-quotes-sync` guarda cotizaciones por ID y revisión; R2 privado existente `havana-nice-v2-media`, prefijo exclusivo `quotes-studio/photos/`, guarda imágenes. No se tocan archivos de Book v2 ni Calendario.
 - **Datos iniciales:** cero cotizaciones y cero fotografías de Quotes Studio. No se importan ejemplos ni se leen borradores de `localStorage`. La biblioteca de fotos arranca vacía; se llena desde Fotos o Diseño.
 - **Sincronización:** edición con auto-guardado, lectura cada 15 s y control de versión. Si otro teléfono modifica una cotización concurrentemente, no se sobrescribe en silencio: se muestra una incidencia para resolver. No dar por guardado si la nube está fuera de línea.
-- **Banco de fotografías:** imágenes JPG, PNG, WebP, GIF, HEIC/HEIF hasta 12 MB; cuenta y tamaño total se refieren **solo a los objetos subidos para Quotes Studio**, no a toda la cuenta R2.
+- **Banco de fotografías:** imágenes existentes de `book/v2/optimized/` de HAVANA NICE v2 disponibles como galería privada y **solo lectura**, sin mover originales. Las nuevas fotos JPG, PNG, WebP, GIF, HEIC/HEIF hasta 12 MB se guardan únicamente en `quotes-studio/photos/`; cuenta y tamaño total se refieren **solo a los objetos subidos para Quotes Studio**, no a toda la cuenta R2.
 - **Aún NO disponible:** envío real a clientes, acceso público por propuesta, notificación de lectura, firma, mensajería externa o permisos individuales. La vista cliente sigue siendo previa interna.
 - **No hay borrados automáticos de los antiguos datos locales**; la aplicación nueva simplemente no los utiliza. No borrar información de otros proyectos.
 

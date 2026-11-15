@@ -14,6 +14,7 @@ export const photoSize = (size: number): string =>
 
 export function useMediaLibrary(enabled: boolean) {
   const [photos, setPhotos] = useState<CloudPhoto[]>([]);
+  const [brandPhotos, setBrandPhotos] = useState<CloudPhoto[]>([]);
   const [bytesUsed, setBytesUsed] = useState(0);
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
@@ -32,16 +33,31 @@ export function useMediaLibrary(enabled: boolean) {
     }
   }, [enabled]);
 
+  const refreshBrandPhotos = useCallback(async () => {
+    if (!enabled) return;
+    try {
+      const response = await fetch('/api/media/brand', { credentials: 'same-origin', cache: 'no-store' });
+      if (!response.ok) throw new Error('HAVANA NICE v2 library unavailable');
+      const result = await response.json() as { photos: CloudPhoto[] };
+      setBrandPhotos(result.photos || []);
+    } catch {
+      // Quotes Studio uploads remain usable even if the older v2 gallery is unavailable.
+      setBrandPhotos([]);
+    }
+  }, [enabled]);
+
   useEffect(() => {
     if (!enabled) {
       setPhotos([]);
+      setBrandPhotos([]);
       setBytesUsed(0);
       return;
     }
     void refreshPhotos();
+    void refreshBrandPhotos();
     const interval = setInterval(() => { void refreshPhotos(); }, 20000);
     return () => clearInterval(interval);
-  }, [enabled, refreshPhotos]);
+  }, [enabled, refreshPhotos, refreshBrandPhotos]);
 
   const uploadPhoto = useCallback(async (file: File): Promise<CloudPhoto> => {
     if (!enabled) throw new Error('Inicia sesión para subir fotografías.');
@@ -71,5 +87,5 @@ export function useMediaLibrary(enabled: boolean) {
     }
   }, [enabled, refreshPhotos]);
 
-  return { photos, bytesUsed, uploadPhoto, uploading, refreshPhotos, error };
+  return { photos, brandPhotos, bytesUsed, uploadPhoto, uploading, refreshPhotos, refreshBrandPhotos, error };
 }

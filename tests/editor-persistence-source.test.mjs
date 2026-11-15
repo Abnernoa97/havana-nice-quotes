@@ -57,3 +57,13 @@ test('Acceso de administración y cuenta de fotos se presentan sin exponer secre
   assert.match(photos, /uploadPhoto\(file\)/);
   assert.doesNotMatch(auth, /45f87199|ADMIN_PASSPHRASE/);
 });
+
+
+test('Las imágenes existentes de Book v2 se reutilizan solo como lectura privada', () => {
+  const app = src('app/App.tsx');
+  const media = src('features/photos/useMediaLibrary.ts');
+  const bank = src('features/photos/PhotoBank.tsx');
+  assert.match(app, /cloudPhotos=\{\[\.\.\.photos, \.\.\.brandPhotos\]\}/);
+  assert.match(media, /fetch\('\/api\/media\/brand'/);
+  assert.match(bank, /brandPhotos\.map\(photo =>/);
+});

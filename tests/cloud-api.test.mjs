@@ -61,6 +61,10 @@ function environment() {
       return { body: new Blob([entry.body]).stream() };
     },
     async delete(key) { objects.delete(key); },
+    async list({ prefix }) {
+      return { objects: [...objects].filter(([key]) => key.startsWith(prefix))
+        .map(([key, value]) => ({ key, size: value.body.byteLength, uploaded: new Date('2026-11-01T00:00:00Z') })) };
+    },
   };
   return { DB: db, MEDIA: bucket, ASSETS: { fetch: async () => new Response('spa') }, quotes, media, objects };
 }
@@ -161,4 +165,36 @@ test('Fuera de la API el Worker conserva los mismos assets de la aplicación', a
   const response = await worker.fetch(request('/'),env);
   assert.equal(response.status,200);
   assert.equal(await response.text(),'spa');
+});
+
+
+test('Galería HAVANA NICE v2 muestra fotos optimizadas privadas sin mezclar calendario ni borrar originales', async () => {
+  const env = environment();
+  const cookie = await login(env);
+  const brandKey = 'book/v2/optimized/test-image/cover.webp';
+  const calendarKey = 'calendar/v2/memories/test/cover.webp';
+  env.objects.set(brandKey, { body: new Uint8Array([87,69,66,80]) });
+  env.objects.set(calendarKey, { body: new Uint8Array([0,1,2]) });
+  const response = await worker.fetch(request('/api/media/brand',{headers:{Cookie: cookie}}),env);
+  assert.equal(response.status,200);
+  const gallery = (await response.json()).photos;
+  assert.equal(gallery.length,1);
+  assert.equal(gallery[0].name,'HAVANA NICE v2 · 01');
+  const denied = await worker.fetch(request(gallery[0].url),env);
+  assert.equal(denied.status,401);
+  const photo = await worker.fetch(request(gallery[0].url,{headers:{Cookie: cookie}}),env);
+  assert.equal(photo.status,200);
+  assert.equal(photo.headers.get('content-type'),'image/webp');
+  const inaccessible = await worker.fetch(request('/api/media/brand/asset?key='+encodeURIComponent(calendarKey),{headers:{Cookie: cookie}}),env);
+  assert.equal(inaccessible.status,404);
+  assert.equal(env.objects.has(brandKey),true);
+  assert.equal(env.objects.has(calendarKey),true);
+});
+
+test('Sin red, el guardado evita reintentos cada segundo y los reanuda tras conectar', async () => {
+  const src = (await import('node:fs')).readFileSync(
+    new URL('../src/features/quotes/useQuoteStore.ts', import.meta.url),'utf8');
+  assert.match(src, /lastFailure\.current = 'offline'/);
+  assert.match(src, /lastFailure\.current === 'none' && timer\.current === null/);
+  assert.match(src, /else if \(lastFailure\.current === 'offline'\)/);
 });

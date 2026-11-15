@@ -16,6 +16,7 @@ export function useQuoteStore(enabled: boolean) {
   const enabledRef = useRef(enabled);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saving = useRef<Promise<boolean> | null>(null);
+  const lastFailure = useRef<'none' | 'offline' | 'conflict'>('none');
   enabledRef.current = enabled;
 
   const flush = useCallback((): Promise<boolean> => {
@@ -36,16 +37,19 @@ export function useQuoteStore(enabled: boolean) {
             body: JSON.stringify({ quote: record, expectedRevision }),
           });
           if (response.status === 409) {
+            lastFailure.current = 'conflict';
             setSyncStatus('conflict');
             return false; // Never silently overwrite another device.
           }
           if (!response.ok) throw new Error('Cloud sync failed: ' + response.status);
           const result = await response.json() as { revision: number };
           revisions.current.set(id, result.revision);
+          lastFailure.current = 'none';
           // Another edit arrived while this request was in flight.
           if (pending.current.get(id) === record) pending.current.delete(id);
         } catch (error) {
           console.warn('Cloud save unavailable', error);
+          lastFailure.current = 'offline';
           setSyncStatus('offline');
           return false; // The edited record remains in memory for retry.
         }
@@ -56,7 +60,7 @@ export function useQuoteStore(enabled: boolean) {
     saving.current = work;
     void work.finally(() => {
       saving.current = null;
-      if (pending.current.size && enabledRef.current && timer.current === null) {
+      if (pending.current.size && enabledRef.current && lastFailure.current === 'none' && timer.current === null) {
         timer.current = setTimeout(() => { timer.current = null; void flush(); }, 900);
       }
     });
@@ -110,17 +114,23 @@ export function useQuoteStore(enabled: boolean) {
         renderQuotes(merged);
       }
       if (!pending.current.size) setSyncStatus('synced');
+      else if (lastFailure.current === 'offline') {
+        // Reconnect only after a successful cloud read, rather than retrying every second.
+        lastFailure.current = 'none';
+        queueSave();
+      }
     } catch (error) {
       console.warn('Cloud refresh unavailable', error);
       setSyncStatus('offline');
     }
-  }, []);
+  }, [queueSave]);
 
   useEffect(() => {
     if (!enabled) {
       local.current = [];
       revisions.current.clear();
       pending.current.clear();
+      lastFailure.current = 'none';
       renderQuotes([]);
       setSyncStatus('loading');
       return;
