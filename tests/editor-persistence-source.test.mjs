@@ -65,11 +65,22 @@ test('El acceso a la nube es por dispositivo autorizado, sin formulario de contr
 });
 
 
-test('Las imágenes existentes de Book v2 se reutilizan solo como lectura privada', () => {
+test('La biblioteca de Quotes Studio solo muestra fotos cargadas en su propia aplicación', () => {
   const app = src('app/App.tsx');
   const media = src('features/photos/useMediaLibrary.ts');
   const bank = src('features/photos/PhotoBank.tsx');
-  assert.match(app, /cloudPhotos=\{\[\.\.\.photos, \.\.\.brandPhotos\]\}/);
-  assert.match(media, /fetch\('\/api\/media\/brand'/);
-  assert.match(bank, /brandPhotos\.map\(photo =>/);
+  const css = readFileSync(new URL('../src/features/photos/photo-bank.css', import.meta.url), 'utf8');
+  const styles = readFileSync(new URL('../src/shared/styles/index.css', import.meta.url), 'utf8');
+  const worker = readFileSync(new URL('../worker/index.ts', import.meta.url), 'utf8');
+  assert.match(app, /cloudPhotos=\{photos\}/);
+  assert.match(bank, /photos\.map\(p =>/);
+  assert.match(bank, /type="file"/);
+  assert.match(bank, /Actualizar biblioteca/);
+  assert.match(bank, /Una biblioteca lista para tus fotografías/);
+  assert.match(css, /grid-template-columns: repeat\(2, minmax\(0,1fr\)\)/);
+  for (const file of [app, media, bank, worker, css]) {
+    assert.doesNotMatch(file, /brandPhotos|refreshBrandPhotos|BRAND_PREFIX|\/api\/media\/brand|book\/v2\/optimized\/|hn-photo-existing/);
+  }
+  assert.doesNotMatch(app, /footer-demo|Cloudflare D1 \+ R2|Datos protegidos y sincronizados en la nube/);
+  assert.doesNotMatch(styles, /\.footer-demo/);
 });

@@ -81,10 +81,6 @@ function environment() {
       return { body: new Blob([entry.body]).stream() };
     },
     async delete(key) { objects.delete(key); },
-    async list({ prefix }) {
-      return { objects: [...objects].filter(([key]) => key.startsWith(prefix))
-        .map(([key, value]) => ({ key, size: value.body.byteLength, uploaded: new Date('2026-11-01T00:00:00Z') })) };
-    },
   };
   return { DB: db, MEDIA: bucket, ASSETS: { fetch: async () => new Response('spa') }, quotes, media, objects, sessions, invites };
 }
@@ -221,27 +217,41 @@ test('Fuera de la API el Worker conserva los mismos assets de la aplicación', a
 });
 
 
-test('Galería HAVANA NICE v2 muestra fotos optimizadas privadas sin mezclar calendario ni borrar originales', async () => {
+test('Quotes Studio no muestra ni sirve fotografías de otras aplicaciones', async () => {
   const env = environment();
   const cookie = await authorizeDevice(env);
-  const brandKey = 'book/v2/optimized/test-image/cover.webp';
-  const calendarKey = 'calendar/v2/memories/test/cover.webp';
-  env.objects.set(brandKey, { body: new Uint8Array([87,69,66,80]) });
-  env.objects.set(calendarKey, { body: new Uint8Array([0,1,2]) });
-  const response = await worker.fetch(request('/api/media/brand',{headers:{Cookie: cookie}}),env);
-  assert.equal(response.status,200);
-  const gallery = (await response.json()).photos;
-  assert.equal(gallery.length,1);
-  assert.equal(gallery[0].name,'HAVANA NICE v2 · 01');
-  const denied = await worker.fetch(request(gallery[0].url),env);
-  assert.equal(denied.status,401);
-  const photo = await worker.fetch(request(gallery[0].url,{headers:{Cookie: cookie}}),env);
-  assert.equal(photo.status,200);
-  assert.equal(photo.headers.get('content-type'),'image/webp');
-  const inaccessible = await worker.fetch(request('/api/media/brand/asset?key='+encodeURIComponent(calendarKey),{headers:{Cookie: cookie}}),env);
-  assert.equal(inaccessible.status,404);
-  assert.equal(env.objects.has(brandKey),true);
-  assert.equal(env.objects.has(calendarKey),true);
+  const other = 'book/v2/optimized/existing/cover.webp';
+  env.objects.set(other, { body: new Uint8Array([87,69,66,80]) });
+  const legacyGallery = await worker.fetch(request('/api/media/brand', { headers: { Cookie: cookie } }), env);
+  assert.equal(legacyGallery.status, 404);
+  const legacyFile = await worker.fetch(request('/api/media/brand/asset?key=' +
+    encodeURIComponent(other), { headers: { Cookie: cookie } }), env);
+  assert.equal(legacyFile.status, 404);
+  const own = await worker.fetch(request('/api/media', { headers: { Cookie: cookie } }), env);
+  assert.deepEqual((await own.json()).photos, []);
+  assert.equal(env.objects.has(other), true);
+});
+
+test('Las fotos cargadas a Quotes Studio son las únicas que cuentan en su galería', async () => {
+  const env = environment();
+  const cookie = await authorizeDevice(env);
+  env.objects.set('book/v2/optimized/other/cover.webp', { body: new Uint8Array([1]) });
+  for (let i = 0; i < 2; i++) {
+    const upload = await worker.fetch(request('/api/media', {
+      method: 'POST',
+      headers: { Origin: origin, Cookie: cookie, 'Content-Type': 'image/png',
+        'X-File-Name': 'imagen' + i + '.png' },
+      body: new Uint8Array([137,80,78,71,i]),
+    }), env);
+    assert.equal(upload.status, 201);
+  }
+  const response = await worker.fetch(request('/api/media', { headers: { Cookie: cookie } }), env);
+  const data = await response.json();
+  assert.equal(data.photos.length, 2);
+  assert.equal(data.bytesUsed, 10);
+  assert.ok(data.photos.every(p => p.url.startsWith('/api/media/')));
+  assert.equal(env.objects.size, 3);
+  assert.equal([...env.objects.keys()].filter(k => k.startsWith('quotes-studio/photos/')).length, 2);
 });
 
 test('Sin red, el guardado evita reintentos cada segundo y los reanuda tras conectar', async () => {

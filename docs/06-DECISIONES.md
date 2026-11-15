@@ -51,6 +51,14 @@
 - Anticipo: entrada editable y desplegable de opciones **20, 30, 40, 50, 60, 70, 80, 90, 100 %**. El total se calcula de forma directa sobre el mismo importe sin conversiones.
 - La implementación se mantiene modular: `QuotePricingPanel.tsx` y su `quote-pricing.css` propios; no se cambia el diseño ni los parámetros de PageFlip.
 
+## Biblioteca independiente por aplicación · 15/11/2026
+
+- Quotes Studio **solo muestra y utiliza las imágenes subidas manualmente desde la propia aplicación**. Las fotografías de HAVANA NICE v2, Book, Calendario o cualquier otro módulo no se muestran, consultan ni importan.
+- Cloudflare R2 sigue siendo compartido físicamente, pero la app utiliza exclusivamente el prefijo propio `quotes-studio/photos/` y una tabla D1 exclusiva para su biblioteca. Los archivos externos existentes **no se borran ni alteran**.
+- Eliminar de verdad: componentes, contador, consulta API y estilos de la antigua galería v2, no ocultarlos con CSS. Eliminar también las dos leyendas técnicas del pie de página y el CSS que ya no se utiliza.
+- Conservar: selector de la galería nativa del teléfono, subida manual, conteo propio de fotografías, espacio utilizado, «Actualizar biblioteca», estado vacío aprobado y galería de dos columnas en móvil.
+- La gestión de límites, carpetas y organización global de R2 se pospone para otra etapa. No crear infraestructura adicional ahora.
+
 ## Decisiones todavía abiertas
 
 1. Confirmar los nombres originales de las referencias editoriales mencionadas fonéticamente como «Deline» y «John Book».

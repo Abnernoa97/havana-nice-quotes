@@ -12,9 +12,7 @@ interface D1Statement {
 }
 interface D1Binding { prepare(sql: string): D1Statement }
 interface R2Object { body: ReadableStream; httpMetadata?: { contentType?: string }; etag?: string }
-interface R2ListingItem { key: string; size: number; uploaded: Date }
 interface R2Binding {
-  list(options: { prefix: string; limit: number }): Promise<{ objects: R2ListingItem[] }>;
   get(key: string): Promise<R2Object | null>;
   put(key: string, body: ArrayBuffer, opts: { httpMetadata: { contentType: string }; customMetadata: Record<string, string> }): Promise<unknown>;
   delete(key: string): Promise<void>;
@@ -28,7 +26,6 @@ interface SessionRow extends D1Row { token_hash: string; expires_at: number; rev
 interface QuoteRow extends D1Row { id: string; payload: string; revision: number }
 interface MediaRow extends D1Row { id: string; filename: string; mime: string; size: number; created_at: number; object_key: string }
 const PHOTOS_PREFIX = 'quotes-studio/photos/';
-const BRAND_PREFIX = 'book/v2/optimized/';
 const MAX_IMAGE = 12 * 1024 * 1024;
 const COOKIE = 'hn_quotes_device';
 const SESSION_LIFETIME = 365 * 24 * 60 * 60;
@@ -206,33 +203,6 @@ async function api(request: Request, env: Env): Promise<Response> {
     return json({
       photos: rows.results.map(mediaPublic),
       bytesUsed: rows.results.reduce((sum, r) => sum + r.size, 0),
-    });
-  }
-  if (path === '/api/media/brand' && method === 'GET') {
-    // Reuse the existing optimized HAVANA NICE v2 images as a read-only gallery.
-    // Never modify, import or enumerate unrelated Book originals or Calendar objects.
-    const listing = await env.MEDIA.list({ prefix: BRAND_PREFIX, limit: 180 });
-    const originals = listing.objects.filter(obj => obj.key.endsWith('.webp'));
-    return json({ photos: originals.map((obj, index) => ({
-      id: obj.key, name: 'HAVANA NICE v2 · ' + String(index + 1).padStart(2, '0'),
-      mime: 'image/webp', size: obj.size,
-      createdAt: Math.floor(obj.uploaded.getTime() / 1000),
-      url: '/api/media/brand/asset?key=' + encodeURIComponent(obj.key),
-    })) });
-  }
-  if (path === '/api/media/brand/asset' && (method === 'GET' || method === 'HEAD')) {
-    const key = url.searchParams.get('key') || '';
-    if (!key.startsWith(BRAND_PREFIX) || !key.endsWith('.webp') || key.includes('..')) {
-      return bad('Fotografía no autorizada.', 404);
-    }
-    const object = await env.MEDIA.get(key);
-    if (!object) return bad('Fotografía no encontrada.', 404);
-    return new Response(method === 'HEAD' ? null : object.body, {
-      headers: {
-        'Content-Type': 'image/webp',
-        'Cache-Control': 'private, max-age=120',
-        'X-Content-Type-Options': 'nosniff',
-      },
     });
   }
   if (path === '/api/media' && method === 'POST') {

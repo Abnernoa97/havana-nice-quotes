@@ -146,7 +146,6 @@ export function useQuoteStore(enabled: boolean) {
 
   return {
     quotes, setQuotes, syncStatus,
-    storageError: syncStatus === 'offline' || syncStatus === 'conflict',
     flush, refresh,
   };
 }

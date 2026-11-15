@@ -1154,15 +1154,6 @@ p {
   min-width: 0;
   font-size: 12px;
 }
-.footer-demo {
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  font-size: 9px;
-  color: #a1a9a0;
-  padding: 21px 45px;
-  border-top: 1px solid #e6e7e0;
-}
 .mobile-bottom {
   display: none;
 }
@@ -1493,9 +1484,6 @@ p {
     color: #184131;
     font-weight: 700;
   }
-  .footer-demo {
-    padding-bottom: 90px;
-  }
 }
 @media (max-width: 600px) {
   .topright {
@@ -1663,10 +1651,6 @@ p {
   }
   .chat-bubbles {
     min-height: 270px;
-  }
-  .footer-demo {
-    flex-direction: column;
-    padding: 16px 20px 85px;
   }
   .client-navbar {
     height: 70px;

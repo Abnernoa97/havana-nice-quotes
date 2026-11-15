@@ -44,8 +44,8 @@ const pages = [
 function App() {
   const auth = useDeviceAccess();
   const enabled = auth.status === 'authorized';
-  const { quotes, setQuotes, storageError, syncStatus, flush } = useQuoteStore(enabled);
-  const { photos, brandPhotos, bytesUsed, uploadPhoto, uploading, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
+  const { quotes, setQuotes, syncStatus, flush } = useQuoteStore(enabled);
+  const { photos, bytesUsed, uploadPhoto, uploading, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
   const { view, routeTo, goBack } = useAppHistory(quotes[0]?.id || 'empty');
   const { section, active, tab, mobileMenu, preview, previewMode, mobilePreview, installGuide } = view;
   const setTab: Dispatch<SetStateAction<string>> = change => {
@@ -250,7 +250,7 @@ function App() {
       mobilePreview={mobilePreview}
       setMobilePreview={setMobilePreview}
       share={share}
-      cloudPhotos={[...photos, ...brandPhotos]}
+      cloudPhotos={photos}
       onOpenBank={() => navigate('photos')}
     />
   ) : (
@@ -284,14 +284,8 @@ function App() {
     />
   ) : null;
   const photoView = (
-    <PhotoBank photos={photos} brandPhotos={brandPhotos} bytesUsed={bytesUsed} uploading={uploading}
-      error={mediaError} uploadPhoto={uploadPhoto} refreshPhotos={refreshPhotos}
-      canUsePhoto={!!item} onUsePhoto={url => {
-        if (!item) return;
-        edit('cover', url);
-        routeTo({ section: 'editor', tab: 'design' });
-        setToast('Fotografía de HAVANA NICE v2 aplicada como portada.');
-      }}/>
+    <PhotoBank photos={photos} bytesUsed={bytesUsed} uploading={uploading}
+      error={mediaError} uploadPhoto={uploadPhoto} refreshPhotos={refreshPhotos} />
   );
   useEffect(() => {
     const onEscape = (event: KeyboardEvent) => {
@@ -355,10 +349,6 @@ function App() {
         {section === 'editor' && editor}
         {section === 'messages' && messagesView}
         {section === 'photos' && photoView}
-        <div className="footer-demo">
-          <span>HAVANA NICE Quotes Studio · Cloudflare D1 + R2</span>
-          <span>{storageError ? 'Sincronización pendiente · Comprueba la conexión' : 'Datos protegidos y sincronizados en la nube'}</span>
-        </div>
       </div>
       <div className="mobile-bottom">
         {pages.map(p => (
