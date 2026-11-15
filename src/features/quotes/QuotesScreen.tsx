@@ -1,6 +1,6 @@
 import type { ReactNode, Dispatch, SetStateAction } from 'react';
 import { Search, ArrowUpRight } from 'lucide-react';
-import { usd, dDate } from '../../shared/lib/formatters';
+import { money, dDate } from '../../shared/lib/formatters';
 import type { Quote } from './types';
 import { filterQuotes } from './model';
 
@@ -85,7 +85,7 @@ export default function QuotesScreen({
                 </div>
               </div>
               <span className="table-date">{dDate(q.date)}</span>
-              <span className="table-price">{usd(q.price)}</span>
+              <span className="table-price">{money(q.price, q.currency)}</span>
               <span>
                 <i className={'pill ' + statusClass(q.status)}>{q.status}</i>
               </span>

@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { CheckCircle2, Heart, MessageCircle } from 'lucide-react';
-import { usd } from '../../shared/lib/formatters';
+import { money } from '../../shared/lib/formatters';
 import type { Quote } from '../quotes/types';
 import Proposal from './Proposal';
 
@@ -76,7 +76,7 @@ export default function ClientPage({
                 <Heart size={16} /> Simulate acceptance
               </button>
             )}
-            <p className="client-demo-investment">Total mostrado: {usd(item.price)}</p>
+            <p className="client-demo-investment">Total mostrado: {money(item.price, item.currency)}</p>
           </div>
         </div>
       </details>

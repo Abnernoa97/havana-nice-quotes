@@ -43,6 +43,14 @@
 - Las invitaciones tienen uso único; se almacenan únicamente hashes en D1, nunca tokens completos en Git o R2.
 - El primer vínculo se entrega mediante un enlace administrativo temporal y se consume después del primer uso.
 
+## Precios y anticipos · 15/11/2026
+
+- El selector de moneda ofrece exactamente **USD y MX**; no hay conversión de divisas, tipo de cambio ni segundo precio.
+- La moneda se guarda en cada cotización y aparece en las listas, editor y lecturas Scroll / Revista 3D. Registros anteriores sin moneda se interpretan como USD (sin modificar sus importes).
+- Precio: campo numérico sin cero de relleno al comienzo; al enfocar se selecciona el importe actual y se normalizan ceros iniciales y separadores.
+- Anticipo: entrada editable y desplegable de opciones **20, 30, 40, 50, 60, 70, 80, 90, 100 %**. El total se calcula de forma directa sobre el mismo importe sin conversiones.
+- La implementación se mantiene modular: `QuotePricingPanel.tsx` y su `quote-pricing.css` propios; no se cambia el diseño ni los parámetros de PageFlip.
+
 ## Decisiones todavía abiertas
 
 1. Confirmar los nombres originales de las referencias editoriales mencionadas fonéticamente como «Deline» y «John Book».

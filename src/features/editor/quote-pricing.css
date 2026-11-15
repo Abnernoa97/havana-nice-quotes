@@ -1,0 +1,120 @@
+/* Precios · único componente responsable del selector de moneda y anticipo. */
+.editor-page .hn-pricing .hn-pricing-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  margin-bottom: 9px;
+}
+.editor-page .hn-pricing .hn-pricing-heading label {
+  margin: 0;
+  flex: 1;
+}
+.hn-currency-switch {
+  --switch-padding: 4px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(54px, 1fr));
+  position: relative;
+  flex: 0 0 130px;
+  padding: var(--switch-padding);
+  min-height: 42px;
+  isolation: isolate;
+  border: 1px solid #d8e4d8;
+  border-radius: 12px;
+  background: #f1f4ef;
+}
+.hn-currency-switch::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: var(--switch-padding);
+  bottom: var(--switch-padding);
+  left: var(--switch-padding);
+  width: calc((100% - var(--switch-padding) * 2) / 2);
+  background: #244a37;
+  border-radius: 8px;
+  box-shadow: 0 2px 7px #17312326;
+  transition: transform .2s ease;
+}
+.hn-currency-switch[data-currency='MX']::before {
+  transform: translateX(100%);
+}
+.hn-currency-switch button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #68806e;
+  border-radius: 8px;
+  min-height: 32px;
+  transition: color .2s ease;
+}
+.hn-currency-switch button.selected { color: white; }
+.hn-currency-switch button:focus-visible,
+.hn-deposit-picker summary:focus-visible,
+.hn-deposit-options button:focus-visible {
+  outline: 2px solid #ad9364;
+  outline-offset: 3px;
+}
+.hn-pricing input.hn-price-input {
+  font-variant-numeric: tabular-nums;
+}
+.hn-deposit-picker { margin-top: 12px; }
+.hn-deposit-picker summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 11px 13px;
+  min-height: 43px;
+  border: 1px solid #e0e8de;
+  border-radius: 10px;
+  background: #f7f9f5;
+  color: #44654f;
+  font-size: 12px;
+  font-weight: 600;
+}
+.hn-deposit-picker summary::-webkit-details-marker { display: none; }
+.hn-deposit-picker-selected {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: #214836;
+}
+.hn-deposit-picker[open] .hn-deposit-picker-selected svg { transform: rotate(180deg); }
+.hn-deposit-picker-selected svg { transition: transform .2s ease; }
+.hn-deposit-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px 0 4px;
+}
+.hn-deposit-options button {
+  cursor: pointer;
+  min-height: 43px;
+  padding: 9px 6px;
+  border: 1px solid #e0e8de;
+  border-radius: 9px;
+  background: #fff;
+  color: #3f5f4b;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.hn-deposit-options button.selected {
+  color: #fff;
+  background: #244a37;
+  border-color: #244a37;
+}
+.hn-deposit-options button:hover:not(.selected) { background: #eaf1e8; }
+@media (prefers-reduced-motion: reduce) {
+  .hn-currency-switch::before, .hn-currency-switch button,
+  .hn-deposit-picker-selected svg { transition: none; }
+}

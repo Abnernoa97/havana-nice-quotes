@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import type { Quote } from '../quotes/types';
 import { PageFlip } from 'page-flip';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
-import { usd } from '../../shared/lib/formatters';
+import { money, quoteCurrency } from '../../shared/lib/formatters';
 import './flip-magazine.css';
 
 function MagazineLeaf({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -71,7 +71,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
       try { flip?.destroy(); } catch (error) { console.warn('Page flip cleanup', error); }
       mount.replaceChildren();
     };
-  }, [item.id, item.cover, item.name, item.note, item.package, item.price, item.location, item.deposit, item.desc, item.date]);
+  }, [item.id, item.cover, item.name, item.note, item.package, item.price, item.location, item.deposit, item.desc, item.date, item.currency]);
 
   const changePage = (direction: 'next' | 'prev') => {
     const flip = flipRef.current;
@@ -172,9 +172,9 @@ export default function FlipMagazine({ item }: { item: Quote }) {
             <span className="hn-micro">YOUR LIVE MUSIC EXPERIENCE</span>
             <h2>The<br/><em>Investment.</em></h2>
             <p>{item.package}</p>
-            <div className="hn-investment-total">{usd(item.price)}<small>USD · PROPOSAL TOTAL</small></div>
+            <div className="hn-investment-total">{money(item.price, item.currency)}<small>{quoteCurrency(item.currency)} · PROPOSAL TOTAL</small></div>
             <div className="hn-investment-rule"/>
-            <div className="hn-investment-details"><span>RESERVATION DEPOSIT · {item.deposit}%</span><strong>{usd(item.price * item.deposit / 100)}</strong></div>
+            <div className="hn-investment-details"><span>RESERVATION DEPOSIT · {item.deposit}%</span><strong>{money(item.price * item.deposit / 100, item.currency)}</strong></div>
             <div className="hn-investment-rule"/>
             <p className="hn-investment-copy">{item.desc}</p>
             <small className="hn-investment-notice">VISUAL SAMPLE ONLY — NOT A FORMAL QUOTE.</small>

@@ -103,6 +103,7 @@ function validQuote(input: unknown, id: string): input is Record<string, unknown
     REQUIRED_FIELDS.every(field => typeof q[field] === 'string') &&
     typeof q.price === 'number' && Number.isFinite(q.price) && q.price >= 0 &&
     typeof q.deposit === 'number' && Number.isFinite(q.deposit) && q.deposit >= 0 && q.deposit <= 100 &&
+    (q.currency === undefined || q.currency === 'USD' || q.currency === 'MX') &&
     VALID_STATES.has(String(q.status)) &&
     (q.style === undefined || ['libre', 'vogue', 'lane', 'junebug', 'nyt'].includes(String(q.style))) &&
     (q.readingMode === undefined || ['flip', 'scroll'].includes(String(q.readingMode))) &&

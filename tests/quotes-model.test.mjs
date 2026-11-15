@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { filterQuotes, statusClass, createSampleDraft, editSampleQuote, safeQuotePrice, safeQuoteDeposit, findClientActivity } from '../src/features/quotes/model.ts';
-import { usd, dDate } from '../src/shared/lib/formatters.ts';
+import { filterQuotes, statusClass, createSampleDraft, editSampleQuote, safeQuotePrice, safeQuoteDeposit, normalizePriceInput, findClientActivity } from '../src/features/quotes/model.ts';
+import { usd, money, quoteCurrency, dDate } from '../src/shared/lib/formatters.ts';
 import { seed } from '../src/features/quotes/demo-data.ts';
 import { formatHomeDate, homeGreeting } from '../src/features/home/greeting.ts';
 import { readFileSync } from 'node:fs';
@@ -85,4 +85,32 @@ test('Conversaciones y aceptaciones de demostración permanecen por cotización'
   const updated = editSampleQuote([a, b], a.id, 'status', 'Aceptada');
   assert.equal(updated[0].status, 'Aceptada');
   assert.equal(updated[1].status, b.status);
+});
+
+
+test('USD y MX son etiquetas independientes sin conversión del precio', () => {
+  assert.equal(money(77000, 'USD'), '$77,000 USD');
+  assert.equal(money(77000, 'MX'), '$77,000 MX');
+  assert.equal(money(77000 * 30 / 100, 'MX'), '$23,100 MX');
+  assert.equal(money(77000 * 100 / 100, 'USD'), '$77,000 USD');
+  assert.equal(quoteCurrency(undefined), 'USD');
+  assert.equal(quoteCurrency('MX'), 'MX');
+  assert.equal(createSampleDraft('hn-currency').currency, 'USD');
+});
+
+test('El precio ignora ceros iniciales y caracteres de pegado', () => {
+  assert.equal(normalizePriceInput('077000'), '77000');
+  assert.equal(normalizePriceInput('000077000'), '77000');
+  assert.equal(normalizePriceInput('77,000'), '77000');
+  assert.equal(normalizePriceInput('0'), '0');
+  assert.equal(normalizePriceInput(''), '');
+  assert.equal(normalizePriceInput('100000'), '100000');
+});
+
+test('Anticipos 20–100 se calculan exactamente sobre USD y MX', () => {
+  const price = 77000;
+  for (const percent of [20,30,40,50,60,70,80,90,100]) {
+    assert.equal(safeQuoteDeposit(String(percent)), percent);
+    assert.equal(Number((price * percent / 100).toFixed(2)), 770 * percent);
+  }
 });

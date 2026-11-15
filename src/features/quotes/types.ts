@@ -1,4 +1,6 @@
-/** Datos exclusivamente ficticios de la versión demostrativa. */
+import type { QuoteCurrency } from '../../shared/lib/formatters';
+
+/** Datos de las cotizaciones, compartidos entre el estudio y la nube. */
 export type QuoteStatus = 'Borrador' | 'Enviada' | 'En revisión' | 'Aceptada';
 export type QuoteStyle = 'libre' | 'vogue' | 'lane' | 'junebug' | 'nyt';
 export type ReadingMode = 'flip' | 'scroll';
@@ -12,6 +14,7 @@ export type Quote = {
   date: string;
   price: number;
   deposit: number;
+  currency?: QuoteCurrency;
   status: QuoteStatus;
   cover: string;
   font: string;

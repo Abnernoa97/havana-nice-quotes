@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react';
-import { usd, dDate } from '../../shared/lib/formatters';
+import { money, dDate } from '../../shared/lib/formatters';
 import type { Quote } from '../quotes/types';
 
 type Props = { item: Quote; styleName: string; embedded?: boolean };
@@ -61,11 +61,11 @@ export default function Proposal({ item, styleName, embedded = false }: Props) {
         <div className="price-row">
           <div>
             <small>TOTAL PROPOSAL</small>
-            <strong>{usd(item.price)}</strong>
+            <strong>{money(item.price, item.currency)}</strong>
           </div>
           <div>
             <small>TO RESERVE · {item.deposit}%</small>
-            <strong>{usd((item.price * item.deposit) / 100)}</strong>
+            <strong>{money((item.price * item.deposit) / 100, item.currency)}</strong>
           </div>
         </div>
         <div className="paper-end">

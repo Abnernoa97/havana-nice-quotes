@@ -36,6 +36,7 @@ export function createSampleDraft(id: string): Quote {
     location: 'Destination, Mexico',
     date: '',
     price: 5900,
+    currency: 'USD',
     status: 'Borrador',
     messages: [],
     cover: photos[0],
@@ -50,6 +51,11 @@ export function editSampleQuote(
   quotes: Quote[], id: string, key: keyof Quote, value: Quote[keyof Quote]
 ): Quote[] {
   return quotes.map(q => (q.id === id ? { ...q, [key]: value } : q));
+}
+
+/** Text input for whole-number quotes: never keeps a default or pasted leading zero. */
+export function normalizePriceInput(input: string): string {
+  return input.replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, '');
 }
 
 /** Los inputs numéricos pueden producir valores negativos, Infinity o NaN durante la edición. */

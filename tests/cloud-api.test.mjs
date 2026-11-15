@@ -251,3 +251,29 @@ test('Sin red, el guardado evita reintentos cada segundo y los reanuda tras cone
   assert.match(src, /lastFailure\.current === 'none' && timer\.current === null/);
   assert.match(src, /else if \(lastFailure\.current === 'offline'\)/);
 });
+
+
+test('Cotizaciones conservan USD/MX en D1 y rechazan monedas no admitidas', async () => {
+  const env = environment();
+  const cookie = await authorizeDevice(env);
+  const id = 'hn-00000000-1234-1234-1234-123456789abc';
+  const quote = {
+    id, name: 'Fer & Noa', client: '', email: '', location: 'Mexico',
+    date: '', price: 77000, deposit: 30, currency: 'MX',
+    status: 'Borrador', cover: '', font: 'editorial', color: '#18342f',
+    note: '', package: 'Live Band', desc: '', messages: [], style: 'libre', readingMode: 'flip',
+  };
+  const created = await worker.fetch(jsonRequest('/api/quotes/' + id, 'PUT',
+    { quote, expectedRevision: 0 }, cookie), env);
+  assert.equal(created.status, 200);
+  const loaded = await worker.fetch(request('/api/quotes', { headers: { Cookie: cookie } }), env);
+  assert.equal((await loaded.json()).quotes[0].quote.currency, 'MX');
+  const invalid = await worker.fetch(jsonRequest('/api/quotes/' + id, 'PUT',
+    { quote: { ...quote, currency: 'EUR' }, expectedRevision: 1 }, cookie), env);
+  assert.equal(invalid.status, 400);
+  const changed = await worker.fetch(jsonRequest('/api/quotes/' + id, 'PUT',
+    { quote: { ...quote, currency: 'USD', deposit: 100 }, expectedRevision: 1 }, cookie), env);
+  assert.equal(changed.status, 200);
+  const latest = await worker.fetch(request('/api/quotes', { headers: { Cookie: cookie } }), env);
+  assert.deepEqual(((await latest.json()).quotes[0].quote), { ...quote, currency: 'USD', deposit: 100 });
+});
