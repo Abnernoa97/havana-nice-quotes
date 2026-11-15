@@ -5,6 +5,7 @@ import EditorialStyles, { editorialStyles } from './EditorialStyles';
 import { photos, seed } from './features/quotes/demo-data';
 import { usd, dDate } from './shared/lib/formatters';
 import QuotePricingPanel from './features/editor/QuotePricingPanel';
+import QuoteDetailsPanel from './features/editor/QuoteDetailsPanel';
 import {
   LayoutDashboard,
   FileText,
@@ -675,56 +676,7 @@ function App() {
             </button>
           </div>
           {tab === 'details' && (
-            <div className="edit-body">
-              <span className="eyebrow">PROPOSAL DETAILS</span>
-              <h3>Personaliza cada detalle</h3>
-              <label>
-                Nombres de la pareja
-                <input
-                  value={item.name}
-                  onChange={e => edit('name', e.target.value)}
-                  placeholder="Olivia & James"
-                />
-              </label>
-              <label>
-                Destino / Venue
-                <input
-                  value={item.location}
-                  onChange={e => edit('location', e.target.value)}
-                />
-              </label>
-              <label>
-                Fecha de la celebración
-                <input
-                  type="date"
-                  value={item.date}
-                  onChange={e => edit('date', e.target.value)}
-                />
-              </label>
-              <label>
-                Mensaje en la portada
-                <textarea
-                  rows={3}
-                  value={item.note}
-                  onChange={e => edit('note', e.target.value)}
-                />
-              </label>
-              <label>
-                Nombre del servicio
-                <input
-                  value={item.package}
-                  onChange={e => edit('package', e.target.value)}
-                />
-              </label>
-              <label>
-                Descripción
-                <textarea
-                  rows={4}
-                  value={item.desc}
-                  onChange={e => edit('desc', e.target.value)}
-                />
-              </label>
-            </div>
+            <QuoteDetailsPanel item={item} edit={edit} />
           )}
           {tab === 'styles' && (
             <EditorialStyles
