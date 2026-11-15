@@ -101,6 +101,34 @@ if (fileSet.has('wrangler.jsonc')) {
 }
 // Contratos mínimos que protegen decisiones importantes de la demo.
 const sourceFiles = all.filter(p => /\.(?:ts|tsx|js|jsx)$/.test(p) && p.startsWith('src/'));
+// Detectar módulos nuevos que quedaron abandonados tras una refactorización.
+// La ruta de entrada es src/main.tsx; los .d.ts ambientales se incluyen por TypeScript.
+// Esto es una verificación conservadora: no elimina archivos automáticamente.
+const appSources = all.filter(p =>
+  p.startsWith('src/') && /\.(?:tsx?|jsx?|css)$/.test(p) && !p.endsWith('.d.ts'));
+const appSourceSet = new Set(appSources);
+const reachable = new Set();
+const queue = ['src/main.tsx'];
+while (queue.length) {
+  const origin = queue.pop();
+  if (!origin || reachable.has(origin) || !appSourceSet.has(origin)) continue;
+  reachable.add(origin);
+  const contents = fs.readFileSync(path.join(ROOT, origin), 'utf8');
+  // Rutas entrecomilladas: cubre imports, exports y import() dinámico.
+  for (const match of contents.matchAll(/['"]([.]{1,2}\/[^'"]+)['"]/g)) {
+    const base = path.resolve(path.dirname(path.join(ROOT, origin)), match[1]);
+    const candidates = ['', '.ts', '.tsx', '.js', '.jsx', '.css',
+      '/index.ts', '/index.tsx', '/index.js'];
+    const linked = candidates.map(ext =>
+      path.relative(ROOT, base + ext).replaceAll(path.sep, '/'))
+      .find(p => appSourceSet.has(p));
+    if (linked && !reachable.has(linked)) queue.push(linked);
+  }
+}
+const orphaned = appSources.filter(p => !reachable.has(p));
+check('Sin módulos huérfanos en src/', orphaned.length === 0,
+  'Módulos sin referencia desde src/main.tsx: ' + orphaned.join(', '));
+
 const unchecked = sourceFiles.filter(p =>
   fs.readFileSync(path.join(ROOT, p), 'utf8').includes('@ts-nocheck'));
 check('Sin TypeScript desactivado en src/', unchecked.length === 0,
