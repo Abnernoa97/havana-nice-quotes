@@ -15,8 +15,21 @@ const required = [
   'wrangler.jsonc', 'public/manifest.webmanifest', 'public/sw.js',
   'public/icon-192.png', 'public/icon-512.png',
   'src/main.tsx', 'src/App.tsx', 'src/index.css',
-  'src/EditorialStyles.tsx', 'src/editorial-styles.css',
-  'src/FlipMagazine.tsx', 'src/flip-magazine.css'
+  'src/features/home/HomeScreen.tsx',
+  'src/features/quotes/types.ts', 'src/features/quotes/demo-data.ts',
+  'src/features/quotes/QuotesScreen.tsx',
+  'src/features/messages/MessagesScreen.tsx',
+  'src/features/client/Proposal.tsx', 'src/features/client/ClientPage.tsx',
+  'src/features/editor/QuoteEditorScreen.tsx',
+  'src/features/editor/QuoteDesignPanel.tsx',
+  'src/features/editor/QuoteDetailsPanel.tsx',
+  'src/features/editor/QuotePricingPanel.tsx',
+  'src/features/editor/styles/EditorialStyles.tsx',
+  'src/features/editor/styles/editorial-styles.css',
+  'src/features/magazine/FlipMagazine.tsx',
+  'src/features/magazine/flip-magazine.css',
+  'src/features/pwa/InstallGuide.tsx', 'src/features/pwa/useInstallPrompt.ts',
+  'src/app/WorkspaceChrome.tsx'
 ];
 const walk = dir => fs.readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
   if (ignored.has(entry.name)) return [];
@@ -69,8 +82,8 @@ if (fileSet.has('src/App.tsx')) {
   const lines = app.split('\n').length;
   if (lines > 500) report.warnings.push('App.tsx concentra ' + lines + ' líneas; separar gradualmente');
 }
-if (fileSet.has('src/FlipMagazine.tsx')) {
-  const flip = fs.readFileSync(path.join(ROOT, 'src/FlipMagazine.tsx'), 'utf8');
+if (fileSet.has('src/features/magazine/FlipMagazine.tsx')) {
+  const flip = fs.readFileSync(path.join(ROOT, 'src/features/magazine/FlipMagazine.tsx'), 'utf8');
   check('Page Flip usa API loadFromHTML', flip.includes('.loadFromHTML('),
     'Revisar el método del lector 3D antes de publicar');
 }
