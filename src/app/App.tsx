@@ -44,10 +44,10 @@ const pages = [
 function App() {
   const auth = useDeviceAccess();
   const enabled = auth.status === 'authorized';
-  const { quotes, setQuotes, syncStatus, flush } = useQuoteStore(enabled);
-  const { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
+  const { quotes, setQuotes, syncStatus, flush, refresh: refreshQuotes } = useQuoteStore(enabled);
+  const { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, deleting, deletePhotos, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
   const { view, routeTo, goBack } = useAppHistory(quotes[0]?.id || 'empty');
-  const { section, active, tab, mobileMenu, preview, previewMode, mobilePreview, installGuide } = view;
+  const { section, active, tab, mobileMenu, preview, previewMode, mobilePreview, installGuide, photoViewerId, photoSelecting } = view;
   const setTab: Dispatch<SetStateAction<string>> = change => {
     const next = typeof change === 'function' ? change(tab) : change;
     if (['details', 'styles', 'design', 'pricing'].includes(next)) routeTo({ tab: next as EditorTab });
@@ -101,7 +101,8 @@ function App() {
   };
   const navigate = (x: string) => {
     const target = (pages.some(page => page.id === x) ? x : 'home') as AppSection;
-    const next = { section: target, preview: false, mobileMenu: false, installGuide: false };
+    const next = { section: target, preview: false, mobileMenu: false, installGuide: false,
+      photoViewerId: null, photoSelecting: false };
     if (mobileMenu) {
       // Replace drawer entry so native Back goes to the preceding section, not an open drawer.
       if (section === target && !preview) goBack();
@@ -291,7 +292,14 @@ function App() {
   ) : null;
   const photoView = (
     <PhotoBank photos={photos} bytesUsed={bytesUsed} uploading={uploading} uploadProgress={uploadProgress}
-      error={mediaError} uploadPhotos={uploadPhotos} refreshPhotos={refreshPhotos} />
+      deleting={deleting} deletePhotos={deletePhotos} refreshQuotes={refreshQuotes}
+      error={mediaError} uploadPhotos={uploadPhotos} refreshPhotos={refreshPhotos}
+      viewerId={photoViewerId} selectionMode={photoSelecting}
+      openViewer={id => routeTo({ photoViewerId: id })}
+      changeViewer={id => routeTo({ photoViewerId: id }, 'replace')}
+      closeViewer={goBack}
+      startSelection={() => routeTo({ photoSelecting: true })}
+      exitSelection={goBack} />
   );
   useEffect(() => {
     const onEscape = (event: KeyboardEvent) => {

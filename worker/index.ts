@@ -233,6 +233,26 @@ async function api(request: Request, env: Env): Promise<Response> {
       .bind(id).first<MediaRow>();
     return json({ photo: mediaPublic(row!) }, 201);
   }
+  if (/^\/api\/media\/[a-f0-9-]{36}$/.test(path) && method === 'DELETE') {
+    const id = path.slice('/api/media/'.length);
+    const row = await env.DB.prepare(
+      'SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ?'
+    ).bind(id).first<MediaRow>();
+    // Never touch another app's R2 prefix, even when passed a valid UUID.
+    if (!row || !row.object_key.startsWith(PHOTOS_PREFIX)) {
+      return bad('Fotografía no encontrada.', 404);
+    }
+    // Remove the actual R2 object. On failure metadata remains for retry.
+    await env.MEDIA.delete(row.object_key);
+    // Existing proposals may use this photo as a cover. Clear the broken URL,
+    // incrementing revisions so edits on another device cannot overwrite it.
+    const cleared = await env.DB.prepare(
+      "UPDATE quotes SET payload = json_set(payload, '$.cover', ''), revision = revision + 1, updated_at = unixepoch() WHERE json_extract(payload, '$.cover') = ?"
+    ).bind('/api/media/' + id).run();
+    await env.DB.prepare('DELETE FROM media WHERE id = ? AND object_key = ?')
+      .bind(id, row.object_key).run();
+    return json({ deleted: true, clearedCovers: cleared.meta.changes });
+  }
   if (/^\/api\/media\/[a-f0-9-]{36}$/.test(path) && (method === 'GET' || method === 'HEAD')) {
     const id = path.slice('/api/media/'.length);
     const row = await env.DB.prepare('SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ?')

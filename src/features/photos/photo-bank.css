@@ -15,11 +15,8 @@
   font-size: 12px; cursor: pointer;
 }
 .hn-photo-bank-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(180px,1fr)); gap: 17px; }
-.hn-photo-bank-item { margin: 0; background: white; border: 1px solid #e9ece6; border-radius: 12px; overflow: hidden; }
+.hn-photo-bank-item { position: relative; display: block; width: 100%; padding: 0; margin: 0; border: 0; background: #e9ece6; border-radius: 12px; overflow: hidden; cursor: pointer; touch-action: pan-y; -webkit-touch-callout: none; }
 .hn-photo-bank-item img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #e9eee7; }
-.hn-photo-bank-item figcaption { padding: 12px; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
-.hn-photo-bank-item figcaption strong { color: #294536; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hn-photo-bank-item figcaption span { color: #8d9d8d; font-size: 10px; white-space: nowrap; }
 .hn-photo-bank-empty { display: grid; justify-items: center; text-align: center; padding: clamp(45px, 9vw, 95px) 18px; border: 1px dashed #cbd9cb; border-radius: 12px; color: #7d9281; background: #f3f5ef; }
 .hn-photo-bank-empty h2 { font: 400 25px 'Playfair Display',Georgia,serif; color: #2e503d; margin: 18px 0 9px; }
 .hn-photo-bank-empty p { max-width: 405px; font-size: 13px; line-height: 1.75; }
@@ -39,4 +36,59 @@
   color: #8b9c8e;
   font-size: 11px;
   line-height: 1.5;
+}
+
+/* Gallery tiles are photos only: no filename, file weight or caption. */
+.hn-photo-bank-item img { user-select: none; -webkit-user-drag: none; pointer-events: none; }
+.hn-photo-bank-item:focus-visible { outline: 3px solid #ad9364; outline-offset: 3px; }
+.hn-photo-bank-item.is-selected { outline: 3px solid #2c6546; outline-offset: -3px; }
+.hn-photo-check {
+  position: absolute; top: 9px; right: 9px; display: grid; place-items: center;
+  width: 29px; height: 29px; border-radius: 50%; color: white; background: #28543c;
+  border: 2px solid white; pointer-events: none;
+}
+.hn-photo-selection-bar {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+  padding: 12px 16px; margin: 0 0 18px; border-radius: 10px;
+  background: #e7eee5; color: #254b39;
+}
+.hn-photo-selection-bar strong { font-size: 13px; }
+.hn-photo-selection-bar > div { display: flex; gap: 10px; }
+.hn-photo-selection-bar button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 13px; border-radius: 8px; border: 1px solid #cbd8ca;
+  color: #28543e; font-weight: 600; font-size: 12px; cursor: pointer; background: #fff;
+}
+.hn-photo-selection-bar button.danger { background: #913c3c; color: #fff; border-color: #913c3c; }
+.hn-photo-selection-bar button:disabled { opacity: .55; cursor: default; }
+.hn-photo-lightbox {
+  position: fixed; inset: 0; z-index: 1300; background: #090d0bea;
+  display: grid; place-items: center; color: white;
+  overscroll-behavior: contain;
+}
+.hn-photo-lightbox-view {
+  width: 100%; height: 100%; padding: 50px 12px 78px;
+  display: grid; place-items: center; touch-action: pan-y;
+}
+.hn-photo-lightbox-view img {
+  max-width: 100%; max-height: 100%; width: auto; height: auto;
+  object-fit: contain; user-select: none; -webkit-user-drag: none;
+}
+.hn-photo-lightbox-close,.hn-photo-lightbox-prev,.hn-photo-lightbox-next {
+  position: absolute; z-index: 1; display: grid; place-items: center;
+  width: 45px; height: 45px; border-radius: 50%;
+  background: #ffffff1b; border: 1px solid #ffffff30; color: #fff; cursor: pointer;
+}
+.hn-photo-lightbox-close { top: max(16px, env(safe-area-inset-top)); right: 18px; }
+.hn-photo-lightbox-prev { left: 12px; top: 50%; transform: translateY(-50%); }
+.hn-photo-lightbox-next { right: 12px; top: 50%; transform: translateY(-50%); }
+.hn-photo-lightbox-count {
+  position: absolute; bottom: max(22px, env(safe-area-inset-bottom)); left: 50%;
+  transform: translateX(-50%); color: #ffffffbf; font-size: 12px; letter-spacing: .13em;
+}
+.hn-photo-lightbox button:focus-visible { outline: 3px solid #d9bc81; outline-offset: 3px; }
+@media (max-width: 600px) {
+  .hn-photo-lightbox-prev { left: 7px; }
+  .hn-photo-lightbox-next { right: 7px; }
+  .hn-photo-lightbox-prev,.hn-photo-lightbox-next { width: 39px; height: 39px; background: #00000068; }
 }

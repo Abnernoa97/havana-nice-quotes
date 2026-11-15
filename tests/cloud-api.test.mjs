@@ -60,6 +60,23 @@ function environment() {
             quotes.set(values[1], { id: values[1], payload: values[0], revision: row.revision + 1 });
             return { meta: { changes: 1 } };
           }
+          if (sql.startsWith('UPDATE quotes SET payload = json_set')) {
+            let changed = 0;
+            for (const [id, row] of quotes) {
+              const quote = JSON.parse(row.payload);
+              if (quote.cover === values[0]) {
+                quotes.set(id, { ...row, payload: JSON.stringify({ ...quote, cover: '' }), revision: row.revision + 1 });
+                changed++;
+              }
+            }
+            return { meta: { changes: changed } };
+          }
+          if (sql.startsWith('DELETE FROM media WHERE')) {
+            const row = media.get(values[0]);
+            if (!row || row.object_key !== values[1]) return { meta: { changes: 0 } };
+            media.delete(values[0]);
+            return { meta: { changes: 1 } };
+          }
           if (sql.startsWith('INSERT INTO media')) {
             media.set(values[0], {
               id: values[0], object_key: values[1], filename: values[2],
@@ -286,4 +303,87 @@ test('Cotizaciones conservan USD/MX en D1 y rechazan monedas no admitidas', asyn
   assert.equal(changed.status, 200);
   const latest = await worker.fetch(request('/api/quotes', { headers: { Cookie: cookie } }), env);
   assert.deepEqual(((await latest.json()).quotes[0].quote), { ...quote, currency: 'USD', deposit: 100 });
+});
+
+
+test('Borrado definitivo exige sesión y elimina archivo R2 y registro D1', async () => {
+  const env = environment();
+  const cookie = await authorizeDevice(env);
+  const uploaded = await worker.fetch(request('/api/media', {
+    method: 'POST',
+    headers: { Cookie: cookie, Origin: origin, 'Content-Type': 'image/png', 'X-File-Name': 'propia.png' },
+    body: new Uint8Array([137, 80, 78, 71]),
+  }), env);
+  const photo = (await uploaded.json()).photo;
+  assert.equal((await worker.fetch(request(photo.url, { method: 'DELETE' }), env)).status, 401);
+  assert.equal(env.objects.size, 1);
+  const rejectedOrigin = await worker.fetch(request(photo.url, {
+    method: 'DELETE', headers: { Cookie: cookie, Origin: 'https://other.example' },
+  }), env);
+  assert.equal(rejectedOrigin.status, 403);
+  const removed = await worker.fetch(request(photo.url, {
+    method: 'DELETE', headers: { Cookie: cookie, Origin: origin },
+  }), env);
+  assert.equal(removed.status, 200);
+  assert.equal((await removed.json()).deleted, true);
+  assert.equal(env.objects.size, 0);
+  assert.equal(env.media.size, 0);
+  assert.equal((await worker.fetch(request(photo.url, { headers: { Cookie: cookie } }), env)).status, 404);
+  assert.equal((await worker.fetch(request(photo.url, {
+    method: 'DELETE', headers: { Cookie: cookie, Origin: origin },
+  }), env)).status, 404);
+});
+
+test('Si una foto eliminada era portada, se limpia esa referencia y aumenta su revisión', async () => {
+  const env = environment();
+  const cookie = await authorizeDevice(env);
+  const img = await worker.fetch(request('/api/media', {
+    method: 'POST', headers: { Cookie: cookie, Origin: origin, 'Content-Type': 'image/png' },
+    body: new Uint8Array([137,80,78,71]),
+  }), env);
+  const photo = (await img.json()).photo;
+  const id = 'hn-12345678-5678-1234-1234-123456789abc';
+  const quote = {
+    id, name: 'Test', client: '', email: '', location: 'Mexico', date: '',
+    price: 100, deposit: 30, status: 'Borrador', cover: photo.url,
+    font: 'editorial', color: '#18342f', note: '', package: '', desc: '',
+  };
+  const created = await worker.fetch(jsonRequest('/api/quotes/' + id, 'PUT',
+    { quote, expectedRevision: 0 }, cookie), env);
+  assert.equal(created.status, 200);
+  const removed = await worker.fetch(request(photo.url, {
+    method: 'DELETE', headers: { Cookie: cookie, Origin: origin },
+  }), env);
+  assert.equal((await removed.json()).clearedCovers, 1);
+  const updated = env.quotes.get(id);
+  assert.equal(JSON.parse(updated.payload).cover, '');
+  assert.equal(updated.revision, 2);
+  const stale = await worker.fetch(jsonRequest('/api/quotes/' + id, 'PUT',
+    { quote: { ...quote, price: 200 }, expectedRevision: 1 }, cookie), env);
+  assert.equal(stale.status, 409);
+});
+
+test('Borrado jamás toca imágenes de otras aplicaciones ni elimina metadatos si falla R2', async () => {
+  const env = environment();
+  const cookie = await authorizeDevice(env);
+  const id = '12af16f8-0fe6-4cea-9562-5c9c69d48299';
+  env.media.set(id, { id, object_key: 'book/v2/optimized/original.webp',
+    filename: 'original.webp', mime: 'image/webp', size: 3, created_at: 0 });
+  env.objects.set('book/v2/optimized/original.webp', { body: new Uint8Array([1,2,3]) });
+  assert.equal((await worker.fetch(request('/api/media/' + id, {
+    method: 'DELETE', headers: { Cookie: cookie, Origin: origin },
+  }), env)).status, 404);
+  assert.equal(env.objects.has('book/v2/optimized/original.webp'), true);
+  const upload = await worker.fetch(request('/api/media', {
+    method: 'POST', headers: { Cookie: cookie, Origin: origin, 'Content-Type': 'image/png' },
+    body: new Uint8Array([137,80,78,71]),
+  }), env);
+  const photo = (await upload.json()).photo;
+  env.MEDIA.delete = async () => { throw new Error('R2 temporarily unavailable'); };
+  const failed = await worker.fetch(request(photo.url, {
+    method: 'DELETE', headers: { Cookie: cookie, Origin: origin },
+  }), env);
+  assert.equal(failed.status, 500);
+  assert.equal(env.media.has(photo.id), true);
+  assert.equal(env.objects.has('book/v2/optimized/original.webp'), true);
 });

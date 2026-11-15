@@ -11,6 +11,8 @@ export type AppView = {
   mobilePreview: boolean;
   mobileMenu: boolean;
   installGuide: boolean;
+  photoViewerId: string | null;
+  photoSelecting: boolean;
 };
 type Entry = { depth: number; view: AppView };
 type Stamped = Entry & { __havanaNiceHistory: 1 };
@@ -29,6 +31,8 @@ export function initialView(active: string): AppView {
     section: 'home', active, tab: 'styles', preview: false,
     previewMode: 'flip', mobilePreview: false, mobileMenu: false,
     installGuide: false,
+    photoViewerId: null,
+    photoSelecting: false,
   };
 }
 export function readNavigationEntry(state: unknown): Entry | null {
@@ -45,7 +49,9 @@ export function readNavigationEntry(state: unknown): Entry | null {
       typeof view.preview !== 'boolean' ||
       typeof view.mobilePreview !== 'boolean' ||
       typeof view.mobileMenu !== 'boolean' ||
-      typeof view.installGuide !== 'boolean') return null;
+      typeof view.installGuide !== 'boolean' ||
+      (view.photoViewerId !== null && typeof view.photoViewerId !== 'string') ||
+      typeof view.photoSelecting !== 'boolean') return null;
   return { depth: entry.depth!, view: { ...view } as AppView };
 }
 const stamp = (entry: Entry): Stamped => ({ __havanaNiceHistory: 1, ...entry });

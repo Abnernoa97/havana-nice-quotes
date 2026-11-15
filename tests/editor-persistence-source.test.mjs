@@ -101,3 +101,33 @@ test('Fotos y Diseño admiten diez archivos por selección, sin limitar el total
   assert.match(app, /uploadPhotos\(selected\)/);
   assert.doesNotMatch(hook, /uploadPhoto\(/);
 });
+
+
+test('La galería presenta fotos solas; pulsación prolongada selecciona y el visor es reversible', () => {
+  const gallery = src('features/photos/PhotoBank.tsx');
+  const nav = src('app/native-navigation.ts');
+  const css = readFileSync(new URL('../src/features/photos/photo-bank.css', import.meta.url), 'utf8');
+  assert.match(gallery, /photos\.map\(photo =>/);
+  assert.match(gallery, /onPointerDown=\{event => beginHold\(event, photo\.id\)\}/);
+  assert.match(gallery, /onContextMenu=\{event => longPressContext\(event, photo\.id\)\}/);
+  assert.match(gallery, /window\.confirm/);
+  assert.match(gallery, /role="dialog" aria-modal="true" aria-label="Visor de fotografías"/);
+  assert.match(gallery, /onTouchStart=\{onSwipeStart\} onTouchEnd=\{onSwipeEnd\}/);
+  assert.doesNotMatch(gallery, /<figcaption>|<strong title=\{p\.name\}|photoSize\(p\.size\)/);
+  assert.doesNotMatch(css, /\.hn-photo-bank-item figcaption/);
+  assert.match(nav, /photoViewerId: string \| null/);
+  assert.match(nav, /photoSelecting: boolean/);
+});
+
+test('La selección puede borrar archivos reales y actualizar cotizaciones que usan la portada', () => {
+  const gallery = src('features/photos/PhotoBank.tsx');
+  const media = src('features/photos/useMediaLibrary.ts');
+  const app = src('app/App.tsx');
+  const worker = readFileSync(new URL('../worker/index.ts', import.meta.url), 'utf8');
+  assert.match(gallery, /deletePhotos\(ids\)/);
+  assert.match(gallery, /await refreshQuotes\(\)/);
+  assert.match(media, /method: 'DELETE'/);
+  assert.match(worker, /await env\.MEDIA\.delete\(row\.object_key\)/);
+  assert.match(worker, /json_set\(payload, '\$\.cover', ''\)/);
+  assert.match(app, /deletePhotos=\{deletePhotos\} refreshQuotes=\{refreshQuotes\}/);
+});

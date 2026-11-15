@@ -21,6 +21,8 @@ export function useMediaLibrary(enabled: boolean) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ done: number; total: number } | null>(null);
   const uploadLock = useRef(false);
+  const deleteLock = useRef(false);
+  const [deleting, setDeleting] = useState(false);
 
   const refreshPhotos = useCallback(async () => {
     if (!enabled) return;
@@ -92,5 +94,42 @@ export function useMediaLibrary(enabled: boolean) {
     }
   }, [enabled, refreshPhotos]);
 
-  return { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, refreshPhotos, error };
+  /** Permanent R2 deletion; each successful DELETE also removes its D1 row. */
+  const deletePhotos = useCallback(async (ids: string[]): Promise<{
+    deleted: string[];
+    failures: { id: string; reason: string }[];
+  }> => {
+    if (!enabled) throw new Error('El teléfono no está vinculado.');
+    if (deleteLock.current || uploadLock.current) throw new Error('Hay otra operación en curso.');
+    if (!ids.length) return { deleted: [], failures: [] };
+    deleteLock.current = true;
+    setDeleting(true);
+    setError('');
+    const deleted: string[] = [];
+    const failures: { id: string; reason: string }[] = [];
+    try {
+      for (const id of [...new Set(ids)]) {
+        try {
+          const response = await fetch('/api/media/' + encodeURIComponent(id), {
+            method: 'DELETE', credentials: 'same-origin',
+          });
+          if (!response.ok) {
+            const body = await response.json().catch(() => ({})) as { error?: string };
+            throw new Error(body.error || 'No se pudo eliminar la foto.');
+          }
+          deleted.push(id);
+        } catch (cause) {
+          failures.push({ id, reason: cause instanceof Error ? cause.message : 'Error al eliminar.' });
+        }
+      }
+      await refreshPhotos();
+      if (failures.length) setError(failures.length + ' fotografía(s) no se pudieron eliminar. Intenta de nuevo.');
+      return { deleted, failures };
+    } finally {
+      deleteLock.current = false;
+      setDeleting(false);
+    }
+  }, [enabled, refreshPhotos]);
+
+  return { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, deleting, deletePhotos, refreshPhotos, error };
 }

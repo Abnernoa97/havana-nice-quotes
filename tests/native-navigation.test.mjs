@@ -122,3 +122,26 @@ test('History records contain route IDs, not private quote content', () => {
   assert.equal(entry?.view.active, 'hn2');
   assert.deepEqual(Object.keys(entry.view).sort(), Object.keys(initialView('hn1')).sort());
 });
+
+
+test('Native Back closes the full-screen photo viewer before leaving Fotos', () => {
+  const f = fixture();
+  f.navigator.transition({ section: 'photos' });
+  f.navigator.transition({ photoViewerId: 'photo-one' });
+  f.navigator.transition({ photoViewerId: 'photo-two' }, 'replace');
+  f.navigator.back();
+  assert.equal(f.navigator.getView().section, 'photos');
+  assert.equal(f.navigator.getView().photoViewerId, null);
+  f.navigator.back();
+  assert.equal(f.navigator.getView().section, 'home');
+});
+
+test('Native Back exits long-press photo selection without leaving Fotos', () => {
+  const f = fixture();
+  f.navigator.transition({ section: 'photos' });
+  f.navigator.transition({ photoSelecting: true });
+  assert.equal(f.navigator.getView().photoSelecting, true);
+  f.navigator.back();
+  assert.equal(f.navigator.getView().photoSelecting, false);
+  assert.equal(f.navigator.getView().section, 'photos');
+});

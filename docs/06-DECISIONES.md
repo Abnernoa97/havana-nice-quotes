@@ -74,6 +74,15 @@
 - No borrar fotografías reales subidas a `quotes-studio/photos/` ni otros recursos R2; de cotizaciones guardadas solo se quitan las URLs de stock claramente identificables.
 - Se conserva la galería para subir material propio (máximo 10 fotos por selección). No reincorporar imágenes externas por defecto.
 
+## Galería de fotos y eliminación definitiva · 15/11/2026
+
+- **Galería solo de imágenes:** eliminar realmente los pies de tarjeta (nombres, extensiones y tamaño de cada imagen) y sus estilos, no ocultarlos con CSS. Conservar únicamente los contadores generales de la biblioteca arriba.
+- Tocar una foto abre el visor a pantalla completa, con navegación anterior/siguiente y gesto horizontal en Android; la **tecla o botón Atrás nativo** cierra primero el visor.
+- Mantener pulsada una foto en la galería activa selección múltiple; en escritorio se admite clic derecho. En modo selección se puede marcar/desmarcar y confirmar **eliminación definitiva**, o cancelar con Atrás nativo.
+- Al confirmar, el Worker elimina los objetos propios de `quotes-studio/photos/` en R2 y sus registros D1, **nunca archivos de otras aplicaciones**. Si alguna foto era portada de una cotización, el servidor deja la portada vacía y aumenta la revisión de esa cotización para evitar referencias rotas y escrituras obsoletas.
+- No se borran fotos al publicar esta funcionalidad: únicamente después de que Fer & Noa las seleccionen y acepten la confirmación en el estudio.
+- No usar otra rama ni GitHub Actions, ni mover/eliminar fotografías de módulos externos.
+
 ## Decisiones todavía abiertas
 
 1. Confirmar los nombres originales de las referencias editoriales mencionadas fonéticamente como «Deline» y «John Book».
