@@ -130,6 +130,7 @@
   justify-content: center;
 }
 .studio-magazine-cover {
+  background-color: #173c2e;
   width: min(100%, 390px);
   aspect-ratio: 410 / 580;
   color: #fff;

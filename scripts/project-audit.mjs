@@ -16,7 +16,7 @@ const required = [
   'public/icon-192.png', 'public/icon-512.png',
   'src/main.tsx', 'src/app/App.tsx', 'src/shared/styles/index.css',
   'src/features/home/HomeScreen.tsx',
-  'src/features/quotes/types.ts', 'src/features/quotes/demo-data.ts',
+  'src/features/quotes/types.ts',
   'src/features/quotes/QuotesScreen.tsx',
   'src/features/quotes/useQuoteStore.ts',
   'src/features/auth/DeviceGate.tsx', 'src/features/auth/useDeviceAccess.ts',
@@ -142,6 +142,11 @@ while (queue.length) {
   }
 }
 const orphaned = appSources.filter(p => !reachable.has(p));
+check('Sin fotografías ficticias ni semillas obsoletas',
+  !fileSet.has('src/features/quotes/demo-data.ts') &&
+  !appSources.some(p => /images\\.unsplash\\.com|source\\.unsplash\\.com/.test(
+    fs.readFileSync(path.join(ROOT, p), 'utf8'))),
+  'El proyecto aún contiene imágenes externas de demostración');
 check('Sin módulos huérfanos en src/', orphaned.length === 0,
   'Módulos sin referencia desde src/main.tsx: ' + orphaned.join(', '));
 

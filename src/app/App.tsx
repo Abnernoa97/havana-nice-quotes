@@ -6,7 +6,7 @@ import type { ChangeEvent } from 'react';
 import type { Quote } from '../features/quotes/types';
 import FlipMagazine from '../features/magazine/FlipMagazine';
 import { editorialStyles } from '../features/editor/styles/EditorialStyles';
-import { createSampleDraft, editSampleQuote, statusClass } from '../features/quotes/model';
+import { createQuoteDraft, editSampleQuote, statusClass } from '../features/quotes/model';
 import { useQuoteStore } from '../features/quotes/useQuoteStore';
 import { useDeviceAccess } from '../features/auth/useDeviceAccess';
 import DeviceGate from '../features/auth/DeviceGate';
@@ -117,7 +117,7 @@ function App() {
   };
   const addQuote = () => {
     const id = 'hn-' + crypto.randomUUID();
-    const q = createSampleDraft(id);
+    const q = createQuoteDraft(id);
     setQuotes(list => [q, ...list]);
     setNewMessage('');
     setClientMessage('');

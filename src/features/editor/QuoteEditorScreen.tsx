@@ -7,6 +7,7 @@ import QuoteDetailsPanel from './QuoteDetailsPanel';
 import QuoteDesignPanel from './QuoteDesignPanel';
 import type { CloudPhoto } from '../photos/useMediaLibrary';
 import QuotePricingPanel from './QuotePricingPanel';
+import { coverBackground } from '../../shared/lib/coverBackground';
 
 type Props = {
   item: Quote;
@@ -151,7 +152,7 @@ export default function QuoteEditorScreen({
               </div>
             ) : (
               <div className={'studio-magazine-preview hn-style-' + styleName} style={{ '--paper-accent': item.color } as CSSProperties}>
-                <div className="studio-magazine-cover" style={{ backgroundImage: 'linear-gradient(180deg, rgba(7,19,16,.24), rgba(7,19,16,.03) 36%, rgba(7,19,16,.73)), url(' + item.cover + ')' }}>
+                <div className="studio-magazine-cover" style={{ backgroundImage: coverBackground(item.cover, 'linear-gradient(180deg, rgba(7,19,16,.24), rgba(7,19,16,.03) 36%, rgba(7,19,16,.73))') }}>
                   <div className="studio-magazine-cover-top"><strong>HAVANA NICE</strong><span>THE PRIVATE EDITION</span></div>
                   <div className="studio-magazine-cover-bottom">
                     <span>A PRIVATE LIVE MUSIC PROPOSAL</span>

@@ -6,7 +6,8 @@ const source = (file) => readFileSync(new URL('../src/' + file, import.meta.url)
 
 test('Fotografías decorativas no repiten los nombres junto al texto de pareja', () => {
   for (const file of ['features/home/HomeScreen.tsx', 'features/quotes/QuotesScreen.tsx']) {
-    assert.match(source(file), /<img src=\{q\.cover\} alt=""\s*\/>/);
+    assert.match(source(file), /q\.cover \? <img src=\{q\.cover\} alt=""\s*\/>/);
+    assert.match(source(file), /className="quote-cover-empty"/);
   }
 });
 

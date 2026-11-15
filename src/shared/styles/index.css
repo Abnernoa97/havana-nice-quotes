@@ -283,8 +283,7 @@ p {
 }
 .welcome-hero {
   height: 340px;
-  background: url('https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1600&q=85&fit=crop')
-    center 45% / cover;
+  background: linear-gradient(115deg, #14382c, #37634c 68%, #a38b64);
   border-radius: 11px;
   overflow: hidden;
 }
@@ -407,7 +406,8 @@ p {
   gap: 14px;
   background: #fff;
 }
-.recent-row img {
+.recent-row img,
+.recent-row .quote-cover-empty {
   width: 49px;
   height: 49px;
   object-fit: cover;
@@ -576,7 +576,8 @@ p {
   align-items: center;
   gap: 11px;
 }
-.table-couple img {
+.table-couple img,
+.table-couple .quote-cover-empty {
   width: 50px;
   height: 50px;
   border-radius: 4px;
@@ -891,6 +892,7 @@ p {
   letter-spacing: 0.14em;
 }
 .proposal-photo {
+  background-color: #173c2e;
   background-size: cover;
   background-position: center;
   min-height: 380px;
@@ -1802,3 +1804,6 @@ p {
   background: transparent; text-decoration: underline; padding: 8px 0; cursor: pointer;
 }
 .hn-photo-picker-empty { color: #87988b; font-size: 12px; line-height: 1.5; margin-top: 12px; }
+
+/* No artificial image URLs when a real photo has not yet been selected. */
+.quote-cover-empty{flex:0 0 auto;display:grid;place-items:center;color:#83988a;background:#ebf0e9}

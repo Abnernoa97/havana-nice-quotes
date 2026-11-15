@@ -9,6 +9,7 @@
 - Cuenta de cotizaciones y fotos de Quotes Studio inicia **en cero**; el storage local antiguo ya no alimenta la app.
 - **Acceso sin contraseña:** vinculación mediante un enlace privado único por teléfono; token hasheado y consumible una sola vez en D1, cookie HttpOnly/Secure/SameSite=Strict propia de cada dispositivo, autorización renovable sin formulario de contraseña. Cloudflare Access no está habilitado; no se utiliza.
 - Cotizaciones por ID y revisión, guardado automático, consulta cada 15 segundos y aviso al detectar conflicto o caída de conexión. No repetir escrituras cada segundo durante una caída de red.
+- Sin imágenes de stock ni Unsplash en la versión de producción: los borradores empiezan con portada vacía, y los espacios sin imágenes usan la paleta HAVANA NICE sin perder dimensiones ni animaciones.
 - Fotos privadas desde R2; **exclusivamente las subidas manualmente a Quotes Studio** desde Fotos o Diseño, visibles para portada y sincronización en todos los teléfonos. No se consulta, lista ni muestra contenido de otras aplicaciones, aunque se reutilice el mismo bucket R2. El tamaño usado y el conteo solo abarcan la biblioteca propia.
 - Publicación y QA deben verificarse por separado: code, auditoría, tests, TypeScript, Workers Build exitoso, deployment 100% y pruebas manuales móviles. **Ningún deploy por GitHub Actions**.
 - **No implementado:** compartir links privados con clientes, aceptación contractual, mensajes reales, avisos de recepción y editor de páginas libres.

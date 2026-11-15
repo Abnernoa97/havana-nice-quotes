@@ -4,6 +4,7 @@ import type { Quote } from '../quotes/types';
 import { PageFlip } from 'page-flip';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
 import { money, quoteCurrency } from '../../shared/lib/formatters';
+import { coverBackground } from '../../shared/lib/coverBackground';
 import './flip-magazine.css';
 
 function MagazineLeaf({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -119,7 +120,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
 
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
         <MagazineLeaf className="hn-cover-leaf">
-          <div className="hn-cover-image" style={{ backgroundImage: 'linear-gradient(180deg, rgba(7,19,16,.24), rgba(7,19,16,.03) 36%, rgba(7,19,16,.73)), url(' + item.cover + ')' }}>
+          <div className="hn-cover-image" style={{ backgroundImage: coverBackground(item.cover, 'linear-gradient(180deg, rgba(7,19,16,.24), rgba(7,19,16,.03) 36%, rgba(7,19,16,.73))') }}>
             <div className="hn-cover-top"><span>HAVANA NICE</span><small>THE PRIVATE EDITION</small></div>
             <div className="hn-cover-bottom">
               <small>A PRIVATE LIVE MUSIC PROPOSAL</small>
@@ -136,7 +137,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
             <span className="hn-micro">FOR {item.name.toUpperCase()}</span>
             <h2>Live music.<br/><em>Made personal.</em></h2>
             <p>{item.note}</p>
-            <div className="hn-editorial-picture" style={{backgroundImage:"url(https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1000&q=80)"}}></div>
+            <div className="hn-editorial-picture" aria-hidden="true"></div>
             <div className="hn-signature">Fer & Noa<span>HAVANA NICE</span></div>
           </div>
           <div className="hn-leaf-foot"><span>PRIVATE PROPOSAL</span><span>02</span></div>
@@ -145,7 +146,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
           <div className="hn-leaf-heading"><span>02 / THE EXPERIENCE</span><span>HAVANA NICE</span></div>
           <div className="hn-vision-content">
             <h2>One celebration.<br/><em>Every moment.</em></h2>
-            <div className="hn-vision-picture" style={{backgroundImage:"url(https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1000&q=80)"}}></div>
+            <div className="hn-vision-picture" aria-hidden="true"></div>
             <div className="hn-vision-rows">
               <div><strong>01</strong><span><b>COCKTAIL</b><small>A warm welcome with a fully live band.</small></span></div>
               <div><strong>02</strong><span><b>DINNER</b><small>Music that complements conversation and atmosphere.</small></span></div>
@@ -155,7 +156,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
           <div className="hn-leaf-foot"><span>{item.location.toUpperCase()}</span><span>03</span></div>
         </MagazineLeaf>
         <MagazineLeaf className="hn-ensemble-leaf">
-          <div className="hn-ensemble-cover" style={{backgroundImage:"linear-gradient(90deg,rgba(17,27,24,.78),rgba(17,27,24,.28)),url(https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=1100&q=80)"}}>
+          <div className="hn-ensemble-cover">
             <div className="hn-leaf-heading light"><span>03 / THE BAND</span><span>HAVANA NICE</span></div>
             <div className="hn-ensemble-body">
               <h2>The<br/>Ensemble.</h2>
@@ -183,7 +184,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
         </MagazineLeaf>
         <MagazineLeaf className="hn-end-leaf">
           <div className="hn-leaf-heading"><span>05 / END NOTE</span><span>HAVANA NICE</span></div>
-          <div className="hn-end-photo" style={{backgroundImage:"url(https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=1000&q=80)"}}></div>
+          <div className="hn-end-photo" aria-hidden="true"></div>
           <div className="hn-end-body"><span className="hn-micro">FER & NOA</span><h2>We'd love to<br/><em>be part of it.</em></h2><p>Thanks for considering HAVANA NICE for your celebration. We're here for questions, ideas, and the details that matter to you.</p><strong>HAVANA NICE</strong></div>
           <div className="hn-leaf-foot"><span>SERVING LOVE THROUGH LIVE MUSIC</span><span>06</span></div>
         </MagazineLeaf>

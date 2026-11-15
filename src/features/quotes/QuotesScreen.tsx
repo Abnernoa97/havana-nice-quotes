@@ -1,5 +1,5 @@
 import type { ReactNode, Dispatch, SetStateAction } from 'react';
-import { Search, ArrowUpRight } from 'lucide-react';
+import { Search, ArrowUpRight, Image as ImageIcon } from 'lucide-react';
 import { money, dDate } from '../../shared/lib/formatters';
 import type { Quote } from './types';
 import { filterQuotes } from './model';
@@ -78,7 +78,7 @@ export default function QuotesScreen({
               onClick={() => selectQuote(q.id)}
             >
               <div className="table-couple">
-                <img src={q.cover} alt="" />
+                {q.cover ? <img src={q.cover} alt="" /> : <span className="quote-cover-empty" aria-hidden="true"><ImageIcon size={19}/></span>}
                 <div>
                   <strong>{q.name}</strong>
                   <small>{q.location}</small>

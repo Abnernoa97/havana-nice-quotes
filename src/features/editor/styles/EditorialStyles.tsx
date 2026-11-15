@@ -33,10 +33,10 @@ export default function EditorialStyles({value, onChange, readingMode, onReading
               {s.id==='libre' ? (
                 <><div className="hn-mini-square"/><strong>YOUR<br/>STORY.</strong><small>A PERSONAL VISION</small></>
               ) : s.id==='nyt' ? (
-                <><div className="hn-mini-double-rule"/><small>THE PRIVATE WEDDING EDITION</small><strong>A Celebration<br/>in Mexico</strong><div className="hn-mini-photo newspaper" style={{backgroundImage:'url('+photo+')'}}/><p>LOVE · MUSIC · THE PEOPLE WHO MATTER</p></>
+                <><div className="hn-mini-double-rule"/><small>THE PRIVATE WEDDING EDITION</small><strong>A Celebration<br/>in Mexico</strong>{photo && <div className="hn-mini-photo newspaper" style={{backgroundImage:'url('+photo+')'}}/>}<p>LOVE · MUSIC · THE PEOPLE WHO MATTER</p></>
               ) : (
-                <><div className="hn-mini-photo" style={{backgroundImage:'url('+photo+')'}}/>
-                  {s.id==='vogue' ? <><strong>THE<br/>EDIT.</strong><small>AN EXCLUSIVE WEDDING STORY</small><em>OLIVIA & JAMES</em></> :
+                <>{photo && <div className="hn-mini-photo" style={{backgroundImage:'url('+photo+')'}}/>}
+                  {s.id==='vogue' ? <><strong>THE<br/>EDIT.</strong><small>AN EXCLUSIVE WEDDING STORY</small><em>YOUR CELEBRATION</em></> :
                    s.id==='lane' ? <><small>THE PRIVATE EDITION</small><strong>Art of<br/><em>celebration.</em></strong><span>HAVANA NICE / MEXICO</span></> :
                    <><small>WEDDING STORIES</small><strong>Joy, love<br/><em>& live music.</em></strong><span>THE EDITORIAL JOURNAL</span></>}
                 </>

@@ -66,6 +66,14 @@
 - La biblioteca se consulta una sola vez al terminar el lote; Diseño aplica la primera foto subida como portada y guarda el resto en la misma biblioteca.
 - Se conservan el límite de **12 MB por fotografía**, la biblioteca aislada por aplicación y el diseño de dos columnas.
 
+## Eliminación definitiva de fotografías de prueba · 15/11/2026
+
+- Se eliminó por completo el archivo de stock y parejas ficticias de producción `src/features/quotes/demo-data.ts`; el constructor de borradores ya no importa datos demo y su portada comienza vacía.
+- Se retiraron todas las fotografías externas incrustadas de Unsplash de Inicio, Scroll, estilos y las hojas de Revista 3D. Los espacios vacíos conservan su composición mediante fondos neutros de la marca, sin crear imágenes falsas ni modificar el motor PageFlip.
+- Las cotizaciones sin foto muestran un ícono en las listas, en vez de solicitar `src=""`. Una portada real solo se muestra cuando fue elegida desde R2.
+- No borrar fotografías reales subidas a `quotes-studio/photos/` ni otros recursos R2; de cotizaciones guardadas solo se quitan las URLs de stock claramente identificables.
+- Se conserva la galería para subir material propio (máximo 10 fotos por selección). No reincorporar imágenes externas por defecto.
+
 ## Decisiones todavía abiertas
 
 1. Confirmar los nombres originales de las referencias editoriales mencionadas fonéticamente como «Deline» y «John Book».

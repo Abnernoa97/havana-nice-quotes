@@ -1,4 +1,5 @@
 import { formatHomeDate, homeGreeting } from './greeting';
+import { Image as ImageIcon } from 'lucide-react';
 import { findClientActivity } from '../quotes/model';
 import type { Quote } from '../quotes/types';
 import {
@@ -103,7 +104,7 @@ export default function HomeScreen({
               key={q.id}
               onClick={() => selectQuote(q.id)}
             >
-              <img src={q.cover} alt="" />
+              {q.cover ? <img src={q.cover} alt="" /> : <span className="quote-cover-empty" aria-hidden="true"><ImageIcon size={19}/></span>}
               <div>
                 <strong>{q.name}</strong>
                 <small>{q.location}</small>

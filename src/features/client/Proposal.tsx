@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react';
 import { money, dDate } from '../../shared/lib/formatters';
 import type { Quote } from '../quotes/types';
+import { coverBackground } from '../../shared/lib/coverBackground';
 
 type Props = { item: Quote; styleName: string; embedded?: boolean };
 
@@ -15,10 +16,8 @@ export default function Proposal({ item, styleName, embedded = false }: Props) {
       <div
         className="proposal-photo"
         style={{
-          backgroundImage:
-            'linear-gradient(180deg,rgba(10,24,20,.04) 16%,rgba(10,24,20,.33) 60%,rgba(10,24,20,.67)), url(' +
-            item.cover +
-            ')',
+          backgroundImage: coverBackground(item.cover,
+            'linear-gradient(180deg,rgba(10,24,20,.04) 16%,rgba(10,24,20,.33) 60%,rgba(10,24,20,.67))'),
         }}
       >
         <div className="hero-content">

@@ -1,7 +1,6 @@
 import type { Quote } from './types';
-import { seed, photos } from './demo-data.ts';
 
-/** La búsqueda de la demo conserva la combinación pareja + destino. */
+/** Filtra cotizaciones por pareja, destino y estado. */
 export function filterQuotes(quotes: Quote[], filter: string, search: string): Quote[] {
   return quotes.filter(
     q =>
@@ -23,12 +22,9 @@ export function statusClass(s: string): string {
         : 'gray';
 }
 
-/** Alta de borrador ficticio: mismas propiedades y valores del prototipo. */
-export function createSampleDraft(id: string): Quote {
+/** A new quotation has no imported test photos or predefined covers. */
+export function createQuoteDraft(id: string): Quote {
   return {
-    ...seed[0],
-    style: 'libre',
-    readingMode: 'flip',
     id,
     name: 'New Couple',
     client: '',
@@ -36,13 +32,18 @@ export function createSampleDraft(id: string): Quote {
     location: 'Destination, Mexico',
     date: '',
     price: 5900,
+    deposit: 30,
     currency: 'USD',
     status: 'Borrador',
-    messages: [],
-    cover: photos[0],
+    cover: '',
+    font: 'editorial',
+    color: '#18342f',
     note: 'Your celebration, your way.',
     package: 'Signature Live Band',
     desc: 'Live music planned with care for every moment of your celebration.',
+    messages: [],
+    style: 'libre',
+    readingMode: 'flip',
   };
 }
 

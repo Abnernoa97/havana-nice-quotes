@@ -15,7 +15,7 @@
 .hn-flip-host{width:100%;height:100%;margin:auto}
 .hn-leaf{height:100%;width:100%;overflow:hidden;background:#f8f6f0;border:1px solid #d7d5cd;box-shadow:inset 0 0 3px #362a2610;color:#193126;font-family:'DM Sans',sans-serif}
 .hn-magazine-source{display:none}
-.hn-cover-image,.hn-ensemble-cover{height:100%;width:100%;background-position:center;background-size:cover;position:relative;display:flex;flex-direction:column;color:white}
+.hn-cover-image,.hn-ensemble-cover{background-color:#173c2e;height:100%;width:100%;background-position:center;background-size:cover;position:relative;display:flex;flex-direction:column;color:white}
 .hn-cover-top{padding:7.2% 8%;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .hn-cover-top span{font:500 clamp(15px,2vw,24px) 'Playfair Display',serif;letter-spacing:.07em}
 .hn-cover-top small,.hn-cover-number{font-size:8px;letter-spacing:.16em;font-weight:600}
@@ -35,12 +35,12 @@
 .hn-editorial-content h2,.hn-vision-content h2,.hn-investment-body h2,.hn-end-body h2{font-family:'Playfair Display',serif;line-height:1.18;letter-spacing:-.055em;font-weight:400;font-size:clamp(27px,3vw,46px);margin:5% 0}
 .hn-editorial-content h2 em,.hn-vision-content h2 em,.hn-investment-body h2 em,.hn-end-body h2 em{color:#78927a;font-weight:400}
 .hn-editorial-content>p,.hn-end-body>p{font-family:'Playfair Display',serif;font-size:clamp(11px,1.05vw,14px);line-height:1.6;color:#66776a;max-width:375px}
-.hn-editorial-picture{flex:1;min-height:70px;margin-top:5%;background-size:cover;background-position:center}
+.hn-editorial-picture{background:linear-gradient(135deg,#d9e5d8,#7d9988);flex:1;min-height:70px;margin-top:5%;background-size:cover;background-position:center}
 .hn-signature{font-family:'Playfair Display',serif;font-style:italic;font-size:clamp(17px,2vw,24px);padding:3% 0;color:#283d2f}
 .hn-signature span{display:block;font-style:normal;letter-spacing:.12em;font-size:8px;font-family:'DM Sans',sans-serif;margin-top:3px}
 .hn-vision-content{display:flex;flex-direction:column;min-height:0;flex:1;padding:0 8%}
 .hn-vision-content h2{margin:1% 0 4%}
-.hn-vision-picture{height:30%;background-position:center;background-size:cover;flex-shrink:0}
+.hn-vision-picture{background:linear-gradient(125deg,#d8ddce,#8fa896);height:30%;background-position:center;background-size:cover;flex-shrink:0}
 .hn-vision-rows{display:flex;flex-direction:column;margin-top:3%;flex:1}
 .hn-vision-rows>div{display:flex;gap:12px;padding:3.5% 0;border-bottom:1px solid #dfe4d8}
 .hn-vision-rows strong{font-family:'Playfair Display',serif;color:#819684;font-size:17px;font-weight:400}
@@ -63,7 +63,7 @@
 .hn-investment-details strong{font:400 22px 'Playfair Display',serif}
 .hn-investment-copy{font:400 13px/1.5 'DM Sans',sans-serif!important;color:#6b7e70;margin-top:5%;max-height:22%;overflow:hidden}
 .hn-investment-notice{font-size:8px;color:#9b9c91;margin-top:auto;letter-spacing:.08em}
-.hn-end-photo{height:46%;background-position:center;background-size:cover}
+.hn-end-photo{background:linear-gradient(135deg,#dfe9dd,#96aa9c);height:46%;background-position:center;background-size:cover}
 .hn-end-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:4% 9%}
 .hn-end-body h2{font-size:clamp(29px,3vw,44px)}
 .hn-end-body>strong{font:500 15px 'Playfair Display',serif;letter-spacing:.1em;margin-top:8%}

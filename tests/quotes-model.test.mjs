@@ -1,8 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { filterQuotes, statusClass, createSampleDraft, editSampleQuote, safeQuotePrice, safeQuoteDeposit, normalizePriceInput, findClientActivity } from '../src/features/quotes/model.ts';
+import { filterQuotes, statusClass, createQuoteDraft, editSampleQuote, safeQuotePrice, safeQuoteDeposit, normalizePriceInput, findClientActivity } from '../src/features/quotes/model.ts';
 import { usd, money, quoteCurrency, dDate } from '../src/shared/lib/formatters.ts';
-import { seed } from '../src/features/quotes/demo-data.ts';
+// Synthetic test records never ship in production or contain stock photography.
+const seed = [
+  { ...createQuoteDraft('hn1'), name: 'Olivia & James', location: 'San Miguel de Allende',
+    status: 'En revisión', messages: [{ from: 'client', text: 'Hello', time: '10:42 AM' }] },
+  { ...createQuoteDraft('hn2'), name: 'Sophie & Daniel', location: 'Los Cabos', status: 'Enviada' },
+  { ...createQuoteDraft('hn3'), name: 'Emma & Lucas', location: 'Mexico City', status: 'Aceptada' },
+];
 import { formatHomeDate, homeGreeting } from '../src/features/home/greeting.ts';
 import { readFileSync } from 'node:fs';
 
@@ -34,7 +40,7 @@ test('USD, anticipos y fechas estadounidenses siguen siendo precisos', () => {
 });
 
 test('El nuevo borrador es independiente de otras cotizaciones', () => {
-  const quote = createSampleDraft('hn-custom-1');
+  const quote = createQuoteDraft('hn-custom-1');
   assert.equal(quote.status, 'Borrador');
   assert.equal(quote.readingMode, 'flip');
   const other = seed[1];
@@ -42,11 +48,12 @@ test('El nuevo borrador es independiente de otras cotizaciones', () => {
   assert.equal(next[0].price, 10000);
   assert.equal(next[1], other);
   assert.equal(quote.price, 5900);
+  assert.equal(quote.cover, '');
 });
 
 test('Los cambios a una pareja no alteran la cotización de otra', () => {
-  const a = createSampleDraft('hn-a');
-  const b = createSampleDraft('hn-b');
+  const a = createQuoteDraft('hn-a');
+  const b = createQuoteDraft('hn-b');
   assert.notEqual(a.id, b.id);
   assert.equal(editSampleQuote([a, b], a.id, 'name', 'New Pair')[1], b);
 });
@@ -64,7 +71,7 @@ test('Precios de la interfaz no permiten NaN ni importes negativos', () => {
 test('Un borrador preserva los cinco estilos y los dos modos al serializarse', () => {
   for (const style of ['libre', 'vogue', 'lane', 'junebug', 'nyt']) {
     for (const readingMode of ['flip', 'scroll']) {
-      const quote = { ...createSampleDraft('hn-custom-2'), style, readingMode, cover: '/api/media/a1234567-1234-1234-1234-123456789abc' };
+      const quote = { ...createQuoteDraft('hn-custom-2'), style, readingMode, cover: '/api/media/a1234567-1234-1234-1234-123456789abc' };
       assert.deepEqual(JSON.parse(JSON.stringify(quote)), quote);
     }
   }
@@ -80,7 +87,7 @@ test('El panel principal muestra fecha y saludo actuales', () => {
 test('Conversaciones y aceptaciones de demostración permanecen por cotización', () => {
   assert.equal(findClientActivity(seed)?.quote.id, 'hn1');
   assert.equal(findClientActivity(seed.map(q => ({ ...q, messages: [] }))), null);
-  const a = createSampleDraft('hn-custom-3');
+  const a = createQuoteDraft('hn-custom-3');
   const b = seed[1];
   const updated = editSampleQuote([a, b], a.id, 'status', 'Aceptada');
   assert.equal(updated[0].status, 'Aceptada');
@@ -95,7 +102,7 @@ test('USD y MX son etiquetas independientes sin conversión del precio', () => {
   assert.equal(money(77000 * 100 / 100, 'USD'), '$77,000 USD');
   assert.equal(quoteCurrency(undefined), 'USD');
   assert.equal(quoteCurrency('MX'), 'MX');
-  assert.equal(createSampleDraft('hn-currency').currency, 'USD');
+  assert.equal(createQuoteDraft('hn-currency').currency, 'USD');
 });
 
 test('El precio ignora ceros iniciales y caracteres de pegado', () => {
@@ -112,5 +119,14 @@ test('Anticipos 20–100 se calculan exactamente sobre USD y MX', () => {
   for (const percent of [20,30,40,50,60,70,80,90,100]) {
     assert.equal(safeQuoteDeposit(String(percent)), percent);
     assert.equal(Number((price * percent / 100).toFixed(2)), 770 * percent);
+  }
+});
+
+
+test('Los borradores nuevos no incorporan ninguna portada ajena', () => {
+  for (const id of ['hn-draft-one', 'hn-draft-two']) {
+    const quote = createQuoteDraft(id);
+    assert.equal(quote.cover, '');
+    assert.equal(quote.status, 'Borrador');
   }
 });
