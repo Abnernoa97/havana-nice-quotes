@@ -54,12 +54,6 @@ function environment() {
             quotes.set(values[0], { id: values[0], payload: values[1], revision: 1 });
             return { meta: { changes: 1 } };
           }
-          if (sql.startsWith('UPDATE quotes')) {
-            const row = quotes.get(values[1]);
-            if (!row || row.revision !== values[2]) return { meta: { changes: 0 } };
-            quotes.set(values[1], { id: values[1], payload: values[0], revision: row.revision + 1 });
-            return { meta: { changes: 1 } };
-          }
           if (sql.startsWith('UPDATE quotes SET payload = json_set')) {
             let changed = 0;
             for (const [id, row] of quotes) {
@@ -70,6 +64,12 @@ function environment() {
               }
             }
             return { meta: { changes: changed } };
+          }
+          if (sql.startsWith('UPDATE quotes')) {
+            const row = quotes.get(values[1]);
+            if (!row || row.revision !== values[2]) return { meta: { changes: 0 } };
+            quotes.set(values[1], { id: values[1], payload: values[0], revision: row.revision + 1 });
+            return { meta: { changes: 1 } };
           }
           if (sql.startsWith('DELETE FROM media WHERE')) {
             const row = media.get(values[0]);

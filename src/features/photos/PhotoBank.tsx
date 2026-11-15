@@ -101,6 +101,8 @@ export default function PhotoBank({
   }, []);
 
   const beginHold = (event: PointerEvent<HTMLButtonElement>, id: string) => {
+    // Reset any suppressed context-menu click on a fresh tap.
+    swallowClick.current = false;
     if (selectionMode || event.button !== 0) return;
     clearHold();
     holdStart.current = { x: event.clientX, y: event.clientY };
