@@ -145,7 +145,7 @@ export default function HomeScreen({
             </div>
           ) : (
             <p className="panel-intro">Todavía no hay mensajes de prueba.</p>
-          )
+          )}
         </div>
       </div>
     </div>
