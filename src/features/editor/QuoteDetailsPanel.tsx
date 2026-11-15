@@ -87,7 +87,7 @@ export default function QuoteDetailsPanel({ item, edit }: Props) {
                     ))}
                   </div>
                 </details>
-              )
+              )}
             </div>
   );
 }
