@@ -169,3 +169,17 @@ test('La aceptación simulada pertenece al estado de cada cotización, no a otra
   assert.equal(restored[0].status, 'Aceptada');
   assert.equal(restored[1].status, seed[0].status);
 });
+
+test('La carga de cotizaciones rechaza IDs duplicados y campos ausentes del editor', () => {
+  const preserved = [createSampleDraft('hn-test'), ...seed];
+  assert.deepEqual(parseStoredQuotes(JSON.stringify(preserved), seed), preserved);
+  for (const missing of ['client', 'email', 'date', 'font', 'color']) {
+    const incomplete = { ...seed[0] };
+    delete incomplete[missing];
+    assert.equal(parseStoredQuotes(JSON.stringify([incomplete]), seed), seed);
+  }
+  assert.equal(parseStoredQuotes(JSON.stringify([{ ...seed[0], id: '' }]), seed), seed);
+  assert.equal(parseStoredQuotes(JSON.stringify([seed[0], { ...seed[1], id: seed[0].id }]), seed), seed);
+  assert.equal(parseStoredQuotes(JSON.stringify([{ ...seed[0], readingMode: null }]), seed), seed);
+  assert.equal(parseStoredQuotes(JSON.stringify([{ ...seed[0], style: 12 }]), seed), seed);
+});
