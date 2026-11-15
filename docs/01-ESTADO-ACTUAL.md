@@ -1,5 +1,7 @@
 # 01 · Estado actual
 
+**Actualización 15/11/2026:** la exportación local de JSON se publicó correctamente en Cloudflare (commit `f3f83e5`, versión `b8ab531d-cace-466a-ae5a-7e874ed0bf14`); su descarga en Samsung todavía está pendiente de confirmación. La clasificación de archivos QN-00.05 está documentada en [08-CLASIFICACION-Y-LIMPIEZA](08-CLASIFICACION-Y-LIMPIEZA.md).
+
 **Corte:** 15 de noviembre de 2026. **Base de código inspeccionada:** `d129e4261b9dbe2b7b32670f306e763032dca31f` (`main`). El repositorio quedó sin commits posteriores a la biblioteca de Estilos al realizar la auditoría. Se distingue abajo lo visto en código de lo comprobado por el usuario.
 
 ## Inventario verificable

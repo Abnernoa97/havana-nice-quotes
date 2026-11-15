@@ -5,3 +5,13 @@ dist/
 !.env.example
 .DS_Store
 *.log
+# Cloudflare Wrangler local state and secrets
+.wrangler/
+.dev.vars
+.dev.vars.*
+# Local build caches and test reports
+.vite/
+coverage/
+*.tsbuildinfo
+# Never commit user-generated backups
+HAVANA_NICE_QUOTES_RESPALDO_*.json

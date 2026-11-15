@@ -17,6 +17,7 @@ Esta carpeta es la **fuente de verdad del proyecto**. Permite retomar el desarro
 | [05 · Protocolo de desarrollo](docs/05-PROTOCOLO-DE-DESARROLLO.md) | Cómo cambiar, comprobar, publicar y regresar |
 | [06 · Registro de decisiones](docs/06-DECISIONES.md) | Decisiones tomadas y puntos todavía abiertos |
 | [07 · Respaldo y recuperación](docs/07-RESPALDO.md) | Commit protegido, exportación del Samsung y verificación pendiente |
+| [08 · Clasificación y limpieza](docs/08-CLASIFICACION-Y-LIMPIEZA.md) | Inventario verificado, estructura futura y normas de limpieza |
 
 ## Identidad de este proyecto
 
@@ -34,6 +35,7 @@ Esta carpeta es la **fuente de verdad del proyecto**. Permite retomar el desarro
 npm install
 npm run dev
 npm run build
+npm run audit:structure
 ```
 
 **Cloudflare:** rama `main`; build `npm run build`; deploy `npx wrangler deploy`; assets `./dist`, definidos en `wrangler.jsonc`.

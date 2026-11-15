@@ -60,6 +60,10 @@ El estado se carga de `localStorage.getItem('hn_quotes_visual_v1')` al iniciar y
 
 El shell de la PWA puede cachearse; **no significa que la experiencia completa sea offline ni que exista sincronización**.
 
+## Organización progresiva
+
+Ver el [inventario real, la clasificación y la estructura objetivo de QN-00.05](08-CLASIFICACION-Y-LIMPIEZA.md). En esta etapa no se movieron componentes ni se modificó la clave `hn_quotes_visual_v1`.
+
 ## Deuda técnica detectada
 
 1. `src/App.tsx` es demasiado central: incorpora UI, datos, reglas y simulaciones. Hay riesgo de romper funciones al modificar una sección.

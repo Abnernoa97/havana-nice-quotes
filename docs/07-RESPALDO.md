@@ -54,7 +54,7 @@ El archivo contiene todas las propuestas del dispositivo desde el que se pulse e
 - [x] Commit reproducible identificado.
 - [x] Versión y despliegue Cloudflare identificados.
 - [x] Función de exportación local agregada al código.
-- [ ] Confirmar nueva compilación y despliegue de esa función.
+- [x] Nueva compilación y despliegue confirmados (commit `f3f83e5`, versión `b8ab531d-cace-466a-ae5a-7e874ed0bf14`, 15/11/2026).
 - [ ] Usuario descargó y verificó el JSON del Samsung.
 - [ ] Usuario descargó un ZIP de código en un soporte externo.
 - [ ] Implementar restauración no destructiva antes de cualquier migración de datos.
