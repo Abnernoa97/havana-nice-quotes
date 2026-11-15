@@ -2,16 +2,13 @@ import type { ChangeEvent } from 'react';
 import { Check, UploadCloud } from 'lucide-react';
 import type { CloudPhoto } from '../photos/useMediaLibrary';
 import { MAX_PHOTOS_PER_UPLOAD } from '../photos/photo-batch';
+import type { Quote } from '../quotes/types';
+import CarolinaGalleryEditor from '../templates/CarolinaGalleryEditor';
+import '../templates/carolina-editor.css';
 
-type DesignQuote = {
-  cover: string;
-  font: string;
-  color: string;
-};
-type DesignField = keyof DesignQuote;
 type Props = {
-  item: DesignQuote;
-  edit: (key: DesignField, value: string) => void;
+  item: Quote;
+  edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
   filePicked: (event: ChangeEvent<HTMLInputElement>) => void;
   cloudPhotos: CloudPhoto[];
   onOpenBank: () => void;
@@ -53,6 +50,10 @@ export default function QuoteDesignPanel({ item, edit, filePicked, cloudPhotos, 
                   onChange={filePicked}
                 />
               </label>
+              {item.style === 'carolina' && (
+                <CarolinaGalleryEditor item={item} photos={cloudPhotos}
+                  onUpdate={gallery => edit('gallery', gallery)} openBank={onOpenBank}/>
+              )}
               <div className="edit-separator" />
               <label>Tipografía del título</label>
               <div className="font-options">

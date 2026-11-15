@@ -39,3 +39,7 @@ npx wrangler deploy
 ## Papelera
 
 El menú lateral incluye Papelera unificada: permite restaurar o borrar definitivamente cotizaciones y fotografías. Las imágenes permanecen en el mismo R2 hasta su purga y no se eliminan automáticamente. La categoría Archivos estará disponible cuando exista gestión de adjuntos.
+
+## Primera plantilla real (Carolina)
+
+El PDF de Canva Carolina guió un nuevo diseño nativo `carolina`: portada fotográfica, seis espacios de collage y tercera hoja de celebración/experiencia/producción. Las fotos se eligen del banco R2 de Quotes Studio, sin importar automáticamente imágenes del PDF. Los campos de cliente, fecha, venue, importe, moneda y anticipo se reutilizan; nueve textos de servicio están editables. Scroll mantiene tres páginas; la revista PageFlip utiliza una hoja reversa blanca para paginar sin modificar el motor.

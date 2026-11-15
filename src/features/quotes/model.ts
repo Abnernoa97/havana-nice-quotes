@@ -42,7 +42,7 @@ export function createQuoteDraft(id: string): Quote {
     package: 'Signature Live Band',
     desc: 'Live music planned with care for every moment of your celebration.',
     messages: [],
-    style: 'libre',
+    style: 'carolina',
     readingMode: 'flip',
   };
 }

@@ -43,6 +43,7 @@ test('El nuevo borrador es independiente de otras cotizaciones', () => {
   const quote = createQuoteDraft('hn-custom-1');
   assert.equal(quote.status, 'Borrador');
   assert.equal(quote.readingMode, 'flip');
+  assert.equal(quote.style, 'carolina');
   const other = seed[1];
   const next = editSampleQuote([quote, other], quote.id, 'price', 10000);
   assert.equal(next[0].price, 10000);
@@ -68,8 +69,8 @@ test('Precios de la interfaz no permiten NaN ni importes negativos', () => {
   assert.equal(safeQuoteDeposit('-1'), 0);
 });
 
-test('Un borrador preserva los cinco estilos y los dos modos al serializarse', () => {
-  for (const style of ['libre', 'vogue', 'lane', 'junebug', 'nyt']) {
+test('Los estilos editoriales y la plantilla real preservan Scroll y 3D', () => {
+  for (const style of ['carolina', 'libre', 'vogue', 'lane', 'junebug', 'nyt']) {
     for (const readingMode of ['flip', 'scroll']) {
       const quote = { ...createQuoteDraft('hn-custom-2'), style, readingMode, cover: '/api/media/a1234567-1234-1234-1234-123456789abc' };
       assert.deepEqual(JSON.parse(JSON.stringify(quote)), quote);

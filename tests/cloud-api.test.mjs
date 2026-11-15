@@ -489,3 +489,27 @@ test('Papelera requiere una sesión autorizada para restaurar o purgar', async (
   assert.equal((await worker.fetch(request('/api/trash/photo/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/restore',{method:'POST'}),env)).status,401);
   assert.equal((await worker.fetch(request('/api/trash/quote/hn-12345678-1234-1234-1234-123456789abc',{method:'DELETE'}),env)).status,401);
 });
+
+
+test('Cotización Carolina guarda 6 fotos privadas y su texto editable en D1 sin conversiones', async () => {
+  const env=environment();
+  const cookie=await authorizeDevice(env);
+  const id='hn-01010101-0202-0303-0404-050505050505';
+  const gallery=Array.from({length:6}, (_,i)=>'/api/media/'+String(i).repeat(8)+'-0000-0000-0000-000000000000');
+  const quote={id,name:'Carolina',client:'',email:'',location:'Cortijo Jajalpa, Mexico',
+    date:'2028-02-19',price:50000,deposit:30,currency:'MX',status:'Borrador',cover:'',
+    font:'editorial',color:'#18342f',note:'',package:'Live Wedding Band',desc:'',
+    style:'carolina',readingMode:'scroll',gallery,
+    carolinaCopy:{performance:'90 minutes',space:'At least 2x2 meters'}};
+  const result=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+    {quote,expectedRevision:0},cookie),env);
+  assert.equal(result.status,200);
+  const loaded=await worker.fetch(request('/api/quotes',{headers:{Cookie:cookie}}),env);
+  assert.deepEqual((await loaded.json()).quotes[0].quote,quote);
+  const over=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+    {quote:{...quote,gallery:[...gallery,'']},expectedRevision:1},cookie),env);
+  assert.equal(over.status,400);
+  const external=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+    {quote:{...quote,gallery:['https://stock.example/photo.jpg']},expectedRevision:1},cookie),env);
+  assert.equal(external.status,400);
+});

@@ -5,6 +5,7 @@ import { PageFlip } from 'page-flip';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
 import { money, quoteCurrency } from '../../shared/lib/formatters';
 import { coverBackground } from '../../shared/lib/coverBackground';
+import { CarolinaCover, CarolinaCollage, CarolinaTerms, CarolinaBlankReverse } from '../templates/CarolinaTemplate';
 import './flip-magazine.css';
 
 function MagazineLeaf({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -24,7 +25,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
   const [page, setPage] = useState(0);
   const [orientation, setOrientation] = useState('portrait');
   const [failure, setFailure] = useState(false);
-  const total = 6;
+  const total = item.style === 'carolina' ? 4 : 6;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -72,7 +73,8 @@ export default function FlipMagazine({ item }: { item: Quote }) {
       try { flip?.destroy(); } catch (error) { console.warn('Page flip cleanup', error); }
       mount.replaceChildren();
     };
-  }, [item.id, item.cover, item.name, item.note, item.package, item.price, item.location, item.deposit, item.desc, item.date, item.currency]);
+  }, [item.id, item.cover, item.name, item.note, item.package, item.price, item.location, item.deposit, item.desc, item.date, item.currency, item.style,
+    JSON.stringify(item.gallery), JSON.stringify(item.carolinaCopy)]);
 
   const changePage = (direction: 'next' | 'prev') => {
     const flip = flipRef.current;
@@ -94,7 +96,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
       </header>
 
       <div className="hn-magazine-stage">
-        <div className="hn-magazine-surface" ref={mountRef} aria-label="Revista interactiva de seis páginas" />
+        <div className="hn-magazine-surface" ref={mountRef} aria-label={'Revista interactiva de ' + total + ' páginas'} />
       </div>
 
       {failure && (
@@ -119,6 +121,15 @@ export default function FlipMagazine({ item }: { item: Quote }) {
       <p className="hn-magazine-disclaimer">Design preview only · Delivery and acceptance are not active.</p>
 
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
+        {item.style === 'carolina' ? (
+          <>
+            <MagazineLeaf className="hn-carolina-leaf"><CarolinaCover item={item}/></MagazineLeaf>
+            <MagazineLeaf className="hn-carolina-leaf"><CarolinaCollage item={item}/></MagazineLeaf>
+            <MagazineLeaf className="hn-carolina-leaf"><CarolinaTerms item={item}/></MagazineLeaf>
+            <MagazineLeaf className="hn-carolina-leaf"><CarolinaBlankReverse/></MagazineLeaf>
+          </>
+        ) : (
+          <>
         <MagazineLeaf className="hn-cover-leaf">
           <div className="hn-cover-image" style={{ backgroundImage: coverBackground(item.cover, 'linear-gradient(180deg, rgba(7,19,16,.24), rgba(7,19,16,.03) 36%, rgba(7,19,16,.73))') }}>
             <div className="hn-cover-top"><span>HAVANA NICE</span><small>THE PRIVATE EDITION</small></div>
@@ -188,6 +199,8 @@ export default function FlipMagazine({ item }: { item: Quote }) {
           <div className="hn-end-body"><span className="hn-micro">FER & NOA</span><h2>We'd love to<br/><em>be part of it.</em></h2><p>Thanks for considering HAVANA NICE for your celebration. We're here for questions, ideas, and the details that matter to you.</p><strong>HAVANA NICE</strong></div>
           <div className="hn-leaf-foot"><span>SERVING LOVE THROUGH LIVE MUSIC</span><span>06</span></div>
         </MagazineLeaf>
+          </>
+        )}
       </div>
     </section>
   );

@@ -27,21 +27,21 @@ export default function ClientPage({
 }: Props) {
   return (
     <div className={'client-app client-editorial-reader hn-style-' + styleName} style={{ '--paper-accent': item.color } as CSSProperties}>
-      <div className="client-reader-masthead">
+      {styleName !== 'carolina' && <div className="client-reader-masthead">
         <span>HAVANA NICE</span>
         <span>LIVE MUSIC · MEXICO</span>
-      </div>
+      </div>}
 
       <main className="client-reader-document" aria-label={'Propuesta personalizada para ' + item.name}>
         <Proposal item={item} styleName={styleName} />
       </main>
 
-      <section className="client-reader-afterword">
+      {styleName !== 'carolina' && <section className="client-reader-afterword">
         <span className="eyebrow">A NOTE FROM US</span>
         <h2>Questions? <em>We're right here.</em></h2>
         <p>Have a question or want to adjust a detail? We'd be happy to talk it through with you.</p>
         <div className="client-reader-signoff">Fer & Noa <small>HAVANA NICE</small></div>
-      </section>
+      </section>}
 
       <details className="client-preview-testing">
         <summary>Herramientas de prueba del prototipo · no visibles en una cotización final</summary>
@@ -81,10 +81,10 @@ export default function ClientPage({
         </div>
       </details>
 
-      <footer className="client-reader-footer">
+      {styleName !== 'carolina' && <footer className="client-reader-footer">
         <span>HAVANA NICE</span>
         <span>LIVE MUSIC FOR YOUR CELEBRATION</span>
-      </footer>
+      </footer>}
     </div>
   );
 }

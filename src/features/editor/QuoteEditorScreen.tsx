@@ -8,6 +8,7 @@ import QuoteDesignPanel from './QuoteDesignPanel';
 import type { CloudPhoto } from '../photos/useMediaLibrary';
 import QuotePricingPanel from './QuotePricingPanel';
 import { coverBackground } from '../../shared/lib/coverBackground';
+import { CarolinaCover } from '../templates/CarolinaTemplate';
 
 type Props = {
   item: Quote;
@@ -152,6 +153,9 @@ export default function QuoteEditorScreen({
               </div>
             ) : (
               <div className={'studio-magazine-preview hn-style-' + styleName} style={{ '--paper-accent': item.color } as CSSProperties}>
+                {styleName === 'carolina' ? (
+                  <CarolinaCover item={item}/>
+                ) : (
                 <div className="studio-magazine-cover" style={{ backgroundImage: coverBackground(item.cover, 'linear-gradient(180deg, rgba(7,19,16,.24), rgba(7,19,16,.03) 36%, rgba(7,19,16,.73))') }}>
                   <div className="studio-magazine-cover-top"><strong>HAVANA NICE</strong><span>THE PRIVATE EDITION</span></div>
                   <div className="studio-magazine-cover-bottom">
@@ -162,6 +166,7 @@ export default function QuoteEditorScreen({
                   </div>
                   <small>ISSUE 001 · MEXICO</small>
                 </div>
+                )}
                 <p className="studio-magazine-preview-note">Portada estática. Abre la revista para comprobar el doblez y todas las páginas.</p>
               </div>
             )}

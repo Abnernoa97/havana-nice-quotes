@@ -4,6 +4,7 @@
 
 - Repo `Abnernoa97/havana-nice-quotes`, rama única `main`; publicación automática en el Worker Cloudflare existente `havana-nice-quotes`.
 - React + Vite, editor/Inicio/Cotizaciones/Mensajes/Vista cliente, lectura Scroll y PageFlip 3D conservados.
+- Primera plantilla real de Canva: **HAVANA NICE Original · Carolina**, 3 páginas, 6 espacios de fotografía independientes desde R2 privado, textos de servicio/producción editables. Predeterminada en borradores nuevos; estilos editoriales antiguos preservados.
 - Navegación nativa de Android/PWA mediante historial centralizado. La prueba táctil sigue pendiente.
 - **Nube:** D1 `havana-nice-quotes-sync` con tablas `quotes`, `media` (con campo `deleted_at`), `device_invites` y `device_sessions`; R2 `havana-nice-v2-media` usando únicamente `quotes-studio/photos/`. Ningún dato del calendario o Book v2 se borra.
 - Cuenta de cotizaciones y fotos de Quotes Studio inicia **en cero**; el storage local antiguo ya no alimenta la app.

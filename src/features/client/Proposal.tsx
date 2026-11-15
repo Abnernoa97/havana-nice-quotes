@@ -2,11 +2,15 @@ import { Check } from 'lucide-react';
 import { money, dDate } from '../../shared/lib/formatters';
 import type { Quote } from '../quotes/types';
 import { coverBackground } from '../../shared/lib/coverBackground';
+import CarolinaDocument from '../templates/CarolinaTemplate';
 
 type Props = { item: Quote; styleName: string; embedded?: boolean };
 
 /** Mismo JSX que el prototipo original, sin rediseños. */
 export default function Proposal({ item, styleName, embedded = false }: Props) {
+  if (styleName === 'carolina') {
+    return <CarolinaDocument item={item}/>;
+  }
   return (
     <div className={'proposal hn-style-' + styleName + ' ' + (embedded ? 'embedded' : '')}>
       <div className="proposal-top">

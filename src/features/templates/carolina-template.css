@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Jost:wght@400;500&display=swap');
+
+/* HAVANA NICE Original — rebuilt from Carolina's 3-page Canva PDF.
+   Separate from editorial styles and the PageFlip engine. */
+.hn-carolina-document {
+  width: min(100%, 720px);
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+  background: transparent;
+}
+.hn-carolina-page {
+  width: 100%;
+  aspect-ratio: 612 / 792;
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+  container-type: inline-size;
+}
+.hn-carolina-cover {
+  background-color: #352721;
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+}
+.hn-carolina-cover-brand {
+  position: absolute;
+  top: 12.5%;
+  left: 5%;
+  right: 5%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2em;
+  text-shadow: 0 2px 9px #21150c65;
+}
+.hn-carolina-cover-brand strong {
+  font: 400 clamp(25px, 10.4cqw, 87px)/.93 'Cormorant Garamond', Georgia, serif;
+  letter-spacing: -.054em;
+  white-space: nowrap;
+}
+.hn-carolina-cover-brand span {
+  font: 400 clamp(16px, 5.9cqw, 44px)/1.15 'Great Vibes', cursive;
+}
+.hn-carolina-collage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .8%;
+  background: #fff;
+}
+.hn-carolina-photo-column {
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: .8%;
+}
+.hn-carolina-photo-column.left > :first-child { flex: 1.1; }
+.hn-carolina-photo-column.left > :last-child { flex: .9; }
+.hn-carolina-photo-column.right > * { flex: 1; }
+.hn-carolina-photo {
+  position: relative;
+  width: 100%;
+  min-height: 0;
+  background: #e3e6df;
+  background-position: center;
+  background-size: cover;
+}
+.hn-carolina-photo:nth-child(even) { background-color: #d5ddd4; }
+.hn-carolina-terms {
+  padding: 6.3% 6.1% 4.8%;
+  font-family: 'Jost', 'DM Sans', Arial, sans-serif;
+  color: #73441d;
+  display: flex;
+  flex-direction: column;
+  gap: 3.1%;
+}
+.hn-carolina-term-group h2 {
+  color: #38251a;
+  font: 400 clamp(20px, 5.8cqw, 48px)/1.18 'Great Vibes', cursive;
+  letter-spacing: 0;
+  margin: 0 0 1.8%;
+}
+.hn-carolina-term-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 2.5%;
+}
+.hn-carolina-term-lines p {
+  font-size: clamp(8px, 2.46cqw, 19px);
+  font-weight: 400;
+  letter-spacing: -.025em;
+  line-height: 1.12;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.hn-carolina-term-group.experience .hn-carolina-term-lines { gap: .8em; }
+.hn-carolina-term-group.production .hn-carolina-term-lines { gap: .75em; }
+.hn-carolina-term-group.celebration { margin-bottom: 3.7%; }
+.hn-carolina-term-group.experience { margin-bottom: auto; }
+.hn-carolina-reverse { background: #fff; }
+.hn-magazine .hn-carolina-page { height: 100%; aspect-ratio: auto; }
+.hn-magazine .hn-carolina-terms { gap: 2.2%; }
+.hn-magazine .hn-carolina-term-lines p { font-size: clamp(8px, 2.42cqw, 16px); }
+.hn-style-carolina .proposal, .hn-style-carolina .paper-content { background: #fff; }
+.hn-style-carolina .hn-magazine { background: #e9e9e4; }
+.hn-style-carolina .client-reader-document { padding: 14px 0; }
+.hn-carolina-document.embedded { gap: 8px; }
+@media(max-width:650px) {
+  .hn-carolina-document { gap: 10px; }
+  .hn-carolina-terms { gap: 2%; }
+  .hn-carolina-term-group.celebration { margin-bottom: 2%; }
+  .hn-carolina-term-group.experience .hn-carolina-term-lines { gap: .55em; }
+  .hn-carolina-term-group.production .hn-carolina-term-lines { gap: .5em; }
+}

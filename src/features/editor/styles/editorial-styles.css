@@ -98,3 +98,34 @@
 .hn-style-nyt .hn-magazine{background:#e7e6e0}
 @media(max-width:390px){.hn-style-mini{height:158px}.hn-card-caption p{font-size:9px}.edit-tabs.hn-four-tabs button{font-size:9px}}
 @media(min-width:900px) and (max-width:1160px){.hn-styles-gallery{grid-template-columns:1fr}}
+
+/* Primary real HAVANA NICE layouts are separate from editorial experiments. */
+.hn-styles-category-heading { display: block; margin: 24px 0 12px; }
+.hn-styles-original { grid-template-columns: 1fr; }
+.hn-styles-original .hn-style-card { display: grid; grid-template-columns: minmax(135px,44%) 1fr; }
+.hn-styles-original .hn-style-mini { height: 190px; }
+.hn-styles-original .hn-card-caption { justify-content: center; padding: 16px; }
+.hn-mini-carolina {
+  align-items: center; text-align: center; color: #fff;
+  background: linear-gradient(135deg,#3e2e2a,#8b6557 58%,#322c2a);
+}
+.hn-mini-carolina .hn-mini-photo { filter: brightness(.6); }
+.hn-mini-carolina > strong {
+  position: relative; margin: 12% 0 0; white-space: nowrap;
+  font: 400 28px/.9 'Cormorant Garamond',Georgia,serif; letter-spacing: -.05em;
+}
+.hn-mini-carolina > em { position: relative; font: 400 19px 'Great Vibes',cursive; }
+.hn-mini-carolina-bottom {
+  position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
+  height: 42px; width: 73%; margin-top: auto; background: #fff; padding: 3px;
+}
+.hn-mini-carolina-bottom span { background: #99a89b; }
+.hn-mini-carolina-bottom span:nth-child(2){background:#b1a390}
+.hn-mini-carolina-bottom span:nth-child(3){background:#d5c9bd}
+.hn-mini-carolina-bottom span:nth-child(4){background:#819388}
+@media(max-width:400px){
+  .hn-styles-original .hn-style-card { grid-template-columns: 43% 57%; }
+  .hn-styles-original .hn-style-mini { height: 168px; }
+  .hn-mini-carolina > strong { font-size: 23px; }
+  .hn-mini-carolina > em { font-size: 16px; }
+}

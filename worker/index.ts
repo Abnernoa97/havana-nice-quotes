@@ -102,7 +102,14 @@ function validQuote(input: unknown, id: string): input is Record<string, unknown
     typeof q.deposit === 'number' && Number.isFinite(q.deposit) && q.deposit >= 0 && q.deposit <= 100 &&
     (q.currency === undefined || q.currency === 'USD' || q.currency === 'MX') &&
     VALID_STATES.has(String(q.status)) &&
-    (q.style === undefined || ['libre', 'vogue', 'lane', 'junebug', 'nyt'].includes(String(q.style))) &&
+    (q.style === undefined || ['carolina', 'libre', 'vogue', 'lane', 'junebug', 'nyt'].includes(String(q.style))) &&
+    (q.gallery === undefined || Array.isArray(q.gallery) && q.gallery.length <= 6 &&
+      q.gallery.every((photo: unknown) => typeof photo === 'string' && (photo === '' ||
+        /^\/api\/media\/[a-f0-9-]{36}$/.test(photo)))) &&
+    (q.carolinaCopy === undefined || (!!q.carolinaCopy && typeof q.carolinaCopy === 'object' &&
+      !Array.isArray(q.carolinaCopy) && Object.entries(q.carolinaCopy).every(([field, value]) =>
+        ['performance', 'musicians', 'crew', 'backline', 'logistics', 'balance', 'production', 'connections', 'space'].includes(field) &&
+        typeof value === 'string' && value.length <= 1500))) &&
     (q.readingMode === undefined || ['flip', 'scroll'].includes(String(q.readingMode))) &&
     (q.messages === undefined || Array.isArray(q.messages) && q.messages.length < 500 &&
       q.messages.every((m: unknown) => !!m && typeof m === 'object' &&

@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const src = file => readFileSync(new URL('../src/' + file, import.meta.url), 'utf8');
 
-test('Cinco estilos y ambos modos mantienen el mismo documento en editor y cliente', () => {
+test('Plantilla real y cinco estilos mantienen ambos modos editor/cliente', () => {
   const editor = src('features/editor/QuoteEditorScreen.tsx');
   const app = src('app/App.tsx');
   const styles = src('features/editor/styles/EditorialStyles.tsx');
-  for (const id of ['libre', 'vogue', 'lane', 'junebug', 'nyt']) assert.ok(styles.includes("id:'" + id + "'"));
+  for (const id of ['carolina', 'libre', 'vogue', 'lane', 'junebug', 'nyt']) assert.ok(styles.includes("id:'" + id + "'"));
   assert.match(editor, /onChange=\{style => edit\('style', style\)\}/);
   assert.match(editor, /onReadingChange=\{mode => \{ edit\('readingMode', mode\); setPreviewMode\(mode\); \}\}/);
   assert.match(app, /previewMode === 'flip' \?/);
@@ -144,4 +144,39 @@ test('Papelera visible desde el menú, sin sexta pestaña móvil', () => {
   assert.match(trash, /Archivos/);
   assert.match(worker, /deleted_at IS NOT NULL/);
   assert.match(worker, /await env\.MEDIA\.delete\(photo\.object_key\)/);
+});
+
+
+test('Carolina es la plantilla real principal y separada de los estilos editoriales', () => {
+  const styles = src('features/editor/styles/EditorialStyles.tsx');
+  const types = src('features/quotes/types.ts');
+  const editor = src('features/editor/QuoteEditorScreen.tsx');
+  assert.match(styles, /name:'HAVANA NICE Original · Carolina'/);
+  assert.match(styles, /PLANTILLAS ORIGINALES/);
+  assert.match(styles, /ESTILOS EDITORIALES ESPECIALES/);
+  assert.match(types, /'carolina' \| 'libre'/);
+  assert.match(editor, /<CarolinaCover item=\{item\}\/>/);
+});
+
+test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF incrustado', () => {
+  const template = src('features/templates/CarolinaTemplate.tsx');
+  const design = src('features/editor/QuoteDesignPanel.tsx');
+  const details = src('features/editor/QuoteDetailsPanel.tsx');
+  const proposal = src('features/client/Proposal.tsx');
+  const magazine = src('features/magazine/FlipMagazine.tsx');
+  assert.match(template, /CAROLINA_SLOTS = 6/);
+  for (const label of ['The Celebration', 'The Experience', 'Production &amp; Tech']) {
+    assert.ok(template.includes(label));
+  }
+  assert.match(template, /export function CarolinaCover/);
+  assert.match(template, /export function CarolinaCollage/);
+  assert.match(template, /export function CarolinaTerms/);
+  assert.match(template, /<CarolinaCover item=\{item\}\/>[\s\S]*?<CarolinaCollage item=\{item\}\/>[\s\S]*?<CarolinaTerms item=\{item\}\/>/);
+  assert.match(proposal, /styleName === 'carolina'/);
+  assert.match(design, /onUpdate=\{gallery => edit\('gallery', gallery\)\}/);
+  assert.match(details, /edit\('carolinaCopy'/);
+  assert.match(magazine, /item\.style === 'carolina'/);
+  assert.match(magazine, /<CarolinaBlankReverse\/>/);
+  assert.match(magazine, /flippingTime: 1080/);
+  assert.doesNotMatch(template, /<iframe|<embed|<object|\.pdf/);
 });

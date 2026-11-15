@@ -1,3 +1,7 @@
+## Plantillas reales (etapa activa)
+
+Incorporada primera cotización real Canva **Carolina**: portada, collage editable y página de experiencia/producción. Siguiente etapa: comparar visualmente con el PDF en Android, afinar tipografía y espaciados, y repetir con los siguientes PDF.
+
 # 04 · Roadmap vigente
 
 **Alcance:** HAVANA NICE Quotes Studio, prototipo con datos ficticios. El control de limpieza está en [Issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3) y el estado real en [09 · Estado vigente](09-ESTADO-VIGENTE-Y-LIMPIEZA.md). Este documento describe **desarrollo futuro**, no tareas ya entregadas.

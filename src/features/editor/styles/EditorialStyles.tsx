@@ -2,6 +2,7 @@ import { Check, ChevronRight, BookOpen, AlignJustify, Palette, Eye } from 'lucid
 import './editorial-styles.css';
 
 export const editorialStyles = [
+  {id:'carolina',name:'HAVANA NICE Original · Carolina',category:'PLANTILLA REAL · CANVA',desc:'Nuestra cotización real: portada, seis fotografías y página de servicios.',features:'3 páginas · Editable · HAVANA NICE'},
   {id:'libre',name:'Estilo libre',category:'TU PROPIO LENGUAJE',desc:'Una composición abierta para crear tu propio lenguaje visual.',features:'Personalizable · HAVANA NICE'},
   {id:'vogue',name:'Vogue',category:'FASHION EDITORIAL',desc:'Grandes títulos, fotografías dominantes y alto contraste editorial.',features:'Bodoni · Contraste · Moda'},
   {id:'lane',name:'The Lane',category:'MODERN LUXURY',desc:'Arquitectura, fotografía delicada, aire y composiciones asimétricas.',features:'Cormorant · Marfil · Espacio'},
@@ -18,19 +19,22 @@ type Props = {
   onPreview: () => void;
   photo: string;
 };
-export default function EditorialStyles({value, onChange, readingMode, onReadingChange, onEditFree, onPreview, photo}: Props) {
+
+type StyleOption = (typeof editorialStyles)[number];
+function StyleCard({s, value, onChange, photo}: {s: StyleOption; value: string; onChange: (id: string)=>void; photo: string}) {
   return (
-    <div className="hn-styles-tab">
-      <span className="eyebrow">HAVANA NICE / EDITORIAL LIBRARY</span>
-      <h3>Una propuesta. Muchos lenguajes.</h3>
-      <p className="hn-styles-lead">Elige cómo se cuenta la historia. Cada estilo cambia la dirección visual, no los nombres, fotografías, textos ni precios.</p>
-      <div className="hn-styles-gallery">
-        {editorialStyles.map(s => (
           <button key={s.id} type="button" aria-pressed={s.id === value}
             className={'hn-style-card hn-card-'+s.id+(value===s.id?' selected':'')}
             onClick={()=>onChange(s.id)}>
             <div className={'hn-style-mini hn-mini-'+s.id}>
-              {s.id==='libre' ? (
+              {s.id==='carolina' ? (
+                <>
+                  {photo && <div className="hn-mini-photo" style={{backgroundImage:'url('+photo+')'}}/>}
+                  <strong>HAVANA NICE</strong>
+                  <em>Live Wedding Music</em>
+                  <div className="hn-mini-carolina-bottom"><span/><span/><span/><span/></div>
+                </>
+              ) : s.id==='libre' ? (
                 <><div className="hn-mini-square"/><strong>YOUR<br/>STORY.</strong><small>A PERSONAL VISION</small></>
               ) : s.id==='nyt' ? (
                 <><div className="hn-mini-double-rule"/><small>THE PRIVATE WEDDING EDITION</small><strong>A Celebration<br/>in Mexico</strong>{photo && <div className="hn-mini-photo newspaper" style={{backgroundImage:'url('+photo+')'}}/>}<p>LOVE · MUSIC · THE PEOPLE WHO MATTER</p></>
@@ -48,6 +52,24 @@ export default function EditorialStyles({value, onChange, readingMode, onReading
               <p>{s.desc}</p><small>{s.features}</small>
             </div>
           </button>
+  );
+}
+export default function EditorialStyles({value, onChange, readingMode, onReadingChange, onEditFree, onPreview, photo}: Props) {
+  return (
+    <div className="hn-styles-tab">
+      <span className="eyebrow">HAVANA NICE / LIBRERÍA DE DISEÑOS</span>
+      <h3>Empieza con nuestras cotizaciones reales.</h3>
+      <p className="hn-styles-lead">Primero, nuestras plantillas de Canva. Después, los diseños editoriales especiales. Puedes cambiar de estilo sin perder la información.</p>
+      <span className="eyebrow hn-styles-category-heading">PLANTILLAS ORIGINALES</span>
+      <div className="hn-styles-gallery hn-styles-original">
+        {editorialStyles.filter(s => s.id === 'carolina').map(s => (
+          <StyleCard key={s.id} s={s} value={value} onChange={onChange} photo={photo}/>
+        ))}
+      </div>
+      <span className="eyebrow hn-styles-category-heading">ESTILOS EDITORIALES ESPECIALES</span>
+      <div className="hn-styles-gallery">
+        {editorialStyles.filter(s => s.id !== 'carolina').map(s => (
+          <StyleCard key={s.id} s={s} value={value} onChange={onChange} photo={photo}/>
         ))}
       </div>
       <p className="hn-style-attribution">Estilos originales de HAVANA NICE inspirados en lenguajes editoriales. No representan diseños oficiales ni afiliación con las publicaciones.</p>

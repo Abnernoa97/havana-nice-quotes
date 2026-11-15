@@ -92,6 +92,17 @@
 - Las cotizaciones que usaban una portada enviada a Papelera se muestran sin portada, sin referencias rotas. Restaurar la foto no la asigna automáticamente: puede elegirse de nuevo.
 - En esta etapa no se purga ningún elemento existente ni se alteran fotos de otras aplicaciones. Una sola rama `main` y publicación Cloudflare Workers Builds.
 
+## Primera plantilla real · Carolina (Canva, 19/10/2026)
+
+- PDF real suministrado por Fer & Noa: `Carolina_Havana Nice.pdf`, formato carta y **tres páginas**. Se usa como referencia visual, sin incrustar el PDF plano ni importar automáticamente sus fotografías al banco R2.
+- **Página 1:** fotografía a sangre con marca blanca HAVANA NICE / Live Wedding Music. La foto es la portada editable seleccionada en Diseño.
+- **Página 2:** collage de **6 fotografías**: dos imágenes apiladas a la izquierda y cuatro a la derecha, con calles blancas estrechas. Cada espacio es editable por separado usando exclusivamente la biblioteca de fotos propia.
+- **Página 3:** The Celebration / The Experience / Production & Tech, títulos manuscritos, fondo blanco y texto marrón; fecha, venue, importe y porcentaje conectados a los campos existentes; nueve líneas de servicio y producción desplegables y editables en Datos. Se conservaron los términos del PDF como texto base.
+- Estilo `carolina` **principal y predeterminado para borradores nuevos**. Las cinco direcciones editoriales previas quedan intactas, clasificadas como opciones especiales.
+- La plantilla se renderiza como componentes HTML y CSS editables tanto en la vista Scroll como en Revista 3D. El motor PageFlip no cambia; para la paginación de libros de hoja par, el 3D añade una contraportada completamente blanca. El documento Scroll sigue conteniendo las tres páginas originales.
+- **No alterar** fotografías reales, montos ni cotizaciones guardadas al incorporar el estilo. No convertir USD/MX automáticamente. Evitar imágenes de stock, clientes ficticios o importaciones cruzadas de otras aplicaciones.
+- Repetir esta arquitectura modular con los siguientes PDF de cotizaciones reales.
+
 ## Decisiones todavía abiertas
 
 1. Confirmar los nombres originales de las referencias editoriales mencionadas fonéticamente como «Deline» y «John Book».

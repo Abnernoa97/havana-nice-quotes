@@ -1,0 +1,27 @@
+/* Six-photo selector for the original Carolina collage. Only one picker exists. */
+.hn-carolina-gallery-editor { margin: 24px 0; padding-top: 22px; border-top: 1px solid #e4e9e2; }
+.hn-carolina-gallery-editor h4 { font: 400 25px 'Playfair Display',serif; margin: 10px 0; color: #284b37; }
+.hn-carolina-gallery-editor > p { color: #849589; font-size: 11px; line-height: 1.5; }
+.hn-carolina-gallery-slots { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; margin-top: 16px; }
+.hn-carolina-gallery-slot {
+  position: relative; border: 1px solid #d7e1d7; background: #eef1eb; border-radius: 9px;
+  aspect-ratio: .85; overflow: hidden; color: #78927c; cursor: pointer;
+  display: grid; place-items: center; padding: 0;
+}
+.hn-carolina-gallery-slot img { width: 100%; height: 100%; object-fit: cover; }
+.hn-carolina-gallery-slot span { position: absolute; bottom: 7px; left: 7px; border-radius: 5px; background: #1d382bbd; color: white; padding: 4px 6px; font-size: 10px; }
+.hn-carolina-gallery-slot.active { outline: 3px solid #356346; outline-offset: 2px; }
+.hn-carolina-gallery-picker { border: 1px solid #d9e4d8; background: #fafbf8; border-radius: 10px; margin-top: 16px; padding: 12px; }
+.hn-carolina-gallery-picker-head { display: flex; align-items: center; justify-content: space-between; color: #325440; font-size: 12px; }
+.hn-carolina-gallery-picker-head button { display: grid; place-items:center; border:0; background:transparent; cursor:pointer; padding:7px; }
+.hn-carolina-gallery-choices { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; margin-top: 10px; }
+.hn-carolina-gallery-choices button { aspect-ratio: 1; display: grid; place-items:center; border: 1px solid #d8e2d9; background: white; color: #6c856f; border-radius: 7px; position: relative; padding: 0; overflow: hidden; cursor: pointer; }
+.hn-carolina-gallery-choices button img { width: 100%; height: 100%; object-fit:cover; }
+.hn-carolina-gallery-choices button.clear { display:flex; flex-direction:column; gap:5px; font-size:9px; padding:6px; }
+.hn-carolina-gallery-choices button > svg:last-child:not(:first-child) { position:absolute; top:4px; right:4px; color:#fff; background:#2d6246; border-radius:50%; }
+.hn-carolina-gallery-slot:focus-visible,.hn-carolina-gallery-choices button:focus-visible { outline: 2px solid #b09260; outline-offset: 3px; }
+.hn-carolina-copy-editor { margin-top: 28px; border: 1px solid #dce5da; border-radius: 11px; background: #fafbf7; overflow: hidden; }
+.hn-carolina-copy-editor summary { cursor:pointer; padding:15px; font-size:12px; font-weight:700; color:#31543c; }
+.hn-carolina-copy-fields { padding: 4px 16px 18px; }
+.hn-carolina-copy-fields label { display: block; font-size: 11px; margin-top: 12px; color:#54705a; }
+.hn-carolina-copy-fields textarea { display:block; width:100%; resize:vertical; min-height:65px; margin-top:7px; font-size:12px; }
