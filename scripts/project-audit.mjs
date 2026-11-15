@@ -12,7 +12,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ignored = new Set(['.git', 'node_modules', 'dist', '.wrangler', '.vite', 'coverage']);
 const required = [
   'index.html', 'package.json', 'tsconfig.json', 'vite.config.ts',
-  'wrangler.jsonc', 'public/manifest.webmanifest', 'public/sw.js',
+  'wrangler.jsonc', 'bun.lock', 'public/manifest.webmanifest', 'public/sw.js',
   'public/icon-192.png', 'public/icon-512.png',
   'src/main.tsx', 'src/app/App.tsx', 'src/shared/styles/index.css',
   'src/features/home/HomeScreen.tsx',
@@ -80,7 +80,8 @@ if (fileSet.has('src/app/App.tsx')) {
   check('Clave de guardado preservada', app.includes('hn_quotes_visual_v1'),
     'Revisar la compatibilidad del almacenamiento de cotizaciones');
   const lines = app.split('\n').length;
-  if (lines > 500) report.warnings.push('App.tsx concentra ' + lines + ' líneas; separar gradualmente');
+  check('App.tsx por debajo de 500 líneas', lines <= 500,
+    'App.tsx concentra ' + lines + ' líneas: revisar separación funcional');
 }
 if (fileSet.has('src/features/magazine/FlipMagazine.tsx')) {
   const flip = fs.readFileSync(path.join(ROOT, 'src/features/magazine/FlipMagazine.tsx'), 'utf8');
@@ -92,6 +93,31 @@ if (fileSet.has('wrangler.jsonc')) {
   check('Worker de este proyecto', wrangler.includes('"havana-nice-quotes"'),
     'Revisar el destino del deploy; no intervenir en otros Workers');
 }
+// Contratos mínimos que protegen decisiones importantes de la demo.
+const sourceFiles = all.filter(p => /\.(?:ts|tsx|js|jsx)$/.test(p) && p.startsWith('src/'));
+const unchecked = sourceFiles.filter(p =>
+  fs.readFileSync(path.join(ROOT, p), 'utf8').includes('@ts-nocheck'));
+check('Sin TypeScript desactivado en src/', unchecked.length === 0,
+  'Archivos con @ts-nocheck: ' + unchecked.join(', '));
+const originals = ['src/App.tsx', 'src/FlipMagazine.tsx', 'src/EditorialStyles.tsx'];
+check('Sin componentes antiguos en la raíz de src', originals.every(p => !fileSet.has(p)),
+  'Rutas antiguas todavía activas: ' + originals.filter(p => fileSet.has(p)).join(', '));
+const fmtCopies = sourceFiles.flatMap(p => {
+  const text = fs.readFileSync(path.join(ROOT, p), 'utf8');
+  return [...text.matchAll(/new Intl\.NumberFormat\(/g)].map(() => p);
+});
+check('Un solo formateador internacional de importes', fmtCopies.length === 1 &&
+  fmtCopies[0] === 'src/shared/lib/formatters.ts',
+  'Intl.NumberFormat aparece en: ' + fmtCopies.join(', '));
+const magazinePath = 'src/features/magazine/FlipMagazine.tsx';
+if (fileSet.has(magazinePath)) {
+  const magazine = fs.readFileSync(path.join(ROOT, magazinePath), 'utf8');
+  check('Parámetros del Page Flip aprobado preservados',
+    ['flippingTime: 1080', 'maxShadowOpacity: 0.72', 'showCover: false',
+      'usePortrait: true', "flip.loadFromHTML("].every(x => magazine.includes(x)),
+    'Revisar pliegue 3D: cambió un parámetro protegido');
+}
+
 console.log('HAVANA NICE · Auditoría de estructura (solo lectura)');
 console.log('Archivos revisados:', report.files, '· Tamaño:', (report.sizeBytes / 1024).toFixed(1) + ' KiB');
 for (const test of report.checks) console.log((test.ok ? '✓ ' : '✗ ') + test.description);

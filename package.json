@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run audit:structure && npm test && tsc --noEmit && vite build",
     "preview": "vite preview",
     "audit:structure": "node scripts/project-audit.mjs",
     "test": "node --experimental-strip-types --test tests/*.test.mjs"
