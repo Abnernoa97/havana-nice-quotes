@@ -10,8 +10,6 @@ type Props = {
   clientMessage: string;
   setClientMessage: Dispatch<SetStateAction<string>>;
   sendClient: () => void;
-  viewAccept: boolean;
-  setViewAccept: Dispatch<SetStateAction<boolean>>;
   updateStatus: (status: string) => void;
 };
 
@@ -23,8 +21,6 @@ export default function ClientPage({
   clientMessage,
   setClientMessage,
   sendClient,
-  viewAccept,
-  setViewAccept,
   updateStatus,
 }: Props) {
   return (
@@ -118,7 +114,7 @@ export default function ClientPage({
               Accepting this demo only changes the sample status. No electronic
               signature is collected.
             </p>
-            {viewAccept ? (
+            {item.status === 'Aceptada' ? (
               <div className="demo-success">
                 <CheckCircle2 size={25} />
                 <strong>Acceptance simulated</strong>
@@ -127,10 +123,7 @@ export default function ClientPage({
             ) : (
               <button
                 className="btn outline full"
-                onClick={() => {
-                  setViewAccept(true);
-                  updateStatus('Aceptada');
-                }}
+                onClick={() => updateStatus('Aceptada')}
               >
                 <Heart size={16} /> Simulate acceptance
               </button>

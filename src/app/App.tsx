@@ -44,7 +44,6 @@ function App() {
   const [search, setSearch] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [clientMessage, setClientMessage] = useState('');
-  const [viewAccept, setViewAccept] = useState(false);
   const { standalone, installApplication, showInstallGuide, setShowInstallGuide } = useInstallPrompt();
   const installationGuide = showInstallGuide ? (
     <InstallGuide onClose={() => setShowInstallGuide(false)} />
@@ -104,7 +103,6 @@ function App() {
       { from: 'client', text: clientMessage.trim(), time: 'Just now' },
     ]);
     setClientMessage('');
-    setViewAccept(false);
     setToast('Solicitud añadida a la bandeja de esta demo');
   };
   const sendAdmin = () => {
@@ -202,8 +200,6 @@ function App() {
       clientMessage={clientMessage}
       setClientMessage={setClientMessage}
       sendClient={sendClient}
-      viewAccept={viewAccept}
-      setViewAccept={setViewAccept}
       updateStatus={updateStatus}
     />
   );

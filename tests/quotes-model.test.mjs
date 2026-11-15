@@ -158,3 +158,14 @@ test('Inicio presenta una conversación ficticia existente, nunca una pareja fij
   assert.equal(next?.message.text, 'Can we add a welcome party?');
   assert.equal(custom.messages[1].text, 'Can we add a welcome party?');
 });
+
+test('La aceptación simulada pertenece al estado de cada cotización, no a otra pareja', () => {
+  const initial = [createSampleDraft('hn-new'), ...seed];
+  const changed = editSampleQuote(initial, 'hn-new', 'status', 'Aceptada');
+  assert.equal(changed[0].status, 'Aceptada');
+  assert.equal(initial[0].status, 'Borrador');
+  assert.equal(changed[1].status, seed[0].status);
+  const restored = parseStoredQuotes(JSON.stringify(changed), seed);
+  assert.equal(restored[0].status, 'Aceptada');
+  assert.equal(restored[1].status, seed[0].status);
+});
