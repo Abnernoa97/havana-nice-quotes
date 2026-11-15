@@ -1,14 +1,12 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import FlipMagazine from './FlipMagazine';
-import EditorialStyles, { editorialStyles } from './EditorialStyles';
+import { editorialStyles } from './EditorialStyles';
 import { photos, seed } from './features/quotes/demo-data';
-import QuotePricingPanel from './features/editor/QuotePricingPanel';
-import QuoteDetailsPanel from './features/editor/QuoteDetailsPanel';
-import QuoteDesignPanel from './features/editor/QuoteDesignPanel';
 import HomeScreen from './features/home/HomeScreen';
 import MessagesScreen from './features/messages/MessagesScreen';
 import ClientPage from './features/client/ClientPage';
+import QuoteEditorScreen from './features/editor/QuoteEditorScreen';
 import Proposal from './features/client/Proposal';
 import QuotesScreen from './features/quotes/QuotesScreen';
 import {
@@ -19,18 +17,11 @@ import {
   MessageCircle,
   Plus,
   ArrowUpRight,
-  Eye,
-  Save,
-  DollarSign,
   Send,
   X,
   Menu,
   ChevronLeft,
   Sparkles,
-  PenLine,
-  ExternalLink,
-  Monitor,
-  Smartphone,
   Settings2,
   Download,
 } from 'lucide-react';
@@ -375,112 +366,20 @@ function App() {
     />
   );
   const editor = (
-    <div className="page editor-page">
-      <div className="editor-head">
-        <div>
-          <div className="eyebrow">QUOTE DESIGNER / DEMO</div>
-          <h1>
-            Diseña tu propuesta <span className="italic">a tu manera.</span>
-          </h1>
-        </div>
-        <div className="editor-actions">
-          <button className="btn subtle" onClick={openClientPreview}>
-            <Eye size={16} /> Vista del cliente
-          </button>
-          <button className="btn primary" onClick={save}>
-            <Save size={16} /> Guardar
-          </button>
-        </div>
-      </div>
-      <div className="editor-workspace">
-        <div className="edit-panel">
-          <div className="edit-tabs hn-four-tabs">
-            <button
-              className={tab === 'details' ? 'active' : ''}
-              onClick={() => setTab('details')}
-            >
-              <PenLine size={16} /> Datos
-            </button>
-            <button
-              className={tab === 'styles' ? 'active' : ''}
-              onClick={() => setTab('styles')}
-            >
-              <BookOpen size={16} /> Estilos
-            </button>
-            <button
-              className={tab === 'design' ? 'active' : ''}
-              onClick={() => setTab('design')}
-            >
-              <Palette size={16} /> Diseño
-            </button>
-            <button
-              className={tab === 'pricing' ? 'active' : ''}
-              onClick={() => setTab('pricing')}
-            >
-              <DollarSign size={16} /> Precios
-            </button>
-          </div>
-          {tab === 'details' && (
-            <QuoteDetailsPanel item={item} edit={edit} />
-          )}
-          {tab === 'styles' && (
-            <EditorialStyles
-              value={styleName}
-              onChange={style => edit('style', style)}
-              readingMode={item.readingMode === 'scroll' ? 'scroll' : 'flip'}
-              onReadingChange={mode => { edit('readingMode', mode); setPreviewMode(mode); }}
-              onEditFree={() => setTab('design')}
-              onPreview={openClientPreview}
-              photo={item.cover}
-            />
-          )}
-          {tab === 'design' && (
-            <QuoteDesignPanel item={item} edit={edit} filePicked={filePicked} />
-          )}
-          {tab === 'pricing' && (
-            <QuotePricingPanel item={item} edit={edit} share={share} />
-          )}
-        </div>
-        <div className="preview-side">
-          <div className="preview-heading">
-            <div>
-              <span className="eyebrow">LIVE PREVIEW</span>
-              <h3>Así lo verá la pareja</h3>
-            </div>
-            <div className="preview-switch">
-              <button
-                className={!mobilePreview ? 'active' : ''}
-                onClick={() => setMobilePreview(false)}
-                title="Vista de escritorio"
-              >
-                <Monitor size={18} />
-              </button>
-              <button
-                className={mobilePreview ? 'active' : ''}
-                onClick={() => setMobilePreview(true)}
-                title="Vista móvil"
-              >
-                <Smartphone size={18} />
-              </button>
-            </div>
-          </div>
-          <div
-            className={
-              mobilePreview
-                ? 'preview-viewport mobile-frame'
-                : 'preview-viewport'
-            }
-          >
-            <div style={{ '--paper-accent': item.color }}>
-              <Proposal item={item} styleName={styleName} embedded />
-            </div>
-          </div>
-          <button className="preview-open" onClick={openClientPreview}>
-            <ExternalLink size={16} /> Abrir vista completa del cliente
-          </button>
-        </div>
-      </div>
-    </div>
+    <QuoteEditorScreen
+      item={item}
+      tab={tab}
+      setTab={setTab}
+      styleName={styleName}
+      edit={edit}
+      setPreviewMode={setPreviewMode}
+      openClientPreview={openClientPreview}
+      save={save}
+      filePicked={filePicked}
+      mobilePreview={mobilePreview}
+      setMobilePreview={setMobilePreview}
+      share={share}
+    />
   );
   const messagesView = (
     <MessagesScreen
