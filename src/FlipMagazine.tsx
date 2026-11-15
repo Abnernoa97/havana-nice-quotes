@@ -1,15 +1,9 @@
 // @ts-nocheck
 import { useEffect, useRef, useState } from 'react';
 import { PageFlip } from 'page-flip';
-import { ArrowLeft, ArrowRight, BookOpen, Hand, RotateCcw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
+import { usd } from './shared/lib/formatters';
 import './flip-magazine.css';
-
-const currency = value =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(Number(value || 0));
 
 function MagazineLeaf({ children, className = '' }) {
   return <div className={'hn-leaf ' + className} data-density="soft">{children}</div>;
@@ -177,9 +171,9 @@ export default function FlipMagazine({ item }) {
             <span className="hn-micro">YOUR LIVE MUSIC EXPERIENCE</span>
             <h2>The<br/><em>Investment.</em></h2>
             <p>{item.package}</p>
-            <div className="hn-investment-total">{currency(item.price)}<small>USD · PROPOSAL TOTAL</small></div>
+            <div className="hn-investment-total">{usd(item.price)}<small>USD · PROPOSAL TOTAL</small></div>
             <div className="hn-investment-rule"/>
-            <div className="hn-investment-details"><span>RESERVATION DEPOSIT · {item.deposit}%</span><strong>{currency(item.price * item.deposit / 100)}</strong></div>
+            <div className="hn-investment-details"><span>RESERVATION DEPOSIT · {item.deposit}%</span><strong>{usd(item.price * item.deposit / 100)}</strong></div>
             <div className="hn-investment-rule"/>
             <p className="hn-investment-copy">{item.desc}</p>
             <small className="hn-investment-notice">VISUAL SAMPLE ONLY — NOT A FORMAL QUOTE.</small>
