@@ -4,6 +4,7 @@ import FlipMagazine from './FlipMagazine';
 import EditorialStyles, { editorialStyles } from './EditorialStyles';
 import { photos, seed } from './features/quotes/demo-data';
 import { usd, dDate } from './shared/lib/formatters';
+import QuotePricingPanel from './features/editor/QuotePricingPanel';
 import {
   LayoutDashboard,
   FileText,
@@ -808,53 +809,7 @@ function App() {
             </div>
           )}
           {tab === 'pricing' && (
-            <div className="edit-body">
-              <span className="eyebrow">THE INVESTMENT</span>
-              <h3>Servicios e inversión</h3>
-              <label>
-                Nombre del paquete
-                <input
-                  value={item.package}
-                  onChange={e => edit('package', e.target.value)}
-                />
-              </label>
-              <label>
-                Precio total (USD)
-                <input
-                  type="number"
-                  min="0"
-                  value={item.price}
-                  onChange={e => edit('price', Number(e.target.value))}
-                />
-              </label>
-              <label>
-                Anticipo (%)
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={item.deposit}
-                  onChange={e =>
-                    edit(
-                      'deposit',
-                      Math.max(0, Math.min(100, Number(e.target.value)))
-                    )
-                  }
-                />
-              </label>
-              <div className="investment-box">
-                <small>ANTICIPO CALCULADO</small>
-                <strong>{usd((item.price * item.deposit) / 100)}</strong>
-              </div>
-              <div className="edit-separator" />
-              <button className="btn primary full" onClick={share}>
-                <Send size={16} /> Preparar envío
-              </button>
-              <p className="helper">
-                El envío y las firmas reales se activarán después de configurar
-                seguridad y sincronización.
-              </p>
-            </div>
+            <QuotePricingPanel item={item} edit={edit} share={share} />
           )}
         </div>
         <div className="preview-side">
