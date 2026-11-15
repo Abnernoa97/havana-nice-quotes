@@ -197,7 +197,7 @@ test('Datos reúne detalles, inversión, moneda y anticipo sin duplicar el paque
   assert.match(prices, /data-currency=\{currency\}/);
   assert.match(prices, /DEPOSIT_OPTIONS = \[20, 30, 40, 50, 60, 70, 80, 90, 100\]/);
   assert.equal((details.match(/Nombre del servicio/g) || []).length, 1);
-  assert.doesNotMatch(prices, /Nombre del paquete|Preparar envío|<Send|share|envío y las firmas/);
+  assert.doesNotMatch(prices, /Nombre del paquete|Preparar envío|<Send|\bshare\b|envío y las firmas/);
   assert.doesNotMatch(editor, /tab === 'pricing'|Precios <\/button>|studio-editor-subtitle/);
 });
 

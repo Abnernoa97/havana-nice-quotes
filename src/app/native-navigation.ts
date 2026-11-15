@@ -1,6 +1,6 @@
 /** Browser and Android PWA Back navigation, independent of any visual components. */
 export type AppSection = 'home' | 'quotes' | 'editor' | 'messages' | 'photos' | 'trash';
-export type EditorTab = 'details' | 'styles' | 'design' | 'pricing';
+export type EditorTab = 'details' | 'styles' | 'design' | 'publish';
 export type ReadingView = 'flip' | 'scroll';
 export type AppView = {
   section: AppSection;
@@ -8,7 +8,6 @@ export type AppView = {
   tab: EditorTab;
   preview: boolean;
   previewMode: ReadingView;
-  mobilePreview: boolean;
   mobileMenu: boolean;
   installGuide: boolean;
   photoViewerId: string | null;
@@ -23,13 +22,13 @@ export type BrowserHistoryPort = {
   back(): void;
 };
 const sections: AppSection[] = ['home', 'quotes', 'editor', 'messages', 'photos', 'trash'];
-const tabs: EditorTab[] = ['details', 'styles', 'design', 'pricing'];
+const tabs: EditorTab[] = ['details', 'styles', 'design', 'publish'];
 const modes: ReadingView[] = ['flip', 'scroll'];
 
 export function initialView(active: string): AppView {
   return {
-    section: 'home', active, tab: 'styles', preview: false,
-    previewMode: 'flip', mobilePreview: false, mobileMenu: false,
+    section: 'home', active, tab: 'details', preview: false,
+    previewMode: 'flip', mobileMenu: false,
     installGuide: false,
     photoViewerId: null,
     photoSelecting: false,
@@ -47,12 +46,22 @@ export function readNavigationEntry(state: unknown): Entry | null {
       !(tabs.includes(view.tab as EditorTab) || view.tab === 'pricing') ||
       !modes.includes(view.previewMode as ReadingView) ||
       typeof view.preview !== 'boolean' ||
-      typeof view.mobilePreview !== 'boolean' ||
       typeof view.mobileMenu !== 'boolean' ||
       typeof view.installGuide !== 'boolean' ||
       (view.photoViewerId !== null && typeof view.photoViewerId !== 'string') ||
       typeof view.photoSelecting !== 'boolean') return null;
-  return { depth: entry.depth!, view: { ...view, tab: view.tab === 'pricing' ? 'details' : view.tab } as AppView };
+  // Normalize old saved navigation states without carrying obsolete preview fields.
+  return { depth: entry.depth!, view: {
+    section: view.section as AppSection,
+    active: view.active as string,
+    tab: view.tab === 'pricing' ? 'details' : view.tab as EditorTab,
+    preview: view.preview as boolean,
+    previewMode: view.previewMode as ReadingView,
+    mobileMenu: view.mobileMenu as boolean,
+    installGuide: view.installGuide as boolean,
+    photoViewerId: view.photoViewerId as string | null,
+    photoSelecting: view.photoSelecting as boolean,
+  } };
 }
 const stamp = (entry: Entry): Stamped => ({ __havanaNiceHistory: 1, ...entry });
 const sameView = (a: AppView, b: AppView): boolean =>
