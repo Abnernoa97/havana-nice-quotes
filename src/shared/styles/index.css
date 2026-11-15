@@ -1799,11 +1799,11 @@ p {
 @media(max-width:950px) {
   .mobile-bottom { grid-template-columns: repeat(5, minmax(0,1fr)); }
 }
-.hn-cloud-logout {
+.hn-device-link-action {
   display: grid; place-items: center; border: 0; border-radius: 7px;
   background: transparent; color: #b0c2b4; padding: 8px; cursor: pointer;
 }
-.hn-cloud-logout:hover { background: #385b4a; color: #fff; }
+.hn-device-link-action:hover { background: #385b4a; color: #fff; }
 .hn-cloud-indicator { display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
 .hn-cloud-indicator.offline,.hn-cloud-indicator.conflict { color: #a2643d; background: #fff0dc; }
 .hn-cloud-empty { display: grid; align-content: start; justify-items: start; gap: 14px; padding-top: 65px; }

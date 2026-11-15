@@ -8,8 +8,8 @@ import FlipMagazine from '../features/magazine/FlipMagazine';
 import { editorialStyles } from '../features/editor/styles/EditorialStyles';
 import { createSampleDraft, editSampleQuote, statusClass } from '../features/quotes/model';
 import { useQuoteStore } from '../features/quotes/useQuoteStore';
-import { useCloudAuth } from '../features/auth/useCloudAuth';
-import CloudLogin from '../features/auth/CloudLogin';
+import { useDeviceAccess } from '../features/auth/useDeviceAccess';
+import DeviceGate from '../features/auth/DeviceGate';
 import { useMediaLibrary } from '../features/photos/useMediaLibrary';
 import PhotoBank from '../features/photos/PhotoBank';
 import HomeScreen from '../features/home/HomeScreen';
@@ -30,6 +30,8 @@ import {
   Plus,
   X,
   ChevronLeft,
+  Copy,
+  Share2,
 } from 'lucide-react';
 
 const pages = [
@@ -40,8 +42,8 @@ const pages = [
   { id: 'photos', label: 'Fotos', icon: Images },
 ];
 function App() {
-  const auth = useCloudAuth();
-  const enabled = auth.status === 'authenticated';
+  const auth = useDeviceAccess();
+  const enabled = auth.status === 'authorized';
   const { quotes, setQuotes, storageError, syncStatus, flush } = useQuoteStore(enabled);
   const { photos, brandPhotos, bytesUsed, uploadPhoto, uploading, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
   const { view, routeTo, goBack } = useAppHistory(quotes[0]?.id || 'empty');
@@ -64,6 +66,8 @@ function App() {
     else if (!next && mobileMenu) goBack();
   };
   const [toast, setToast] = useState('');
+  const [inviteUrl, setInviteUrl] = useState('');
+  const [inviteBusy, setInviteBusy] = useState(false);
   const [filter, setFilter] = useState('Todas');
   const [search, setSearch] = useState('');
   const [newMessage, setNewMessage] = useState('');
@@ -139,9 +143,7 @@ function App() {
       : 'No se pudo guardar ahora. Tus cambios siguen abiertos; comprueba la conexión.'));
   };
   const share = () =>
-    setToast(
-      'Demo visual: el envío real se activará cuando conectemos la nube.'
-    );
+    setToast('El envío real de propuestas a clientes sigue pendiente.');
   const updateStatus = (status: string) => {
     edit('status', status);
     setToast('Estado de demostración actualizado');
@@ -184,8 +186,31 @@ function App() {
       <Plus size={16} /> Nueva cotización
     </button>
   );
+  const invitePhone = async () => {
+    if (inviteBusy) return;
+    setInviteBusy(true);
+    try {
+      setInviteUrl(await auth.invite());
+      if (mobileMenu) goBack();
+    } catch (error) {
+      setToast(error instanceof Error ? error.message : 'No se pudo generar la invitación.');
+    } finally {
+      setInviteBusy(false);
+    }
+  };
+  const copyInvite = () => {
+    void navigator.clipboard.writeText(inviteUrl)
+      .then(() => setToast('Enlace copiado. Envíalo a tu otro teléfono.'))
+      .catch(() => setToast('Selecciona el enlace y cópialo para compartirlo.'));
+  };
+  const shareInvite = () => {
+    if (!navigator.share) { copyInvite(); return; }
+    void navigator.share({ title: 'Vincular HAVANA NICE Quotes Studio', url: inviteUrl })
+      .catch(() => undefined);
+  };
   const sidebar = (
-    <Sidebar pages={pages} quotes={quotes} navigate={navigate} section={section} onLogout={() => void auth.logout()} />
+    <Sidebar pages={pages} quotes={quotes} navigate={navigate} section={section}
+      onInvite={() => void invitePhone()} />
   );
   const topbar = (
     <Topbar section={section} standalone={standalone} installApplication={installApplication} setMobileMenu={setMobileMenu} syncStatus={syncStatus} />
@@ -280,7 +305,7 @@ function App() {
   }, [installGuide, mobileMenu, preview, goBack]);
 
   if (!enabled) return (
-    <CloudLogin checking={auth.status === 'checking'} error={auth.error} login={auth.login} />
+    <DeviceGate checking={auth.status === 'checking'} error={auth.error} />
   );
   if (syncStatus === 'loading') return (
     <div className="hn-cloud-loading" role="status">Conectando tus cotizaciones con Cloudflare...</div>
@@ -349,6 +374,26 @@ function App() {
       </div>
       {toast && <div className="toast">{toast}</div>}
       {installationGuide}
+      {inviteUrl && (
+        <div className="hn-device-modal-backdrop" onClick={() => setInviteUrl('')}>
+          <section className="hn-device-modal" role="dialog" aria-modal="true" aria-label="Vincular otro teléfono"
+            onClick={event => event.stopPropagation()}>
+            <button className="hn-device-modal-close" type="button" aria-label="Cerrar" onClick={() => setInviteUrl('')}>
+              <X size={19}/>
+            </button>
+            <span className="eyebrow">HAVANA NICE · TUS DISPOSITIVOS</span>
+            <h2>Vincular otro teléfono</h2>
+            <p>Abre este enlace desde el teléfono que quieras agregar. Se autoriza una sola vez y después podrás entrar directamente, sin contraseña.</p>
+            <input value={inviteUrl} aria-label="Enlace privado para otro dispositivo" readOnly
+              onFocus={event => event.currentTarget.select()}/>
+            <div className="hn-device-modal-actions">
+              <button className="btn outline" type="button" onClick={copyInvite}><Copy size={16}/> Copiar enlace</button>
+              <button className="btn primary" type="button" onClick={shareInvite}><Share2 size={16}/> Compartir</button>
+            </div>
+            <small>El enlace caduca en 20 minutos, funciona una sola vez y no debe compartirse con otras personas.</small>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

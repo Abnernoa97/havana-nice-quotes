@@ -19,7 +19,8 @@ const required = [
   'src/features/quotes/types.ts', 'src/features/quotes/demo-data.ts',
   'src/features/quotes/QuotesScreen.tsx',
   'src/features/quotes/useQuoteStore.ts',
-  'src/features/auth/CloudLogin.tsx', 'src/features/auth/useCloudAuth.ts',
+  'src/features/auth/DeviceGate.tsx', 'src/features/auth/useDeviceAccess.ts',
+  'src/features/auth/device-access.css', 'migrations/0002_passwordless_devices.sql',
   'src/features/photos/PhotoBank.tsx', 'src/features/photos/useMediaLibrary.ts',
   'worker/index.ts', 'migrations/0001_quotes.sql',
   'src/features/messages/MessagesScreen.tsx',
@@ -95,7 +96,10 @@ if (fileSet.has('src/app/App.tsx')) {
     !fileSet.has('src/features/quotes/storage.ts') &&
     wranglerCode.includes('"havana-nice-quotes-sync"') &&
     wranglerCode.includes('"havana-nice-v2-media"') &&
-    workerCode.includes('quotes-studio/photos/'),
+    workerCode.includes('quotes-studio/photos/') &&
+    workerCode.includes('/api/device/activate') &&
+    !workerCode.includes('/api/auth/login') &&
+    !fileSet.has('src/features/auth/CloudLogin.tsx'),
     'Revisar sincronización cloud, bindings de D1/R2 o código local obsoleto');
   const lines = app.split('\n').length;
   check('App.tsx por debajo de 500 líneas', lines <= 500,

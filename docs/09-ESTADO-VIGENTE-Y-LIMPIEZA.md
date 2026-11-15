@@ -5,9 +5,9 @@
 - Repo `Abnernoa97/havana-nice-quotes`, rama única `main`; publicación automática en el Worker Cloudflare existente `havana-nice-quotes`.
 - React + Vite, editor/Inicio/Cotizaciones/Mensajes/Vista cliente, lectura Scroll y PageFlip 3D conservados.
 - Navegación nativa de Android/PWA mediante historial centralizado. La prueba táctil sigue pendiente.
-- **Nube:** D1 `havana-nice-quotes-sync` con tablas `quotes`, `media` y `admin_access`; R2 `havana-nice-v2-media` usando únicamente `quotes-studio/photos/`. Ningún dato del calendario o Book v2 se borra.
+- **Nube:** D1 `havana-nice-quotes-sync` con tablas `quotes`, `media`, `device_invites` y `device_sessions`; R2 `havana-nice-v2-media` usando únicamente `quotes-studio/photos/`. Ningún dato del calendario o Book v2 se borra.
 - Cuenta de cotizaciones y fotos de Quotes Studio inicia **en cero**; el storage local antiguo ya no alimenta la app.
-- Autenticación con contraseña de administrador, hash PBKDF2 privado en D1 y cookie de sesión firmada. Cloudflare Access no habilitado, así que no se usa.
+- **Acceso sin contraseña:** vinculación mediante un enlace privado único por teléfono; token hasheado y consumible una sola vez en D1, cookie HttpOnly/Secure/SameSite=Strict propia de cada dispositivo, autorización renovable sin formulario de contraseña. Cloudflare Access no está habilitado; no se utiliza.
 - Cotizaciones por ID y revisión, guardado automático, consulta cada 15 segundos y aviso al detectar conflicto o caída de conexión. No repetir escrituras cada segundo durante una caída de red.
 - Fotos privadas desde R2; subir desde Banco de fotografías o pestaña Diseño y reutilizar en la portada. La galería también muestra los archivos WebP optimizados existentes bajo `book/v2/optimized/` en modo **solo lectura**, sin copiarlos ni alterar módulos ajenos. El tamaño usado contabiliza solo la biblioteca propia de Quotes Studio.
 - Publicación y QA deben verificarse por separado: code, auditoría, tests, TypeScript, Workers Build exitoso, deployment 100% y pruebas manuales móviles. **Ningún deploy por GitHub Actions**.

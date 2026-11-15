@@ -16,10 +16,21 @@
 .hn-cloud-login-card h1 { font: 400 43px/1.1 'Playfair Display',Georgia,serif; margin: 21px 0; letter-spacing: -.05em; }
 .hn-cloud-login-card h1 em { color: #73947e; font-weight: 400; }
 .hn-cloud-login-card>p { font-size: 13px; line-height: 1.75; color: #758678; }
-.hn-cloud-login-card label { display: block; font-weight: 700; font-size: 12px; margin: 29px 0 10px; }
-.hn-cloud-login-input { border: 1px solid #dae5da; border-radius: 9px; display: flex; align-items: center; gap: 10px; color: #79927e; padding: 0 14px; min-height: 51px; }
-.hn-cloud-login-input input { border: 0; background: transparent; width: 100%; min-height: 49px; font-size: 14px; outline: none; }
-.hn-cloud-login-input:focus-within { outline: 2px solid #86a68d; outline-offset: 2px; }
 .hn-cloud-login-card button { width: 100%; margin-top: 21px; justify-content: center; }
 .hn-cloud-login-card small { display: block; margin-top: 20px; font-size: 10px; line-height: 1.6; color: #a0aaa0; text-align: center; }
 .hn-cloud-login-card .hn-cloud-login-error { padding: 12px; border-radius: 8px; background: #fff0ed; color: #ad4a3b; margin-top: 15px; }
+
+/* A trusted device opens straight into the studio, without any password form. */
+.hn-device-gate { text-align: center; }
+.hn-device-gate > svg { color: #6e9680; margin-top: 28px; }
+.hn-device-gate .hn-cloud-login-kicker { justify-content: center; }
+.hn-device-gate button { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 24px; }
+.hn-device-modal-backdrop { position: fixed; inset: 0; z-index: 1000; background: #0d2a20a8; display: grid; place-items: center; padding: 18px; }
+.hn-device-modal { background: #fff; border-radius: 16px; width: min(100%,480px); padding: clamp(22px,5vw,36px); position: relative; box-shadow: 0 25px 80px #13251b50; }
+.hn-device-modal h2 { color: #264734; font: 400 29px 'Playfair Display',Georgia,serif; margin: 14px 0 13px; }
+.hn-device-modal p { color: #728476; font-size: 13px; line-height: 1.65; }
+.hn-device-modal input { width: 100%; border: 1px solid #d8e3d8; border-radius: 8px; padding: 13px; margin: 20px 0 13px; color: #47664f; font-size: 12px; }
+.hn-device-modal-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.hn-device-modal-actions button { flex: 1 1 130px; justify-content: center; }
+.hn-device-modal-close { position: absolute; right: 15px; top: 13px; background: none; border: 0; cursor: pointer; color: #59715e; padding: 8px; }
+.hn-device-modal small { display: block; font-size: 11px; color: #8e9c8e; margin-top: 14px; }

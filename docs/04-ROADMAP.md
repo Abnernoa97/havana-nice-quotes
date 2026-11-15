@@ -8,7 +8,7 @@
 
 - D1 propio para las cotizaciones (cero datos de prueba iniciales), versión por propuesta y autosave protegido contra escrituras obsoletas.
 - R2 existente `havana-nice-v2-media` para la biblioteca privada de Quotes Studio, sin modificar recursos de Book v2 o Calendario.
-- Contraseña privada para Fer & Noa, cookies seguras y API interna; fotos por URL autenticada.
+- Acceso privado sin contraseña mediante vinculación temporal del teléfono, cookies seguras y API interna; fotos por URL autenticada.
 - Navegación "Fotos", selección de portada desde el banco y métricas del tamaño de los archivos propios.
 - Sin importar muestras locales antiguas, sin enviar correos reales ni recopilar aperturas/ubicaciones.
 - **Pendiente de QA manual:** subir/seleccionar una foto desde Samsung, iniciar sesión desde otro teléfono, comprobar que una cotización nueva aparece y que el botón Atrás funciona.

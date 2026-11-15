@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Sparkles, LogOut, Menu, Download, Cloud, CloudOff } from 'lucide-react';
+import { Sparkles, Link2, Menu, Download, Cloud, CloudOff } from 'lucide-react';
 import type { Quote } from '../features/quotes/types';
 
 export type NavItem = { id: string; label: string; icon: LucideIcon };
@@ -8,7 +8,7 @@ type SidebarProps = {
   quotes: Quote[];
   navigate: (section: string) => void;
   section: string;
-  onLogout: () => void;
+  onInvite: () => void;
 };
 type TopbarProps = {
   section: string;
@@ -27,7 +27,7 @@ function Logo() {
   );
 }
 
-export function Sidebar({ pages, quotes, navigate, section, onLogout }: SidebarProps) {
+export function Sidebar({ pages, quotes, navigate, section, onInvite }: SidebarProps) {
   return (
     <aside className="sidebar">
       <Logo />
@@ -63,8 +63,8 @@ export function Sidebar({ pages, quotes, navigate, section, onLogout }: SidebarP
           <span>
             Fer & Noa<small>HAVANA NICE Studio</small>
           </span>
-          <button type="button" className="hn-cloud-logout" onClick={onLogout} title="Cerrar sesión"
-            aria-label="Cerrar sesión de la nube"><LogOut size={18}/></button>
+          <button type="button" className="hn-device-link-action" onClick={onInvite}
+            title="Vincular otro teléfono" aria-label="Vincular otro teléfono"><Link2 size={18}/></button>
         </div>
       </div>
     </aside>

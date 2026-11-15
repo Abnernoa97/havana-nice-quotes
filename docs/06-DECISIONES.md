@@ -31,9 +31,17 @@
 - **Cuenta Cloudflare existente:** `Solo Aplicaciones`, Worker `havana-nice-quotes`; mantener una sola app y publicar vía Workers Builds, no GitHub Actions.
 - **D1 dedicado:** `havana-nice-quotes-sync` (ID `4c8403ed-94f3-4989-9016-4409fabf0f47`); **NO** usar `havana-events-sync` ni `havana-nice-v2-dev`.
 - **R2 reutilizado sin borrar:** `havana-nice-v2-media` con prefijo privado `quotes-studio/photos/`. El dominio público R2.dev está deshabilitado.
-- **Acceso protegido:** Cloudflare Access no estaba habilitado en la cuenta; login propio del estudio con hash de alta entropía almacenado en D1 privado, sesión firmada HttpOnly/SameSite=Strict. La credencial en claro no se almacena en código ni documentación.
+- **Acceso sin contraseña (decisión posterior de Fer & Noa):** sin pantalla de login ni texto de contraseña. Cada teléfono se autoriza una sola vez mediante enlace de invitación de alta entropía y después usa sesión privada HttpOnly/Secure/SameSite=Strict. No se hace pública la API D1/R2 ni se utiliza Cloudflare Access, que no está habilitado.
 - Cotizaciones se guardan de forma independiente con revisión en D1 y sincronización periódica. No dar por completado un guardado si el servidor no confirma; los conflictos quedan sin sobreescribir.
 - Banco de fotos disponible desde menú y editor; nuevo panel de espacio usado refiere a la biblioteca propia, no a toda la cuenta R2. Mensajería/aceptación real, envío por enlace, analítica y alertas posteriores.
+
+## Acceso sin contraseñas · 15/11/2026
+
+- Fer & Noa rechazaron expresamente la pantalla de contraseña. La aplicación debe abrir directamente en dispositivos vinculados.
+- Para agregar dispositivos, usar enlaces privados y efímeros emitidos desde un dispositivo ya autorizado, sin formularios ni cuentas de terceros.
+- Mantener acceso cerrado en D1 y R2; quitar el login **no significa habilitar acceso anónimo** a cotizaciones o fotos.
+- Las invitaciones tienen uso único; se almacenan únicamente hashes en D1, nunca tokens completos en Git o R2.
+- El primer vínculo se entrega mediante un enlace administrativo temporal y se consume después del primer uso.
 
 ## Decisiones todavía abiertas
 

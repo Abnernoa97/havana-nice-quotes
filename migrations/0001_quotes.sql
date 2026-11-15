@@ -15,4 +15,5 @@ CREATE TABLE IF NOT EXISTS media (
   created_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
 CREATE INDEX IF NOT EXISTS idx_media_created ON media(created_at DESC);
--- admin_access is seeded only in private D1; never store credentials in Git.
+-- Device invitations and sessions are added in 0002_passwordless_devices.sql.
+-- No login password is used by Quotes Studio.

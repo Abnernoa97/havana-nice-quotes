@@ -49,13 +49,19 @@ test('La revista mantiene intactos los parámetros de plegado 3D', () => {
   assert.match(magazine, /<p>\{item\.note\}<\/p>/);
 });
 
-test('Acceso de administración y cuenta de fotos se presentan sin exponer secretos', () => {
-  const auth = src('features/auth/CloudLogin.tsx');
+test('El acceso a la nube es por dispositivo autorizado, sin formulario de contraseña', () => {
+  const gate = src('features/auth/DeviceGate.tsx');
+  const auth = src('features/auth/useDeviceAccess.ts');
+  const app = src('app/App.tsx');
   const photos = src('features/photos/PhotoBank.tsx');
-  assert.match(auth, /type="password"/);
+  assert.doesNotMatch(gate, /type="password"|Contraseña del estudio|password/i);
+  assert.match(auth, /\/api\/device\/activate/);
+  assert.match(auth, /\/api\/device\/status/);
+  assert.match(auth, /#activate=/);
+  assert.match(app, /<DeviceGate checking=\{auth\.status === 'checking'\}/);
+  assert.match(app, /onInvite=\{\(\) => void invitePhone\(\)\}/);
   assert.match(photos, /bytesUsed/);
   assert.match(photos, /uploadPhoto\(file\)/);
-  assert.doesNotMatch(auth, /45f87199|ADMIN_PASSPHRASE/);
 });
 
 

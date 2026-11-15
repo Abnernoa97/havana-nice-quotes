@@ -24,14 +24,15 @@ interface Env {
   MEDIA: R2Binding;
   ASSETS: { fetch(request: Request): Promise<Response> };
 }
-interface AccessRow extends D1Row { pass_salt: string; pass_hash: string }
+interface SessionRow extends D1Row { token_hash: string; expires_at: number; revoked_at: number | null }
 interface QuoteRow extends D1Row { id: string; payload: string; revision: number }
 interface MediaRow extends D1Row { id: string; filename: string; mime: string; size: number; created_at: number; object_key: string }
 const PHOTOS_PREFIX = 'quotes-studio/photos/';
 const BRAND_PREFIX = 'book/v2/optimized/';
 const MAX_IMAGE = 12 * 1024 * 1024;
-const COOKIE = 'hn_quotes_session';
-const SESSION_LIFETIME = 14 * 24 * 60 * 60;
+const COOKIE = 'hn_quotes_device';
+const SESSION_LIFETIME = 365 * 24 * 60 * 60;
+const INVITE_LIFETIME = 20 * 60;
 const VALID_MIMES: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
@@ -46,53 +47,45 @@ const REQUIRED_FIELDS = [
 ];
 const VALID_STATES = new Set(['Borrador', 'Enviada', 'En revisión', 'Aceptada']);
 const validId = (s: string) => /^hn-[a-f0-9-]{20,64}$/.test(s);
-const hexToBytes = (hex: string): Uint8Array => new Uint8Array(
-  (hex.match(/.{1,2}/g) || []).map(s => parseInt(s, 16))
-);
 const bytesToHex = (bytes: Uint8Array): string =>
   Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+const randomToken = (): string => bytesToHex(crypto.getRandomValues(new Uint8Array(32)));
+const hashToken = async (token: string): Promise<string> =>
+  bytesToHex(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token))));
 const equalHex = (a: string, b: string): boolean => {
   if (a.length !== b.length) return false;
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return diff === 0;
 };
-const textBytes = (s: string): Uint8Array => new TextEncoder().encode(s);
-const b64 = (value: Uint8Array): string =>
-  btoa(Array.from(value, x => String.fromCharCode(x)).join(''))
-    .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-const signed = async (text: string, hash: string) => {
-  const key = await crypto.subtle.importKey(
-    'raw', hexToBytes(hash), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-  );
-  return b64(new Uint8Array(await crypto.subtle.sign('HMAC', key, textBytes(text))));
-};
-const authRow = async (env: Env): Promise<AccessRow | null> =>
-  env.DB.prepare('SELECT pass_salt, pass_hash FROM admin_access WHERE id = 1')
-    .first<AccessRow>();
 const cookieValue = (request: Request): string | undefined => {
   const cookies = request.headers.get('cookie') || '';
-  const found = cookies.split(';').map(x => x.trim()).find(x => x.startsWith(COOKIE + '='));
-  return found?.slice(COOKIE.length + 1);
+  return cookies.split(';').map(x => x.trim()).find(x => x.startsWith(COOKIE + '='))?.slice(COOKIE.length + 1);
+};
+const sessionId = (request: Request): string | null => {
+  const match = cookieValue(request)?.match(/^([a-f0-9-]{36})\.([a-f0-9]{64})$/);
+  return match ? match[1] : null;
 };
 async function authorized(request: Request, env: Env): Promise<boolean> {
   const token = cookieValue(request);
   if (!token) return false;
-  const parts = token.split('.');
-  if (parts.length !== 3 || !/^\d+$/.test(parts[0]) || !/^[\w-]{30,80}$/.test(parts[1])) return false;
-  const expiry = Number(parts[0]);
-  if (!Number.isFinite(expiry) || expiry < Date.now() / 1000) return false;
-  const access = await authRow(env);
-  if (!access) return false;
-  const expected = await signed(parts[0] + '.' + parts[1], access.pass_hash);
-  return equalHex(parts[2], expected);
+  const match = token.match(/^([a-f0-9-]{36})\.([a-f0-9]{64})$/);
+  if (!match) return false;
+  const row = await env.DB.prepare(
+    'SELECT token_hash, expires_at, revoked_at FROM device_sessions WHERE id = ?'
+  ).bind(match[1]).first<SessionRow>();
+  if (!row || row.revoked_at !== null || row.expires_at < Math.floor(Date.now() / 1000)) return false;
+  return equalHex(await hashToken(match[2]), row.token_hash);
 }
+const deviceCookie = (id: string, token: string): string =>
+  COOKIE + '=' + id + '.' + token +
+  '; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=' + SESSION_LIFETIME;
 function json(value: unknown, status = 200, extra?: HeadersInit): Response {
   return new Response(JSON.stringify(value), {
     status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...(extra || {}) },
   });
 }
-const unauthorized = () => json({ error: 'Acceso privado. Inicia sesión.' }, 401);
+const unauthorized = () => json({ error: 'Dispositivo no vinculado.' }, 401);
 const bad = (message: string, status = 400) => json({ error: message }, status);
 async function readJSON(request: Request, maxLength = 50000): Promise<Record<string, unknown> | null> {
   const text = await request.text();
@@ -130,33 +123,51 @@ async function api(request: Request, env: Env): Promise<Response> {
     const origin = request.headers.get('Origin');
     if (origin && origin !== url.origin) return bad('Origen no permitido.', 403);
   }
-  if (path === '/api/auth/login' && method === 'POST') {
-    const data = await readJSON(request, 1000);
-    const password = data?.password;
-    if (typeof password !== 'string' || password.length > 256) return bad('Credenciales inválidas.', 401);
-    const access = await authRow(env);
-    if (!access) return bad('El acceso no está configurado.', 503);
-    const source = await crypto.subtle.importKey('raw', textBytes(password), 'PBKDF2', false, ['deriveBits']);
-    const bytes = new Uint8Array(await crypto.subtle.deriveBits({
-      name: 'PBKDF2', salt: hexToBytes(access.pass_salt), iterations: 150000, hash: 'SHA-256',
-    }, source, 256));
-    if (!equalHex(bytesToHex(bytes), access.pass_hash)) return bad('Contraseña incorrecta.', 401);
-    const expiry = Math.floor(Date.now() / 1000) + SESSION_LIFETIME;
-    const body = expiry + '.' + crypto.randomUUID().replace(/-/g, '');
-    const token = body + '.' + await signed(body, access.pass_hash);
-    return json({ authenticated: true }, 200, {
-      'Set-Cookie': COOKIE + '=' + token + '; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=' + SESSION_LIFETIME,
-    });
+  // Passwordless by design: only a one-time, 256-bit device invitation can
+  // activate a phone. Neither a password nor an anonymous public token exists.
+  if (path === '/api/device/activate' && method === 'POST') {
+    const data = await readJSON(request, 256);
+    const code = data?.code;
+    if (typeof code !== 'string' || !/^[a-f0-9]{64}$/.test(code)) {
+      return bad('Enlace de vinculación inválido.', 401);
+    }
+    const digest = await hashToken(code);
+    const claim = await env.DB.prepare(
+      'UPDATE device_invites SET used_at = unixepoch() WHERE token_hash = ? AND used_at IS NULL AND expires_at > unixepoch()'
+    ).bind(digest).run();
+    if (!claim.meta.changes) return bad('El enlace ya se utilizó o caducó.', 401);
+    const id = crypto.randomUUID();
+    const secret = randomToken();
+    await env.DB.prepare(
+      'INSERT INTO device_sessions (id, token_hash, expires_at, created_at) VALUES (?, ?, ?, unixepoch())'
+    ).bind(id, await hashToken(secret), Math.floor(Date.now() / 1000) + SESSION_LIFETIME).run();
+    return json({ authorized: true }, 200, { 'Set-Cookie': deviceCookie(id, secret) });
   }
-  if (path === '/api/auth/session' && method === 'GET') {
-    return await authorized(request, env) ? json({ authenticated: true }) : unauthorized();
+  if (path === '/api/device/status' && method === 'GET') {
+    return await authorized(request, env)
+      ? json({ authorized: true }) : unauthorized();
   }
-  if (path === '/api/auth/logout' && method === 'POST') {
-    return json({ authenticated: false }, 200, {
+  if (path === '/api/device/revoke' && method === 'POST') {
+    if (!await authorized(request, env)) return unauthorized();
+    const id = sessionId(request);
+    if (id) await env.DB.prepare('UPDATE device_sessions SET revoked_at = unixepoch() WHERE id = ?')
+      .bind(id).run();
+    return json({ authorized: false }, 200, {
       'Set-Cookie': COOKIE + '=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0',
     });
   }
   if (!await authorized(request, env)) return unauthorized();
+  if (path === '/api/device/invite' && method === 'POST') {
+    const code = randomToken();
+    await env.DB.prepare(
+      'INSERT INTO device_invites (token_hash, expires_at, created_at) VALUES (?, ?, unixepoch())'
+    ).bind(await hashToken(code), Math.floor(Date.now() / 1000) + INVITE_LIFETIME).run();
+    // The token is returned only to a currently authorized phone. It travels
+    // in the URL fragment, so it is not sent in HTTP requests, access logs
+    // or Referer headers.
+    return json({ url: url.origin + '/#activate=' + code, expiresIn: INVITE_LIFETIME });
+  }
+
 
   if (path === '/api/quotes' && method === 'GET') {
     const rows = await env.DB.prepare('SELECT id, payload, revision FROM quotes ORDER BY updated_at DESC, id DESC')
