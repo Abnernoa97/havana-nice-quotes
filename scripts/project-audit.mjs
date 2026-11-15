@@ -18,7 +18,10 @@ const required = [
   'src/features/home/HomeScreen.tsx',
   'src/features/quotes/types.ts', 'src/features/quotes/demo-data.ts',
   'src/features/quotes/QuotesScreen.tsx',
-  'src/features/quotes/storage.ts', 'src/features/quotes/useQuoteStore.ts',
+  'src/features/quotes/useQuoteStore.ts',
+  'src/features/auth/CloudLogin.tsx', 'src/features/auth/useCloudAuth.ts',
+  'src/features/photos/PhotoBank.tsx', 'src/features/photos/useMediaLibrary.ts',
+  'worker/index.ts', 'migrations/0001_quotes.sql',
   'src/features/messages/MessagesScreen.tsx',
   'src/features/client/Proposal.tsx', 'src/features/client/ClientPage.tsx',
   'src/features/editor/QuoteEditorScreen.tsx',
@@ -78,13 +81,22 @@ if (fileSet.has('public/manifest.webmanifest')) {
 }
 if (fileSet.has('src/app/App.tsx')) {
   const app = fs.readFileSync(path.join(ROOT, 'src/app/App.tsx'), 'utf8');
-  const storePath = 'src/features/quotes/storage.ts';
+  const storePath = 'src/features/quotes/useQuoteStore.ts';
   const storageCode = fileSet.has(storePath)
-    ? fs.readFileSync(path.join(ROOT, storePath), 'utf8')
-    : '';
-  check('Clave de guardado preservada en módulo de cotizaciones',
-    app.includes('useQuoteStore') && storageCode.includes("'hn_quotes_visual_v1'"),
-    'Revisar clave en storage.ts y conexión useQuoteStore en App');
+    ? fs.readFileSync(path.join(ROOT, storePath), 'utf8') : '';
+  const wranglerCode = fileSet.has('wrangler.jsonc')
+    ? fs.readFileSync(path.join(ROOT, 'wrangler.jsonc'), 'utf8') : '';
+  const workerCode = fileSet.has('worker/index.ts')
+    ? fs.readFileSync(path.join(ROOT, 'worker/index.ts'), 'utf8') : '';
+  check('Nube privada D1 + R2; guardado local obsoleto eliminado',
+    app.includes('useQuoteStore(enabled)') &&
+    storageCode.includes("fetch('/api/quotes'") &&
+    !storageCode.includes('localStorage') &&
+    !fileSet.has('src/features/quotes/storage.ts') &&
+    wranglerCode.includes('"havana-nice-quotes-sync"') &&
+    wranglerCode.includes('"havana-nice-v2-media"') &&
+    workerCode.includes('quotes-studio/photos/'),
+    'Revisar sincronización cloud, bindings de D1/R2 o código local obsoleto');
   const lines = app.split('\n').length;
   check('App.tsx por debajo de 500 líneas', lines <= 500,
     'App.tsx concentra ' + lines + ' líneas: revisar separación funcional');
