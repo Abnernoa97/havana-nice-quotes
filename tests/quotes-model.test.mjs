@@ -75,3 +75,35 @@ test('Crear y editar no cambia otras cotizaciones ficticias', () => {
   assert.equal(changed[1], seed[0]);
   assert.equal(editSampleQuote(list, 'missing', 'price', 12)[0], draft);
 });
+
+test('Depósitos 0% y 100% se conservan; se rechazan importes fuera de rango', () => {
+  const valid = [0, 100].map((deposit, index) => ({ ...seed[index], deposit }));
+  assert.deepEqual(parseStoredQuotes(JSON.stringify(valid), seed), valid);
+  for (const deposit of [-1, 100.1, 101, Infinity]) {
+    const sample = { ...seed[0], deposit };
+    assert.equal(parseStoredQuotes(JSON.stringify([sample]), seed), seed);
+  }
+});
+
+test('Estados y mensajes corruptos no bloquean la cotización activa', () => {
+  for (const change of [
+    { status: 'Aprobada externamente' },
+    { messages: [null] },
+    { messages: [{ from: 'client', text: 123, time: '' }] },
+    { price: -10 },
+  ]) {
+    assert.equal(parseStoredQuotes(JSON.stringify([{ ...seed[0], ...change }]), seed), seed);
+  }
+});
+
+test('Los estilos y modos de lectura válidos sobreviven al guardado local', () => {
+  const styles = ['libre', 'vogue', 'lane', 'junebug', 'nyt'];
+  for (const style of styles) {
+    const draft = { ...createSampleDraft('hn-test'), style, readingMode: 'scroll' };
+    assert.deepEqual(parseStoredQuotes(JSON.stringify([draft]), seed), [draft]);
+  }
+  const original = createSampleDraft('hn-test');
+  const changed = editSampleQuote([original], original.id, 'readingMode', 'scroll');
+  assert.equal(changed[0].readingMode, 'scroll');
+  assert.equal(original.readingMode, 'flip');
+});
