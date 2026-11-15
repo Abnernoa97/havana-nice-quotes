@@ -107,3 +107,18 @@ test('Los estilos y modos de lectura válidos sobreviven al guardado local', () 
   assert.equal(changed[0].readingMode, 'scroll');
   assert.equal(original.readingMode, 'flip');
 });
+
+import { formatHomeDate, homeGreeting } from '../src/features/home/greeting.ts';
+
+test('Inicio usa la fecha real y no una fecha ficticia fija', () => {
+  const date = new Date(2026, 10, 15, 9, 30);
+  assert.equal(formatHomeDate(date), 'SUNDAY, NOVEMBER 15, 2026');
+  assert.equal(formatHomeDate(new Date(2027, 0, 1)), 'FRIDAY, JANUARY 1, 2027');
+});
+
+test('Inicio adapta saludo a mañana, tarde y noche del dispositivo', () => {
+  assert.equal(homeGreeting(new Date(2026, 10, 15, 9, 59)), 'Good morning');
+  assert.equal(homeGreeting(new Date(2026, 10, 15, 12, 0)), 'Good afternoon');
+  assert.equal(homeGreeting(new Date(2026, 10, 15, 17, 59)), 'Good afternoon');
+  assert.equal(homeGreeting(new Date(2026, 10, 15, 18, 0)), 'Good evening');
+});

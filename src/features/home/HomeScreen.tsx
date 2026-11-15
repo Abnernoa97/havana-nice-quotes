@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { formatHomeDate, homeGreeting } from './greeting';
 import {
   FileText,
   Send,
@@ -35,13 +36,14 @@ export default function HomeScreen({
   selectQuote,
   statusClass,
 }: Props) {
+  const today = new Date();
   return (
     <div className="page dashboard">
       <div className="intro-line">
         <div>
-          <span className="eyebrow">THURSDAY, OCTOBER 15, 2026</span>
+          <span className="eyebrow">{formatHomeDate(today)}</span>
           <h1>
-            Good evening, Fer & Noa <span className="handwave">✳</span>
+            {homeGreeting(today)}, Fer & Noa <span className="handwave">✳</span>
           </h1>
           <p>
             Todo lo que necesitas para crear propuestas que se sientan
