@@ -183,3 +183,12 @@ test('La carga de cotizaciones rechaza IDs duplicados y campos ausentes del edit
   assert.equal(parseStoredQuotes(JSON.stringify([{ ...seed[0], readingMode: null }]), seed), seed);
   assert.equal(parseStoredQuotes(JSON.stringify([{ ...seed[0], style: 12 }]), seed), seed);
 });
+
+test('Los IDs de nuevos borradores se mantienen independientes de los ejemplos antiguos', () => {
+  const a = createSampleDraft('hn-example-a');
+  const b = createSampleDraft('hn-example-b');
+  assert.equal(a.id, 'hn-example-a');
+  assert.equal(b.id, 'hn-example-b');
+  assert.deepEqual(parseStoredQuotes(JSON.stringify([a, b]), seed), [a, b]);
+  assert.equal(editSampleQuote([a, b], b.id, 'name', 'New Client')[0], a);
+});

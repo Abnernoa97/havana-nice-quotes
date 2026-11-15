@@ -33,7 +33,7 @@ const pages = [
 function App() {
   const { quotes, setQuotes, storageError } = useQuoteStore();
   const [section, setSection] = useState('home');
-  const [active, setActive] = useState('hn1');
+  const [active, setActive] = useState(() => quotes[0].id);
   const [tab, setTab] = useState('styles');
   const [mobileMenu, setMobileMenu] = useState(false);
   const [preview, setPreview] = useState(false);
@@ -75,7 +75,7 @@ function App() {
     setClientMessage('');
   };
   const addQuote = () => {
-    const id = 'hn' + Date.now();
+    const id = 'hn-' + crypto.randomUUID();
     const q = createSampleDraft(id);
     setQuotes(list => [q, ...list]);
     activateQuote(id);

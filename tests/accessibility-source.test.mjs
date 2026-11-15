@@ -30,3 +30,10 @@ test('La selección de otra pareja limpia borradores de mensaje sin enviar', () 
   assert.match(app, /setActive=\{activateQuote\}/);
   assert.match(messages, /setActive: \(id: string\) => void;/);
 });
+
+test('La selección inicial coincide con la primera cotización local y no con hn1 fijo', () => {
+  const app = source('app/App.tsx');
+  assert.match(app, /useState\(\(\) => quotes\[0\]\.id\)/);
+  assert.match(app, /const id = 'hn-' \+ crypto\.randomUUID\(\)/);
+  assert.doesNotMatch(app, /useState\('hn1'\)/);
+});
