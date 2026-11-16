@@ -141,20 +141,22 @@ export default function TrashScreen({
     {message&&<p className="hn-trash-message" role="status">{message}</p>}
     {error&&<p className="hn-trash-error" role="alert">{error}</p>}
     {selected.length>0&&<section className="hn-trash-selected">
-      <button type="button" className="hn-trash-selected-toggle" aria-expanded={markedOpen}
-        aria-controls="hn-trash-selected-rows" onClick={()=>setMarkedOpen(open=>!open)}>
-        <CheckSquare size={16}/> Seleccionados ({selected.length})
-        <span className={'hn-trash-chevron'+(markedOpen?' is-open':'')} aria-hidden="true">⌄</span>
-      </button>
+      <div className="hn-trash-selected-header">
+        <button type="button" className="hn-trash-selected-toggle" aria-expanded={markedOpen}
+          aria-controls="hn-trash-selected-rows" onClick={()=>setMarkedOpen(open=>!open)}>
+          <CheckSquare size={16}/> Seleccionados ({selected.length})
+          <span className={'hn-trash-chevron'+(markedOpen?' is-open':'')} aria-hidden="true">⌄</span>
+        </button>
+        <div className="hn-trash-selected-shortcuts" role="group" aria-label="Acciones de selección">
+          <button type="button" aria-label="Restaurar seleccionados" title="Restaurar seleccionados"
+            disabled={locked} onClick={()=>void bulk('restore')}><RotateCcw size={19}/></button>
+          <button type="button" className="danger" aria-label="Eliminar seleccionados"
+            title="Eliminar seleccionados" disabled={locked}
+            onClick={()=>void bulk('purge')}><Trash2 size={19}/></button>
+        </div>
+      </div>
       {markedOpen&&<div id="hn-trash-selected-rows" className="hn-trash-selected-body">
         {selected.map(item=>row(item,true))}
-        <div className="hn-trash-bulk-actions">
-          <button type="button" disabled={locked} onClick={()=>void bulk('restore')}>
-            <RotateCcw size={15}/> Restaurar seleccionados
-          </button>
-          <button type="button" className="danger" disabled={locked}
-            onClick={()=>void bulk('purge')}><Trash2 size={15}/> Eliminar seleccionados</button>
-        </div>
       </div>}
     </section>}
     {remaining.length>0?<div className="hn-trash-list">{remaining.map(item=>row(item,false))}</div>
