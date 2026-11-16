@@ -484,8 +484,8 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
   assert.match(canvas,/onClick=\{addPhotoAnywhere\}/);
   assert.match(canvas,/const addPhotoAnywhere=\(\)=>/);
   assert.match(canvas,/if \(page===1\) \{ addPhotoBlock\(\); return; \}/);
-  assert.match(canvas,/setTarget\('extra:'\+id\)/);
-  assert.match(canvas,/onSelectExtraPhoto=\{id=>open\('extra:'\+id\)\}/);
+  assert.match(canvas,/setTarget\(`extra:\$\{id\}`\)/);
+  assert.match(canvas,/onSelectExtraPhoto=\{id=>open\(`extra:\$\{id\}`\)\}/);
   assert.match(canvas,/const removePhoto = \(id:string\) =>/);
   assert.match(canvas,/const removeElement\s*=\s*\(id:string\) => isPhotoId\(id\) \? removePhoto\(id\) : removeText\(id\)/);
   assert.match(canvas,/onClick=\{\(\)=>removeElement\(transformingId\)\}/);

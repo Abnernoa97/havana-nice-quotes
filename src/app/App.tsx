@@ -206,6 +206,7 @@ function App() {
           extraPhotos: previous.map(photo=>photo.id===id ? {...photo,url:saved.url} : photo),
         } };
       }
+      if (typeof target !== 'number') return quote;
       const gallery = Array.from({ length: CAROLINA_MAX_SLOTS }, (_, i) => quote.gallery?.[i] || '');
       gallery[target] = saved.url;
       return { ...quote, gallery };

@@ -210,7 +210,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     if (extras.length>=24) { setError('Máximo 24 fotografías añadidas.'); return; }
     const id=crypto.randomUUID();
     updateLayout({extraPhotos:[...extras,{id,page,url:''}]});
-    setTransformingId(null);setLastTextId(null);setBank(false);setTarget('extra:'+id);
+    setTransformingId(null);setLastTextId(null);setBank(false);setTarget(`extra:${id}`);
   };
   const addPhotoBlock = () => {
     const slot = photoSlotToAdd(photoOrder, carolinaPhotos(item));
@@ -249,7 +249,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       const photoId=target.slice(6);
       updateLayout({extraPhotos:(item.carolinaLayout?.extraPhotos||[]).map(photo=>
         photo.id===photoId ? {...photo,url} : photo)});
-    } else {
+    } else if (typeof target==='number') {
       const gallery=carolinaPhotos(item);
       gallery[target]=url;
       edit('gallery',gallery);
@@ -330,12 +330,12 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
               <div className="hn-canvas-cover">
                 <CarolinaCover item={item} interaction={textInteraction}
                   onSelectCover={() => open('cover')}
-                  onSelectExtraPhoto={id=>open('extra:'+id)}/>
+                  onSelectExtraPhoto={id=>open(`extra:${id}`)}/>
               </div>
             )}
             {page === 1 && <CarolinaCollage item={item} onSelectPhoto={index => open(index)}
-              onSelectExtraPhoto={id=>open('extra:'+id)} interaction={textInteraction}/>}
-            {page === 2 && <CarolinaTerms item={item} interaction={textInteraction} onSelectExtraPhoto={id=>open('extra:'+id)}/>}
+              onSelectExtraPhoto={id=>open(`extra:${id}`)} interaction={textInteraction}/>}
+            {page === 2 && <CarolinaTerms item={item} interaction={textInteraction} onSelectExtraPhoto={id=>open(`extra:${id}`)}/>}
           </>
         ) : (
           <div className="hn-canvas-editorial">
