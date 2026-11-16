@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import type { TrashItem } from './useTrash';
 
-export type TrashFilter='all'|'quote'|'photo'|'file';
+export type TrashFilter='all'|'quote'|'photo'|'video'|'file';
 const options:{id:TrashFilter;label:string}[]=[
   {id:'all',label:'Todo'},{id:'quote',label:'Cotizaciones'},
-  {id:'photo',label:'Fotos'},{id:'file',label:'Archivos'},
+  {id:'photo',label:'Fotos'},{id:'video',label:'Videos'},{id:'file',label:'Archivos'},
 ];
 type Props={filter:TrashFilter;items:TrashItem[];onFilter:(id:TrashFilter)=>void};
 

@@ -11,6 +11,7 @@ function environment() {
   const quotes = new Map();
   const media = new Map();
   const objects = new Map();
+  const multipart = new Map();
   const invites = new Map([[activationHash, { used: false, expiry: Math.floor(Date.now() / 1000) + 10000 }]]);
   const sessions = new Map();
   const db = {
@@ -126,16 +127,44 @@ function environment() {
       return query;
     },
   };
+  const multipartHandle=(key,uploadId)=>({
+    uploadId,
+    async uploadPart(partNumber,buffer){
+      const record=multipart.get(key+'|'+uploadId);
+      if(!record)throw new Error('Multipart not found');
+      const bytes=Buffer.from(buffer);
+      record.parts.set(partNumber,bytes);
+      return {partNumber,etag:createHash('md5').update(bytes).digest('hex')};
+    },
+    async complete(parts){
+      const record=multipart.get(key+'|'+uploadId);
+      if(!record)throw new Error('Multipart not found');
+      const bytes=Buffer.concat(parts.map(p=>record.parts.get(p.partNumber)));
+      objects.set(key,{body:bytes,options:record.options});
+      multipart.delete(key+'|'+uploadId);
+      return {size:bytes.byteLength};
+    },
+    async abort(){multipart.delete(key+'|'+uploadId);}
+  });
   const bucket = {
     async put(key, body, options) { objects.set(key, { body, options }); },
-    async get(key) {
+    async get(key,opts) {
       const entry = objects.get(key);
       if (!entry) return null;
-      return { body: new Blob([entry.body]).stream() };
+      const all=new Uint8Array(await new Blob([entry.body]).arrayBuffer());
+      const range=opts?.range;
+      const bytes=range?all.slice(range.offset,range.offset+range.length):all;
+      return { body: new Blob([bytes]).stream(),size:all.length };
     },
     async delete(key) { objects.delete(key); },
+    async createMultipartUpload(key,options){
+      const uploadId='upload-'+crypto.randomUUID();
+      multipart.set(key+'|'+uploadId,{parts:new Map(),options});
+      return multipartHandle(key,uploadId);
+    },
+    resumeMultipartUpload(key,uploadId){return multipartHandle(key,uploadId);},
   };
-  return { DB: db, MEDIA: bucket, ASSETS: { fetch: async () => new Response('spa') }, quotes, media, objects, sessions, invites };
+  return { DB: db, MEDIA: bucket, ASSETS: { fetch: async () => new Response('spa') }, quotes, media, objects, multipart, sessions, invites };
 }
 const request = (path, options={}) => new Request(origin + path, options);
 const jsonRequest = (path, method, payload, cookie='') =>
@@ -629,4 +658,93 @@ test('Las seis plantillas guardan el mismo modelo universal D1 sin perder el res
       {quote:{...quote,designLayout:{photoStyles:{'photo:cover':{opacity:999}}}},expectedRevision:1},cookie),env);
     assert.equal(bad.status,400,'D1 no acepta efectos dañados en '+styles[i]);
   }
+});
+
+test('Video web: requiere dispositivo autorizado y admite solo versión comprimida MP4/WebM',async()=>{
+ const env=environment();
+ assert.equal((await worker.fetch(request('/api/videos'),env)).status,401);
+ assert.equal((await worker.fetch(jsonRequest('/api/videos/init','POST',{
+  name:'raw.mov',mime:'video/quicktime',size:20
+ }),env)).status,401);
+ const cookie=await authorizeDevice(env);
+ const wrong=await worker.fetch(jsonRequest('/api/videos/init','POST',{
+  name:'raw.mov',mime:'video/quicktime',size:20
+ },cookie),env);
+ assert.equal(wrong.status,400);
+ const empty=await worker.fetch(jsonRequest('/api/videos/init','POST',{
+  name:'web.mp4',mime:'video/mp4',size:0
+ },cookie),env);
+ assert.equal(empty.status,400);
+ const tooBig=await worker.fetch(jsonRequest('/api/videos/init','POST',{
+  name:'web.mp4',mime:'video/mp4',size:513*1024*1024
+ },cookie),env);
+ assert.equal(tooBig.status,400);
+ assert.equal(env.objects.size,0);
+});
+
+test('Video web: sube en partes, se guarda en R2 privado, permite Range 206 y se restaura en Papelera',async()=>{
+ const env=environment(),cookie=await authorizeDevice(env);
+ const bytes=new Uint8Array([1,2,3,4,5,6,7,8,9,10]);
+ const init=await worker.fetch(jsonRequest('/api/videos/init','POST',{
+  name:'prueba-web.mp4',mime:'video/mp4',size:bytes.length
+ },cookie),env);
+ assert.equal(init.status,201);
+ const {id,uploadId,partSize}=await init.json();
+ assert.equal(partSize,6*1024*1024);
+ const part=await worker.fetch(request('/api/videos/'+id+'/part?uploadId='+encodeURIComponent(uploadId)+'&part=1',{
+  method:'PUT',headers:{Cookie:cookie,Origin:origin,'Content-Type':'application/octet-stream'},
+  body:bytes,
+ }),env);
+ assert.equal(part.status,200);
+ const partMeta=await part.json();
+ assert.match(partMeta.etag,/^[a-f0-9]{32}$/);
+ const complete=await worker.fetch(jsonRequest('/api/videos/'+id+'/complete','POST',{
+  uploadId,name:'prueba-web.mp4',mime:'video/mp4',size:bytes.length,parts:[partMeta]
+ },cookie),env);
+ assert.equal(complete.status,201);
+ const video=(await complete.json()).video;
+ assert.equal(video.url,'/api/videos/'+id);
+ assert.ok([...env.objects.keys()].every(key=>key.startsWith('quotes-studio/videos/')));
+ assert.equal((await worker.fetch(request('/api/media',{headers:{Cookie:cookie}}),env).then(r=>r.json())).photos.length,0);
+ const listing=await worker.fetch(request('/api/videos',{headers:{Cookie:cookie}}),env);
+ assert.equal((await listing.json()).videos.length,1);
+ assert.equal((await worker.fetch(request(video.url),env)).status,401);
+ const range=await worker.fetch(request(video.url,{headers:{Cookie:cookie,Range:'bytes=2-4'}}),env);
+ assert.equal(range.status,206);
+ assert.equal(range.headers.get('content-range'),'bytes 2-4/10');
+ assert.deepEqual([...new Uint8Array(await range.arrayBuffer())],[3,4,5]);
+ const suffix=await worker.fetch(request(video.url,{headers:{Cookie:cookie,Range:'bytes=-2'}}),env);
+ assert.equal(suffix.status,206);
+ assert.deepEqual([...new Uint8Array(await suffix.arrayBuffer())],[9,10]);
+ const invalid=await worker.fetch(request(video.url,{headers:{Cookie:cookie,Range:'bytes=200-'}}),env);
+ assert.equal(invalid.status,416);
+ const del=await worker.fetch(request(video.url,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
+ assert.equal(del.status,200);
+ assert.equal((await worker.fetch(request(video.url,{headers:{Cookie:cookie}}),env)).status,404);
+ const trash=await worker.fetch(request('/api/trash',{headers:{Cookie:cookie}}),env);
+ assert.ok((await trash.json()).items.some(item=>item.kind==='video'&&item.id===id));
+ const restore=await worker.fetch(request('/api/trash/video/'+id+'/restore',{method:'POST',headers:{Cookie:cookie,Origin:origin}}),env);
+ assert.equal(restore.status,200);
+ assert.equal((await worker.fetch(request(video.url,{headers:{Cookie:cookie}}),env)).status,200);
+ await worker.fetch(request(video.url,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
+ const purge=await worker.fetch(request('/api/trash/video/'+id,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
+ assert.equal(purge.status,200);
+ assert.equal(env.objects.size,0);
+});
+
+test('Video web: no se confirma si faltan partes y se puede abortar subida incompleta',async()=>{
+ const env=environment(),cookie=await authorizeDevice(env);
+ const init=await worker.fetch(jsonRequest('/api/videos/init','POST',{
+  name:'incompleto.webm',mime:'video/webm',size:6
+ },cookie),env);
+ const {id,uploadId}=await init.json();
+ const noParts=await worker.fetch(jsonRequest('/api/videos/'+id+'/complete','POST',{
+  uploadId,name:'incompleto.webm',mime:'video/webm',size:6,parts:[]
+ },cookie),env);
+ assert.equal(noParts.status,400);
+ const abort=await worker.fetch(jsonRequest('/api/videos/'+id+'/abort','POST',{uploadId},cookie),env);
+ assert.equal(abort.status,200);
+ assert.equal(env.objects.size,0);
+ const list=await worker.fetch(request('/api/videos',{headers:{Cookie:cookie}}),env);
+ assert.equal((await list.json()).videos.length,0);
 });

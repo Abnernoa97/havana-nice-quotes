@@ -4,7 +4,7 @@ import type { TrashItem } from './useTrash';
 import TrashFilterMenu from './TrashFilterMenu';
 import './trash.css';
 
-type Filter = 'all' | 'quote' | 'photo' | 'file';
+type Filter = 'all' | 'quote' | 'photo' | 'video' | 'file';
 type Props = {
   items: TrashItem[];
   busy: boolean;
@@ -109,7 +109,7 @@ export default function TrashScreen({
       </div>
       <div className="hn-trash-content">
         <strong>{item.label}</strong>
-        <small>{item.kind==='photo'?'Fotografía':item.kind==='quote'?'Cotización':'Archivo'}
+        <small>{item.kind==='photo'?'Fotografía':item.kind==='video'?'Video':item.kind==='quote'?'Cotización':'Archivo'}
           {' · '}{new Date(item.deletedAt*1000).toLocaleDateString('es-MX')}</small>
       </div>
       <div className="hn-trash-actions">

@@ -1,0 +1,7 @@
+.hn-media-library-tabs{display:flex;gap:5px;align-items:center;max-width:100%;min-width:0;
+ background:#e9efe8;border-radius:11px;padding:4px;margin:0 auto 18px;width:max-content}
+.hn-media-library-tabs button{min-height:38px;min-width:115px;padding:9px 15px;
+ border:0;border-radius:9px;color:#567362;background:transparent;font-weight:700;font-size:12px;cursor:pointer}
+.hn-media-library-tabs button.selected{background:#244a37;color:white;box-shadow:0 1px 6px #123d261a}
+@media(max-width:440px){.hn-media-library-tabs{width:calc(100% - 24px)}
+ .hn-media-library-tabs button{flex:1;min-width:0}}

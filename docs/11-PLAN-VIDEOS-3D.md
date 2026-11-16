@@ -1,3 +1,15 @@
+## Fase 1 implementada · 16/11/2026
+
+Ya existe una biblioteca independiente de video, dentro de Fotos → Videos:
+- Conversión **local** sin servicios externos: Canvas + MediaRecorder + Web Audio. Mantiene audio cuando el navegador soporta la captura. Salida MP4 o WebM a un máximo de 1280 px y 24 fps, ~2.2 Mb/s de video más ~128 kb/s de audio.
+- Solo se envía a R2 el archivo web convertido: el original no sale del teléfono. Si el navegador o codec no permiten la conversión, la subida se detiene con un mensaje.
+- Transferencia privada R2 multipart (6 MiB por parte) y metadatos en la tabla D1 existente `media` bajo `quotes-studio/videos/`. Sin migraciones y sin activar Stream, Queues ni planes nuevos.
+- Biblioteca con reproductor con audio, tamaño real y opción de enviar a Papelera; permite restaurar y eliminar definitivamente por el sistema actual. Endpoint con soporte HTTP Range autenticado para búsqueda del reproductor.
+- En esta fase, el contenedor final está limitado a 512 MiB. El peso del original puede ser mayor si el dispositivo logra convertirlo. La conversión local se hace a velocidad aproximadamente real y necesita mantener la pantalla activa. No prometemos calidad idéntica bit a bit ni compatibilidad universal: hay que probar Chrome Android y Safari iOS físicamente antes de considerarlo validado.
+- **El video no está conectado todavía a Portada, Scroll ni Book 3D.** Son la siguiente fase.
+
+---
+
 # Próxima evolución · Video en portada y revista 3D
 **Estudio técnico, no implementación** · 16 de noviembre de 2026
 

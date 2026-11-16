@@ -1,5 +1,6 @@
 import { validCarolinaLayout } from '../src/features/templates/carolina-layout.ts';
 import { isTemplateStyle } from '../src/features/templates/template-registry.ts';
+import { handleVideoApi, videoPrefix } from './videos.ts';
 /**
  * HAVANA NICE Quotes Studio · Cloudflare Worker
  * Private D1 quotes + media index; private R2 objects in quotes-studio/.
@@ -13,9 +14,21 @@ interface D1Statement {
   run(): Promise<{ meta: { changes: number } }>;
 }
 interface D1Binding { prepare(sql: string): D1Statement }
-interface R2Object { body: ReadableStream; httpMetadata?: { contentType?: string }; etag?: string }
+interface R2Object { body: ReadableStream; size: number; httpMetadata?: { contentType?: string }; etag?: string }
 interface R2Binding {
-  get(key: string): Promise<R2Object | null>;
+  get(key: string, options?: {range: {offset: number; length: number}}): Promise<R2Object | null>;
+  createMultipartUpload(key: string, options: { httpMetadata: {contentType: string}; customMetadata: Record<string,string>}): Promise<{
+    uploadId: string;
+    uploadPart(number:number,bytes:ArrayBuffer):Promise<{partNumber:number;etag:string}>;
+    complete(parts:{partNumber:number;etag:string}[]):Promise<{size:number}>;
+    abort():Promise<void>;
+  }>;
+  resumeMultipartUpload(key:string,uploadId:string):{
+    uploadId: string;
+    uploadPart(number:number,bytes:ArrayBuffer):Promise<{partNumber:number;etag:string}>;
+    complete(parts:{partNumber:number;etag:string}[]):Promise<{size:number}>;
+    abort():Promise<void>;
+  };
   put(key: string, body: ArrayBuffer, opts: { httpMetadata: { contentType: string }; customMetadata: Record<string, string> }): Promise<unknown>;
   delete(key: string): Promise<void>;
 }
@@ -178,6 +191,7 @@ async function api(request: Request, env: Env): Promise<Response> {
   }
 
 
+  if (path.startsWith('/api/videos')) return handleVideoApi(request, env);
   if (path === '/api/quotes' && method === 'GET') {
     const rows = await env.DB.prepare('SELECT id, payload, revision FROM quotes WHERE deleted_at IS NULL ORDER BY updated_at DESC, id DESC')
       .all<QuoteRow>();
@@ -212,8 +226,9 @@ async function api(request: Request, env: Env): Promise<Response> {
     const rows = await env.DB.prepare('SELECT id, object_key, filename, mime, size, created_at FROM media WHERE deleted_at IS NULL ORDER BY created_at DESC, id DESC')
       .all<MediaRow>();
     return json({
-      photos: rows.results.map(mediaPublic),
-      bytesUsed: rows.results.reduce((sum, r) => sum + r.size, 0),
+      photos: rows.results.filter(row=>row.object_key.startsWith(PHOTOS_PREFIX)).map(mediaPublic),
+      bytesUsed: rows.results.filter(row=>row.object_key.startsWith(PHOTOS_PREFIX))
+        .reduce((sum, r) => sum + r.size, 0),
     });
   }
   if (path === '/api/media' && method === 'POST') {
@@ -265,9 +280,11 @@ async function api(request: Request, env: Env): Promise<Response> {
       ...media.results.filter(row => row.object_key.startsWith(PHOTOS_PREFIX))
         .map(row => ({ id: row.id, kind: 'photo', label: row.filename,
           deletedAt: row.deleted_at, url: '/api/trash/photo/' + row.id })),
+      ...media.results.filter(row => row.object_key.startsWith(videoPrefix))
+        .map(row => ({id:row.id,kind:'video',label:row.filename,deletedAt:row.deleted_at})),
     ].sort((a, b) => Number(b.deletedAt) - Number(a.deletedAt)) });
   }
-  if (/^\/api\/trash\/(photo|quote)\/[a-z0-9-]+\/restore$/.test(path) && method === 'POST') {
+  if (/^\/api\/trash\/(photo|video|quote)\/[a-z0-9-]+\/restore$/.test(path) && method === 'POST') {
     const parts = path.split('/');
     const kind = parts[3], id = parts[4];
     if (kind === 'quote') {
@@ -280,14 +297,14 @@ async function api(request: Request, env: Env): Promise<Response> {
     const photo = await env.DB.prepare(
       'SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ? AND deleted_at IS NOT NULL'
     ).bind(id).first<MediaRow>();
-    if (!photo || !photo.object_key.startsWith(PHOTOS_PREFIX)) return bad('Fotografía no encontrada.', 404);
+    if (!photo || !photo.object_key.startsWith(kind==='video'?videoPrefix:PHOTOS_PREFIX)) return bad('Archivo no encontrado.', 404);
     if (!await env.MEDIA.get(photo.object_key)) return bad('El archivo no existe en R2.', 404);
     const result = await env.DB.prepare(
       'UPDATE media SET deleted_at = NULL WHERE id = ? AND deleted_at IS NOT NULL'
     ).bind(id).run();
     return result.meta.changes ? json({ restored: true }) : bad('Fotografía no encontrada.', 404);
   }
-  if (/^\/api\/trash\/(photo|quote)\/[a-z0-9-]+$/.test(path) && method === 'DELETE') {
+  if (/^\/api\/trash\/(photo|video|quote)\/[a-z0-9-]+$/.test(path) && method === 'DELETE') {
     const parts = path.split('/');
     const kind = parts[3], id = parts[4];
     if (kind === 'quote') {
@@ -300,7 +317,7 @@ async function api(request: Request, env: Env): Promise<Response> {
     const photo = await env.DB.prepare(
       'SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ? AND deleted_at IS NOT NULL'
     ).bind(id).first<MediaRow>();
-    if (!photo || !photo.object_key.startsWith(PHOTOS_PREFIX)) return bad('Fotografía no encontrada.', 404);
+    if (!photo || !photo.object_key.startsWith(kind==='video'?videoPrefix:PHOTOS_PREFIX)) return bad('Archivo no encontrado.', 404);
     await env.MEDIA.delete(photo.object_key);
     await env.DB.prepare(
       'DELETE FROM media WHERE id = ? AND deleted_at IS NOT NULL AND object_key = ?'

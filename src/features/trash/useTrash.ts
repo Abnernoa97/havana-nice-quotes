@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-export type TrashKind = 'quote' | 'photo' | 'file';
+export type TrashKind = 'quote' | 'photo' | 'video' | 'file';
 export type TrashItem = {
   id: string;
   kind: TrashKind;

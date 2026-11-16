@@ -10,7 +10,7 @@ import { useQuoteStore } from '../features/quotes/useQuoteStore';
 import { useDeviceAccess } from '../features/auth/useDeviceAccess';
 import DeviceGate from '../features/auth/DeviceGate';
 import { useMediaLibrary } from '../features/photos/useMediaLibrary';
-import PhotoBank from '../features/photos/PhotoBank';
+import MediaLibraryScreen from '../features/videos/MediaLibraryScreen';
 import { useTrash } from '../features/trash/useTrash';
 import TrashScreen from '../features/trash/TrashScreen';
 import HomeScreen from '../features/home/HomeScreen';
@@ -313,7 +313,7 @@ function App() {
     />
   ) : null;
   const photoView = (
-    <PhotoBank photos={photos} bytesUsed={bytesUsed} uploading={uploading} uploadProgress={uploadProgress}
+    <MediaLibraryScreen enabled={enabled} photos={photos} bytesUsed={bytesUsed} uploading={uploading} uploadProgress={uploadProgress}
       trashing={trashing} trashPhotos={trashPhotos} refreshQuotes={refreshQuotes}
       error={mediaError} uploadPhotos={uploadPhotos} refreshPhotos={refreshPhotos}
       viewerId={photoViewerId} selectionMode={photoSelecting}

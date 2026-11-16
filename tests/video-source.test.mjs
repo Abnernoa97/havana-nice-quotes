@@ -1,0 +1,41 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
+test('El archivo original nunca se envía: se convierte antes de hacer la primera petición a R2',()=>{
+ const converter=src('features/videos/compress-video.ts');
+ const hook=src('features/videos/useVideoLibrary.ts');
+ assert.match(hook,/const converted=await compressVideoForWeb\(source/);
+ assert.ok(hook.indexOf('await compressVideoForWeb')<hook.indexOf("'/api/videos/init'"));
+ assert.match(hook,/converted\.file\.slice\(i\*session\.partSize/);
+ assert.match(hook,/converted\.file\.type/);
+ assert.match(converter,/new MediaRecorder\(stream/);
+ assert.match(converter,/const sourceNode=audio\.createMediaElementSource\(video\)/);
+ assert.match(converter,/const audioDest=audio\.createMediaStreamDestination\(\)/);
+ assert.match(converter,/canvas\.captureStream\(FRAME_RATE\)/);
+ assert.match(converter,/new File\(\[blob\],name/);
+ assert.match(converter,/if\(!source\.type\.startsWith\('video\/'\)/);
+});
+test('Galería de videos independiente y reproducción con audio, sin tocar el diseñador ni Book 3D',()=>{
+ const screen=src('features/videos/MediaLibraryScreen.tsx');
+ const bank=src('features/videos/VideoBank.tsx');
+ const app=src('app/App.tsx');
+ const photos=src('features/photos/PhotoBank.tsx');
+ assert.match(screen,/<PhotoBank \{\.\.\.photoProps\}/);
+ assert.match(screen,/<VideoBank enabled=\{enabled\}/);
+ assert.match(app,/<MediaLibraryScreen enabled=\{enabled\}/);
+ assert.match(bank,/preload="metadata" controls playsInline/);
+ assert.match(bank,/El video está vacío|Cuando subas tu primer video/);
+ assert.match(bank,/Compresión local automática/);
+ assert.doesNotMatch(photos,/compressVideoForWeb|VideoBank/);
+});
+test('Papelera mueve los dos iconos de lote a la cabecera, no debajo de las tarjetas',()=>{
+ const trash=src('features/trash/TrashScreen.tsx');
+ const css=src('features/trash/trash.css');
+ assert.match(trash,/<div className="hn-trash-selected-shortcuts" role="group"/);
+ assert.match(trash,/aria-label="Restaurar seleccionados"/);
+ assert.match(trash,/aria-label="Eliminar seleccionados"/);
+ assert.ok(trash.indexOf('hn-trash-selected-shortcuts')<trash.indexOf('hn-trash-selected-body'));
+ assert.doesNotMatch(trash,/hn-trash-bulk-actions/);
+ assert.match(css,/\.hn-trash-selected-shortcuts\{/);
+});
