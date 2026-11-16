@@ -92,7 +92,7 @@ export default function CarolinaPhotoNode({
     {cover && !url && onSelect && <span className="hn-carolina-cover-invite">Añadir fotografía</span>}
   </>;
   if (onSelect) return (
-    <button type="button" ref={element} className={className} style={mainStyle}
+    <button type="button" ref={element} data-hn-photo-id={id} className={className} style={mainStyle}
       aria-label={extra ? 'Editar fotografía añadida' : cover ? 'Editar fotografía de portada' : 'Editar fotografía del recuadro ' + position}
       onPointerDown={onDown} onPointerMove={onMove}
       onPointerUp={event=>{gesture.onPointerUp(event);touchStart.current=null;}}

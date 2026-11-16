@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, ChevronLeft, ChevronRight, ImagePlus, Images, Smartphone, Trash2, X } from 'lucide-react';
 import { isCarolinaCopyField } from '../templates/carolina-edit-fields';
 import TextStyleDock from './TextStyleDock';
-import PhotoStyleDock from './PhotoStyleDock';
+import PhotoEditingWorkspace from './PhotoEditingWorkspace';
 import type { ElegantFontId } from '../templates/elegant-fonts';
 import type { CarolinaTextField } from '../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../shared/lib/wedding-date';
@@ -33,6 +34,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [photoTool, setPhotoTool] = useState<'crop'|'vignette'|null>(null);
+  const [photoAspect, setPhotoAspect] = useState(3/4);
   const [lastTextId, setLastTextId] = useState<string | null>(null);
   const [trashHovered, setTrashHovered] = useState(false);
   const [transformingId, setTransformingId] = useState<string | null>(null);
@@ -204,6 +206,20 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const photoOrder = carolinaPhotoOrder(item.carolinaLayout);
   const setPhotoOrder = (order:number[]) => updateLayout({photoOrder:order});
   const selectPhoto = (id:string) => {
+    // Empty frames open the source picker, populated photos open the immersive editor.
+    const url = id==='photo:cover' ? item.cover :
+      id.startsWith('photo-extra:') ?
+        item.carolinaLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===id)?.url :
+        carolinaPhotos(item)[Number(id.slice(6))];
+    if (!url) {
+      if (id==='photo:cover') open('cover');
+      else if (id.startsWith('photo-extra:')) open(`extra:${id.slice('photo-extra:'.length)}`);
+      else open(Number(id.slice(6)));
+      return;
+    }
+    const rect=document.querySelector<HTMLElement>('[data-hn-photo-id="'+id+'"]')?.getBoundingClientRect();
+    setPhotoAspect(rect?.width&&rect?.height
+      ? Math.max(.45,Math.min(2.5,rect.width/rect.height)) : 3/4);
     setPhotoTool(null);
     setSelectedPhotoId(id);
     setTransformingId(null);
@@ -346,16 +362,20 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
             setEditingId(null); setLastTextId(null);
           }}/>
       )}
-      {original && selectedPhotoId && !transformingId && !editingId && target===null && (
-        <PhotoStyleDock photoId={selectedPhotoId}
-          url={selectedPhotoId==='photo:cover' ? item.cover :
-            selectedPhotoId.startsWith('photo-extra:') ?
-              item.carolinaLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===selectedPhotoId)?.url || '' :
-              carolinaPhotos(item)[Number(selectedPhotoId.slice(6))] || ''}
-          style={item.carolinaLayout?.photoStyles?.[selectedPhotoId]}
-          onStyleChange={updatePhotoStyle} onReplace={replacePhoto}
-          onToolChange={setPhotoTool} onClose={()=>{setSelectedPhotoId(null);setPhotoTool(null);}}/>
-      )}
+      {original && selectedPhotoId && !transformingId && !editingId && target===null &&
+        createPortal(
+          <PhotoEditingWorkspace photoId={selectedPhotoId}
+            aspect={photoAspect} pageName={pages[page]} activeTool={photoTool}
+            url={selectedPhotoId==='photo:cover' ? item.cover :
+              selectedPhotoId.startsWith('photo-extra:') ?
+                item.carolinaLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===selectedPhotoId)?.url || '' :
+                carolinaPhotos(item)[Number(selectedPhotoId.slice(6))] || ''}
+            style={item.carolinaLayout?.photoStyles?.[selectedPhotoId]}
+            onStyleChange={updatePhotoStyle} onReplace={replacePhoto}
+            onToolChange={setPhotoTool}
+            onClose={()=>{setSelectedPhotoId(null);setPhotoTool(null);}}/>,
+          document.body
+        )}
       {original && transformingId && (
         <button type="button" data-hn-text-trash
           className={'hn-canvas-trash' + (trashHovered ? ' hot' : '')}
@@ -366,7 +386,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         </button>
       )}
       {error && !target && <p className="hn-canvas-error" role="alert">{error}</p>}
-      {target !== null && (
+      {target !== null && createPortal(
         <div className="hn-canvas-shade" onClick={event => {
           if (event.target === event.currentTarget) close();
         }}>
@@ -407,7 +427,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
             {busy && <p className="hn-canvas-message" role="status">Subiendo fotografía...</p>}
             {error && <p className="hn-canvas-error" role="alert">{error}</p>}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );

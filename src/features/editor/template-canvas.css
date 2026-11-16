@@ -88,3 +88,6 @@
 
 /* While a photo effect is active, finger movement edits crop or vignette; a hold still moves the frame. */
 .hn-canvas .hn-carolina-editable-photo{overscroll-behavior:contain;-webkit-touch-callout:none}
+
+/* Replacement picker must be above the dedicated photo workspace. */
+.hn-canvas-shade{z-index:1100}

@@ -526,7 +526,9 @@ test('Panel único de imágenes: un toque edita y una presión larga mueve o eli
   const css=readFileSync(new URL('../src/features/editor/template-canvas.css',import.meta.url),'utf8');
   assert.match(canvas,/selectPhoto\('photo:cover'\)/);
   assert.match(canvas,/onSelectPhoto=\{index => selectPhoto\('photo:'\+index\)\}/);
-  assert.match(canvas,/<PhotoStyleDock photoId=\{selectedPhotoId\}/);
+  assert.match(canvas,/<PhotoEditingWorkspace photoId=\{selectedPhotoId\}/);
+  const workspace=src('features/editor/PhotoEditingWorkspace.tsx');
+  assert.match(workspace,/<PhotoStyleDock photoId=\{photoId\}/);
   assert.match(canvas,/onStyleChange=\{updatePhotoStyle\} onReplace=\{replacePhoto\}/);
   assert.match(canvas,/target===null/);
   assert.doesNotMatch(canvas,/hn-canvas-photo-actions|reorderPhotoBlock|duplicatePhotoBlock/);

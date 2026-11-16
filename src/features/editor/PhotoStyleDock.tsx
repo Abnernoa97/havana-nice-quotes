@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { PointerEvent } from 'react';
-import { Check, CircleDot, Crop, Droplets, Layers3, Palette, RefreshCw, X } from 'lucide-react';
+import { Check, CircleDot, Crop, Droplets, Layers3, Palette, RefreshCw } from 'lucide-react';
 import type { CarolinaPhotoStyle } from '../templates/carolina-layout';
 import { CAROLINA_PHOTO_DEFAULTS as D } from '../templates/carolina-layout';
 import './photo-style-dock.css';
@@ -9,9 +8,9 @@ type Tool = 'background'|'color'|'crop'|'opacity'|'replace'|'vignette';
 type NumberKey = Exclude<keyof CarolinaPhotoStyle,
   'behindText'|'tint'|'vignetteShape'|'vignetteColor'>;
 type Props = {
-  photoId:string; url:string; style?:CarolinaPhotoStyle;
+  photoId:string; style?:CarolinaPhotoStyle;
   onStyleChange:(patch:Partial<CarolinaPhotoStyle>)=>void;
-  onReplace:()=>void; onClose:()=>void;
+  onReplace:()=>void;
   onToolChange:(value:'crop'|'vignette'|null)=>void;
 };
 const tools=[
@@ -37,7 +36,7 @@ function Slider({label,name,value,min,max,unit='%',onChange}:{
 
 /** One contextual dock for one image: never creates a second photo actions bar. */
 export default function PhotoStyleDock({
-  photoId,url,style,onStyleChange,onReplace,onClose,onToolChange,
+  photoId,style,onStyleChange,onReplace,onToolChange,
 }:Props){
   const [tab,setTab]=useState<Tool|null>(null);
   useEffect(()=>{setTab(null);onToolChange(null);},[photoId]);
@@ -51,42 +50,7 @@ export default function PhotoStyleDock({
   const slider=(label:string,key:Exclude<NumberKey,'tintAmount'>,min:number,max:number,unit='%')=>
     <Slider key={key} label={label} name={key} min={min} max={max} unit={unit}
       value={amount(key)} onChange={onStyleChange}/>;
-  const point=(event:PointerEvent<HTMLDivElement>)=>{
-    const rect=event.currentTarget.getBoundingClientRect();
-    const x=Math.max(0,Math.min(100,Math.round((event.clientX-rect.left)/rect.width*100)));
-    const y=Math.max(0,Math.min(100,Math.round((event.clientY-rect.top)/rect.height*100)));
-    if(tab==='crop') onStyleChange({cropX:x,cropY:y});
-    else if(tab==='vignette') onStyleChange({vignetteX:x,vignetteY:y});
-  };
-  const dragPreview=(tab==='crop'||tab==='vignette') && <div
-    className="hn-photo-touch-preview" role="group" tabIndex={0}
-    aria-label={tab==='crop'?'Desliza para ajustar el encuadre':'Desliza para mover el centro de la viñeta'}
-    style={url?{backgroundImage:'url("'+url+'")'}:undefined}
-    onPointerDown={event=>{event.preventDefault();event.currentTarget.setPointerCapture(event.pointerId);point(event);}}
-    onPointerMove={event=>{if(event.currentTarget.hasPointerCapture(event.pointerId))point(event);}}
-    onPointerUp={event=>event.currentTarget.releasePointerCapture(event.pointerId)}
-    onKeyDown={event=>{
-      const x=tab==='crop'?amount('cropX'):amount('vignetteX');
-      const y=tab==='crop'?amount('cropY'):amount('vignetteY');
-      const key=event.key;
-      if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key))return;
-      event.preventDefault();
-      const next={x:Math.max(0,Math.min(100,x+(key==='ArrowRight'?1:key==='ArrowLeft'?-1:0))),
-        y:Math.max(0,Math.min(100,y+(key==='ArrowDown'?1:key==='ArrowUp'?-1:0)))};
-      if(tab==='crop')onStyleChange({cropX:next.x,cropY:next.y});
-      else onStyleChange({vignetteX:next.x,vignetteY:next.y});
-    }}>
-    <span style={{left:(tab==='crop'?amount('cropX'):amount('vignetteX'))+'%',
-      top:(tab==='crop'?amount('cropY'):amount('vignetteY'))+'%'}} />
-  </div>;
   return <aside className="hn-text-dock hn-photo-dock" role="group" aria-label="Editar imagen seleccionada">
-    <div className="hn-text-dock-title">
-      <span className="hn-text-dock-dot" aria-hidden="true"/>
-      <strong>Editar imagen</strong>
-      <span className="hn-text-dock-hint">Solo esta foto</span>
-      <button type="button" aria-label="Cerrar edición de imagen"
-        onClick={()=>{onToolChange(null);onClose();}}><X size={17}/></button>
-    </div>
     {tab && <div className="hn-text-dock-expanded hn-photo-expanded">
       {tab==='background' && <div className="hn-photo-option">
         <button type="button" className={style?.behindText?'chosen':''}
@@ -119,8 +83,7 @@ export default function PhotoStyleDock({
         {slider('Zoom de la foto','cropZoom',100,300)}
         {slider('Encuadre horizontal','cropX',0,100)}
         {slider('Encuadre vertical','cropY',0,100)}
-        {dragPreview}
-        <small>Desliza sobre la foto o el recuadro para ajustar el encuadre.</small>
+        <small>Desliza sobre la fotografía de arriba para ajustar el encuadre.</small>
         <button className="hn-photo-reset" type="button" onClick={()=>onStyleChange({
           cropZoom:100,cropX:50,cropY:50
         })}>Restablecer recorte</button>
@@ -150,8 +113,7 @@ export default function PhotoStyleDock({
         </div>
         {slider('Intensidad','vignetteStrength',0,100)}
         {slider('Extensión','vignetteSize',0,100)}
-        {dragPreview}
-        <small>Mueve el centro de la viñeta con un dedo sobre la foto.</small>
+        <small>Mueve la viñeta con un dedo sobre la fotografía de arriba.</small>
       </div>}
     </div>}
     <div className="hn-text-dock-switches hn-photo-switches" role="group" aria-label="Ajustes de fotografía">
