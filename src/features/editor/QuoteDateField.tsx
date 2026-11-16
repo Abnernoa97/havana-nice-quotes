@@ -12,7 +12,7 @@ export default function QuoteDateField({ quoteId, value, onChange }: Props) {
   useEffect(() => {
     setDraft(displayWeddingDate(value));
     setTouched(false);
-  }, [quoteId]); // New quote: discard partial input from the previous quote.
+  }, [quoteId, value]); // Reflect date changes arriving from another authorized device.
   const iso = parseWeddingDate(draft);
   const invalid = touched && draft.trim() !== '' && !iso;
   const update = (text: string) => {
