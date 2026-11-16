@@ -4,7 +4,7 @@
 .hn-canvas-pages button{display:flex;align-items:center;gap:7px;padding:10px 12px;background:#fff;border:1px solid #dfe9de;border-radius:9px;color:#69816d;font-size:12px;cursor:pointer}
 .hn-canvas-pages button.selected{background:#254937;color:#fff;border-color:#254937}
 .hn-canvas-pages small{opacity:.7;font-size:10px}
-.hn-canvas-sheet{width:min(100%,620px);min-width:0;margin:auto;background:#fff;box-shadow:0 12px 32px #21382916}
+.hn-canvas-sheet{width:min(100%,620px);min-width:0;margin:auto;background:#fff;box-shadow:0 12px 32px #21382916;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .hn-canvas-cover{position:relative;aspect-ratio:612/792}
 .hn-canvas-cover .hn-carolina-page{height:100%;width:100%}
 .hn-carolina-editable-photo{appearance:none;display:flex;align-items:center;justify-content:center;border:0;padding:0;cursor:pointer;color:#668a70}
@@ -53,9 +53,8 @@
 .hn-canvas-cover-button { z-index: 1; }
 
 /* Inline editing, long-hold moving, pinch and rotate. No separate text dialog. */
-.hn-canvas-toolbar{width:min(100%,620px);margin:0 auto 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#64816c;font-size:11px}
 .hn-canvas-toolbar button{border:1px solid #cbd9cb;color:#244a36;background:#fff;border-radius:9px;min-height:41px;min-width:100px;font:600 13px 'DM Sans',sans-serif;cursor:pointer}
-.hn-canvas .hn-carolina-text-node{cursor:text;touch-action:none;user-select:none;-webkit-user-select:none}
+.hn-canvas .hn-carolina-text-node{cursor:text;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .hn-canvas .hn-carolina-text-node.empty{min-width:1em;min-height:1em;color:#b09666}
 .hn-canvas .hn-carolina-text-node:hover:not(.editing){outline:1px dashed #ad915f}
 .hn-canvas .hn-carolina-text-node.editing{min-width:1.5em;outline:1px solid #ad915f;outline-offset:2px;background:#fff9;border-radius:3px;user-select:text;-webkit-user-select:text;touch-action:auto;cursor:text}
@@ -68,13 +67,12 @@
 
 /* Same long-hold gesture used by text; no duplicate transform controls. */
 .hn-canvas .hn-carolina-editable-photo,
-.hn-canvas .hn-carolina-cover-photo { touch-action:none; -webkit-user-select:none; user-select:none; }
+.hn-canvas .hn-carolina-cover-photo { touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
 .hn-canvas .hn-carolina-cover-photo:hover,
 .hn-canvas .hn-carolina-editable-photo:hover { outline:1px dashed #bc9f69; outline-offset:-2px; }
 
 
 /* Controls appear only on the collage; original six-photo layout stays unchanged. */
-.hn-canvas-toolbar { justify-content:flex-start; flex-wrap:wrap; }
 .hn-canvas-toolbar button:disabled { opacity:.4; cursor:default; }
 .hn-canvas-toolbar span { margin-left:auto; }
 .hn-canvas-photo-actions {
@@ -94,36 +92,13 @@
 .hn-canvas-photo-actions button:last-child { color:#975547; }
 
 
-/* Photo-only actions sit below the collage; upper bar contains + Texto alone. */
-.hn-canvas-gallery-actions{width:min(100%,620px);box-sizing:border-box;margin:10px auto 0;display:flex;align-items:center;justify-content:space-between;gap:9px;padding:0 4px;color:#6c846e;font-size:11px}
-.hn-canvas-gallery-actions button{border:1px solid #d4e1d1;background:#fff;color:#2c533d;min-height:39px;min-width:98px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}
-.hn-canvas-gallery-actions button:disabled{opacity:.35;cursor:default}
 /* Only shown after a long press on text. Also accepts the captured pointer on drop. */
 .hn-canvas-trash{position:fixed;z-index:84;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);min-width:210px;max-width:88vw;min-height:62px;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 18px;border:1px dashed #be8e85;border-radius:15px;background:#fff8f5;box-shadow:0 10px 35px #41211d30;color:#985447;cursor:pointer;font-size:12px;font-weight:750;transition:background .15s ease,color .15s ease,scale .15s ease}
 .hn-canvas-trash.hot{background:#9e4c42;color:#fff;border-color:#9e4c42;scale:1.06}
 .hn-canvas-trash:focus-visible{outline:3px solid #bd9860;outline-offset:3px}
 
-/* Same +Foto and +Texto actions on all pages; page picker manages actual book leaves. */
-.hn-canvas-toolbar{display:flex;gap:8px;align-items:center;justify-content:flex-start}
+/* Edit on the selected page, without the obsolete page manager. */
+.hn-canvas-toolbar{width:min(100%,620px);margin:0 auto 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-start;color:#64816c;font-size:11px}
 .hn-canvas-toolbar>button{flex:0 1 130px;min-width:0}
 .hn-canvas-toolbar>span{flex:1 1 100%;text-align:center;font-size:11px}
-.hn-canvas-pages{flex-wrap:wrap}
-.hn-canvas-pages>.hn-canvas-page-settings{
-  flex:0 0 auto;min-height:40px;border:1px solid #d5e2d3;border-radius:9px;
-  background:#fff;color:#526d58;padding:8px 10px;font-size:11px;font-weight:700;
-}
-.hn-canvas-page-manager{
-  width:min(100%,620px);margin:0 auto 13px;padding:10px 11px;
-  box-sizing:border-box;border:1px solid #dce8dc;border-radius:12px;
-  background:#f7faf6;display:flex;flex-direction:column;gap:7px;
-}
-.hn-canvas-page-row{display:flex;align-items:center;gap:7px}
-.hn-canvas-page-row>span{flex:1;color:#294c38;font-size:12px;font-weight:650}
-.hn-canvas-page-row>button{
-  border:1px solid #d7e3d6;border-radius:7px;background:#fff;color:#3c6649;
-  min-height:32px;padding:5px 11px;font-size:12px;cursor:pointer;
-}
-.hn-canvas-page-row>button:disabled{opacity:.3;cursor:default}
-.hn-canvas-page-row>button:last-child{min-width:65px}
-.hn-canvas-page-manager>small{color:#849488;font-size:10px;line-height:1.4}
-.hn-canvas .hn-carolina-floating-photo{touch-action:none;user-select:none;-webkit-user-select:none}
+.hn-canvas .hn-carolina-floating-photo{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}

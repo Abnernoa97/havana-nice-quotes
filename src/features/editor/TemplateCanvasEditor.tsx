@@ -7,7 +7,7 @@ import type { CarolinaTextField } from '../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../templates/CarolinaTextNode';
 import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaTransform } from '../templates/carolina-layout';
-import { carolinaPhotoOrder, carolinaPageOrder, movePhotoSlot, photoSlotToAdd, emptyPhotoSlotToDuplicate, CAROLINA_MAX_SLOTS } from '../templates/carolina-layout';
+import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, emptyPhotoSlotToDuplicate, CAROLINA_MAX_SLOTS } from '../templates/carolina-layout';
 import type { CarolinaPageId } from '../templates/carolina-layout';
 import { normalizePriceInput, safeQuotePrice } from '../quotes/model';
 import type { Quote } from '../quotes/types';
@@ -28,7 +28,6 @@ const pages = ['Portada', 'Collage', 'Propuesta'] as const;
 /** A real preview becomes the editor: 3 Canva pages, 7 independently selectable photo regions. */
 export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto }: Props) {
   const [page, setPage] = useState<CarolinaPageId>(0);
-  const [pageManager, setPageManager] = useState(false);
   const [target, setTarget] = useState<PhotoTarget | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [lastTextId, setLastTextId] = useState<string | null>(null);
@@ -39,7 +38,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [error, setError] = useState('');
   useEffect(() => {
     setPage(carolinaPageOrder(item.carolinaLayout)[0]); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
-    setLastTextId(null); setTrashHovered(false); setPageManager(false);
+    setLastTextId(null); setTrashHovered(false);
   }, [item.id, item.style]);
   const updateLayout = (patch: Partial<CarolinaLayout>) => {
     edit('carolinaLayout', { ...item.carolinaLayout, ...patch });
@@ -151,34 +150,21 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       const gallery=carolinaPhotos(item);
       gallery[slot]='';
       edit('gallery',gallery);
-      const current=carolinaPhotoOrder(item.carolinaLayout);
-      updateLayout({transforms,photoOrder:current.length>1
-        ? current.filter(index=>index!==slot) : current});
+      // Keep the collage frame in place when its image is cleared.
+      updateLayout({transforms});
     }
     setTransformingId(null);setLastTextId(null);setTrashHovered(false);setError('');
   };
   const removeElement = (id:string) => isPhotoId(id) ? removePhoto(id) : removeText(id);
   const selectedPages=carolinaPageOrder(item.carolinaLayout);
   const pageIndex=selectedPages.indexOf(page);
-  const setPageOrder=(order:CarolinaPageId[])=>updateLayout({pageOrder:order});
-  const togglePage=(id:CarolinaPageId)=>{
-    if (selectedPages.includes(id)) {
-      if (selectedPages.length<=1) return;
-      const order=selectedPages.filter(x=>x!==id);
-      setPageOrder(order);
-      if (page===id) setPage(order[0]);
-    } else {
-      setPageOrder([...selectedPages,id]);
-      setPage(id);
-    }
-    setTransformingId(null);setLastTextId(null);setEditingId(null);
-  };
-  const shiftPage=(id:CarolinaPageId,delta:-1|1)=>{
-    const from=selectedPages.indexOf(id),to=from+delta;
-    if (from<0||to<0||to>=selectedPages.length) return;
-    const order=[...selectedPages];
-    [order[from],order[to]]=[order[to],order[from]];
-    setPageOrder(order);
+  const changePage = (direction: -1 | 1) => {
+    setPage(current => {
+      const index = selectedPages.indexOf(current);
+      const next = Math.max(0, Math.min(selectedPages.length - 1, index + direction));
+      return selectedPages[next] ?? current;
+    });
+    setTransformingId(null); setEditingId(null); setLastTextId(null); setTrashHovered(false);
   };
   const chooseFont = (font:ElegantFontId|null) => {
     if (!lastTextId) return;
@@ -220,13 +206,23 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setTarget(slot);
     setBank(false);
   };
-  const reorderPhotoBlock = (slot: number, direction: -1 | 1) =>
-    setPhotoOrder(movePhotoSlot(photoOrder, slot, direction));
-  const hidePhotoBlock = (slot: number) => {
-    if (photoOrder.length <= 1) return;
-    setPhotoOrder(photoOrder.filter(index => index !== slot));
-    setTransformingId(null);
+  const reorderPhotoBlock = (slot: number, direction: -1 | 1) => {
+    const index = photoOrder.indexOf(slot), neighbor = photoOrder[index + direction];
+    if (index < 0 || neighbor === undefined) return;
+    // Swap content within fixed frames, not DOM slots or column layout.
+    const gallery = carolinaPhotos(item);
+    [gallery[slot], gallery[neighbor]] = [gallery[neighbor], gallery[slot]];
+    edit('gallery', gallery);
+    const transforms = { ...item.carolinaLayout?.transforms };
+    const source = 'photo:' + slot, destination = 'photo:' + neighbor;
+    const from = transforms[source], to = transforms[destination];
+    if (to) transforms[source] = to; else delete transforms[source];
+    if (from) transforms[destination] = from; else delete transforms[destination];
+    updateLayout({ transforms });
+    setTransformingId(destination);
+    setError('');
   };
+  const clearPhotoBlock = (slot: number) => removePhoto('photo:' + slot);
   const duplicatePhotoBlock = (slot: number) => {
     const gallery = carolinaPhotos(item);
     const next = emptyPhotoSlotToDuplicate(photoOrder, gallery);
@@ -280,31 +276,6 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
                 <small>{index+1}</small>{pages[id]}
               </button>
             ))}
-            <button type="button" className="hn-canvas-page-settings"
-              aria-expanded={pageManager} onClick={()=>setPageManager(value=>!value)}>
-              Hojas {selectedPages.length}
-            </button>
-          </nav>
-          {pageManager && <div className="hn-canvas-page-manager"
-            role="group" aria-label="Elegir hojas del documento">
-            {pages.map((title,index)=>{
-              const id=index as CarolinaPageId;
-              const included=selectedPages.includes(id);
-              const position=selectedPages.indexOf(id);
-              return <div key={id} className="hn-canvas-page-row">
-                <span>{title}</span>
-                {included && <>
-                  <button type="button" disabled={position===0}
-                    aria-label={'Mover '+title+' antes'} onClick={()=>shiftPage(id,-1)}>‹</button>
-                  <button type="button" disabled={position===selectedPages.length-1}
-                    aria-label={'Mover '+title+' después'} onClick={()=>shiftPage(id,1)}>›</button>
-                </>}
-                <button type="button" disabled={included&&selectedPages.length===1}
-                  onClick={()=>togglePage(id)}>{included?'Quitar':'Añadir'}</button>
-              </div>;
-            })}
-            <small>El orden y las hojas visibles se reflejan en Scroll y revista 3D.</small>
-          </div>}
         </>
       )}
       {original && <div className="hn-canvas-toolbar">
@@ -351,23 +322,23 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         <div className="hn-canvas-photo-actions" role="group" aria-label="Ordenar fotografías">
           <span>Foto {photoOrder.indexOf(selectedPhoto) + 1}</span>
           <button type="button" disabled={photoOrder.indexOf(selectedPhoto) === 0}
-            onClick={() => reorderPhotoBlock(selectedPhoto, -1)}>Anterior</button>
+            onClick={() => reorderPhotoBlock(selectedPhoto, -1)}>Mover antes</button>
           <button type="button" disabled={photoOrder.indexOf(selectedPhoto) === photoOrder.length - 1}
-            onClick={() => reorderPhotoBlock(selectedPhoto, 1)}>Siguiente</button>
+            onClick={() => reorderPhotoBlock(selectedPhoto, 1)}>Mover después</button>
           <button type="button" disabled={photoOrder.length >= CAROLINA_MAX_SLOTS}
             onClick={() => duplicatePhotoBlock(selectedPhoto)}>Duplicar</button>
-          <button type="button" disabled={photoOrder.length <= 1}
-            onClick={() => hidePhotoBlock(selectedPhoto)}>Quitar</button>
+          <button type="button" disabled={!carolinaPhotos(item)[selectedPhoto]}
+            onClick={() => clearPhotoBlock(selectedPhoto)}>Borrar foto</button>
         </div>
       )}
       {original && <div className="hn-canvas-pager">
         <button type="button" disabled={pageIndex<=0} aria-label="Página anterior"
-          onClick={()=>{setPage(selectedPages[pageIndex-1]);setTransformingId(null);setEditingId(null);setLastTextId(null);}}>
+          onClick={()=>changePage(-1)}>
           <ChevronLeft size={18}/>
         </button>
         <span>{pageIndex+1} / {selectedPages.length}</span>
         <button type="button" disabled={pageIndex>=selectedPages.length-1} aria-label="Página siguiente"
-          onClick={()=>{setPage(selectedPages[pageIndex+1]);setTransformingId(null);setEditingId(null);setLastTextId(null);}}>
+          onClick={()=>changePage(1)}>
           <ChevronRight size={18}/>
         </button>
       </div>}

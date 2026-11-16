@@ -149,6 +149,16 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const onPointerMove = (event: ReactPointerEvent<T>) =>
     update(event.pointerId, event.clientX, event.clientY);
   const onPointerUp = (event: ReactPointerEvent<T>) => finish(event.pointerId,event.clientX,event.clientY);
+  const onPointerCancel = (event: ReactPointerEvent<T>) => {
+    // A system-cancelled gesture must never save or erase a photo.
+    cancelHold();
+    pointers.current.delete(event.pointerId);
+    if (pointers.current.size) { resetBaseline(); return; }
+    baseline.current = null; press.current = null; longPressed.current = false;
+    swallowClick.current = true;
+    current.current = saved || ZERO_TRANSFORM;
+    setLive(saved || ZERO_TRANSFORM);
+  };
   const suppressTap = () => {
     if (selected) return true;
     if (!swallowClick.current) return false;
@@ -157,5 +167,5 @@ export function useCarolinaGesture<T extends HTMLElement>(
   };
   const transform = 'translate(' + live.x + 'cqw, ' + live.y +
     'cqw) rotate(' + live.rotation + 'deg) scale(' + live.scale + ')';
-  return { selected, transform, onPointerDown, onPointerMove, onPointerUp, suppressTap };
+  return { selected, transform, onPointerDown, onPointerMove, onPointerUp, onPointerCancel, suppressTap };
 }

@@ -86,3 +86,6 @@
   box-shadow:0 12px 30px #0d1c1a24;
 }
 .hn-flip-host.hn-flip-single .hn-leaf{height:100%;width:100%}
+
+/* Vertical scrolling works directly over the 3D book; horizontal swipes still turn pages. */
+.hn-magazine-stage,.hn-magazine-stage *{touch-action:pan-y pinch-zoom!important}

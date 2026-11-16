@@ -31,7 +31,7 @@ export default function CarolinaPhotoNode({
     <button type="button" ref={element} className={className} style={style}
       aria-label={extra ? 'Elegir fotografía añadida' : cover ? 'Elegir fotografía de portada' : 'Elegir fotografía del recuadro ' + position}
       onPointerDown={gesture.onPointerDown} onPointerMove={gesture.onPointerMove}
-      onPointerUp={gesture.onPointerUp} onPointerCancel={gesture.onPointerUp}
+      onPointerUp={gesture.onPointerUp} onPointerCancel={gesture.onPointerCancel}
       onContextMenu={event => event.preventDefault()}
       onClick={() => { if (!gesture.suppressTap()) onSelect(); }}>
       {!url && <span className="hn-carolina-empty-photo">+</span>}
