@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { Quote } from '../quotes/types';
+import type { CarolinaTextField } from './carolina-edit-fields';
 import { quoteCurrency, usd } from '../../shared/lib/formatters';
 import './carolina-template.css';
 
@@ -40,7 +41,22 @@ export function carolinaInvestment(item: Quote): string {
   return usd(item.price) + (quoteCurrency(item.currency) === 'MX' ? ' Mexican Pesos' : ' USD');
 }
 
-export function CarolinaCover({ item }: { item: Quote }) {
+type OnTextEdit = (field: CarolinaTextField) => void;
+
+/** Same HTML in editor and client; only the edit callback adds on-canvas hotspots. */
+function TextHotspot({ field, value, onEditText }: {
+  field: CarolinaTextField; value: string; onEditText?: OnTextEdit;
+}) {
+  if (!onEditText) return <>{value}</>;
+  return (
+    <button type="button" className={'hn-canvas-inline-text' + (!value ? ' empty' : '')}
+      aria-label={'Editar ' + field} onClick={() => onEditText(field)}>
+      {value || <span aria-hidden="true">✎</span>}
+    </button>
+  );
+}
+
+export function CarolinaCover({ item, onEditText }: { item: Quote; onEditText?: OnTextEdit }) {
   const style: CSSProperties = item.cover
     ? { backgroundImage: 'linear-gradient(180deg,rgba(20,15,13,.33),rgba(20,15,13,.09) 55%,rgba(20,15,13,.42)),url("' + item.cover + '")' }
     : {};
@@ -50,6 +66,18 @@ export function CarolinaCover({ item }: { item: Quote }) {
         <strong>HAVANA NICE</strong>
         <span>Live Wedding Music</span>
       </div>
+      {(onEditText || item.name || item.note || item.location || item.date) && (
+        <div className="hn-carolina-cover-personal">
+          <h2><TextHotspot field="name" value={item.name} onEditText={onEditText}/></h2>
+          <p><TextHotspot field="note" value={item.note} onEditText={onEditText}/></p>
+          <small>
+            <TextHotspot field="location" value={item.location} onEditText={onEditText}/>
+            {(item.location && item.date) && <span aria-hidden="true"> · </span>}
+            <TextHotspot field="date" value={item.date ? carolinaDate(item.date) : ''}
+              onEditText={onEditText}/>
+          </small>
+        </div>
+      )}
     </div>
   );
 }
@@ -90,35 +118,45 @@ export function CarolinaCollage({ item, onSelectPhoto }: {
   );
 }
 
-export function CarolinaTerms({ item }: { item: Quote }) {
+export function CarolinaTerms({ item, onEditText }: { item: Quote; onEditText?: OnTextEdit }) {
   const copy = carolinaCopy(item);
   return (
     <div className="hn-carolina-page hn-carolina-terms">
       <section className="hn-carolina-term-group celebration">
         <h2>The Celebration</h2>
         <div className="hn-carolina-term-lines">
-          <p>Date: {carolinaDate(item.date)}</p>
-          <p>The setting: {item.location}</p>
+          <p>Date: <TextHotspot field="date" value={item.date ? carolinaDate(item.date) : ''}
+            onEditText={onEditText}/></p>
+          <p>The setting: <TextHotspot field="location" value={item.location}
+            onEditText={onEditText}/></p>
         </div>
       </section>
       <section className="hn-carolina-term-group experience">
         <h2>The Experience</h2>
         <div className="hn-carolina-term-lines">
-          <p>Performance: {copy.performance}</p>
-          <p>On Stage: {copy.musicians}</p>
-          <p>Our Crew: {copy.crew}</p>
-          <p>Includes full backline: {copy.backline}.</p>
-          <p>Investment: {carolinaInvestment(item)}</p>
-          <p>{copy.logistics}</p>
-          <p>To secure your date, we require a {item.deposit}% deposit and a signed agreement. {copy.balance}</p>
+          {(onEditText || item.package) && <p>Service: <TextHotspot field="package" value={item.package}
+            onEditText={onEditText}/></p>}
+          {(onEditText || item.desc) && <p><TextHotspot field="desc" value={item.desc}
+            onEditText={onEditText}/></p>}
+          <p>Performance: <TextHotspot field="performance" value={copy.performance} onEditText={onEditText}/></p>
+          <p>On Stage: <TextHotspot field="musicians" value={copy.musicians} onEditText={onEditText}/></p>
+          <p>Our Crew: <TextHotspot field="crew" value={copy.crew} onEditText={onEditText}/></p>
+          <p>Includes full backline: <TextHotspot field="backline" value={copy.backline} onEditText={onEditText}/>.</p>
+          <p>Investment: <TextHotspot field="price" value={item.price ? carolinaInvestment(item) : ''} onEditText={onEditText}/></p>
+          <p><TextHotspot field="logistics" value={copy.logistics} onEditText={onEditText}/></p>
+          <p>To secure your date, we require a <TextHotspot field="deposit"
+            value={item.deposit ? String(item.deposit) + '%' : ''} onEditText={onEditText}/>
+            {' '}deposit and a signed agreement. <TextHotspot field="balance"
+              value={copy.balance} onEditText={onEditText}/></p>
         </div>
       </section>
       <section className="hn-carolina-term-group production">
         <h2>Production &amp; Tech</h2>
         <div className="hn-carolina-term-lines">
-          <p>• AV Production: {copy.production}</p>
-          <p>• {copy.connections}</p>
-          <p>• Space: {copy.space}</p>
+          <p>• AV Production: <TextHotspot field="production" value={copy.production}
+            onEditText={onEditText}/></p>
+          <p>• <TextHotspot field="connections" value={copy.connections} onEditText={onEditText}/></p>
+          <p>• Space: <TextHotspot field="space" value={copy.space} onEditText={onEditText}/></p>
         </div>
       </section>
     </div>

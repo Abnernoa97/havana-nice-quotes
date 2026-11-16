@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight, ImagePlus, Images, Smartphone, X } from 'lucide-react';
+import { CAROLINA_FIELD_LABELS, isCarolinaCopyField } from '../templates/carolina-edit-fields';
+import type { CarolinaTextField } from '../templates/carolina-edit-fields';
+import { displayWeddingDate, parseWeddingDate, weddingWeekday } from '../../shared/lib/wedding-date';
+import { normalizePriceInput, safeQuotePrice } from '../quotes/model';
+import { quoteCurrency } from '../../shared/lib/formatters';
 import type { Quote } from '../quotes/types';
 import type { CloudPhoto } from '../photos/useMediaLibrary';
 import Proposal from '../client/Proposal';
@@ -19,10 +24,33 @@ const pages = ['Portada', 'Collage', 'Propuesta'] as const;
 export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto }: Props) {
   const [page, setPage] = useState(0);
   const [target, setTarget] = useState<PhotoTarget | null>(null);
+  const [textField, setTextField] = useState<CarolinaTextField | null>(null);
+  const [dateDraft, setDateDraft] = useState('');
   const [bank, setBank] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  useEffect(() => { setPage(0); setTarget(null); setBank(false); }, [item.id, item.style]);
+  useEffect(() => {
+    setPage(0); setTarget(null); setBank(false); setTextField(null);
+  }, [item.id, item.style]);
+  const openText = (field: CarolinaTextField) => {
+    setTextField(field);
+    setDateDraft(displayWeddingDate(item.date));
+  };
+  const closeText = () => setTextField(null);
+  const changeText = (field: CarolinaTextField, value: string) => {
+    if (field === 'date') {
+      setDateDraft(value);
+      const iso = parseWeddingDate(value);
+      if (iso) edit('date', iso);
+      else if (!value.trim()) edit('date', '');
+    } else if (field === 'price') {
+      edit('price', safeQuotePrice(normalizePriceInput(value)));
+    } else if (isCarolinaCopyField(field)) {
+      edit('carolinaCopy', { ...item.carolinaCopy, [field]: value.slice(0, 1500) });
+    } else if (field !== 'deposit') {
+      edit(field, value);
+    }
+  };
   const open = (slot: PhotoTarget) => { setTarget(slot); setBank(false); setError(''); };
   const close = () => { if (!busy) { setTarget(null); setBank(false); setError(''); } };
   const choose = (url: string) => {
@@ -63,7 +91,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           <>
             {page === 0 && (
               <div className="hn-canvas-cover">
-                <CarolinaCover item={item}/>
+                <CarolinaCover item={item} onEditText={openText}/>
                 <button type="button" className="hn-canvas-cover-button"
                   onClick={() => open('cover')} aria-label="Elegir foto de portada">
                   {!item.cover && <span><ImagePlus size={22}/> Añadir foto</span>}
@@ -71,7 +99,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
               </div>
             )}
             {page === 1 && <CarolinaCollage item={item} onSelectPhoto={index => open(index)}/>}
-            {page === 2 && <CarolinaTerms item={item}/>}
+            {page === 2 && <CarolinaTerms item={item} onEditText={openText}/>}
           </>
         ) : (
           <div className="hn-canvas-editorial">
@@ -89,6 +117,67 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           <span>{page + 1} / {pages.length}</span>
           <button type="button" disabled={page === 2} aria-label="Página siguiente"
             onClick={() => setPage(page + 1)}><ChevronRight size={18}/></button>
+        </div>
+      )}
+      {textField !== null && (
+        <div className="hn-canvas-shade" onClick={event => {
+          if (event.target === event.currentTarget) closeText();
+        }}>
+          <div className="hn-canvas-picker hn-canvas-text-picker" role="dialog"
+            aria-modal="true" aria-label={'Editar ' + CAROLINA_FIELD_LABELS[textField]}>
+            <header>
+              <strong>{CAROLINA_FIELD_LABELS[textField]}</strong>
+              <button type="button" aria-label="Terminar edición" onClick={closeText}>
+                <X size={19}/>
+              </button>
+            </header>
+            {textField === 'date' ? (
+              <>
+                <input autoFocus type="text" inputMode="text" placeholder="15/11/2027"
+                  value={dateDraft} onChange={event => changeText('date', event.target.value)}
+                  aria-label="Fecha de la celebración"/>
+                <p className="hn-canvas-date-feedback">
+                  {parseWeddingDate(dateDraft)
+                    ? weddingWeekday(parseWeddingDate(dateDraft)!)
+                    : dateDraft ? 'Escribe una fecha válida: 15/11/2027' : 'Sin fecha'}
+                </p>
+              </>
+            ) : textField === 'deposit' ? (
+              <div className="hn-canvas-deposit" role="group" aria-label="Anticipo">
+                {[20, 30, 40, 50, 60, 70, 80, 90, 100].map(percent => (
+                  <button key={percent} type="button" aria-pressed={item.deposit === percent}
+                    className={item.deposit === percent ? 'selected' : ''}
+                    onClick={() => { edit('deposit', percent); closeText(); }}>{percent}%</button>
+                ))}
+              </div>
+            ) : textField === 'price' ? (
+              <>
+                <input autoFocus type="text" inputMode="numeric" placeholder="0"
+                  aria-label="Precio total" value={item.price || ''}
+                  onChange={event => changeText('price', event.target.value)}/>
+                <div className="hn-canvas-currency" role="group" aria-label="Moneda">
+                  {(['USD', 'MX'] as const).map(currency => (
+                    <button type="button" key={currency}
+                      className={quoteCurrency(item.currency) === currency ? 'selected' : ''}
+                      aria-pressed={quoteCurrency(item.currency) === currency}
+                      onClick={() => edit('currency', currency)}>{currency}</button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <textarea autoFocus rows={textField === 'desc' || textField === 'note' ||
+                isCarolinaCopyField(textField) ? 4 : 2}
+                maxLength={isCarolinaCopyField(textField) ? 1500 : 3000}
+                value={isCarolinaCopyField(textField)
+                  ? item.carolinaCopy?.[textField] || ''
+                  : item[textField]}
+                onChange={event => changeText(textField, event.target.value)}
+                aria-label={CAROLINA_FIELD_LABELS[textField]}/>
+            )}
+            <button type="button" className="hn-canvas-text-done" onClick={closeText}>
+              Listo
+            </button>
+          </div>
         </div>
       )}
       {target !== null && (
