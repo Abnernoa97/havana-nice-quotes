@@ -1,87 +1,89 @@
 import type { CSSProperties } from 'react';
 import type { Quote } from '../quotes/types';
-import type { CarolinaTextField } from './carolina-edit-fields';
+import type { CarolinaTextInteraction } from './CarolinaTextNode';
+import CarolinaTextNode from './CarolinaTextNode';
+import type { CarolinaFixedKey } from './carolina-layout';
+import { fixedText } from './carolina-layout';
 import { quoteCurrency, usd } from '../../shared/lib/formatters';
 import './carolina-template.css';
 
-/** The three original Canva pages. All visible content is rendered as real HTML. */
+/** Original three-page composition; all typography is rendered from editable data. */
 export const CAROLINA_SLOTS = 6;
-
 export const CAROLINA_COPY = {
-  performance: '',
-  musicians: '',
-  crew: '',
-  backline: '',
-  logistics: '',
-  balance: '',
-  production: '',
-  connections: '',
-  space: '',
+  performance: '', musicians: '', crew: '', backline: '', logistics: '',
+  balance: '', production: '', connections: '', space: '',
 } as const;
-
 export type CarolinaCopy = { [K in keyof typeof CAROLINA_COPY]: string };
-
 export function carolinaCopy(item: Quote): CarolinaCopy {
   return { ...CAROLINA_COPY, ...item.carolinaCopy };
 }
-
 export function carolinaPhotos(item: Quote): string[] {
   return Array.from({ length: CAROLINA_SLOTS }, (_, i) => item.gallery?.[i] || '');
 }
-
 export function carolinaDate(value: string): string {
-  if (!value) return 'Date to be confirmed';
+  if (!value) return '';
   const date = new Date(value + 'T12:00:00');
   return Number.isFinite(date.valueOf())
     ? date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).replace(',', '')
-    : 'Date to be confirmed';
+    : '';
 }
-
 export function carolinaInvestment(item: Quote): string {
   return usd(item.price) + (quoteCurrency(item.currency) === 'MX' ? ' Mexican Pesos' : ' USD');
 }
-
-type OnTextEdit = (field: CarolinaTextField) => void;
-
-/** Same HTML in editor and client; only the edit callback adds on-canvas hotspots. */
-function TextHotspot({ field, value, onEditText }: {
-  field: CarolinaTextField; value: string; onEditText?: OnTextEdit;
-}) {
-  if (!onEditText) return <>{value}</>;
+type PageProps = { item: Quote; interaction?: CarolinaTextInteraction };
+type FieldNodeProps = PageProps & { field: string; value: string };
+function FieldNode({ item, field, value, interaction }: FieldNodeProps) {
+  const id = 'field:' + field;
+  return <CarolinaTextNode id={id} text={value}
+    transform={item.carolinaLayout?.transforms?.[id]} interaction={interaction}/>;
+}
+function FixedNode({ item, field, interaction }: PageProps & { field: CarolinaFixedKey }) {
+  const id = 'fixed:' + field;
+  return <CarolinaTextNode id={id} text={fixedText(item.carolinaLayout, field)}
+    transform={item.carolinaLayout?.transforms?.[id]} interaction={interaction}/>;
+}
+function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
+  const entries = item.carolinaLayout?.extras?.filter(e => e.page === page) || [];
+  if (!entries.length) return null;
   return (
-    <button type="button" className={'hn-canvas-inline-text' + (!value ? ' empty' : '')}
-      aria-label={'Editar ' + field} onClick={() => onEditText(field)}>
-      {value || <span aria-hidden="true">✎</span>}
-    </button>
+    <div className="hn-carolina-extra-layer">
+      {entries.map(extra => {
+        const id = 'extra:' + extra.id;
+        return <div className="hn-carolina-added-text" key={extra.id}>
+          <CarolinaTextNode id={id} text={extra.text} extra
+            transform={item.carolinaLayout?.transforms?.[id]} interaction={interaction}/>
+        </div>;
+      })}
+    </div>
   );
 }
-
-export function CarolinaCover({ item, onEditText }: { item: Quote; onEditText?: OnTextEdit }) {
+export function CarolinaCover({ item, interaction }: PageProps) {
   const style: CSSProperties = item.cover
     ? { backgroundImage: 'linear-gradient(180deg,rgba(20,15,13,.33),rgba(20,15,13,.09) 55%,rgba(20,15,13,.42)),url("' + item.cover + '")' }
     : {};
   return (
-    <div className="hn-carolina-page hn-carolina-cover" style={style}>
+    <div className={'hn-carolina-page hn-carolina-cover' +
+      (interaction?.transformingId ? ' hn-layout-grid' : '')} style={style}>
       <div className="hn-carolina-cover-brand">
-        <strong>HAVANA NICE</strong>
-        <span>Live Wedding Music</span>
+        <strong><FixedNode item={item} field="brand" interaction={interaction}/></strong>
+        <span><FixedNode item={item} field="subtitle" interaction={interaction}/></span>
       </div>
-      {(onEditText || item.name || item.note || item.location || item.date) && (
+      {(interaction || item.name || item.note || item.location || item.date) && (
         <div className="hn-carolina-cover-personal">
-          <h2><TextHotspot field="name" value={item.name} onEditText={onEditText}/></h2>
-          <p><TextHotspot field="note" value={item.note} onEditText={onEditText}/></p>
+          <h2><FieldNode item={item} field="name" value={item.name} interaction={interaction}/></h2>
+          <p><FieldNode item={item} field="note" value={item.note} interaction={interaction}/></p>
           <small>
-            <TextHotspot field="location" value={item.location} onEditText={onEditText}/>
+            <FieldNode item={item} field="location" value={item.location} interaction={interaction}/>
             {(item.location && item.date) && <span aria-hidden="true"> · </span>}
-            <TextHotspot field="date" value={item.date ? carolinaDate(item.date) : ''}
-              onEditText={onEditText}/>
+            <FieldNode item={item} field="date"
+              value={carolinaDate(item.date)} interaction={interaction}/>
           </small>
         </div>
       )}
+      <ExtraTexts item={item} page={0} interaction={interaction}/>
     </div>
   );
 }
-
 function PhotoCell({ url, position, onSelect }: {
   url: string; position: number; onSelect?: (index: number) => void;
 }) {
@@ -99,13 +101,13 @@ function PhotoCell({ url, position, onSelect }: {
     aria-label={url ? 'Wedding photograph ' + position : 'Photograph slot ' + position}
     style={style}/>;
 }
-
-export function CarolinaCollage({ item, onSelectPhoto }: {
-  item: Quote; onSelectPhoto?: (index: number) => void;
+export function CarolinaCollage({ item, onSelectPhoto, interaction }: PageProps & {
+  onSelectPhoto?: (index: number) => void;
 }) {
   const images = carolinaPhotos(item);
   return (
-    <div className="hn-carolina-page hn-carolina-collage">
+    <div className={'hn-carolina-page hn-carolina-collage' +
+      (interaction?.transformingId ? ' hn-layout-grid' : '')}>
       <div className="hn-carolina-photo-column left">
         {images.slice(0, 2).map((url, i) => <PhotoCell key={i} url={url}
           position={i + 1} onSelect={onSelectPhoto}/>)}
@@ -114,56 +116,65 @@ export function CarolinaCollage({ item, onSelectPhoto }: {
         {images.slice(2).map((url, i) => <PhotoCell key={i + 2} url={url}
           position={i + 3} onSelect={onSelectPhoto}/>)}
       </div>
+      <ExtraTexts item={item} page={1} interaction={interaction}/>
     </div>
   );
 }
-
-export function CarolinaTerms({ item, onEditText }: { item: Quote; onEditText?: OnTextEdit }) {
+export function CarolinaTerms({ item, interaction }: PageProps) {
   const copy = carolinaCopy(item);
   return (
-    <div className="hn-carolina-page hn-carolina-terms">
+    <div className={'hn-carolina-page hn-carolina-terms' +
+      (interaction?.transformingId ? ' hn-layout-grid' : '')}>
       <section className="hn-carolina-term-group celebration">
-        <h2>The Celebration</h2>
+        <h2><FixedNode item={item} field="celebration" interaction={interaction}/></h2>
         <div className="hn-carolina-term-lines">
-          <p>Date: <TextHotspot field="date" value={item.date ? carolinaDate(item.date) : ''}
-            onEditText={onEditText}/></p>
-          <p>The setting: <TextHotspot field="location" value={item.location}
-            onEditText={onEditText}/></p>
+          <p><FixedNode item={item} field="date" interaction={interaction}/>
+            <FieldNode item={item} field="date" value={carolinaDate(item.date)} interaction={interaction}/></p>
+          <p><FixedNode item={item} field="venue" interaction={interaction}/>
+            <FieldNode item={item} field="location" value={item.location} interaction={interaction}/></p>
         </div>
       </section>
       <section className="hn-carolina-term-group experience">
-        <h2>The Experience</h2>
+        <h2><FixedNode item={item} field="experience" interaction={interaction}/></h2>
         <div className="hn-carolina-term-lines">
-          {(onEditText || item.package) && <p>Service: <TextHotspot field="package" value={item.package}
-            onEditText={onEditText}/></p>}
-          {(onEditText || item.desc) && <p><TextHotspot field="desc" value={item.desc}
-            onEditText={onEditText}/></p>}
-          <p>Performance: <TextHotspot field="performance" value={copy.performance} onEditText={onEditText}/></p>
-          <p>On Stage: <TextHotspot field="musicians" value={copy.musicians} onEditText={onEditText}/></p>
-          <p>Our Crew: <TextHotspot field="crew" value={copy.crew} onEditText={onEditText}/></p>
-          <p>Includes full backline: <TextHotspot field="backline" value={copy.backline} onEditText={onEditText}/>.</p>
-          <p>Investment: <TextHotspot field="price" value={item.price ? carolinaInvestment(item) : ''} onEditText={onEditText}/></p>
-          <p><TextHotspot field="logistics" value={copy.logistics} onEditText={onEditText}/></p>
-          <p>To secure your date, we require a <TextHotspot field="deposit"
-            value={item.deposit ? String(item.deposit) + '%' : ''} onEditText={onEditText}/>
-            {' '}deposit and a signed agreement. <TextHotspot field="balance"
-              value={copy.balance} onEditText={onEditText}/></p>
+          {(interaction || item.package) && <p><FixedNode item={item} field="service" interaction={interaction}/>
+            <FieldNode item={item} field="package" value={item.package} interaction={interaction}/></p>}
+          {(interaction || item.desc) && <p><FieldNode item={item} field="desc" value={item.desc}
+            interaction={interaction}/></p>}
+          <p><FixedNode item={item} field="performance" interaction={interaction}/>
+            <FieldNode item={item} field="performance" value={copy.performance} interaction={interaction}/></p>
+          <p><FixedNode item={item} field="musicians" interaction={interaction}/>
+            <FieldNode item={item} field="musicians" value={copy.musicians} interaction={interaction}/></p>
+          <p><FixedNode item={item} field="crew" interaction={interaction}/>
+            <FieldNode item={item} field="crew" value={copy.crew} interaction={interaction}/></p>
+          <p><FixedNode item={item} field="backline" interaction={interaction}/>
+            <FieldNode item={item} field="backline" value={copy.backline} interaction={interaction}/></p>
+          <p><FixedNode item={item} field="investment" interaction={interaction}/>
+            <FieldNode item={item} field="price"
+              value={item.price ? carolinaInvestment(item) : ''} interaction={interaction}/></p>
+          <p><FieldNode item={item} field="logistics" value={copy.logistics} interaction={interaction}/></p>
+          <p><FixedNode item={item} field="depositBefore" interaction={interaction}/>
+            <FieldNode item={item} field="deposit"
+              value={item.deposit ? String(item.deposit) + '%' : ''} interaction={interaction}/>
+            <FixedNode item={item} field="depositAfter" interaction={interaction}/>
+            <FieldNode item={item} field="balance" value={copy.balance} interaction={interaction}/></p>
         </div>
       </section>
       <section className="hn-carolina-term-group production">
-        <h2>Production &amp; Tech</h2>
+        <h2><FixedNode item={item} field="production" interaction={interaction}/></h2>
         <div className="hn-carolina-term-lines">
-          <p>• AV Production: <TextHotspot field="production" value={copy.production}
-            onEditText={onEditText}/></p>
-          <p>• <TextHotspot field="connections" value={copy.connections} onEditText={onEditText}/></p>
-          <p>• Space: <TextHotspot field="space" value={copy.space} onEditText={onEditText}/></p>
+          <p><FixedNode item={item} field="av" interaction={interaction}/>
+            <FieldNode item={item} field="production" value={copy.production} interaction={interaction}/></p>
+          <p><FixedNode item={item} field="bullet" interaction={interaction}/>
+            <FieldNode item={item} field="connections" value={copy.connections} interaction={interaction}/></p>
+          <p><FixedNode item={item} field="space" interaction={interaction}/>
+            <FieldNode item={item} field="space" value={copy.space} interaction={interaction}/></p>
         </div>
       </section>
+      <ExtraTexts item={item} page={2} interaction={interaction}/>
     </div>
   );
 }
-
-/** The 3 original PDF pages, in reading order. */
 export default function CarolinaDocument({ item }: { item: Quote }) {
   return (
     <div className="hn-carolina-document">
@@ -173,8 +184,6 @@ export default function CarolinaDocument({ item }: { item: Quote }) {
     </div>
   );
 }
-
-/** A plain unprinted reverse side, required to pair physical 3D book leaves. */
 export function CarolinaBlankReverse() {
   return <div className="hn-carolina-page hn-carolina-reverse" aria-label="Contraportada sin impresión"/>;
 }

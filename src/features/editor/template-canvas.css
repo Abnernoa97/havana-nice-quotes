@@ -54,23 +54,14 @@
 .hn-canvas-inline-text.empty { min-width: 1.6em; min-height: 1em; color: #ad9366; }
 .hn-canvas-cover .hn-carolina-cover-personal { z-index: 2; }
 .hn-canvas-cover-button { z-index: 1; }
-.hn-canvas-text-picker { display: flex; flex-direction: column; gap: 10px; }
-.hn-canvas-text-picker header { margin-bottom: 4px; }
-.hn-canvas-text-picker textarea,.hn-canvas-text-picker input {
-  box-sizing:border-box; width:100%; border:1px solid #d8e4d7; border-radius:10px;
-  background:#fff; color:#244a37; padding:13px 14px;
-  font:500 16px/1.5 'DM Sans',sans-serif; resize:vertical;
-}
-.hn-canvas-text-picker textarea:focus,.hn-canvas-text-picker input:focus { outline:2px solid #7fa28a; outline-offset:1px; }
-.hn-canvas-text-done {
-  align-self:stretch; background:#244a37; color:#fff; border:0;
-  border-radius:10px; padding:13px; font-size:14px; font-weight:700; cursor:pointer;
-}
-.hn-canvas-date-feedback { margin:0; color:#637d69; font-size:12px; }
-.hn-canvas-deposit { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.hn-canvas-deposit button,.hn-canvas-currency button {
-  border:1px solid #e0e9dd; background:#f7faf5; border-radius:9px;
-  color:#365742; min-height:42px; cursor:pointer; font-weight:700;
-}
-.hn-canvas-deposit button.selected,.hn-canvas-currency button.selected { background:#244a37; border-color:#244a37; color:#fff; }
-.hn-canvas-currency { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+/* Inline editing, long-hold moving, pinch and rotate. No separate text dialog. */
+.hn-canvas-toolbar{width:min(100%,620px);margin:0 auto 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#64816c;font-size:11px}
+.hn-canvas-toolbar button{border:1px solid #cbd9cb;color:#244a36;background:#fff;border-radius:9px;min-height:41px;min-width:100px;font:600 13px 'DM Sans',sans-serif;cursor:pointer}
+.hn-canvas .hn-carolina-text-node{cursor:text;touch-action:none;user-select:none;-webkit-user-select:none}
+.hn-canvas .hn-carolina-text-node.empty{min-width:1em;min-height:1em;color:#b09666}
+.hn-canvas .hn-carolina-text-node:hover:not(.editing){outline:1px dashed #ad915f}
+.hn-canvas .hn-carolina-text-node.editing{min-width:1.5em;outline:1px solid #ad915f;outline-offset:2px;background:#fff9;border-radius:3px;user-select:text;-webkit-user-select:text;touch-action:auto;cursor:text}
+.hn-canvas .hn-carolina-cover-brand,.hn-canvas .hn-carolina-cover-personal{z-index:3}
+.hn-canvas .hn-carolina-extra-layer{z-index:5}
+.hn-canvas .hn-carolina-page.hn-layout-grid::before{z-index:4}

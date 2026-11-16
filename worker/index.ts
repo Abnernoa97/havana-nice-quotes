@@ -1,3 +1,4 @@
+import { validCarolinaLayout } from '../src/features/templates/carolina-layout.ts';
 /**
  * HAVANA NICE Quotes Studio · Cloudflare Worker
  * Private D1 quotes + media index; private R2 objects in quotes-studio/.
@@ -110,6 +111,7 @@ function validQuote(input: unknown, id: string): input is Record<string, unknown
       !Array.isArray(q.carolinaCopy) && Object.entries(q.carolinaCopy).every(([field, value]) =>
         ['performance', 'musicians', 'crew', 'backline', 'logistics', 'balance', 'production', 'connections', 'space'].includes(field) &&
         typeof value === 'string' && value.length <= 1500))) &&
+    (q.carolinaLayout === undefined || validCarolinaLayout(q.carolinaLayout)) &&
     (q.readingMode === undefined || ['flip', 'scroll'].includes(String(q.readingMode))) &&
     (q.messages === undefined || Array.isArray(q.messages) && q.messages.length < 500 &&
       q.messages.every((m: unknown) => !!m && typeof m === 'object' &&

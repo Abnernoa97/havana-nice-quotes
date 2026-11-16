@@ -1,5 +1,6 @@
 import type { QuoteCurrency } from '../../shared/lib/formatters';
 import type { CarolinaCopy } from '../templates/CarolinaTemplate';
+import type { CarolinaLayout } from '../templates/carolina-layout';
 
 /** Datos de las cotizaciones, compartidos entre el estudio y la nube. */
 export type QuoteStatus = 'Borrador' | 'Enviada' | 'En revisión' | 'Aceptada';
@@ -20,6 +21,7 @@ export type Quote = {
   cover: string;
   gallery?: string[];
   carolinaCopy?: Partial<CarolinaCopy>;
+  carolinaLayout?: CarolinaLayout;
   font: string;
   color: string;
   note: string;

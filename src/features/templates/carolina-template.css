@@ -125,3 +125,12 @@
   .hn-carolina-term-group.experience .hn-carolina-term-lines { gap: .55em; }
   .hn-carolina-term-group.production .hn-carolina-term-lines { gap: .5em; }
 }
+
+
+/* Same responsive geometry on designer, client Scroll and 3D pages. */
+.hn-carolina-text-node{display:inline-block;max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;vertical-align:baseline;transform-origin:50% 50%}
+.hn-carolina-extra-layer{position:absolute;inset:0;pointer-events:none;z-index:5}
+.hn-carolina-added-text{position:absolute;left:50%;top:43%;pointer-events:auto;font:500 clamp(10px,3.3cqw,24px)/1.3 'Jost',sans-serif;color:#213a2d;background:#fff8;border-radius:3px;text-align:center;max-width:80%;padding:2px 4px;white-space:pre-wrap}
+.hn-carolina-cover .hn-carolina-added-text{color:#fff;background:#17382b66}
+.hn-carolina-page.hn-layout-grid::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:6;background-image:linear-gradient(to right,#2c8b7766 1px,transparent 1px),linear-gradient(to bottom,#2c8b7766 1px,transparent 1px);background-size:10% 7.7%;opacity:.7}
+.hn-carolina-text-node.transforming{position:relative;z-index:8;outline:1px dashed #a88d52;outline-offset:4px;background:#fff9}
