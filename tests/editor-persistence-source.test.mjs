@@ -95,7 +95,7 @@ test('La biblioteca de Quotes Studio solo muestra fotos cargadas en su propia ap
 });
 
 
-test('Fotos y Diseño admiten diez archivos por selección, sin limitar el total de la biblioteca', () => {
+test('Fotos admite diez imágenes por lote y Diseño una imagen dirigida a cada recuadro', () => {
   const bank = src('features/photos/PhotoBank.tsx');
   const design = src('features/editor/QuoteDesignPanel.tsx');
   const hook = src('features/photos/useMediaLibrary.ts');
@@ -108,7 +108,7 @@ test('Fotos y Diseño admiten diez archivos por selección, sin limitar el total
   assert.match(batch, /MAX_PHOTOS_PER_UPLOAD = 10/);
   assert.match(hook, /await processPhotoBatch\(files,/);
   assert.match(hook, /if \(result\.uploaded\.length\) await refreshPhotos\(\)/);
-  assert.match(app, /uploadPhotos\(selected\)/);
+  assert.match(app, /uploadPhotos\(\[file\]\)/);
   assert.doesNotMatch(hook, /uploadPhoto\(/);
 });
 
