@@ -74,7 +74,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
       mount.replaceChildren();
     };
   }, [item.id, item.cover, item.name, item.note, item.package, item.price, item.location, item.deposit, item.desc, item.date, item.currency, item.style,
-    JSON.stringify(item.gallery), JSON.stringify(item.carolinaCopy)]);
+    JSON.stringify(item.gallery), JSON.stringify(item.carolinaCopy), JSON.stringify(item.carolinaLayout)]);
 
   const changePage = (direction: 'next' | 'prev') => {
     const flip = flipRef.current;

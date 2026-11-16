@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { CarolinaTransform } from './carolina-layout';
+import { elegantFontFamily, loadElegantFont } from './elegant-fonts';
+import type { ElegantFontId } from './elegant-fonts';
 import { useCarolinaGesture } from './useCarolinaGesture';
 import type { CarolinaGestureInteraction } from './useCarolinaGesture';
 
@@ -10,14 +12,15 @@ export type CarolinaTextInteraction = CarolinaGestureInteraction & {
 };
 type Props = {
   id: string; text: string; transform?: CarolinaTransform;
-  interaction?: CarolinaTextInteraction; extra?: boolean;
+  interaction?: CarolinaTextInteraction; extra?: boolean; fontId?: ElegantFontId;
 };
 
 /** Text changes on blur; geometry persists only after gesture release. */
-export default function CarolinaTextNode({ id, text, transform, interaction, extra = false }: Props) {
+export default function CarolinaTextNode({ id, text, transform, interaction, extra = false, fontId }: Props) {
   const node = useRef<HTMLSpanElement>(null);
   const editing = interaction?.editingId === id;
   const gesture = useCarolinaGesture(id, node, transform, interaction, editing);
+  useEffect(() => { if (fontId) loadElegantFont(fontId); }, [fontId]);
 
   useEffect(() => {
     if (!editing || !node.current) return;
@@ -36,7 +39,7 @@ export default function CarolinaTextNode({ id, text, transform, interaction, ext
       className={'hn-carolina-text-node' + (gesture.selected ? ' transforming' : '') +
         (editing ? ' editing' : '') + (extra ? ' extra' : '') +
         (!text && interaction ? ' empty' : '')}
-      style={{ transform: gesture.transform }}
+      style={{ transform: gesture.transform, ...(fontId ? {fontFamily:elegantFontFamily(fontId)} : {}) }}
       contentEditable={editing ? 'plaintext-only' : undefined}
       suppressContentEditableWarning
       role={interaction ? 'textbox' : undefined}

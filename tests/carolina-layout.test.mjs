@@ -109,3 +109,39 @@ test('El diseñador añade, quita, duplica y reordena sin duplicar archivos R2',
   assert.match(template,/carolinaPhotoOrder\(item\.carolinaLayout\)/);
   assert.match(worker,/q\.gallery\.length <= 12/);
 });
+
+
+test('Banco de 42 familias elegantes: incluye Cinzel y organiza los estilos de la boda', async () => {
+  const {ELEGANT_FONTS,ELEGANT_FONT_GROUPS,isElegantFontId,elegantFontFamily} =
+    await import('../src/features/templates/elegant-fonts.ts');
+  assert.equal(ELEGANT_FONTS.length,42);
+  assert.equal(new Set(ELEGANT_FONTS.map(font=>font.id)).size,42);
+  assert.deepEqual(ELEGANT_FONT_GROUPS.map(group=>group.id),
+    ['editorial','clasica','firma','moderna']);
+  assert.ok(isElegantFontId('cinzel'));
+  assert.ok(isElegantFontId('cinzel-decorative'));
+  assert.ok(isElegantFontId('cormorant-garamond'));
+  assert.ok(isElegantFontId('allura'));
+  assert.ok(isElegantFontId('jost'));
+  assert.ok(!isElegantFontId('font; color:red'));
+  assert.ok(!isElegantFontId('not-a-font'));
+  assert.match(elegantFontFamily('cinzel'), /"Cinzel", serif/);
+  assert.match(elegantFontFamily('allura'), /cursive/);
+});
+
+test('Las tipografías se guardan por texto o globalmente y son validadas en D1', () => {
+  const uuid='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
+  const valid = {defaultFont:'cinzel',fonts:{
+    'fixed:brand':'cinzel-decorative','field:name':'bodoni-moda',
+    ['extra:'+uuid]:'allura',
+  }};
+  assert.equal(validCarolinaLayout(valid),true);
+  assert.deepEqual(JSON.parse(JSON.stringify(valid)),valid);
+  assert.equal(validCarolinaLayout({defaultFont:'Arial; font-size:999px'}),false);
+  assert.equal(validCarolinaLayout({defaultFont:'___invalid'}),false);
+  assert.equal(validCarolinaLayout({fonts:{'photo:cover':'cinzel'}}),false);
+  assert.equal(validCarolinaLayout({fonts:{'field:name':'unknown-font'}}),false);
+  assert.equal(validCarolinaLayout({fonts:{'field:name':42}}),false);
+  assert.equal(validCarolinaLayout({fonts:null}),false);
+  assert.equal(validCarolinaLayout({fonts:{'fixed:brand':'cinzel'},danger:true}),false);
+});

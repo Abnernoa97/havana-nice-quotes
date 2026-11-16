@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Check, ChevronLeft, ChevronRight, ImagePlus, Images, Smartphone, X } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, ImagePlus, Images, Smartphone, Type, X } from 'lucide-react';
 import { isCarolinaCopyField } from '../templates/carolina-edit-fields';
+import ElegantFontBank from './ElegantFontBank';
+import type { ElegantFontId } from '../templates/elegant-fonts';
 import type { CarolinaTextField } from '../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../templates/CarolinaTextNode';
@@ -27,20 +29,25 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [page, setPage] = useState(0);
   const [target, setTarget] = useState<PhotoTarget | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [lastTextId, setLastTextId] = useState<string | null>(null);
+  const [fontBankOpen, setFontBankOpen] = useState(false);
+  const [fontTarget, setFontTarget] = useState<string | null>(null);
   const [transformingId, setTransformingId] = useState<string | null>(null);
   const [bank, setBank] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   useEffect(() => {
     setPage(0); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
+    setLastTextId(null); setFontBankOpen(false); setFontTarget(null);
   }, [item.id, item.style]);
   const updateLayout = (patch: Partial<CarolinaLayout>) => {
     edit('carolinaLayout', { ...item.carolinaLayout, ...patch });
   };
   const textInteraction: CarolinaTextInteraction = {
     editingId, transformingId,
-    onTap: id => { setTransformingId(null); setEditingId(id); setError(''); },
-    onSelectTransform: id => { setEditingId(null); setTransformingId(id); setError(''); },
+    onTap: id => { setTransformingId(null); setEditingId(id); setLastTextId(id); setError(''); },
+    onSelectTransform: id => { setEditingId(null); setTransformingId(id);
+      setLastTextId(id.startsWith('photo:') ? null : id); setError(''); },
     onCommitText: (id, raw) => {
       const value = raw.trim().slice(0, 3000);
       if (id.startsWith('fixed:')) {
@@ -82,6 +89,27 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     }] });
     setTransformingId(null);
     setEditingId('extra:' + id);
+    setLastTextId('extra:' + id);
+  };
+  const openFontBank = () => {
+    setFontTarget(lastTextId);
+    if (editingId && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    setEditingId(null);
+    setTransformingId(null);
+    setFontBankOpen(true);
+  };
+  const chooseFont = (font: ElegantFontId | null) => {
+    if (fontTarget) {
+      const fonts={...item.carolinaLayout?.fonts};
+      if (font) fonts[fontTarget]=font;
+      else delete fonts[fontTarget];
+      updateLayout({fonts});
+    } else {
+      updateLayout({defaultFont:font || undefined});
+    }
+    setFontBankOpen(false);
   };
   const photoOrder = carolinaPhotoOrder(item.carolinaLayout);
   const activePhoto = transformingId?.match(/^photo:(\d+)$/);
@@ -146,12 +174,15 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           {pages.map((label, index) => (
             <button key={label} type="button" className={page === index ? 'selected' : ''}
               aria-current={page === index ? 'page' : undefined}
-              onClick={() => { setPage(index); setTransformingId(null); setEditingId(null); }}><small>{index + 1}</small>{label}</button>
+              onClick={() => { setPage(index); setTransformingId(null); setEditingId(null); setLastTextId(null); }}><small>{index + 1}</small>{label}</button>
           ))}
         </nav>
       )}
       {original && <div className="hn-canvas-toolbar">
         <button type="button" onClick={addFreeText}>+ Texto</button>
+        <button type="button" onClick={openFontBank} aria-label="Abrir banco de tipografías">
+          <Type size={16}/> Tipografías
+        </button>
         {page === 1 && <button type="button" disabled={photoOrder.length >= CAROLINA_MAX_SLOTS}
           onClick={addPhotoBlock}>+ Foto</button>}
         {page === 1 && <span>{photoOrder.length} fotos</span>}
@@ -161,6 +192,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         const target = event.target;
         if (target instanceof Element && !target.closest('[data-carolina-text], .hn-carolina-photo, .hn-carolina-cover-photo')) {
           setTransformingId(null);
+          setLastTextId(null);
           if (editingId && document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
           }
@@ -203,11 +235,17 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       {original && (
         <div className="hn-canvas-pager">
           <button type="button" disabled={page === 0} aria-label="Página anterior"
-            onClick={() => { setPage(page - 1); setTransformingId(null); setEditingId(null); }}><ChevronLeft size={18}/></button>
+            onClick={() => { setPage(page - 1); setTransformingId(null); setEditingId(null); setLastTextId(null); }}><ChevronLeft size={18}/></button>
           <span>{page + 1} / {pages.length}</span>
           <button type="button" disabled={page === 2} aria-label="Página siguiente"
-            onClick={() => { setPage(page + 1); setTransformingId(null); setEditingId(null); }}><ChevronRight size={18}/></button>
+            onClick={() => { setPage(page + 1); setTransformingId(null); setEditingId(null); setLastTextId(null); }}><ChevronRight size={18}/></button>
         </div>
+      )}
+      {fontBankOpen && (
+        <ElegantFontBank targetName={fontTarget ? 'Texto seleccionado' : 'Toda la propuesta'}
+          activeFont={fontTarget ? item.carolinaLayout?.fonts?.[fontTarget] :
+            item.carolinaLayout?.defaultFont}
+          onChoose={chooseFont} onClose={()=>setFontBankOpen(false)}/>
       )}
       {error && !target && <p className="hn-canvas-error" role="alert">{error}</p>}
       {target !== null && (

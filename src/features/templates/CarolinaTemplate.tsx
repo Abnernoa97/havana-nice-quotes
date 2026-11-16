@@ -35,12 +35,16 @@ type FieldNodeProps = PageProps & { field: string; value: string };
 function FieldNode({ item, field, value, interaction }: FieldNodeProps) {
   const id = 'field:' + field;
   return <CarolinaTextNode id={id} text={value}
-    transform={item.carolinaLayout?.transforms?.[id]} interaction={interaction}/>;
+    transform={item.carolinaLayout?.transforms?.[id]}
+    fontId={item.carolinaLayout?.fonts?.[id] || item.carolinaLayout?.defaultFont}
+    interaction={interaction}/>;
 }
 function FixedNode({ item, field, interaction }: PageProps & { field: CarolinaFixedKey }) {
   const id = 'fixed:' + field;
   return <CarolinaTextNode id={id} text={fixedText(item.carolinaLayout, field)}
-    transform={item.carolinaLayout?.transforms?.[id]} interaction={interaction}/>;
+    transform={item.carolinaLayout?.transforms?.[id]}
+    fontId={item.carolinaLayout?.fonts?.[id] || item.carolinaLayout?.defaultFont}
+    interaction={interaction}/>;
 }
 function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
   const entries = item.carolinaLayout?.extras?.filter(e => e.page === page) || [];
@@ -51,7 +55,9 @@ function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
         const id = 'extra:' + extra.id;
         return <div className="hn-carolina-added-text" key={extra.id}>
           <CarolinaTextNode id={id} text={extra.text} extra
-            transform={item.carolinaLayout?.transforms?.[id]} interaction={interaction}/>
+            transform={item.carolinaLayout?.transforms?.[id]}
+            fontId={item.carolinaLayout?.fonts?.[id] || item.carolinaLayout?.defaultFont}
+            interaction={interaction}/>
         </div>;
       })}
     </div>

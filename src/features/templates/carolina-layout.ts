@@ -1,3 +1,6 @@
+import { isElegantFontId } from './elegant-fonts';
+import type { ElegantFontId } from './elegant-fonts';
+
 /** Device-independent geometry and per-quotation text customization. */
 export const CAROLINA_FIXED = {
   brand: 'HAVANA NICE',
@@ -31,6 +34,8 @@ export type CarolinaLayout = {
   transforms?: Record<string, CarolinaTransform>;
   extras?: CarolinaExtra[];
   photoOrder?: number[];
+  defaultFont?: ElegantFontId;
+  fonts?: Record<string, ElegantFontId>;
 };
 export const ZERO_TRANSFORM: CarolinaTransform = { x: 0, y: 0, scale: 1, rotation: 0 };
 
@@ -51,7 +56,15 @@ export function clampTransform(value: CarolinaTransform): CarolinaTransform {
 export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const layout = value as Record<string, unknown>;
-  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder'].includes(k))) return false;
+  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder', 'defaultFont', 'fonts'].includes(k))) return false;
+  if (layout.defaultFont !== undefined && !isElegantFontId(layout.defaultFont)) return false;
+  if (layout.fonts !== undefined) {
+    if (!layout.fonts || typeof layout.fonts !== 'object' || Array.isArray(layout.fonts)) return false;
+    const entries=Object.entries(layout.fonts);
+    if (entries.length > 100 || entries.some(([id,font]) =>
+      !/^(fixed:[a-zA-Z]+|field:[a-z]+|extra:[a-f0-9-]{36})$/.test(id) ||
+      !isElegantFontId(font))) return false;
+  }
   if (layout.photoOrder !== undefined) {
     if (!Array.isArray(layout.photoOrder) || layout.photoOrder.length < 1 ||
       layout.photoOrder.length > CAROLINA_MAX_SLOTS ||

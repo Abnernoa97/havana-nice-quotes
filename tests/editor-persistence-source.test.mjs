@@ -381,3 +381,27 @@ test('Diseño respeta las fotos originales y admite collage de 3, 5, 6 o hasta 1
   assert.match(layout,/photoOrder\?: number\[\]/);
   assert.match(app,/Array\.from\(\{ length: CAROLINA_MAX_SLOTS \}/);
 });
+
+
+test('Diseño tiene banco elegante con previews reales, elección por texto y fuente global', () => {
+  const catalog=src('features/templates/elegant-fonts.ts');
+  const bank=src('features/editor/ElegantFontBank.tsx');
+  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const node=src('features/templates/CarolinaTextNode.tsx');
+  const template=src('features/templates/CarolinaTemplate.tsx');
+  const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
+  const magazine=src('features/magazine/FlipMagazine.tsx');
+  assert.match(catalog,/fonts\.googleapis\.com\/css2\?family=/);
+  assert.match(catalog,/typeof document === 'undefined'/);
+  assert.match(bank,/elegantFontFamily\(font\.id\)/);
+  assert.match(bank,/ELEGANT_FONT_GROUPS\.map/);
+  assert.match(bank,/input type="search"/);
+  assert.match(canvas,/<Type size=\{16\}\/> Tipografías/);
+  assert.match(canvas,/fontTarget \? 'Texto seleccionado' : 'Toda la propuesta'/);
+  assert.match(canvas,/updateLayout\(\{fonts\}\)/);
+  assert.match(canvas,/updateLayout\(\{defaultFont:font \|\| undefined\}\)/);
+  assert.match(template,/fontId=\{item\.carolinaLayout\?\.fonts\?\.\[id\] \|\| item\.carolinaLayout\?\.defaultFont\}/);
+  assert.match(node,/fontFamily:elegantFontFamily\(fontId\)/);
+  assert.match(worker,/validCarolinaLayout\(q\.carolinaLayout\)/);
+  assert.match(magazine,/JSON\.stringify\(item\.carolinaLayout\)/);
+});

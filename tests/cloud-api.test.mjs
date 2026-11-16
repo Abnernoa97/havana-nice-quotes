@@ -529,6 +529,8 @@ test('Carolina conserva títulos, textos adicionales y geometría entre disposit
     note:'',package:'',desc:'',style:'carolina',readingMode:'flip',
     carolinaLayout:{
       fixed:{experience:'Our Wedding Experience',brand:'HAVANA NICE',investment:''},
+      defaultFont:'cinzel',
+      fonts:{'fixed:experience':'cinzel-decorative','field:name':'bodoni-moda'},
       extras:[{id:extraId,page:1,text:'Thank you for celebrating with us'}],
       transforms:{
         'fixed:experience':{x:12,y:-8,scale:1.7,rotation:21},
@@ -570,6 +572,10 @@ test('API bloquea layouts con tamaños infinitos, campos no admitidos o extras c
     {transforms:{'photo:cover':{x:0,y:0,scale:0,rotation:0}}},
     {extras:[{id:'not-an-id',page:0,text:'X'}]},
     {extras:[{id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:3,text:'X'}]},
+    {defaultFont:'hacked-font'},
+    {defaultFont:'cinzel',fonts:{'fixed:brand':'unknown'}},
+    {fonts:{'photo:cover':'cinzel'}},
+    {fonts:{'field:name':'cinzel', 'photo:0':'jost'}},
     {unapproved:{test:'X'}},
   ];
   for (const layout of bad) {

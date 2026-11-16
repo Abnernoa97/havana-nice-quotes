@@ -1,0 +1,28 @@
+/* Elegance-first font library, separate from the editable page. */
+.hn-font-shade{position:fixed;inset:0;z-index:95;background:#142a226f;display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.hn-font-bank{width:min(100%,650px);max-height:min(90dvh,820px);background:#fbfcf9;border-radius:19px;box-shadow:0 24px 60px #0c1f1b55;overflow:hidden;display:flex;flex-direction:column;color:#294b3a}
+.hn-font-bank-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:23px 24px 12px}
+.hn-font-bank-head small{font-size:10px;letter-spacing:.15em;font-weight:750;color:#849886}
+.hn-font-bank-head h3{font:400 30px/1.16 'Cormorant Garamond',Georgia,serif;margin:4px 0}
+.hn-font-bank-head p{margin:5px 0 0;font-size:12px;color:#718575}
+.hn-font-bank-head p strong{color:#264a37}
+.hn-font-bank-head>button{border:0;background:transparent;color:#55725e;padding:8px;cursor:pointer}
+.hn-font-search{height:46px;margin:9px 22px 12px;padding:0 14px;border:1px solid #dce6da;border-radius:10px;background:#fff;display:flex;align-items:center;gap:10px;color:#6a8571}
+.hn-font-search:focus-within{outline:2px solid #8fac94;outline-offset:1px}
+.hn-font-search input{border:0;outline:0;min-width:0;flex:1;background:transparent;color:#244b37;font:400 14px 'DM Sans',sans-serif}
+.hn-font-groups{display:flex;gap:5px;overflow-x:auto;padding:0 20px 13px;flex:none;scrollbar-width:thin}
+.hn-font-groups button{white-space:nowrap;border:1px solid #dde7dc;background:#fff;color:#627a66;font-size:11px;font-weight:650;min-height:34px;border-radius:18px;padding:7px 12px;cursor:pointer}
+.hn-font-groups button.active{background:#244a37;border-color:#244a37;color:#fff}
+.hn-font-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;overflow-y:auto;overscroll-behavior:contain;padding:4px 22px 17px}
+.hn-font-option{display:flex;flex-direction:column;gap:7px;justify-content:space-between;text-align:left;min-width:0;min-height:101px;padding:13px 14px;border:1px solid #e1e8de;border-radius:12px;background:#fff;color:#355342;cursor:pointer}
+.hn-font-option.selected{border:1.5px solid #28523b;background:#f0f6f0}
+.hn-font-option:hover{border-color:#aebfae}
+.hn-font-example{display:flex;align-items:center;min-height:47px;font-size:clamp(19px,3.4vw,28px);line-height:1.15;color:#2b4937;overflow-wrap:anywhere}
+.hn-font-label{display:flex;align-items:center;justify-content:space-between;gap:6px;font:600 10px 'DM Sans',sans-serif;color:#77907a}
+.hn-font-label svg{color:#265640}
+.hn-font-empty{grid-column:1/-1;text-align:center;padding:20px;color:#6d8572;font-size:13px}
+.hn-font-bank-footer{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 22px;border-top:1px solid #e5ede3;background:#f7faf6;flex-shrink:0}
+.hn-font-bank-footer button{border:0;background:transparent;color:#315940;font-weight:650;font-size:12px;text-decoration:underline;cursor:pointer;padding:8px 0}
+.hn-font-bank-footer span{font-size:11px;color:#819784}
+.hn-font-bank button:focus-visible{outline:2px solid #b49c67;outline-offset:2px}
+@media(max-width:480px){.hn-font-shade{padding:0}.hn-font-bank{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.hn-font-bank-head{padding:17px 17px 8px}.hn-font-search{margin:8px 15px 10px}.hn-font-groups{padding:0 15px 10px}.hn-font-gallery{padding:4px 13px 14px;gap:7px}.hn-font-option{min-height:94px;padding:10px}.hn-font-example{font-size:21px}.hn-font-bank-footer{padding:11px 15px}}
