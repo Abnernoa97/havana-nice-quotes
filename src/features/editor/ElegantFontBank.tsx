@@ -38,7 +38,7 @@ export default function ElegantFontBank({targetName,activeFont,resetLabel='Resta
         </header>
         <label className="hn-font-search">
           <Search size={18}/>
-          <input type="search" value={search} autoFocus
+          <input type="search" value={search}
             onChange={event=>setSearch(event.target.value)}
             placeholder="Buscar una tipografía…" aria-label="Buscar tipografía"/>
         </label>
