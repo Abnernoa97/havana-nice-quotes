@@ -7,11 +7,12 @@ import './elegant-font-bank.css';
 type Props = {
   targetName: string;
   activeFont?: ElegantFontId;
+  resetLabel?: string;
   onChoose: (font: ElegantFontId | null) => void;
   onClose: () => void;
 };
 /** Real-family previews. Font faces are loaded only for the visible category/search. */
-export default function ElegantFontBank({targetName,activeFont,onChoose,onClose}: Props) {
+export default function ElegantFontBank({targetName,activeFont,resetLabel='Restaurar tipografía original',onChoose,onClose}: Props) {
   const [group,setGroup]=useState<ElegantFontGroup | 'todo'>('editorial');
   const [search,setSearch]=useState('');
   const visible=useMemo(() => {
@@ -65,7 +66,7 @@ export default function ElegantFontBank({targetName,activeFont,onChoose,onClose}
           {!visible.length && <p className="hn-font-empty">No encontramos esa tipografía.</p>}
         </div>
         <footer className="hn-font-bank-footer">
-          <button type="button" onClick={()=>onChoose(null)}>Restaurar tipografía original</button>
+          <button type="button" onClick={()=>onChoose(null)}>{resetLabel}</button>
           <span>{ELEGANT_FONTS.length} familias disponibles</span>
         </footer>
       </section>

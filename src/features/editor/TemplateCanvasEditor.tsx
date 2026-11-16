@@ -243,8 +243,10 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       )}
       {fontBankOpen && (
         <ElegantFontBank targetName={fontTarget ? 'Texto seleccionado' : 'Toda la propuesta'}
-          activeFont={fontTarget ? item.carolinaLayout?.fonts?.[fontTarget] :
-            item.carolinaLayout?.defaultFont}
+          activeFont={fontTarget ? (item.carolinaLayout?.fonts?.[fontTarget] ||
+            item.carolinaLayout?.defaultFont) : item.carolinaLayout?.defaultFont}
+          resetLabel={fontTarget && item.carolinaLayout?.defaultFont
+            ? 'Usar tipografía general' : 'Restaurar tipografía original'}
           onChoose={chooseFont} onClose={()=>setFontBankOpen(false)}/>
       )}
       {error && !target && <p className="hn-canvas-error" role="alert">{error}</p>}
