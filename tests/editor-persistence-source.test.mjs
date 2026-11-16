@@ -170,13 +170,14 @@ test('Carolina es la plantilla real principal y separada de los estilos editoria
 
 test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF incrustado', () => {
   const template = src('features/templates/CarolinaTemplate.tsx');
+  const layout = src('features/templates/carolina-layout.ts');
   const design = src('features/editor/QuoteDesignPanel.tsx');
   const details = src('features/editor/QuoteDetailsPanel.tsx');
   const proposal = src('features/client/Proposal.tsx');
   const magazine = src('features/magazine/FlipMagazine.tsx');
   assert.match(template, /CAROLINA_SLOTS = 6/);
   for (const label of ['The Celebration', 'The Experience', 'Production &amp; Tech']) {
-    assert.ok(template.includes(label));
+    assert.ok(layout.includes(label));
   }
   assert.match(template, /export function CarolinaCover/);
   assert.match(template, /export function CarolinaCollage/);
@@ -286,9 +287,9 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
   const app = src('app/App.tsx');
   const stylesheet = readFileSync(new URL('../src/shared/styles/index.css', import.meta.url),'utf8');
   assert.match(canvas, /const pages = \['Portada', 'Collage', 'Propuesta'\]/);
-  assert.match(canvas, /<CarolinaCover item=\{item\} onEditText=\{openText\}\/>/);
+  assert.match(canvas, /<CarolinaCover item=\{item\} interaction=\{textInteraction\}\/>/);
   assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
-  assert.match(canvas, /<CarolinaTerms item=\{item\} onEditText=\{openText\}\/>/);
+  assert.match(canvas, /<CarolinaTerms item=\{item\} interaction=\{textInteraction\}\/>/);
   assert.match(canvas, /Mi teléfono/);
   assert.match(canvas, /Banco de fotos/);
   assert.match(canvas, /photos\.map\(photo =>/);
@@ -306,20 +307,26 @@ test('Carolina: todos los textos variables se editan tocando la página y llegan
   const fields = src('features/templates/carolina-edit-fields.ts');
   const client = src('features/client/Proposal.tsx');
   const magazine = src('features/magazine/FlipMagazine.tsx');
-  assert.match(editor, /const openText = \(field: CarolinaTextField\)/);
+  const node = src('features/templates/CarolinaTextNode.tsx');
+  const layout = src('features/templates/carolina-layout.ts');
+  assert.match(editor, /onCommitText: \(id, raw\) =>/);
   assert.match(editor, /edit\('carolinaCopy', \{ \.\.\.item\.carolinaCopy, \[field\]: value\.slice\(0, 1500\) \}\)/);
   assert.match(editor, /edit\(field, value\)/);
-  assert.match(editor, /edit\('date', iso\)/);
+  assert.match(editor, /edit\('date', date\)/);
   assert.match(editor, /edit\('price', safeQuotePrice\(normalizePriceInput\(value\)\)\)/);
-  assert.match(editor, /edit\('deposit', percent\)/);
+  assert.match(editor, /edit\('deposit', value \? percent : 0\)/);
+  assert.match(editor, /onCommitTransform: \(id: string, transform: CarolinaTransform\)/);
+  assert.match(editor, /edit\('carolinaLayout',/);
   for (const field of ['name', 'date', 'location', 'note', 'package', 'desc', 'price', 'deposit',
     'performance', 'musicians', 'crew', 'backline', 'logistics', 'balance', 'production',
     'connections', 'space']) assert.ok(fields.includes('  ' + field + ':'), 'Falta el campo '+field);
-  assert.match(template, /export function CarolinaTerms\(\{ item, onEditText \}/);
-  assert.match(template, /onEditText\?: OnTextEdit/);
+  assert.match(template, /export function CarolinaTerms\(\{ item, interaction \}/);
+  assert.match(template, /<CarolinaTextNode id=\{id\} text=\{value\}/);
   assert.match(model, /carolinaCopy\?: Partial<CarolinaCopy>/);
-  // No editable buttons are embedded in the client's pages.
-  assert.match(template, /if \(!onEditText\) return <>\{value\}<\/>/);
+  assert.match(model, /carolinaLayout\?: CarolinaLayout/);
+  assert.match(layout, /export function validCarolinaLayout/);
+  assert.match(node, /contentEditable=\{editing \? 'plaintext-only' : undefined\}/);
+  assert.match(node, /onBlur=\{\(\) =>/);
   assert.match(client, /<CarolinaDocument item=\{item\}\/>/);
   assert.match(magazine, /<CarolinaTerms item=\{item\}\/>/);
 });

@@ -513,3 +513,58 @@ test('Cotización Carolina guarda 6 fotos privadas y su texto editable en D1 sin
     {quote:{...quote,gallery:['https://stock.example/photo.jpg']},expectedRevision:1},cookie),env);
   assert.equal(external.status,400);
 });
+
+
+test('Carolina conserva títulos, textos adicionales y geometría entre dispositivos D1', async () => {
+  const env=environment(), cookie=await authorizeDevice(env);
+  const id='hn-abcdefab-1234-1234-1234-123456789012';
+  const extraId='12345678-1111-2222-3333-444444444444';
+  const quote = {
+    id, name:'Couple',client:'',email:'',location:'Mexico',date:'2027-10-11',
+    price:25000,deposit:40,status:'Borrador',cover:'',font:'editorial',color:'#18342f',
+    note:'',package:'',desc:'',style:'carolina',readingMode:'flip',
+    carolinaLayout:{
+      fixed:{experience:'Our Wedding Experience',brand:'HAVANA NICE',investment:''},
+      extras:[{id:extraId,page:1,text:'Thank you for celebrating with us'}],
+      transforms:{
+        'fixed:experience':{x:12,y:-8,scale:1.7,rotation:21},
+        ['extra:'+extraId]:{x:0,y:24,scale:.8,rotation:-35},
+      },
+    },
+  };
+  const created=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+    {quote,expectedRevision:0},cookie),env);
+  assert.equal(created.status,200);
+  const received=await worker.fetch(request('/api/quotes',{headers:{Cookie:cookie}}),env);
+  assert.deepEqual((await received.json()).quotes[0].quote,quote);
+  const modified={...quote,carolinaLayout:{
+    ...quote.carolinaLayout,
+    transforms:{...quote.carolinaLayout.transforms,'field:name':{x:-10,y:3,scale:2,rotation:90}},
+  }};
+  assert.equal((await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+    {quote:modified,expectedRevision:1},cookie),env)).status,200);
+  const fresh=await worker.fetch(request('/api/quotes',{headers:{Cookie:cookie}}),env);
+  assert.deepEqual((await fresh.json()).quotes[0].quote,modified);
+});
+
+test('API bloquea layouts con tamaños infinitos, campos no admitidos o extras corruptos', async () => {
+  const env=environment(),cookie=await authorizeDevice(env);
+  const id='hn-12341234-5678-9012-3456-abcdefabcdef';
+  const quote={id,name:'',client:'',email:'',location:'',date:'',price:0,deposit:0,
+    status:'Borrador',cover:'',font:'editorial',color:'#18342f',note:'',package:'',desc:''};
+  const bad=[
+    {fixed:{danger:'X'}},
+    {fixed:{brand:'a'.repeat(1201)}},
+    {transforms:{'field:name':{x:Infinity,y:0,scale:1,rotation:0}}},
+    {transforms:{'field:name':{x:0,y:0,scale:5,rotation:0}}},
+    {transforms:{'field:name':{x:0,y:0,scale:1,rotation:181}}},
+    {extras:[{id:'not-an-id',page:0,text:'X'}]},
+    {extras:[{id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:3,text:'X'}]},
+    {unapproved:{test:'X'}},
+  ];
+  for (const layout of bad) {
+    const response=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+      {quote:{...quote,carolinaLayout:layout},expectedRevision:0},cookie),env);
+    assert.equal(response.status,400,'Invalid design layout must be rejected');
+  }
+});
