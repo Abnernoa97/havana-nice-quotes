@@ -80,13 +80,11 @@ test('Fotografías de portada y collage comparten gestos, posiciones y escala pe
 test('Collage variable conserva los seis originales y admite 1 a 12 recuadros con orden estable', async () => {
   const {
     CAROLINA_DEFAULT_ORDER, CAROLINA_MAX_SLOTS, carolinaPhotoOrder,
-    movePhotoSlot, photoSlotToAdd, emptyPhotoSlotToDuplicate,
+    photoSlotToAdd, emptyPhotoSlotToDuplicate,
   } = await import('../src/features/templates/carolina-layout.ts');
   assert.deepEqual(CAROLINA_DEFAULT_ORDER,[0,1,2,3,4,5]);
   assert.equal(CAROLINA_MAX_SLOTS,12);
   assert.deepEqual(carolinaPhotoOrder(undefined),[0,1,2,3,4,5]);
-  assert.deepEqual(movePhotoSlot([0,1,2],1,1),[0,2,1]);
-  assert.deepEqual(movePhotoSlot([0,1,2],0,-1),[0,1,2]);
   assert.equal(photoSlotToAdd([0,1,2,3,4,5],Array(12).fill('')),6);
   assert.equal(emptyPhotoSlotToDuplicate([0,1,2,3,4,5],Array(12).fill('')),6);
   assert.equal(validCarolinaLayout({photoOrder:[0,1,2]}),true);
@@ -102,7 +100,9 @@ test('El diseñador añade, quita, duplica y reordena sin duplicar archivos R2',
   const template=readFileSync(new URL('../src/features/templates/CarolinaTemplate.tsx',import.meta.url),'utf8');
   const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
   assert.match(canvas,/const addPhotoBlock = \(\) =>/);
-  assert.match(canvas,/const hidePhotoBlock = \(slot: number\) =>/);
+  assert.match(canvas,/const clearPhotoBlock = \(slot: number\) =>/);
+  assert.match(canvas,/onClick=\{\(\) => clearPhotoBlock\(selectedPhoto\)\}>Borrar foto/);
+  assert.doesNotMatch(canvas,/photoOrder:current\.length|photoOrder\.filter\(/);
   assert.match(canvas,/const duplicatePhotoBlock = \(slot: number\) =>/);
   assert.match(canvas,/const reorderPhotoBlock = \(slot: number, direction: -1 \| 1\)/);
   assert.match(canvas,/gallery\[next\] = gallery\[slot\] \|\| ''/);

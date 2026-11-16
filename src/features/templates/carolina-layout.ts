@@ -160,14 +160,6 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
 export function carolinaPhotoOrder(layout: CarolinaLayout | undefined): number[] {
   return [...(layout?.photoOrder || CAROLINA_DEFAULT_ORDER)];
 }
-export function movePhotoSlot(order: readonly number[], slot: number, direction: -1 | 1): number[] {
-  const index = order.indexOf(slot);
-  const next = index + direction;
-  if (index < 0 || next < 0 || next >= order.length) return [...order];
-  const changed = [...order];
-  [changed[index], changed[next]] = [changed[next], changed[index]];
-  return changed;
-}
 export function photoSlotToAdd(order: readonly number[], gallery: readonly string[]): number | null {
   const remaining = Array.from({ length: CAROLINA_MAX_SLOTS }, (_, i) => i)
     .filter(index => !order.includes(index));

@@ -379,8 +379,9 @@ test('Diseño respeta las fotos originales y admite collage de 3, 5, 6 o hasta 1
   assert.match(template,/const leftCount = order\.length === CAROLINA_SLOTS \? 2/);
   assert.match(template,/const left = order\.slice\(0, leftCount\)/);
   assert.match(template,/const right = order\.slice\(leftCount\)/);
-  assert.match(canvas,/setPhotoOrder\(movePhotoSlot\(photoOrder, slot, direction\)\)/);
-  assert.match(canvas,/setPhotoOrder\(photoOrder\.filter\(index => index !== slot\)\)/);
+  assert.match(canvas,/\[gallery\[slot\], gallery\[neighbor\]\] = \[gallery\[neighbor\], gallery\[slot\]\]/);
+  assert.match(canvas,/updateLayout\(\{transforms\}\)/);
+  assert.doesNotMatch(canvas,/photoOrder:current\.length|photoOrder\.filter\(/);
   assert.match(canvas,/gallery\[next\] = gallery\[slot\] \|\| ''/);
   assert.match(layout,/photoOrder\?: number\[\]/);
   assert.match(app,/Array\.from\(\{ length: CAROLINA_MAX_SLOTS \}/);
@@ -467,11 +468,10 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   assert.match(flip,/selectedPages\.map\(selectedPage =>/);
   assert.doesNotMatch(flip,/<CarolinaBlankReverse\/>/);
   assert.match(document,/carolinaPageOrder\(item\.carolinaLayout\)\.map\(page=>/);
-  assert.match(canvas,/const setPageOrder=\(order:CarolinaPageId\[\]\)=>/);
-  assert.match(canvas,/const togglePage=\(id:CarolinaPageId\)=>/);
-  assert.match(canvas,/const shiftPage=\(id:CarolinaPageId,delta:-1\|1\)=>/);
+  assert.doesNotMatch(canvas,/pageManager|setPageOrder|togglePage|shiftPage|Hojas \{/);
   assert.match(canvas,/Páginas seleccionadas para la revista/);
-  assert.match(canvas,/setPage\(selectedPages\[pageIndex\+1\]\)/);
+  assert.match(canvas,/onClick=\{\(\)=>changePage\(1\)\}/);
+  assert.match(canvas,/page === 2 && <CarolinaTerms/);
   assert.match(layout,/pageOrder\?: CarolinaPageId\[\]/);
 });
 
@@ -498,4 +498,18 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
   assert.match(photo,/hn-carolina-floating-photo/);
   assert.match(app,/target\.startsWith\('extra:'\)/);
   assert.match(layout,/photo-extra:\[a-f0-9-\]\{36\}/);
+});
+
+
+test('Edición móvil sin selección nativa y 3D con scroll vertical', () => {
+  const gesture=src('features/templates/useCarolinaGesture.ts');
+  const photo=src('features/templates/CarolinaPhotoNode.tsx');
+  const textNode=src('features/templates/CarolinaTextNode.tsx');
+  const editCss=readFileSync(new URL('../src/features/editor/template-canvas.css',import.meta.url),'utf8');
+  const magazineCss=readFileSync(new URL('../src/features/magazine/flip-magazine.css',import.meta.url),'utf8');
+  assert.match(gesture,/const onPointerCancel =/);
+  assert.match(photo,/onPointerCancel=\{gesture\.onPointerCancel\}/);
+  assert.match(textNode,/onPointerCancel=\{gesture\.onPointerCancel\}/);
+  assert.match(editCss,/-webkit-touch-callout:none/);
+  assert.match(magazineCss,/touch-action:pan-y pinch-zoom!important/);
 });
