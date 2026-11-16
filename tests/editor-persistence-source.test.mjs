@@ -182,7 +182,10 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.match(template, /export function CarolinaCover/);
   assert.match(template, /export function CarolinaCollage/);
   assert.match(template, /export function CarolinaTerms/);
-  assert.match(template, /<CarolinaCover item=\{item\}\/>[\s\S]*?<CarolinaCollage item=\{item\}\/>[\s\S]*?<CarolinaTerms item=\{item\}\/>/);
+  assert.match(template, /carolinaPageOrder\(item\.carolinaLayout\)\.map\(page=>/);
+  assert.match(template, /<CarolinaCover key="cover" item=\{item\}\/>/);
+  assert.match(template, /<CarolinaCollage key="collage" item=\{item\}\/>/);
+  assert.match(template, /<CarolinaTerms key="terms" item=\{item\}\/>/);
   assert.match(proposal, /styleName === 'carolina'/);
   const canvas = src('features/editor/TemplateCanvasEditor.tsx');
   assert.match(design, /<TemplateCanvasEditor item=\{item\}/);
@@ -321,7 +324,7 @@ test('Carolina: todos los textos variables se editan tocando la página y llegan
   for (const field of ['name', 'date', 'location', 'note', 'package', 'desc', 'price', 'deposit',
     'performance', 'musicians', 'crew', 'backline', 'logistics', 'balance', 'production',
     'connections', 'space']) assert.ok(fields.includes('  ' + field + ':'), 'Falta el campo '+field);
-  assert.match(template, /export function CarolinaTerms\(\{ item, interaction \}/);
+  assert.match(template, /export function CarolinaTerms\(\{ item, interaction, onSelectExtraPhoto \}/);
   assert.match(template, /<CarolinaTextNode id=\{id\} text=\{value\}/);
   assert.match(model, /carolinaCopy\?: Partial<CarolinaCopy>/);
   assert.match(model, /carolinaLayout\?: CarolinaLayout/);
@@ -435,19 +438,21 @@ test('Un toque abre cinco switches contextuales para personalizar una sola letra
   assert.match(template, /textStyle=\{item\.carolinaLayout\?\.textStyles\?\.\[id\]\}/);
 });
 
-test('Pulsación larga: papelera por click o arrastrar, sin afectar las fotos del collage', () => {
+test('Pulsación larga: papelera compartida para fotos y texto, sin borrar R2', () => {
   const canvas=src('features/editor/TemplateCanvasEditor.tsx');
   const gesture=src('features/templates/useCarolinaGesture.ts');
-  assert.match(canvas, /data-hn-text-trash/);
-  assert.match(canvas, /onClick=\{\(\)=>removeText\(transformingId\)\}/);
-  assert.match(canvas, /if \(hit\) removeText\(id\)/);
-  assert.match(canvas, /onDrop: \(id,x,y\) =>/);
-  assert.match(canvas, /setTrashHovered\(overTrash\(x,y\)\)/);
-  assert.match(canvas, /if \(id\.startsWith\('photo:'\)\) return/);
-  assert.match(canvas, /delete transforms\[id\]; delete fonts\[id\]; delete textStyles\[id\]/);
-  assert.match(gesture, /onDrop\?\.\(id,x,y\)/);
-  assert.match(gesture, /if \(!dropped && JSON\.stringify\(current\.current\)/);
-  assert.match(canvas, /if \(transformingId && !event\.isPrimary\) return/);
+  assert.match(canvas,/data-hn-text-trash/);
+  assert.match(canvas,/onClick=\{\(\)=>removeElement\(transformingId\)\}/);
+  assert.match(canvas,/if \(hit\) removeElement\(id\)/);
+  assert.match(canvas,/const isPhotoId =/);
+  assert.match(canvas,/const removePhoto = \(id:string\) =>/);
+  assert.match(canvas,/const removeElement=\(id:string\) => isPhotoId\(id\) \? removePhoto\(id\) : removeText\(id\)/);
+  assert.match(canvas,/onDrop: \(id,x,y\) =>/);
+  assert.match(canvas,/setTrashHovered\(overTrash\(x,y\)\)/);
+  assert.match(canvas,/delete transforms\[id\]; delete fonts\[id\]; delete textStyles\[id\]/);
+  assert.match(gesture,/onDrop\?\.\(id,x,y\)/);
+  assert.match(gesture,/if \(!dropped && JSON\.stringify\(current\.current\)/);
+  assert.match(canvas,/if \(transformingId && !event\.isPrimary\) return/);
 });
 
 
@@ -462,7 +467,7 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   assert.match(flip,/selectedPages\.map\(selectedPage =>/);
   assert.doesNotMatch(flip,/<CarolinaBlankReverse\/>/);
   assert.match(document,/carolinaPageOrder\(item\.carolinaLayout\)\.map\(page=>/);
-  assert.match(canvas,/setPageOrder=\(order:CarolinaPageId\[\]\)=>/);
+  assert.match(canvas,/const setPageOrder=\(order:CarolinaPageId\[\]\)=>/);
   assert.match(canvas,/const togglePage=\(id:CarolinaPageId\)=>/);
   assert.match(canvas,/const shiftPage=\(id:CarolinaPageId,delta:-1\|1\)=>/);
   assert.match(canvas,/Páginas seleccionadas para la revista/);
@@ -476,7 +481,7 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
   const template=src('features/templates/CarolinaTemplate.tsx');
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
   const layout=src('features/templates/carolina-layout.ts');
-  assert.match(canvas,/<button type="button" onClick=\{addPhotoAnywhere\}/);
+  assert.match(canvas,/onClick=\{addPhotoAnywhere\}/);
   assert.match(canvas,/const addPhotoAnywhere=\(\)=>/);
   assert.match(canvas,/if \(page===1\) \{ addPhotoBlock\(\); return; \}/);
   assert.match(canvas,/setTarget\('extra:'\+id\)/);
