@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { PointerEvent as PointerReact } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import type { CarolinaTransform } from './carolina-layout';
 import { ZERO_TRANSFORM, clampTransform } from './carolina-layout';
 
@@ -7,36 +7,34 @@ export type CarolinaTextInteraction = {
   editingId: string | null;
   transformingId: string | null;
   onTap: (id: string) => void;
-  onCommitText: (id: string, value: string) => void;
+  onCommitText: (id: string, text: string) => void;
   onSelectTransform: (id: string) => void;
-  onCommitTransform: (id: string, value: CarolinaTransform) => void;
+  onCommitTransform: (id: string, transform: CarolinaTransform) => void;
 };
 type Props = {
-  id: string;
-  text: string;
-  transform?: CarolinaTransform;
-  interaction?: CarolinaTextInteraction;
-  extra?: boolean;
+  id: string; text: string; transform?: CarolinaTransform;
+  interaction?: CarolinaTextInteraction; extra?: boolean;
 };
 type Point = { x: number; y: number };
-type Frame = { x: number; y: number; distance: number; angle: number; transform: CarolinaTransform };
+type Frame = Point & { distance: number; angle: number; transform: CarolinaTransform };
 const HOLD_MS = 550;
-const pointGeometry = (positions: Point[]) => {
-  const p = positions[0], q = positions[1];
-  return {
-    x: q ? (p.x + q.x) / 2 : p.x,
-    y: q ? (p.y + q.y) / 2 : p.y,
-    distance: q ? Math.hypot(p.x - q.x, p.y - q.y) : 0,
-    angle: q ? Math.atan2(q.y - p.y, q.x - p.x) : 0,
-  };
-};
 
-/** One tap opens inline editing. Long-press unlocks move/pinch/rotate.
- * Do not write to D1 during pointermove; commit exactly once on pointer release. */
+function geometry(values: Point[]) {
+  const a = values[0], b = values[1];
+  return {
+    x: b ? (a.x + b.x) / 2 : a.x, y: b ? (a.y + b.y) / 2 : a.y,
+    distance: b ? Math.hypot(b.x - a.x, b.y - a.y) : 0,
+    angle: b ? Math.atan2(b.y - a.y, b.x - a.x) : 0,
+  };
+}
+
+/** Plain-text editing on tap. Long press to move; a second finger anywhere on the
+ * current sheet controls scale and rotation. Persist only after gesture completion. */
 export default function CarolinaTextNode({ id, text, transform, interaction, extra = false }: Props) {
   const node = useRef<HTMLSpanElement>(null);
   const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pointers = useRef(new Map<number, Point>());
+  const firstPress = useRef<Point | null>(null);
   const baseline = useRef<Frame | null>(null);
   const current = useRef<CarolinaTransform>(transform || ZERO_TRANSFORM);
   const [live, setLive] = useState<CarolinaTransform>(transform || ZERO_TRANSFORM);
@@ -61,83 +59,124 @@ export default function CarolinaTextNode({ id, text, transform, interaction, ext
     selection?.removeAllRanges();
     selection?.addRange(range);
   }, [editing]);
-  useEffect(() => () => {
-    if (hold.current) clearTimeout(hold.current);
-  }, []);
+  useEffect(() => () => { if (hold.current) clearTimeout(hold.current); }, []);
 
   const cancelHold = () => {
     if (hold.current) clearTimeout(hold.current);
     hold.current = null;
   };
-  const resetBaseline = () => {
-    const frame = pointGeometry([...pointers.current.values()]);
+  const startBaseline = () => {
+    const frame = geometry([...pointers.current.values()]);
     baseline.current = { ...frame, transform: { ...current.current } };
   };
-  const getWidth = () => node.current?.closest('.hn-carolina-page')?.getBoundingClientRect().width || 1;
-  const down = (event: PointerReact<HTMLSpanElement>) => {
-    if (!interaction || editing) return;
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-    event.currentTarget.setPointerCapture(event.pointerId);
+  const pageWidth = () => node.current?.closest('.hn-carolina-page')?.getBoundingClientRect().width || 1;
+
+  const begin = (pointerId: number, x: number, y: number) => {
+    if (!moving && !longPressed.current) swallowClick.current = false;
+    pointers.current.set(pointerId, { x, y });
     if (moving || longPressed.current) {
       cancelHold();
-      resetBaseline();
-    } else if (pointers.current.size === 1) {
+      startBaseline();
+      return;
+    }
+    if (pointers.current.size === 1) {
+      firstPress.current = { x, y };
       cancelHold();
       hold.current = setTimeout(() => {
         if (!pointers.current.size) return;
         longPressed.current = true;
         swallowClick.current = true;
-        interaction.onSelectTransform(id);
-        resetBaseline();
+        interaction?.onSelectTransform(id);
+        startBaseline();
       }, HOLD_MS);
     }
   };
-  const move = (event: PointerReact<HTMLSpanElement>) => {
-    const before = pointers.current.get(event.pointerId);
-    if (!before) return;
-    const updated = { x: event.clientX, y: event.clientY };
-    pointers.current.set(event.pointerId, updated);
+  const update = (pointerId: number, x: number, y: number) => {
+    if (!pointers.current.has(pointerId)) return;
+    pointers.current.set(pointerId, { x, y });
     if (!moving && !longPressed.current) {
-      const initial = baseline.current || { x: before.x, y: before.y };
-      if (Math.hypot(updated.x - initial.x, updated.y - initial.y) > 8) cancelHold();
+      if (firstPress.current && Math.hypot(x - firstPress.current.x, y - firstPress.current.y) > 8) {
+        cancelHold();
+      }
       return;
     }
-    if (!baseline.current) resetBaseline();
-    const start = baseline.current!;
-    const now = pointGeometry([...pointers.current.values()]);
-    const width = getWidth();
-    const next = clampTransform({
-      x: start.transform.x + (now.x - start.x) * 100 / width,
-      y: start.transform.y + (now.y - start.y) * 100 / width,
-      scale: start.transform.scale * (start.distance && now.distance
-        ? now.distance / start.distance : 1),
-      rotation: start.transform.rotation + (start.distance && now.distance
-        ? (now.angle - start.angle) * 180 / Math.PI : 0),
+    if (!baseline.current) startBaseline();
+    const b = baseline.current!;
+    const now = geometry([...pointers.current.values()]);
+    const turn = b.distance && now.distance
+      ? ((now.angle - b.angle) * 180 / Math.PI + 540) % 360 - 180 : 0;
+    const result = clampTransform({
+      x: b.transform.x + (now.x - b.x) * 100 / pageWidth(),
+      y: b.transform.y + (now.y - b.y) * 100 / pageWidth(),
+      scale: b.transform.scale * (b.distance && now.distance ? now.distance / b.distance : 1),
+      rotation: b.transform.rotation + turn,
     });
-    current.current = next;
-    setLive(next);
+    current.current = result;
+    setLive(result);
   };
-  const up = (event: PointerReact<HTMLSpanElement>) => {
+  const finish = (pointerId: number) => {
     cancelHold();
-    if (!pointers.current.has(event.pointerId)) return;
-    pointers.current.delete(event.pointerId);
+    if (!pointers.current.has(pointerId)) return;
+    pointers.current.delete(pointerId);
     if (pointers.current.size) {
-      resetBaseline();
+      startBaseline();
       return;
     }
     baseline.current = null;
+    firstPress.current = null;
     if ((moving || longPressed.current) && interaction) {
-      const original = transform || ZERO_TRANSFORM;
-      if (JSON.stringify(current.current) !== JSON.stringify(original)) {
+      if (JSON.stringify(current.current) !== JSON.stringify(transform || ZERO_TRANSFORM)) {
         interaction.onCommitTransform(id, current.current);
       }
       swallowClick.current = true;
     }
     longPressed.current = false;
   };
+
+  // The second finger can land anywhere on this sheet, even if the text is tiny.
+  useEffect(() => {
+    if (!moving || !node.current) return;
+    const page = node.current.closest('.hn-carolina-page');
+    if (!page) return;
+    const outsideText = (event: PointerEvent) =>
+      !!node.current && !node.current.contains(event.target as Node);
+    const down = (event: PointerEvent) => {
+      if (!outsideText(event) || pointers.current.size === 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      page.setPointerCapture(event.pointerId);
+      startBaseline();
+    };
+    const move = (event: PointerEvent) => {
+      if (outsideText(event)) update(event.pointerId, event.clientX, event.clientY);
+    };
+    const up = (event: PointerEvent) => {
+      if (outsideText(event)) finish(event.pointerId);
+    };
+    page.addEventListener('pointerdown', down);
+    page.addEventListener('pointermove', move);
+    page.addEventListener('pointerup', up);
+    page.addEventListener('pointercancel', up);
+    return () => {
+      page.removeEventListener('pointerdown', down);
+      page.removeEventListener('pointermove', move);
+      page.removeEventListener('pointerup', up);
+      page.removeEventListener('pointercancel', up);
+    };
+  }, [moving]);
+
+  const down = (event: ReactPointerEvent<HTMLSpanElement>) => {
+    if (!interaction || editing || (event.pointerType === 'mouse' && event.button !== 0)) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    begin(event.pointerId, event.clientX, event.clientY);
+  };
+  const move = (event: ReactPointerEvent<HTMLSpanElement>) =>
+    update(event.pointerId, event.clientX, event.clientY);
+  const up = (event: ReactPointerEvent<HTMLSpanElement>) => finish(event.pointerId);
   const transformed = 'translate(' + live.x + 'cqw, ' + live.y +
     'cqw) rotate(' + live.rotation + 'deg) scale(' + live.scale + ')';
+
   return (
     <span ref={node} data-carolina-text={id}
       className={'hn-carolina-text-node' + (moving ? ' transforming' : '') +
