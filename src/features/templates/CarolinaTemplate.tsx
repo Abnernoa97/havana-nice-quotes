@@ -37,6 +37,7 @@ function FieldNode({ item, field, value, interaction }: FieldNodeProps) {
   return <CarolinaTextNode id={id} text={value}
     transform={item.carolinaLayout?.transforms?.[id]}
     fontId={item.carolinaLayout?.fonts?.[id] || item.carolinaLayout?.defaultFont}
+    textStyle={item.carolinaLayout?.textStyles?.[id]}
     interaction={interaction}/>;
 }
 function FixedNode({ item, field, interaction }: PageProps & { field: CarolinaFixedKey }) {
@@ -44,6 +45,7 @@ function FixedNode({ item, field, interaction }: PageProps & { field: CarolinaFi
   return <CarolinaTextNode id={id} text={fixedText(item.carolinaLayout, field)}
     transform={item.carolinaLayout?.transforms?.[id]}
     fontId={item.carolinaLayout?.fonts?.[id] || item.carolinaLayout?.defaultFont}
+    textStyle={item.carolinaLayout?.textStyles?.[id]}
     interaction={interaction}/>;
 }
 function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
@@ -57,6 +59,7 @@ function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
           <CarolinaTextNode id={id} text={extra.text} extra
             transform={item.carolinaLayout?.transforms?.[id]}
             fontId={item.carolinaLayout?.fonts?.[id] || item.carolinaLayout?.defaultFont}
+            textStyle={item.carolinaLayout?.textStyles?.[id]}
             interaction={interaction}/>
         </div>;
       })}

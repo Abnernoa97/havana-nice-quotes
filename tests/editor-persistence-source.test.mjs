@@ -383,7 +383,7 @@ test('Diseño respeta las fotos originales y admite collage de 3, 5, 6 o hasta 1
 });
 
 
-test('Diseño tiene banco elegante con previews reales, elección por texto y fuente global', () => {
+test('Diseño tiene banco elegante dentro del panel contextual y fuentes por texto', () => {
   const catalog=src('features/templates/elegant-fonts.ts');
   const bank=src('features/editor/ElegantFontBank.tsx');
   const canvas=src('features/editor/TemplateCanvasEditor.tsx');
@@ -396,12 +396,55 @@ test('Diseño tiene banco elegante con previews reales, elección por texto y fu
   assert.match(bank,/elegantFontFamily\(font\.id\)/);
   assert.match(bank,/ELEGANT_FONT_GROUPS\.map/);
   assert.match(bank,/input type="search"/);
-  assert.match(canvas,/<Type size=\{16\}\/> Tipografías/);
-  assert.match(canvas,/fontTarget \? 'Texto seleccionado' : 'Toda la propuesta'/);
-  assert.match(canvas,/updateLayout\(\{fonts\}\)/);
-  assert.match(canvas,/updateLayout\(\{defaultFont:font \|\| undefined\}\)/);
+  const dock=src('features/editor/TextStyleDock.tsx');
+  assert.match(dock, /<ElegantFontBank inline/);
+  assert.match(canvas, /<TextStyleDock textId=\{lastTextId\}/);
+  assert.match(canvas, /updateLayout\(\{fonts\}\)/);
+  assert.doesNotMatch(canvas, /defaultFont:font \|\| undefined/);
+  assert.doesNotMatch(canvas, /Abrir banco de tipografías/);
+  assert.match(dock, /Tipografía/);
   assert.match(template,/fontId=\{item\.carolinaLayout\?\.fonts\?\.\[id\] \|\| item\.carolinaLayout\?\.defaultFont\}/);
   assert.match(node,/fontFamily:elegantFontFamily\(fontId\)/);
   assert.match(worker,/validCarolinaLayout\(q\.carolinaLayout\)/);
   assert.match(magazine,/JSON\.stringify\(item\.carolinaLayout\)/);
+});
+
+
+test('Un toque abre cinco switches contextuales para personalizar una sola letra o párrafo', () => {
+  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const dock=src('features/editor/TextStyleDock.tsx');
+  const bank=src('features/editor/ElegantFontBank.tsx');
+  const node=src('features/templates/CarolinaTextNode.tsx');
+  const template=src('features/templates/CarolinaTemplate.tsx');
+  assert.match(canvas, /onTap: id => \{ setTransformingId\(null\); setEditingId\(id\); setLastTextId\(id\)/);
+  assert.match(canvas, /<TextStyleDock textId=\{lastTextId\}/);
+  assert.match(canvas, /<button type="button" onClick=\{addFreeText\}>\+ Texto<\/button>/);
+  assert.doesNotMatch(canvas, /<Type size=\{16\}\/> Tipografías/);
+  assert.match(canvas, /onFontChange=\{chooseFont\} onStyleChange=\{changeTextStyle\}/);
+  assert.match(canvas, /fonts\[lastTextId\]=font/);
+  assert.match(canvas, /updateLayout\(\{textStyles\}\)/);
+  for (const label of ['Tipografía','Color','Tamaño','Ancho','Alto']) {
+    assert.ok(dock.includes("label:'"+label+"'"),label);
+  }
+  assert.match(dock, /type="color"/);
+  assert.match(dock, /type="range"/);
+  assert.match(bank, /inline=false/);
+  assert.match(node, /textStyle\?\.stretchX/);
+  assert.match(node, /fontSize:textStyle.size \+ '%'/);
+  assert.match(template, /textStyle=\{item\.carolinaLayout\?\.textStyles\?\.\[id\]\}/);
+});
+
+test('Pulsación larga: papelera por click o arrastrar, sin afectar las fotos del collage', () => {
+  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const gesture=src('features/templates/useCarolinaGesture.ts');
+  assert.match(canvas, /data-hn-text-trash/);
+  assert.match(canvas, /onClick=\{\(\)=>removeText\(transformingId\)\}/);
+  assert.match(canvas, /if \(hit\) removeText\(id\)/);
+  assert.match(canvas, /onDrop: \(id,x,y\) =>/);
+  assert.match(canvas, /setTrashHovered\(overTrash\(x,y\)\)/);
+  assert.match(canvas, /if \(id\.startsWith\('photo:'\)\) return/);
+  assert.match(canvas, /delete transforms\[id\]; delete fonts\[id\]; delete textStyles\[id\]/);
+  assert.match(gesture, /onDrop\?\.\(id,x,y\)/);
+  assert.match(gesture, /if \(!dropped && JSON\.stringify\(current\.current\)/);
+  assert.match(canvas, /if \(transformingId && !event\.isPrimary\) return/);
 });

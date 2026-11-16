@@ -92,3 +92,13 @@
 }
 .hn-canvas-photo-actions button:disabled { opacity:.35; cursor:default; }
 .hn-canvas-photo-actions button:last-child { color:#975547; }
+
+
+/* Photo-only actions sit below the collage; upper bar contains + Texto alone. */
+.hn-canvas-gallery-actions{width:min(100%,620px);box-sizing:border-box;margin:10px auto 0;display:flex;align-items:center;justify-content:space-between;gap:9px;padding:0 4px;color:#6c846e;font-size:11px}
+.hn-canvas-gallery-actions button{border:1px solid #d4e1d1;background:#fff;color:#2c533d;min-height:39px;min-width:98px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:700}
+.hn-canvas-gallery-actions button:disabled{opacity:.35;cursor:default}
+/* Only shown after a long press on text. Also accepts the captured pointer on drop. */
+.hn-canvas-trash{position:fixed;z-index:84;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);min-width:210px;max-width:88vw;min-height:62px;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 18px;border:1px dashed #be8e85;border-radius:15px;background:#fff8f5;box-shadow:0 10px 35px #41211d30;color:#985447;cursor:pointer;font-size:12px;font-weight:750;transition:background .15s ease,color .15s ease,scale .15s ease}
+.hn-canvas-trash.hot{background:#9e4c42;color:#fff;border-color:#9e4c42;scale:1.06}
+.hn-canvas-trash:focus-visible{outline:3px solid #bd9860;outline-offset:3px}

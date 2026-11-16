@@ -28,6 +28,8 @@ export const CAROLINA_MAX_SLOTS = 12;
 export const CAROLINA_DEFAULT_ORDER = Array.from({ length: CAROLINA_DEFAULT_SLOTS }, (_, i) => i);
 
 export type CarolinaTransform = { x: number; y: number; scale: number; rotation: number };
+/** Appearance is scoped to an individual text block; never inherited by its siblings. */
+export type CarolinaTextStyle = { color?: string; size?: number; stretchX?: number; stretchY?: number };
 export type CarolinaExtra = { id: string; page: 0 | 1 | 2; text: string };
 export type CarolinaLayout = {
   fixed?: Partial<Record<CarolinaFixedKey, string>>;
@@ -36,6 +38,7 @@ export type CarolinaLayout = {
   photoOrder?: number[];
   defaultFont?: ElegantFontId;
   fonts?: Record<string, ElegantFontId>;
+  textStyles?: Record<string, CarolinaTextStyle>;
 };
 export const ZERO_TRANSFORM: CarolinaTransform = { x: 0, y: 0, scale: 1, rotation: 0 };
 
@@ -56,7 +59,7 @@ export function clampTransform(value: CarolinaTransform): CarolinaTransform {
 export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const layout = value as Record<string, unknown>;
-  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder', 'defaultFont', 'fonts'].includes(k))) return false;
+  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder', 'defaultFont', 'fonts', 'textStyles'].includes(k))) return false;
   if (layout.defaultFont !== undefined && !isElegantFontId(layout.defaultFont)) return false;
   if (layout.fonts !== undefined) {
     if (!layout.fonts || typeof layout.fonts !== 'object' || Array.isArray(layout.fonts)) return false;
@@ -64,6 +67,22 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     if (entries.length > 100 || entries.some(([id,font]) =>
       !/^(fixed:[a-zA-Z]+|field:[a-z]+|extra:[a-f0-9-]{36})$/.test(id) ||
       !isElegantFontId(font))) return false;
+  }
+  if (layout.textStyles !== undefined) {
+    if (!layout.textStyles || typeof layout.textStyles !== 'object' || Array.isArray(layout.textStyles)) return false;
+    const entries=Object.entries(layout.textStyles);
+    if (entries.length>100 || entries.some(([id,raw])=>{
+      if (!/^(fixed:[a-zA-Z]+|field:[a-z]+|extra:[a-f0-9-]{36})$/.test(id) ||
+        !raw || typeof raw!=='object' || Array.isArray(raw)) return true;
+      const style=raw as Record<string,unknown>;
+      const validPct=(key:string,min:number,max:number)=>
+        style[key]===undefined || typeof style[key]==='number' &&
+        Number.isInteger(style[key]) && style[key]>=min && style[key]<=max;
+      return Object.keys(style).some(key=>!['color','size','stretchX','stretchY'].includes(key)) ||
+        style.color!==undefined && (typeof style.color!=='string' ||
+          !/^#[0-9a-fA-F]{6}$/.test(style.color)) ||
+        !validPct('size',50,300) || !validPct('stretchX',50,200) || !validPct('stretchY',50,200);
+    })) return false;
   }
   if (layout.photoOrder !== undefined) {
     if (!Array.isArray(layout.photoOrder) || layout.photoOrder.length < 1 ||

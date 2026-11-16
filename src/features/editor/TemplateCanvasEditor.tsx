@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Check, ChevronLeft, ChevronRight, ImagePlus, Images, Smartphone, Type, X } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, ImagePlus, Images, Smartphone, Trash2, X } from 'lucide-react';
 import { isCarolinaCopyField } from '../templates/carolina-edit-fields';
-import ElegantFontBank from './ElegantFontBank';
+import TextStyleDock from './TextStyleDock';
 import type { ElegantFontId } from '../templates/elegant-fonts';
 import type { CarolinaTextField } from '../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../templates/CarolinaTextNode';
-import type { CarolinaFixedKey, CarolinaLayout, CarolinaTransform } from '../templates/carolina-layout';
+import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaTransform } from '../templates/carolina-layout';
 import { carolinaPhotoOrder, movePhotoSlot, photoSlotToAdd, emptyPhotoSlotToDuplicate, CAROLINA_MAX_SLOTS } from '../templates/carolina-layout';
 import { normalizePriceInput, safeQuotePrice } from '../quotes/model';
 import type { Quote } from '../quotes/types';
@@ -30,15 +30,14 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [target, setTarget] = useState<PhotoTarget | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [lastTextId, setLastTextId] = useState<string | null>(null);
-  const [fontBankOpen, setFontBankOpen] = useState(false);
-  const [fontTarget, setFontTarget] = useState<string | null>(null);
+  const [trashHovered, setTrashHovered] = useState(false);
   const [transformingId, setTransformingId] = useState<string | null>(null);
   const [bank, setBank] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   useEffect(() => {
     setPage(0); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
-    setLastTextId(null); setFontBankOpen(false); setFontTarget(null);
+    setLastTextId(null); setTrashHovered(false);
   }, [item.id, item.style]);
   const updateLayout = (patch: Partial<CarolinaLayout>) => {
     edit('carolinaLayout', { ...item.carolinaLayout, ...patch });
@@ -47,7 +46,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     editingId, transformingId,
     onTap: id => { setTransformingId(null); setEditingId(id); setLastTextId(id); setError(''); },
     onSelectTransform: id => { setEditingId(null); setTransformingId(id);
-      setLastTextId(id.startsWith('photo:') ? null : id); setError(''); },
+      setLastTextId(id.startsWith('photo:') ? null : id); setTrashHovered(false); setError(''); },
     onCommitText: (id, raw) => {
       const value = raw.trim().slice(0, 3000);
       if (id.startsWith('fixed:')) {
@@ -79,6 +78,17 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     },
     onCommitTransform: (id: string, transform: CarolinaTransform) => {
       updateLayout({ transforms: { ...item.carolinaLayout?.transforms, [id]: transform } });
+      setTrashHovered(false);
+    },
+    onDrag: (id,x,y) => {
+      if (id.startsWith('photo:')) return;
+      setTrashHovered(overTrash(x,y));
+    },
+    onDrop: (id,x,y) => {
+      const hit=!id.startsWith('photo:') && overTrash(x,y);
+      setTrashHovered(false);
+      if (hit) removeText(id);
+      return hit;
     },
   };
   const addFreeText = () => {
@@ -91,25 +101,55 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setEditingId('extra:' + id);
     setLastTextId('extra:' + id);
   };
-  const openFontBank = () => {
-    setFontTarget(lastTextId);
-    if (editingId && document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
-    setEditingId(null);
-    setTransformingId(null);
-    setFontBankOpen(true);
+  const overTrash = (x:number,y:number):boolean => {
+    const element=document.querySelector('[data-hn-text-trash]');
+    if (!element) return false;
+    const rect=element.getBoundingClientRect();
+    return x>=rect.left && x<=rect.right && y>=rect.top && y<=rect.bottom;
   };
-  const chooseFont = (font: ElegantFontId | null) => {
-    if (fontTarget) {
-      const fonts={...item.carolinaLayout?.fonts};
-      if (font) fonts[fontTarget]=font;
-      else delete fonts[fontTarget];
-      updateLayout({fonts});
+  const removeText = (id:string) => {
+    if (!/^(fixed:[a-zA-Z]+|field:[a-z]+|extra:[a-f0-9-]{36})$/.test(id)) return;
+    const transforms={...item.carolinaLayout?.transforms};
+    const fonts={...item.carolinaLayout?.fonts};
+    const textStyles={...item.carolinaLayout?.textStyles};
+    delete transforms[id]; delete fonts[id]; delete textStyles[id];
+    const clean={transforms,fonts,textStyles};
+    if (id.startsWith('fixed:')) {
+      const key=id.slice(6) as CarolinaFixedKey;
+      updateLayout({...clean,fixed:{...item.carolinaLayout?.fixed,[key]:''}});
+    } else if (id.startsWith('extra:')) {
+      updateLayout({...clean,extras:(item.carolinaLayout?.extras||[])
+        .filter(extra=>'extra:'+extra.id!==id)});
     } else {
-      updateLayout({defaultFont:font || undefined});
+      const field=id.slice(6) as CarolinaTextField;
+      if (field==='price' || field==='deposit') edit(field,0);
+      else if (isCarolinaCopyField(field)) {
+        edit('carolinaCopy',{...item.carolinaCopy,[field]:''});
+      } else edit(field,'');
+      updateLayout(clean);
     }
-    setFontBankOpen(false);
+    setEditingId(null); setTransformingId(null); setLastTextId(null); setTrashHovered(false);
+    setError('');
+  };
+  const chooseFont = (font:ElegantFontId|null) => {
+    if (!lastTextId) return;
+    const fonts={...item.carolinaLayout?.fonts};
+    if (font) fonts[lastTextId]=font;
+    else delete fonts[lastTextId];
+    updateLayout({fonts});
+  };
+  const changeTextStyle = (key:keyof CarolinaTextStyle,value:string|number|undefined) => {
+    if (!lastTextId) return;
+    const textStyles={...item.carolinaLayout?.textStyles};
+    const next:CarolinaTextStyle={...textStyles[lastTextId]};
+    if (value===undefined) delete next[key];
+    else if (key==='color' && typeof value==='string') next.color=value;
+    else if (key==='size' && typeof value==='number') next.size=value;
+    else if (key==='stretchX' && typeof value==='number') next.stretchX=value;
+    else if (key==='stretchY' && typeof value==='number') next.stretchY=value;
+    if (Object.keys(next).length) textStyles[lastTextId]=next;
+    else delete textStyles[lastTextId];
+    updateLayout({textStyles});
   };
   const photoOrder = carolinaPhotoOrder(item.carolinaLayout);
   const activePhoto = transformingId?.match(/^photo:(\d+)$/);
@@ -180,16 +220,11 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       )}
       {original && <div className="hn-canvas-toolbar">
         <button type="button" onClick={addFreeText}>+ Texto</button>
-        <button type="button" onClick={openFontBank} aria-label="Abrir banco de tipografías">
-          <Type size={16}/> Tipografías
-        </button>
-        {page === 1 && <button type="button" disabled={photoOrder.length >= CAROLINA_MAX_SLOTS}
-          onClick={addPhotoBlock}>+ Foto</button>}
-        {page === 1 && <span>{photoOrder.length} fotos</span>}
-        {transformingId && <span>Arrastra · Amplía o gira con dos dedos</span>}
+        {transformingId && <span>Arrastra · Amplía o gira con dos dedos</span>
       </div>}
       <div className="hn-canvas-sheet" onPointerDown={event => {
-        const target = event.target;
+        const target=event.target;
+        if (transformingId && !event.isPrimary) return;
         if (target instanceof Element && !target.closest('[data-carolina-text], .hn-carolina-photo, .hn-carolina-cover-photo')) {
           setTransformingId(null);
           setLastTextId(null);
@@ -218,6 +253,13 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           </div>
         )}
       </div>
+      {original && page === 1 && (
+        <div className="hn-canvas-gallery-actions">
+          <span>{photoOrder.length} fotografías</span>
+          <button type="button" disabled={photoOrder.length >= CAROLINA_MAX_SLOTS}
+            onClick={addPhotoBlock}>+ Foto</button>
+        </div>
+      )}
       {original && page === 1 && selectedPhoto !== null &&
         photoOrder.includes(selectedPhoto) && (
         <div className="hn-canvas-photo-actions" role="group" aria-label="Ordenar fotografías">
@@ -241,13 +283,23 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
             onClick={() => { setPage(page + 1); setTransformingId(null); setEditingId(null); setLastTextId(null); }}><ChevronRight size={18}/></button>
         </div>
       )}
-      {fontBankOpen && (
-        <ElegantFontBank targetName={fontTarget ? 'Texto seleccionado' : 'Toda la propuesta'}
-          activeFont={fontTarget ? (item.carolinaLayout?.fonts?.[fontTarget] ||
-            item.carolinaLayout?.defaultFont) : item.carolinaLayout?.defaultFont}
-          resetLabel={fontTarget && item.carolinaLayout?.defaultFont
-            ? 'Usar tipografía general' : 'Restaurar tipografía original'}
-          onChoose={chooseFont} onClose={()=>setFontBankOpen(false)}/>
+      {original && lastTextId && transformingId!==lastTextId && (
+        <TextStyleDock textId={lastTextId}
+          fontId={item.carolinaLayout?.fonts?.[lastTextId] || item.carolinaLayout?.defaultFont}
+          style={item.carolinaLayout?.textStyles?.[lastTextId]}
+          onFontChange={chooseFont} onStyleChange={changeTextStyle}
+          onClose={()=>{
+            if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+            setEditingId(null); setLastTextId(null);
+          }}/>
+      )}
+      {original && transformingId && !transformingId.startsWith('photo:') && (
+        <button type="button" data-hn-text-trash
+          className={'hn-canvas-trash' + (trashHovered ? ' hot' : '')}
+          aria-label="Eliminar texto seleccionado" onClick={()=>removeText(transformingId)}>
+          <Trash2 size={23}/>
+          <span>{trashHovered ? 'Soltar para borrar' : 'Eliminar texto · Arrastra aquí'}</span>
+        </button>
       )}
       {error && !target && <p className="hn-canvas-error" role="alert">{error}</p>}
       {target !== null && (

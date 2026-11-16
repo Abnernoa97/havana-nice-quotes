@@ -26,3 +26,15 @@
 .hn-font-bank-footer span{font-size:11px;color:#819784}
 .hn-font-bank button:focus-visible{outline:2px solid #b49c67;outline-offset:2px}
 @media(max-width:480px){.hn-font-shade{padding:0}.hn-font-bank{width:100%;max-height:92dvh;border-radius:18px 18px 0 0}.hn-font-bank-head{padding:17px 17px 8px}.hn-font-search{margin:8px 15px 10px}.hn-font-groups{padding:0 15px 10px}.hn-font-gallery{padding:4px 13px 14px;gap:7px}.hn-font-option{min-height:94px;padding:10px}.hn-font-example{font-size:21px}.hn-font-bank-footer{padding:11px 15px}}
+
+
+/* Expanded in the compact selected-text dock, never a second full-screen modal. */
+.hn-font-embedded{display:block;width:100%;margin:0;padding:0;min-width:0}
+.hn-font-inline{width:100%;max-height:43dvh;min-height:0;border-radius:0;box-shadow:none;background:transparent}
+.hn-font-inline .hn-font-search{margin:7px 10px 9px;height:41px}
+.hn-font-inline .hn-font-groups{padding:0 9px 9px}
+.hn-font-inline .hn-font-gallery{max-height:210px;padding:4px 9px 10px;gap:7px}
+.hn-font-inline .hn-font-option{min-height:79px;padding:9px 10px}
+.hn-font-inline .hn-font-example{font-size:clamp(18px,4vw,23px);min-height:35px}
+.hn-font-inline .hn-font-bank-footer{padding:6px 10px;border-top:1px solid #e5ede3}
+.hn-font-inline .hn-font-bank-footer span{font-size:10px}

@@ -8,11 +8,12 @@ type Props = {
   targetName: string;
   activeFont?: ElegantFontId;
   resetLabel?: string;
+  inline?: boolean;
   onChoose: (font: ElegantFontId | null) => void;
   onClose: () => void;
 };
 /** Real-family previews. Font faces are loaded only for the visible category/search. */
-export default function ElegantFontBank({targetName,activeFont,resetLabel='Restaurar tipografía original',onChoose,onClose}: Props) {
+export default function ElegantFontBank({targetName,activeFont,resetLabel='Restaurar tipografía original',inline=false,onChoose,onClose}: Props) {
   const [group,setGroup]=useState<ElegantFontGroup | 'todo'>('editorial');
   const [search,setSearch]=useState('');
   const visible=useMemo(() => {
@@ -23,19 +24,20 @@ export default function ElegantFontBank({targetName,activeFont,resetLabel='Resta
   },[group,search]);
   useEffect(() => { for (const font of visible) loadElegantFont(font.id); },[visible]);
   return (
-    <div className="hn-font-shade" onPointerDown={event => {
-      if (event.target===event.currentTarget) onClose();
+    <div className={inline ? 'hn-font-embedded' : 'hn-font-shade'} onPointerDown={event => {
+      if (!inline && event.target===event.currentTarget) onClose();
     }}>
-      <section role="dialog" aria-modal="true" aria-label="Banco de tipografías elegantes"
-        className="hn-font-bank">
-        <header className="hn-font-bank-head">
+      <section role={inline ? 'group' : 'dialog'} aria-modal={inline ? undefined : true}
+        aria-label="Banco de tipografías elegantes"
+        className={'hn-font-bank' + (inline ? ' hn-font-inline' : '')}>
+        {!inline && <header className="hn-font-bank-head">
           <div>
             <small>HAVANA NICE · DISEÑO</small>
             <h3>Tipografías</h3>
             <p>Aplicar a: <strong>{targetName}</strong></p>
           </div>
           <button type="button" onClick={onClose} aria-label="Cerrar tipografías"><X size={21}/></button>
-        </header>
+        </header>}
         <label className="hn-font-search">
           <Search size={18}/>
           <input type="search" value={search}

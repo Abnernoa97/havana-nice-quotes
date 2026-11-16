@@ -7,6 +7,9 @@ export type CarolinaGestureInteraction = {
   transformingId: string | null;
   onSelectTransform: (id: string) => void;
   onCommitTransform: (id: string, value: CarolinaTransform) => void;
+  onDrag?: (id: string, x: number, y: number) => void;
+  /** Return true when the gesture ended on a destructive drop zone. */
+  onDrop?: (id: string, x: number, y: number) => boolean;
 };
 type Point = { x: number; y: number };
 type Frame = Point & { distance: number; angle: number; transform: CarolinaTransform };
@@ -87,8 +90,9 @@ export function useCarolinaGesture<T extends HTMLElement>(
     });
     current.current = result;
     setLive(result);
+    interactionRef.current?.onDrag?.(id,x,y);
   };
-  const finish = (pointerId: number) => {
+  const finish = (pointerId: number, x?: number, y?: number) => {
     cancelHold();
     if (!pointers.current.has(pointerId)) return;
     pointers.current.delete(pointerId);
@@ -96,7 +100,9 @@ export function useCarolinaGesture<T extends HTMLElement>(
     baseline.current = null;
     press.current = null;
     if (selected || longPressed.current) {
-      if (JSON.stringify(current.current) !== JSON.stringify(saved || ZERO_TRANSFORM)) {
+      const dropped=x!==undefined && y!==undefined &&
+        interactionRef.current?.onDrop?.(id,x,y) === true;
+      if (!dropped && JSON.stringify(current.current) !== JSON.stringify(saved || ZERO_TRANSFORM)) {
         interactionRef.current?.onCommitTransform(id, current.current);
       }
       swallowClick.current = true;
@@ -121,7 +127,7 @@ export function useCarolinaGesture<T extends HTMLElement>(
       if (outsideNode(event)) update(event.pointerId, event.clientX, event.clientY);
     };
     const up = (event: PointerEvent) => {
-      if (outsideNode(event)) finish(event.pointerId);
+      if (outsideNode(event)) finish(event.pointerId,event.clientX,event.clientY);
     };
     page.addEventListener('pointerdown', down);
     page.addEventListener('pointermove', move);
@@ -142,7 +148,7 @@ export function useCarolinaGesture<T extends HTMLElement>(
   };
   const onPointerMove = (event: ReactPointerEvent<T>) =>
     update(event.pointerId, event.clientX, event.clientY);
-  const onPointerUp = (event: ReactPointerEvent<T>) => finish(event.pointerId);
+  const onPointerUp = (event: ReactPointerEvent<T>) => finish(event.pointerId,event.clientX,event.clientY);
   const suppressTap = () => {
     if (selected) return true;
     if (!swallowClick.current) return false;

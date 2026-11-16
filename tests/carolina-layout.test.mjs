@@ -145,3 +145,24 @@ test('Las tipografías se guardan por texto o globalmente y son validadas en D1'
   assert.equal(validCarolinaLayout({fonts:null}),false);
   assert.equal(validCarolinaLayout({fonts:{'fixed:brand':'cinzel'},danger:true}),false);
 });
+
+
+test('Estilos independientes de letras con dimensiones y colores validados', () => {
+  const valid={textStyles:{
+    'fixed:brand':{color:'#BDA577',size:160,stretchX:125,stretchY:85},
+    'field:name':{color:'#244A37',size:110},
+    'extra:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa':{stretchX:200,stretchY:50},
+  }};
+  assert.equal(validCarolinaLayout(valid),true);
+  assert.deepEqual(JSON.parse(JSON.stringify(valid)),valid);
+  assert.equal(validCarolinaLayout({textStyles:{'field:name':{color:'red'}}}),false);
+  assert.equal(validCarolinaLayout({textStyles:{'field:name':{color:'#fff'}}}),false);
+  assert.equal(validCarolinaLayout({textStyles:{'field:name':{size:0}}}),false);
+  assert.equal(validCarolinaLayout({textStyles:{'field:name':{size:500}}}),false);
+  assert.equal(validCarolinaLayout({textStyles:{'field:name':{stretchX:300}}}),false);
+  assert.equal(validCarolinaLayout({textStyles:{'field:name':{stretchY:49}}}),false);
+  assert.equal(validCarolinaLayout({textStyles:{'photo:cover':{size:150}}}),false);
+  assert.equal(validCarolinaLayout({textStyles:{'field:name':{fontFamily:'Arial'}}}),false);
+  assert.equal(validCarolinaLayout({textStyles:{'field:name':{size:Infinity}}}),false);
+  assert.equal(validCarolinaLayout({textStyles:{'field:name':[]}}),false);
+});

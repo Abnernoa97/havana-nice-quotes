@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { CarolinaTransform } from './carolina-layout';
+import type { CarolinaTextStyle, CarolinaTransform } from './carolina-layout';
 import { elegantFontFamily, loadElegantFont } from './elegant-fonts';
 import type { ElegantFontId } from './elegant-fonts';
 import { useCarolinaGesture } from './useCarolinaGesture';
@@ -13,10 +13,11 @@ export type CarolinaTextInteraction = CarolinaGestureInteraction & {
 type Props = {
   id: string; text: string; transform?: CarolinaTransform;
   interaction?: CarolinaTextInteraction; extra?: boolean; fontId?: ElegantFontId;
+  textStyle?: CarolinaTextStyle;
 };
 
 /** Text changes on blur; geometry persists only after gesture release. */
-export default function CarolinaTextNode({ id, text, transform, interaction, extra = false, fontId }: Props) {
+export default function CarolinaTextNode({ id, text, transform, interaction, extra = false, fontId, textStyle }: Props) {
   const node = useRef<HTMLSpanElement>(null);
   const editing = interaction?.editingId === id;
   const gesture = useCarolinaGesture(id, node, transform, interaction, editing);
@@ -39,7 +40,14 @@ export default function CarolinaTextNode({ id, text, transform, interaction, ext
       className={'hn-carolina-text-node' + (gesture.selected ? ' transforming' : '') +
         (editing ? ' editing' : '') + (extra ? ' extra' : '') +
         (!text && interaction ? ' empty' : '')}
-      style={{ transform: gesture.transform, ...(fontId ? {fontFamily:elegantFontFamily(fontId)} : {}) }}
+      style={{
+        transform: gesture.transform +
+          ' scale(' + ((textStyle?.stretchX ?? 100)/100) + ',' +
+          ((textStyle?.stretchY ?? 100)/100) + ')',
+        ...(fontId ? {fontFamily:elegantFontFamily(fontId)} : {}),
+        ...(textStyle?.color ? {color:textStyle.color} : {}),
+        ...(textStyle?.size ? {fontSize:textStyle.size + '%'} : {}),
+      }}
       contentEditable={editing ? 'plaintext-only' : undefined}
       suppressContentEditableWarning
       role={interaction ? 'textbox' : undefined}
