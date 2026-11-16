@@ -176,7 +176,7 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   const proposal = src('features/client/Proposal.tsx');
   const magazine = src('features/magazine/FlipMagazine.tsx');
   assert.match(template, /CAROLINA_SLOTS = 6/);
-  for (const label of ['The Celebration', 'The Experience', 'Production &amp; Tech']) {
+  for (const label of ['The Celebration', 'The Experience', 'Production & Tech']) {
     assert.ok(layout.includes(label));
   }
   assert.match(template, /export function CarolinaCover/);

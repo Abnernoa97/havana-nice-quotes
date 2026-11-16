@@ -23,7 +23,7 @@ test('Transformaciones son proporcionales a la página y tienen límites', () =>
 test('Diseño nuevo puede serializarse y validarse sin alterar otros campos', () => {
   const uuid='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
   const value={fixed:{production:'Technical details'},extras:[{id:uuid,page:2,text:'Free text'}],
-    transforms:{'extra:'+uuid:{x:4,y:-5,scale:1.4,rotation:-30}}};
+    transforms:{['extra:'+uuid]:{x:4,y:-5,scale:1.4,rotation:-30}}};
   assert.equal(validCarolinaLayout(value),true);
   assert.deepEqual(JSON.parse(JSON.stringify(value)),value);
   assert.equal(validCarolinaLayout({fixed:{test:'Not allowed'}}),false);
