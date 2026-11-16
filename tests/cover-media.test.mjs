@@ -37,7 +37,7 @@ test('Video seleccionado funciona en plantillas y lector 3D como medio, no como 
  const node=src('features/templates/CoverMediaNode.tsx');
  const mag=src('features/magazine/FlipMagazine.tsx');
  assert.match(node,/if\(video\)/);
- assert.match(node,/<video className="hn-cover-video" src=\{video\}/);
+ assert.match(node,/<video ref=\{player\} className="hn-cover-video" src=\{video\}/);
  assert.match(node,/autoPlay muted loop playsInline disablePictureInPicture/);
  assert.doesNotMatch(node,/<video[^>]*\scontrols(?:\s|\/>)/);
  assert.match(node,/IntersectionObserver/);
