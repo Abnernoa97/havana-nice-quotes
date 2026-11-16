@@ -288,19 +288,6 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const original = !item.style || item.style === 'carolina';
   return (
     <section className="hn-canvas">
-      {original && (
-        <>
-          <nav className="hn-canvas-pages" aria-label="Páginas seleccionadas para la revista">
-            {selectedPages.map((id,index) => (
-              <button key={id} type="button" className={page===id?'selected':''}
-                aria-current={page===id?'page':undefined}
-                onClick={()=>{setPage(id);setTransformingId(null);setEditingId(null);setLastTextId(null);setSelectedPhotoId(null);setPhotoTool(null);setPhotoLayersOpen(false);}}>
-                <small>{index+1}</small>{pages[id]}
-              </button>
-            ))}
-          </nav>
-        </>
-      )}
       {original && <div className="hn-canvas-toolbar">
         <button type="button" onClick={addFreeText}>+ Texto</button>
         <button type="button" onClick={addPhotoAnywhere}

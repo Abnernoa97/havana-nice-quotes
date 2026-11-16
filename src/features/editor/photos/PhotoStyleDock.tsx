@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
+import { pointerIntent } from '../shared/pointer-intent';
 import { Check, ChevronRight, CircleDot, Crop, Droplets, Layers3, Palette, RefreshCw } from 'lucide-react';
 import type { CarolinaPhotoStyle } from '../../templates/carolina-layout';
 import { CAROLINA_PHOTO_DEFAULTS as D } from '../../templates/carolina-layout';
@@ -22,16 +24,71 @@ const tools=[
   {id:'vignette',label:'Viñeta',Icon:CircleDot},
 ] as const;
 
+/** The browser owns vertical touch panning; values change only for deliberate
+ * horizontal drags or short taps. This prevents accidental edits while scrolling. */
 function Slider({label,name,value,min,max,unit='%',onChange}:{
   label:string;name:NumberKey;value:number;min:number;max:number;
   unit?:string;onChange:Props['onStyleChange'];
 }){
-  return <label className="hn-photo-slider">
-    <span><span>{label}</span><strong>{value}{unit}</strong></span>
-    <input type="range" min={min} max={max} step="1" value={value}
-      aria-label={label}
-      onChange={event=>onChange({[name]:Number(event.currentTarget.value)} as Partial<CarolinaPhotoStyle>)}/>
-  </label>;
+  const ref=useRef<HTMLDivElement>(null);
+  const pointer=useRef<{id:number;x:number;y:number;intent:'pending'|'horizontal'|'vertical'}|null>(null);
+  const setByPosition=(x:number)=>{
+    const rect=ref.current?.getBoundingClientRect();
+    if(!rect||!rect.width)return;
+    const next=Math.max(min,Math.min(max,Math.round(min+(x-rect.left)/rect.width*(max-min))));
+    if(next!==value)onChange({[name]:next} as Partial<CarolinaPhotoStyle>);
+  };
+  const start=(event:ReactPointerEvent<HTMLDivElement>)=>{
+    if(event.pointerType==='mouse' && event.button!==0)return;
+    pointer.current={id:event.pointerId,x:event.clientX,y:event.clientY,intent:'pending'};
+    // Never capture on touch-down: Android must remain free to scroll.
+  };
+  const move=(event:ReactPointerEvent<HTMLDivElement>)=>{
+    const p=pointer.current;
+    if(!p||p.id!==event.pointerId||p.intent==='vertical')return;
+    const dx=event.clientX-p.x,dy=event.clientY-p.y;
+    if(p.intent==='pending'){
+      const intent=pointerIntent(dx,dy);
+      if(intent==='pending')return;
+      p.intent=intent;
+      if(intent==='vertical')return;
+      try{event.currentTarget.setPointerCapture(event.pointerId);}catch{/* native scroll won */}
+    }
+    setByPosition(event.clientX);
+  };
+  const end=(event:ReactPointerEvent<HTMLDivElement>)=>{
+    const p=pointer.current;
+    if(!p||p.id!==event.pointerId)return;
+    if(p.intent==='pending'&&Math.hypot(event.clientX-p.x,event.clientY-p.y)<7)
+      setByPosition(event.clientX);
+    if(event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    pointer.current=null;
+  };
+  const cancel=(event:ReactPointerEvent<HTMLDivElement>)=>{
+    if(pointer.current?.id===event.pointerId)pointer.current=null;
+  };
+  const key=(event:ReactKeyboardEvent<HTMLDivElement>)=>{
+    const step=(event.key==='ArrowRight'||event.key==='ArrowUp')?1:
+      (event.key==='ArrowLeft'||event.key==='ArrowDown')?-1:0;
+    if(!step&&event.key!=='Home'&&event.key!=='End')return;
+    event.preventDefault();
+    const next=event.key==='Home'?min:event.key==='End'?max:
+      Math.max(min,Math.min(max,value+step));
+    if(next!==value)onChange({[name]:next} as Partial<CarolinaPhotoStyle>);
+  };
+  const percent=(value-min)/(max-min)*100;
+  return <div className="hn-photo-slider">
+    <div className="hn-photo-slider-heading"><span>{label}</span><strong>{value}{unit}</strong></div>
+    <div className="hn-photo-slider-track" ref={ref} role="slider"
+      tabIndex={0} aria-label={label} aria-valuemin={min} aria-valuemax={max}
+      aria-valuenow={value} aria-valuetext={value+unit}
+      onPointerDown={start} onPointerMove={move} onPointerUp={end}
+      onPointerCancel={cancel} onKeyDown={key}>
+      <span className="hn-photo-slider-fill" style={{width:percent+'%'}} aria-hidden="true"/>
+      <span className="hn-photo-slider-thumb" style={{left:percent+'%'}} aria-hidden="true"/>
+    </div>
+  </div>;
 }
 
 /** One contextual dock for one image: never creates a second photo actions bar. */

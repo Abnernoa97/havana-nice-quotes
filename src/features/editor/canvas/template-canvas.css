@@ -1,9 +1,5 @@
 /* Page-centered editing canvas; the reader components remain the source of truth. */
-.hn-canvas{padding:16px 10px 26px;background:#f6f8f4}
-.hn-canvas-pages{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin:0 0 16px}
-.hn-canvas-pages button{display:flex;align-items:center;gap:7px;padding:10px 12px;background:#fff;border:1px solid #dfe9de;border-radius:9px;color:#69816d;font-size:12px;cursor:pointer}
-.hn-canvas-pages button.selected{background:#254937;color:#fff;border-color:#254937}
-.hn-canvas-pages small{opacity:.7;font-size:10px}
+.hn-canvas{padding:9px 10px 26px;background:#f6f8f4;touch-action:pan-y}
 .hn-canvas-sheet{width:min(100%,620px);min-width:0;margin:auto;background:#fff;box-shadow:0 12px 32px #21382916;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .hn-canvas-cover{position:relative;aspect-ratio:612/792}
 .hn-canvas-cover .hn-carolina-page{height:100%;width:100%}
@@ -39,7 +35,7 @@
 
 /* Inline editing, long-hold moving, pinch and rotate. No separate text dialog. */
 .hn-canvas-toolbar button{border:1px solid #cbd9cb;color:#244a36;background:#fff;border-radius:9px;min-height:41px;min-width:100px;font:600 13px 'DM Sans',sans-serif;cursor:pointer}
-.hn-canvas .hn-carolina-text-node{cursor:text;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.hn-canvas .hn-carolina-text-node{cursor:text;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .hn-canvas .hn-carolina-text-node.empty{min-width:1em;min-height:1em;color:#b09666}
 .hn-canvas .hn-carolina-text-node:hover:not(.editing){outline:1px dashed #ad915f}
 .hn-canvas .hn-carolina-text-node.editing{min-width:1.5em;outline:1px solid #ad915f;outline-offset:2px;background:#fff9;border-radius:3px;user-select:text;-webkit-user-select:text;touch-action:auto;cursor:text}
@@ -47,12 +43,12 @@
 .hn-canvas .hn-carolina-extra-layer{z-index:3}
 .hn-canvas .hn-carolina-page.hn-layout-grid::before{z-index:4}
 
-.hn-canvas .hn-carolina-page.hn-layout-grid { touch-action:none; }
+.hn-canvas .hn-carolina-page.hn-layout-grid { touch-action:pan-y; }
 .hn-canvas .hn-carolina-text-node.editing { font-size:max(16px, 1em); }
 
 /* Same long-hold gesture used by text; no duplicate transform controls. */
 .hn-canvas .hn-carolina-editable-photo,
-.hn-canvas .hn-carolina-cover-photo { touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+.hn-canvas .hn-carolina-cover-photo { touch-action:pan-y; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
 .hn-canvas .hn-carolina-cover-photo:hover,
 .hn-canvas .hn-carolina-editable-photo:hover { outline:1px dashed #bc9f69; outline-offset:-2px; }
 
@@ -69,8 +65,13 @@
 .hn-canvas-toolbar{width:min(100%,620px);margin:0 auto 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-start;color:#64816c;font-size:11px}
 .hn-canvas-toolbar>button{flex:0 1 130px;min-width:0}
 .hn-canvas-toolbar>span{flex:1 1 100%;text-align:center;font-size:11px}
-.hn-canvas .hn-carolina-floating-photo{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.hn-canvas .hn-carolina-floating-photo{touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 
 
 /* Replacement picker must be above the dedicated photo workspace. */
 
+
+/* Scroll above images and text works normally; moving is armed only by a long press. */
+.hn-canvas .hn-carolina-page{touch-action:pan-y}
+.hn-canvas .hn-carolina-text-node.transforming,
+.hn-canvas .hn-carolina-editable-photo.hn-photo-transforming{touch-action:none}

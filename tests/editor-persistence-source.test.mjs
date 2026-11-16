@@ -472,7 +472,8 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   assert.doesNotMatch(flip,/<CarolinaBlankReverse\/>/);
   assert.match(document,/carolinaPageOrder\(item\.carolinaLayout\)\.map\(page=>/);
   assert.doesNotMatch(canvas,/pageManager|setPageOrder|togglePage|shiftPage|Hojas \{/);
-  assert.match(canvas,/Páginas seleccionadas para la revista/);
+  assert.doesNotMatch(canvas,/hn-canvas-pages|Páginas seleccionadas para la revista/);
+  assert.match(canvas,/className="hn-canvas-pager"/);
   assert.match(canvas,/onClick=\{\(\)=>changePage\(1\)\}/);
   assert.match(canvas,/page === 2 && <CarolinaTerms/);
   assert.match(layout,/pageOrder\?: CarolinaPageId\[\]/);
@@ -615,4 +616,10 @@ test('Edición de efectos fotográficos tiene un solo propietario',()=>{
  assert.doesNotMatch(photo,/effectMoved|touchStart|effectMode|onDown =|onMove =/);
  assert.doesNotMatch(gesture,/imageEdit\?:/);
  assert.match(canvas,/<PhotoEditingWorkspace photoId=\{selectedPhotoId\}/);
+});
+
+test('El bloqueo de scroll ocurre exclusivamente tras pulsación larga',()=>{
+  const hook=src('features/templates/useCarolinaGesture.ts');
+  assert.match(hook,/addEventListener\('touchmove', preventDragScroll, \{passive:false\}\)/);
+  assert.match(hook,/if \(longPressed\.current && event\.cancelable\) event\.preventDefault\(\)/);
 });

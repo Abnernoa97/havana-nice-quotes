@@ -27,3 +27,14 @@ test('Editor tiene una sola arquitectura activa y ningún archivo antiguo',()=>{
   assert.doesNotMatch(node,/effectMoved|effectMode/);
   assert.doesNotMatch(gesture,/imageEdit\?:/);
 });
+
+test('Navegación inferior única y gesto de desplazamiento vertical seguro',()=>{
+ const canvas=read('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const css=read('features/editor/canvas/template-canvas.css');
+ const dock=read('features/editor/photos/PhotoStyleDock.tsx');
+ assert.doesNotMatch(canvas,/hn-canvas-pages/);
+ assert.match(canvas,/className="hn-canvas-pager"/);
+ assert.doesNotMatch(css,/\.hn-canvas-pages/);
+ assert.match(css,/touch-action:pan-y/);
+ assert.match(dock,/pointerIntent/);
+});

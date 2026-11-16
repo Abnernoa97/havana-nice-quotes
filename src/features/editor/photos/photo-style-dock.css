@@ -44,9 +44,16 @@
   background:linear-gradient(90deg,#fafcf900,#fafcf9 55%)}
 .hn-photo-controls{display:flex;flex-direction:column;gap:10px}
 .hn-photo-slider{display:flex;flex-direction:column;gap:3px}
-.hn-photo-slider>span{display:flex;justify-content:space-between;align-items:center;color:#53705b;font-size:12px}
-.hn-photo-slider strong{font-variant-numeric:tabular-nums;color:#254937;font-weight:750}
-.hn-photo-slider input{width:100%;accent-color:#244a37;min-height:22px;touch-action:pan-x}
+.hn-photo-slider-heading{display:flex;justify-content:space-between;align-items:center;color:#53705b;font-size:12px}
+.hn-photo-slider-heading strong{font-variant-numeric:tabular-nums;color:#254937;font-weight:750}
+.hn-photo-slider-track{position:relative;height:25px;min-width:100%;touch-action:pan-y;user-select:none;
+  -webkit-user-select:none;cursor:ew-resize;display:flex;align-items:center;outline:none}
+.hn-photo-slider-track::before{content:'';height:5px;background:#e6eae5;border:1px solid #c8cec8;
+  position:absolute;left:0;right:0;border-radius:999px;pointer-events:none}
+.hn-photo-slider-fill{position:absolute;left:0;height:5px;border-radius:999px;background:#254937;pointer-events:none}
+.hn-photo-slider-thumb{position:absolute;width:17px;height:17px;background:#254937;border-radius:50%;
+  transform:translateX(-50%);box-shadow:0 0 0 2px #f5f7f3;pointer-events:none}
+.hn-photo-slider-track:focus-visible{outline:2px solid #bd9860;outline-offset:3px;border-radius:5px}
 .hn-photo-option{display:flex;flex-direction:column;align-items:flex-start;gap:7px}
 .hn-photo-option>button,.hn-photo-options>button,.hn-photo-presets button{
   border:1px solid #d8e4d6;background:#fff;color:#365d42;
@@ -91,7 +98,7 @@
 .hn-photo-workspace-stage{overflow-y:auto;overscroll-behavior-y:contain;touch-action:pan-y;scrollbar-width:thin}
 .hn-photo-workspace-frame:not(.editing-effect){touch-action:pan-y}
 .hn-photo-workspace-frame.editing-effect{touch-action:none}
-.hn-photo-workspace .hn-photo-expanded{overscroll-behavior-y:contain;touch-action:pan-y}
+.hn-photo-workspace .hn-photo-expanded{overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
 .hn-photo-workspace .hn-photo-tools-rail{flex-shrink:0}
 .hn-photo-workspace .hn-photo-switches{touch-action:pan-x}
 .hn-photo-crop-turn{display:flex;gap:6px}

@@ -46,6 +46,16 @@ export function useCarolinaGesture<T extends HTMLElement>(
     setLive(saved || ZERO_TRANSFORM);
   }, [saved?.x, saved?.y, saved?.scale, saved?.rotation]);
   useEffect(() => () => { if (hold.current) clearTimeout(hold.current); }, []);
+  useEffect(() => {
+    const element = node.current;
+    if (!element || disabled || !interaction) return;
+    // Native scroll is blocked only when a long press has intentionally armed the drag.
+    const preventDragScroll = (event: TouchEvent) => {
+      if (longPressed.current && event.cancelable) event.preventDefault();
+    };
+    element.addEventListener('touchmove', preventDragScroll, {passive:false});
+    return () => element.removeEventListener('touchmove', preventDragScroll);
+  }, [disabled, !!interaction]);
 
   const cancelHold = () => { if (hold.current) clearTimeout(hold.current); hold.current = null; };
   const resetBaseline = () => {
@@ -70,6 +80,10 @@ export function useCarolinaGesture<T extends HTMLElement>(
         if (!pointers.current.size) return;
         longPressed.current = true;
         swallowClick.current = true;
+        // Capture *after* the hold so vertical swipes can scroll the document natively.
+        if (node.current?.isConnected) {
+          try { node.current.setPointerCapture(pointerId); } catch { /* OS already cancelled */ }
+        }
         interactionRef.current?.onSelectTransform(id);
         resetBaseline();
       }, LONG_PRESS_MS);
@@ -156,8 +170,10 @@ export function useCarolinaGesture<T extends HTMLElement>(
 
   const onPointerDown = (event: ReactPointerEvent<T>) => {
     if (disabled || !interaction || event.pointerType === 'mouse' && event.button !== 0) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
     begin(event.pointerId, event.clientX, event.clientY);
+    // A previously armed layer is explicitly being moved; otherwise leave the
+    // pointer unclaimed and allow native vertical scrolling / pointercancel.
+    if (longPressed.current) event.currentTarget.setPointerCapture(event.pointerId);
   };
   const onPointerMove = (event: ReactPointerEvent<T>) =>
     update(event.pointerId, event.clientX, event.clientY);
