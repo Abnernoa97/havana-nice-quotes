@@ -202,6 +202,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     updateLayout({textStyles});
   };
   const photoOrder = carolinaPhotoOrder(item.carolinaLayout);
+  const setPhotoOrder = (order:number[]) => updateLayout({photoOrder:order});
   const selectPhoto = (id:string) => {
     setPhotoTool(null);
     setSelectedPhotoId(id);
@@ -220,7 +221,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     if (!selectedPhotoId) return;
     if (selectedPhotoId === 'photo:cover') open('cover');
     else if (selectedPhotoId.startsWith('photo-extra:'))
-      open('extra:' + selectedPhotoId.slice('photo-extra:'.length));
+      open(`extra:${selectedPhotoId.slice('photo-extra:'.length)}`);
     else if (/^photo:(1[01]|[0-9])$/.test(selectedPhotoId))
       open(Number(selectedPhotoId.slice(6)));
   };
