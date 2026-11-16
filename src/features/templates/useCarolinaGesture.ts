@@ -58,6 +58,11 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const begin = (pointerId: number, x: number, y: number) => {
     if (!longPressed.current) swallowClick.current = false;
     pointers.current.set(pointerId, { x, y });
+    // A layer chosen explicitly from the layer list is ready to drag immediately.
+    if (interactionRef.current?.transformingId===id) {
+      longPressed.current = true;
+      swallowClick.current = true;
+    }
     if (longPressed.current) { cancelHold(); resetBaseline(); return; }
     if (pointers.current.size === 1) {
       press.current = { x, y };

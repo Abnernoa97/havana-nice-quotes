@@ -557,3 +557,42 @@ test('Reemplazar una fotografía mantiene sus efectos previos',()=>{
   assert.match(app,/gallery\[target\] = saved\.url/);
   assert.match(photo,/photoStyle\?\.opacity/);
 });
+
+
+test('Editor inmersivo: giro real, scroll independiente y controles anclados',()=>{
+  const workspace=src('features/editor/PhotoEditingWorkspace.tsx');
+  const dock=src('features/editor/PhotoStyleDock.tsx');
+  const photo=src('features/templates/CarolinaPhotoNode.tsx');
+  const model=src('features/templates/carolina-layout.ts');
+  const css=readFileSync(new URL('../src/features/editor/photo-style-dock.css',import.meta.url),'utf8');
+  assert.match(workspace,/rotateCrop\(g\.startRotation,g\.angle,angle\(positions\[0\],positions\[1\]\)\)/);
+  assert.match(workspace,/positions\.length>1/);
+  assert.match(workspace,/cropRotation:rotation/);
+  assert.match(dock,/slider\('Girar izquierda \/ derecha','cropRotation',-180,180,'°'\)/);
+  assert.match(photo,/rotate\(' \+ \(photoStyle\?\.cropRotation/);
+  assert.match(model,/cropRotation:\[-180,180\]/);
+  assert.match(css,/\.hn-photo-workspace-stage\{overflow-y:auto/);
+  assert.match(css,/\.hn-photo-workspace \.hn-photo-expanded\{overscroll-behavior-y:contain;touch-action:pan-y\}/);
+  assert.match(css,/\.hn-photo-workspace \.hn-photo-tools-rail\{flex-shrink:0\}/);
+  assert.match(css,/\.hn-photo-workspace \.hn-photo-switches\{touch-action:pan-x\}/);
+  assert.match(workspace,/const closeRef=useRef\(onClose\)/);
+  assert.match(workspace,/\},\[\]\);/);
+});
+
+test('Fotos en fondo se recuperan por capas aunque el texto o una foto las cubra',()=>{
+  const editor=src('features/editor/TemplateCanvasEditor.tsx');
+  const css=readFileSync(new URL('../src/features/editor/template-canvas.css',import.meta.url),'utf8');
+  const templateCss=readFileSync(new URL('../src/features/templates/carolina-template.css',import.meta.url),'utf8');
+  const gestures=src('features/templates/useCarolinaGesture.ts');
+  assert.match(editor,/const photoLayers=\[\.\.\.backgroundCover,\.\.\.backgroundCollage,\.\.\.layeredPhotos\]/);
+  assert.match(editor,/Capas de fotos/);
+  assert.match(editor,/onClick=\{\(\)=>selectPhoto\(layer\.id\)\}/);
+  assert.match(editor,/onClick=\{\(\)=>movePhotoLayer\(layer\.id\)\}/);
+  assert.match(editor,/onClick=\{\(\)=>removePhoto\(layer\.id\)\}/);
+  assert.match(editor,/delete transforms\[id\]; delete photoStyles\[id\]/);
+  assert.match(css,/\.hn-canvas-layers-list\{/);
+  assert.match(templateCss,/\.hn-canvas \.hn-carolina-term-group\{pointer-events:none\}/);
+  assert.match(templateCss,/\.hn-canvas \.hn-carolina-term-group \.hn-carolina-text-node\{pointer-events:auto\}/);
+  assert.match(templateCss,/hn-carolina-floating-photo\.hn-photo-transforming/);
+  assert.match(gestures,/interactionRef\.current\?\.transformingId===id/);
+});

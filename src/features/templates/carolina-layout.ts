@@ -45,6 +45,7 @@ export type CarolinaPhotoStyle = {
   tint?: string; tintAmount?: number;
   cropZoom?: number; cropX?: number; cropY?: number;
   cropAspect?: 'frame'|'1:1'|'4:5'|'9:16'|'16:9';
+  cropRotation?: number;
   opacity?: number;
   vignetteShape?: 'none' | 'square' | 'round';
   vignetteColor?: 'black' | 'white';
@@ -54,7 +55,7 @@ export type CarolinaPhotoStyle = {
 export const CAROLINA_PHOTO_DEFAULTS = {
   brightness: 100, contrast: 100, saturate: 100, hue: 0,
   grayscale: 0, sepia: 0, tintAmount: 0,
-  cropZoom: 100, cropX: 50, cropY: 50, opacity: 100,
+  cropZoom: 100, cropX: 50, cropY: 50, cropRotation: 0, opacity: 100,
   vignetteStrength: 45, vignetteSize: 55, vignetteX: 50, vignetteY: 50,
 } as const;
 
@@ -123,7 +124,7 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     const numeric: Record<string,[number,number]> = {
       brightness:[0,200], contrast:[0,200], saturate:[0,200],
       hue:[-180,180], grayscale:[0,100], sepia:[0,100],
-      tintAmount:[0,100], cropZoom:[100,300], cropX:[0,100],
+      tintAmount:[0,100], cropZoom:[100,300], cropX:[0,100], cropRotation:[-180,180],
       cropY:[0,100], opacity:[0,100], vignetteStrength:[0,100],
       vignetteSize:[0,100], vignetteX:[0,100], vignetteY:[0,100],
     };

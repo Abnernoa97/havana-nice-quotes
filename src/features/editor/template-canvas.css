@@ -91,3 +91,17 @@
 
 /* Replacement picker must be above the dedicated photo workspace. */
 .hn-canvas-shade{z-index:1100}
+
+/* Reachable layer index even when a background photo is obscured by editable text or another photo. */
+.hn-canvas-layers{width:min(100%,620px);margin:0 auto 10px}
+.hn-canvas-layers-trigger{display:flex;align-items:center;gap:7px;min-height:32px;max-width:100%;border:1px solid #d5e2d5;border-radius:9px;padding:6px 10px;background:#fff;color:#315840;font:650 11px 'DM Sans',sans-serif}
+.hn-canvas-layers-trigger strong{font-variant-numeric:tabular-nums;font-size:10px}
+.hn-canvas-layers-trigger svg:last-child{transition:transform .15s ease}
+.hn-canvas-layers-trigger svg:last-child.open{transform:rotate(180deg)}
+.hn-canvas-layers-list{display:grid;gap:5px;margin-top:5px;background:#fff;padding:8px;border:1px solid #dee8dc;border-radius:10px;max-height:200px;overflow-y:auto;overscroll-behavior:contain}
+.hn-canvas-layer{display:flex;align-items:center;gap:7px;min-height:42px}
+.hn-canvas-layer img{width:39px;height:39px;object-fit:cover;border-radius:5px}
+.hn-canvas-layer-name{flex:1;min-width:0;color:#315840;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hn-canvas-layer-name small{color:#88958a}
+.hn-canvas-layer button{display:grid;place-items:center;min-height:33px;padding:6px 8px;border:1px solid #d9e5da;border-radius:7px;background:#f7faf6;color:#315840;font-size:11px;font-weight:700}
+.hn-canvas-layer button[aria-label^="Borrar"]{color:#99574c;background:#fff7f5}

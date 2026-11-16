@@ -73,7 +73,7 @@ export default function CarolinaPhotoNode({
   const picture: CSSProperties = {
     backgroundImage: url ? 'url("' + url + '")' : undefined,
     backgroundPosition: (photoStyle?.cropX ?? D.cropX) + '% ' + (photoStyle?.cropY ?? D.cropY) + '%',
-    transform: 'scale(' + ((photoStyle?.cropZoom ?? D.cropZoom) / 100) + ')',
+    transform: 'rotate(' + (photoStyle?.cropRotation ?? D.cropRotation) + 'deg) scale(' + ((photoStyle?.cropZoom ?? D.cropZoom) / 100) + ')',
     transformOrigin: (photoStyle?.cropX ?? D.cropX) + '% ' + (photoStyle?.cropY ?? D.cropY) + '%',
     filter: 'brightness(' + (photoStyle?.brightness ?? D.brightness) + '%) ' +
       'contrast(' + (photoStyle?.contrast ?? D.contrast) + '%) ' +

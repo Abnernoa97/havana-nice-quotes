@@ -91,10 +91,16 @@ export default function PhotoStyleDock({
             onClick={()=>onStyleChange({cropAspect:option.id})}>{option.label}</button>)}
         </div>
         {slider('Zoom','cropZoom',100,300)}
+        {slider('Girar izquierda / derecha','cropRotation',-180,180,'°')}
+        <div className="hn-photo-crop-turn" role="group" aria-label="Giro rápido">
+          <button type="button" onClick={()=>onStyleChange({cropRotation:Math.max(-180,(style?.cropRotation??0)-90)})}>↶ 90°</button>
+          <button type="button" onClick={()=>onStyleChange({cropRotation:0})}>0°</button>
+          <button type="button" onClick={()=>onStyleChange({cropRotation:Math.min(180,(style?.cropRotation??0)+90)})}>90° ↷</button>
+        </div>
         <div className="hn-photo-crop-footer">
-          <small>Mueve la foto con un dedo · Pellizca para ampliar · Ajusta desde las esquinas</small>
+          <small>Mueve con un dedo · Pellizca y gira con dos · Ajusta desde las esquinas</small>
           <button className="hn-photo-reset" type="button" onClick={()=>onStyleChange({
-            cropZoom:100,cropX:50,cropY:50,cropAspect:'frame'
+            cropZoom:100,cropX:50,cropY:50,cropRotation:0,cropAspect:'frame'
           })}>Restablecer</button>
         </div>
       </div>}

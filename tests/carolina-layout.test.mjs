@@ -245,3 +245,16 @@ test('Validación de relaciones de recorte dentro de un recuadro estable',()=>{
   for(const a of ['frame','1:1','4:5','9:16','16:9'])assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{cropAspect:a,cropZoom:135}}}),true);
   assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{cropAspect:'4:3'}}}),false);
 });
+
+
+test('Giro fotográfico persistente: horizontal, vertical y giro con dos dedos',async()=>{
+  const {rotateCrop,normalizeCropRotation}=await import('../src/features/templates/photo-crop.ts');
+  assert.equal(rotateCrop(0,0,Math.PI/2),90);
+  assert.equal(rotateCrop(170,0,Math.PI/2),-100);
+  assert.equal(normalizeCropRotation(-270),90);
+  assert.equal(normalizeCropRotation(360),0);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:cover':{cropRotation:90}}}),true);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{cropRotation:-180}}}),true);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{cropRotation:181}}}),false);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{cropRotation:45.5}}}),false);
+});

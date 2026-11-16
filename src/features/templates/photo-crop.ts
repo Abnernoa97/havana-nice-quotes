@@ -14,3 +14,13 @@ export function handleCropZoom(v:CropValues,corner:string,dx:number,dy:number,w:
   const sx=corner.includes('left')?1:-1,sy=corner.includes('top')?1:-1;
   return clampCrop({...v,cropZoom:v.cropZoom+200*(sx*dx/Math.max(1,w)+sy*dy/Math.max(1,h))});
 }
+
+/** Rotate the image content without moving the frame; wrap safely across ±180°. */
+export function normalizeCropRotation(degrees:number):number {
+  if(!Number.isFinite(degrees)) return 0;
+  return Math.round((((degrees+180)%360)+360)%360-180);
+}
+export function rotateCrop(startDegrees:number,startAngleRadians:number,currentAngleRadians:number):number {
+  const delta=((currentAngleRadians-startAngleRadians)*180/Math.PI+540)%360-180;
+  return normalizeCropRotation(startDegrees+delta);
+}
