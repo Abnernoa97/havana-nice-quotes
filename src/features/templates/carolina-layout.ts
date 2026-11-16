@@ -69,7 +69,7 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     if (!layout.transforms || typeof layout.transforms !== 'object' || Array.isArray(layout.transforms)) return false;
     if (Object.entries(layout.transforms).length > 100) return false;
     for (const [id, raw] of Object.entries(layout.transforms)) {
-      if (!/^(fixed:[a-zA-Z]+|field:[a-z]+|extra:[a-f0-9-]{36}|photo:(?:cover|[0-5]))$/.test(id) ||
+      if (!/^(fixed:[a-zA-Z]+|field:[a-z]+|extra:[a-f0-9-]{36}|photo:(?:cover|1[01]|[0-9]))$/.test(id) ||
         !raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
       const t = raw as Record<string, unknown>;
       if (Object.keys(t).sort().join(',') !== 'rotation,scale,x,y') return false;

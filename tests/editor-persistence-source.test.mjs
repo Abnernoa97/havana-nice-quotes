@@ -355,8 +355,7 @@ test('Fotos editables en el diseño real y visor: los 7 recuadros usan un solo g
   const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
   assert.match(image,/useCarolinaGesture\(id, element, transform, interaction\)/);
   assert.match(template,/item\.carolinaLayout\?\.transforms\?\.\['photo:cover'\]/);
-  assert.match(template,/item\.carolinaLayout\?\.transforms\?\.\['photo:' \+ i\]/);
-  assert.match(template,/item\.carolinaLayout\?\.transforms\?\.\['photo:' \+ \(i \+ 2\)\]/);
+  assert.equal((template.match(/item\.carolinaLayout\?\.transforms\?\.\['photo:' \+ slot\]/g)||[]).length,2);
   assert.match(template,/<CarolinaPhotoNode cover id="photo:cover"/);
   assert.doesNotMatch(template,/function PhotoCell\(/);
   assert.match(gesture,/const LONG_PRESS_MS = 550/);

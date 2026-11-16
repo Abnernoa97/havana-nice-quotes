@@ -61,17 +61,17 @@ test('Fotografías de portada y collage comparten gestos, posiciones y escala pe
   assert.match(photo,/onPointerDown=\{gesture\.onPointerDown\}/);
   assert.match(photo,/if \(!gesture\.suppressTap\(\)\) onSelect\(\)/);
   assert.match(template,/id="photo:cover"/);
-  assert.match(template,/id=\{'photo:' \+ i\}/);
-  assert.match(template,/id=\{'photo:' \+ \(i \+ 2\)\}/);
+  assert.equal((template.match(/id=\{'photo:' \+ slot\}/g)||[]).length,2);
   assert.match(template,/transform=\{item\.carolinaLayout\?\.transforms\?\.\['photo:cover'\]\}/);
   assert.match(canvas,/onSelectCover=\{\(\) => open\('cover'\)\}/);
   assert.match(canvas,/\.hn-carolina-photo, \.hn-carolina-cover-photo/);
-  assert.match(layout,/photo:\(\?:cover\|\[0-5\]\)/);
+  assert.match(layout,/photo:\(\?:cover\|1\[01\]\|\[0-9\]\)/);
   assert.match(gestures,/page\.addEventListener\('pointerdown', down\)/);
   for(const id of ['photo:cover','photo:0','photo:1','photo:2','photo:3','photo:4','photo:5']) {
     assert.ok(validCarolinaLayout({transforms:{[id]:{x:-15,y:7,scale:1.8,rotation:18}}}),id);
   }
-  assert.equal(validCarolinaLayout({transforms:{'photo:6':{x:0,y:0,scale:1,rotation:0}}}),false);
+  assert.equal(validCarolinaLayout({transforms:{'photo:11':{x:0,y:0,scale:1,rotation:0}}}),true);
+  assert.equal(validCarolinaLayout({transforms:{'photo:12':{x:0,y:0,scale:1,rotation:0}}}),false);
   assert.equal(validCarolinaLayout({transforms:{'photo:outside':{x:0,y:0,scale:1,rotation:0}}}),false);
   assert.equal(validCarolinaLayout({transforms:{'photo:cover':{x:0,y:0,scale:50,rotation:0}}}),false);
 });

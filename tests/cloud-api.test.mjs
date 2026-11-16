@@ -536,6 +536,7 @@ test('Carolina conserva títulos, textos adicionales y geometría entre disposit
         'photo:cover':{x:-10,y:2,scale:1.4,rotation:9},
         'photo:0':{x:10,y:-3,scale:1.1,rotation:0},
         'photo:5':{x:4,y:8,scale:2,rotation:55},
+        'photo:11':{x:8,y:12,scale:1.9,rotation:25},
       },
     },
   };
