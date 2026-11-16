@@ -198,6 +198,14 @@ function App() {
     setQuotes(current => current.map(quote => {
       if (quote.id !== quoteId) return quote;
       if (target === 'cover') return { ...quote, cover: saved.url };
+      if (typeof target === 'string' && target.startsWith('extra:')) {
+        const id=target.slice(6);
+        const previous=quote.carolinaLayout?.extraPhotos || [];
+        if (!previous.some(photo=>photo.id===id)) return quote;
+        return { ...quote, carolinaLayout: { ...quote.carolinaLayout,
+          extraPhotos: previous.map(photo=>photo.id===id ? {...photo,url:saved.url} : photo),
+        } };
+      }
       const gallery = Array.from({ length: CAROLINA_MAX_SLOTS }, (_, i) => quote.gallery?.[i] || '');
       gallery[target] = saved.url;
       return { ...quote, gallery };

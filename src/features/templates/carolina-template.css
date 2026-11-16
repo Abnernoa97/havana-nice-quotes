@@ -164,3 +164,19 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
 .hn-carolina-collage.flexible-collage:has(.hn-carolina-photo-column.right:empty) {
   grid-template-columns:1fr;
 }
+
+/* User-added image blocks: same layer in edit mode, Scroll and 3D. */
+.hn-carolina-photo-overlay{position:absolute;inset:0;pointer-events:none;z-index:4}
+.hn-carolina-photo-overlay .hn-carolina-floating-photo{
+  position:absolute;top:33%;left:32%;width:36%;height:29%;
+  display:block;pointer-events:auto;border:0;border-radius:2px;
+  background-color:#e1e8e1;background-size:cover;background-position:center;
+  padding:0;transform-origin:center;box-sizing:border-box;
+}
+.hn-carolina-photo-overlay .hn-carolina-floating-photo.hn-carolina-editable-photo{
+  cursor:pointer;border:1px dashed #9eac9c;
+}
+.hn-carolina-photo-overlay .hn-carolina-floating-photo .hn-carolina-empty-photo{
+  display:grid;place-items:center;width:100%;height:100%;
+  color:#637e6a;font-size:26px;
+}

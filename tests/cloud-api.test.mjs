@@ -529,6 +529,8 @@ test('Carolina conserva títulos, textos adicionales y geometría entre disposit
     note:'',package:'',desc:'',style:'carolina',readingMode:'flip',
     carolinaLayout:{
       fixed:{experience:'Our Wedding Experience',brand:'HAVANA NICE',investment:''},
+      pageOrder:[0,2],
+      extraPhotos:[{id:'99999999-9999-9999-9999-999999999999',page:2,url:'/api/media/11111111-1111-1111-1111-111111111111'}],
       defaultFont:'cinzel',
       fonts:{'fixed:experience':'cinzel-decorative','field:name':'bodoni-moda'},
       textStyles:{'fixed:experience':{color:'#BDA577',size:160,stretchX:135,stretchY:105},
@@ -583,6 +585,12 @@ test('API bloquea layouts con tamaños infinitos, campos no admitidos o extras c
     {textStyles:{'field:name':{stretchX:300}}},
     {textStyles:{'photo:cover':{color:'#FFFFFF'}}},
     {textStyles:{'field:name':{fontFamily:'untrusted'}}},
+    {pageOrder:[]},
+    {pageOrder:[0,0]},
+    {pageOrder:[9]},
+    {extraPhotos:[{id:'11111111-1111-1111-1111-111111111111',page:2,url:'https://outside.example/img.jpg'}]},
+    {extraPhotos:[{id:'11111111-1111-1111-1111-111111111111',page:5,url:''}]},
+    {transforms:{'photo-extra:invalid':{x:0,y:0,scale:1,rotation:0}}},
     {unapproved:{test:'X'}},
   ];
   for (const layout of bad) {

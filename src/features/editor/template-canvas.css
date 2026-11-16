@@ -102,3 +102,28 @@
 .hn-canvas-trash{position:fixed;z-index:84;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);min-width:210px;max-width:88vw;min-height:62px;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 18px;border:1px dashed #be8e85;border-radius:15px;background:#fff8f5;box-shadow:0 10px 35px #41211d30;color:#985447;cursor:pointer;font-size:12px;font-weight:750;transition:background .15s ease,color .15s ease,scale .15s ease}
 .hn-canvas-trash.hot{background:#9e4c42;color:#fff;border-color:#9e4c42;scale:1.06}
 .hn-canvas-trash:focus-visible{outline:3px solid #bd9860;outline-offset:3px}
+
+/* Same +Foto and +Texto actions on all pages; page picker manages actual book leaves. */
+.hn-canvas-toolbar{display:flex;gap:8px;align-items:center;justify-content:flex-start}
+.hn-canvas-toolbar>button{flex:0 1 130px;min-width:0}
+.hn-canvas-toolbar>span{flex:1 1 100%;text-align:center;font-size:11px}
+.hn-canvas-pages{flex-wrap:wrap}
+.hn-canvas-pages>.hn-canvas-page-settings{
+  flex:0 0 auto;min-height:40px;border:1px solid #d5e2d3;border-radius:9px;
+  background:#fff;color:#526d58;padding:8px 10px;font-size:11px;font-weight:700;
+}
+.hn-canvas-page-manager{
+  width:min(100%,620px);margin:0 auto 13px;padding:10px 11px;
+  box-sizing:border-box;border:1px solid #dce8dc;border-radius:12px;
+  background:#f7faf6;display:flex;flex-direction:column;gap:7px;
+}
+.hn-canvas-page-row{display:flex;align-items:center;gap:7px}
+.hn-canvas-page-row>span{flex:1;color:#294c38;font-size:12px;font-weight:650}
+.hn-canvas-page-row>button{
+  border:1px solid #d7e3d6;border-radius:7px;background:#fff;color:#3c6649;
+  min-height:32px;padding:5px 11px;font-size:12px;cursor:pointer;
+}
+.hn-canvas-page-row>button:disabled{opacity:.3;cursor:default}
+.hn-canvas-page-row>button:last-child{min-width:65px}
+.hn-canvas-page-manager>small{color:#849488;font-size:10px;line-height:1.4}
+.hn-canvas .hn-carolina-floating-photo{touch-action:none;user-select:none;-webkit-user-select:none}

@@ -26,16 +26,25 @@ export type CarolinaFixedKey = keyof typeof CAROLINA_FIXED;
 export const CAROLINA_DEFAULT_SLOTS = 6;
 export const CAROLINA_MAX_SLOTS = 12;
 export const CAROLINA_DEFAULT_ORDER = Array.from({ length: CAROLINA_DEFAULT_SLOTS }, (_, i) => i);
+export const CAROLINA_PAGE_TITLES = ['Portada', 'Collage', 'Propuesta'] as const;
+export type CarolinaPageId = 0 | 1 | 2;
+export const CAROLINA_DEFAULT_PAGES: CarolinaPageId[] = [0,1,2];
+export function carolinaPageOrder(layout: CarolinaLayout | undefined): CarolinaPageId[] {
+  return [...(layout?.pageOrder || CAROLINA_DEFAULT_PAGES)];
+}
 
 export type CarolinaTransform = { x: number; y: number; scale: number; rotation: number };
 /** Appearance is scoped to an individual text block; never inherited by its siblings. */
 export type CarolinaTextStyle = { color?: string; size?: number; stretchX?: number; stretchY?: number };
-export type CarolinaExtra = { id: string; page: 0 | 1 | 2; text: string };
+export type CarolinaExtra = { id: string; page: CarolinaPageId; text: string };
+export type CarolinaExtraPhoto = { id: string; page: CarolinaPageId; url: string };
 export type CarolinaLayout = {
   fixed?: Partial<Record<CarolinaFixedKey, string>>;
   transforms?: Record<string, CarolinaTransform>;
   extras?: CarolinaExtra[];
   photoOrder?: number[];
+  pageOrder?: CarolinaPageId[];
+  extraPhotos?: CarolinaExtraPhoto[];
   defaultFont?: ElegantFontId;
   fonts?: Record<string, ElegantFontId>;
   textStyles?: Record<string, CarolinaTextStyle>;
@@ -59,7 +68,7 @@ export function clampTransform(value: CarolinaTransform): CarolinaTransform {
 export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const layout = value as Record<string, unknown>;
-  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder', 'defaultFont', 'fonts', 'textStyles'].includes(k))) return false;
+  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder', 'pageOrder', 'extraPhotos', 'defaultFont', 'fonts', 'textStyles'].includes(k))) return false;
   if (layout.defaultFont !== undefined && !isElegantFontId(layout.defaultFont)) return false;
   if (layout.fonts !== undefined) {
     if (!layout.fonts || typeof layout.fonts !== 'object' || Array.isArray(layout.fonts)) return false;
@@ -84,6 +93,25 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
         !validPct('size',50,300) || !validPct('stretchX',50,200) || !validPct('stretchY',50,200);
     })) return false;
   }
+  if (layout.pageOrder !== undefined) {
+    if (!Array.isArray(layout.pageOrder) || !layout.pageOrder.length || layout.pageOrder.length>3 ||
+      new Set(layout.pageOrder).size!==layout.pageOrder.length ||
+      layout.pageOrder.some((page:unknown)=>page!==0&&page!==1&&page!==2)) return false;
+  }
+  if (layout.extraPhotos !== undefined) {
+    if (!Array.isArray(layout.extraPhotos) || layout.extraPhotos.length>24) return false;
+    const seen=new Set<string>();
+    for (const photo of layout.extraPhotos) {
+      if (!photo || typeof photo!=='object' || Array.isArray(photo)) return false;
+      const p=photo as Record<string,unknown>;
+      if (Object.keys(p).sort().join(',')!=='id,page,url' ||
+        typeof p.id!=='string' || !/^[a-f0-9-]{36}$/.test(p.id) ||
+        seen.has(p.id) || (p.page!==0&&p.page!==1&&p.page!==2) ||
+        typeof p.url!=='string' || p.url!=='' &&
+        !/^\/api\/media\/[a-f0-9-]{36}$/.test(p.url)) return false;
+      seen.add(p.id);
+    }
+  }
   if (layout.photoOrder !== undefined) {
     if (!Array.isArray(layout.photoOrder) || layout.photoOrder.length < 1 ||
       layout.photoOrder.length > CAROLINA_MAX_SLOTS ||
@@ -101,7 +129,7 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     if (!layout.transforms || typeof layout.transforms !== 'object' || Array.isArray(layout.transforms)) return false;
     if (Object.entries(layout.transforms).length > 100) return false;
     for (const [id, raw] of Object.entries(layout.transforms)) {
-      if (!/^(fixed:[a-zA-Z]+|field:[a-z]+(?::cover)?|extra:[a-f0-9-]{36}|photo:(?:cover|1[01]|[0-9]))$/.test(id) ||
+      if (!/^(fixed:[a-zA-Z]+|field:[a-z]+(?::cover)?|extra:[a-f0-9-]{36}|photo:(?:cover|1[01]|[0-9])|photo-extra:[a-f0-9-]{36})$/.test(id) ||
         !raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
       const t = raw as Record<string, unknown>;
       if (Object.keys(t).sort().join(',') !== 'rotation,scale,x,y') return false;

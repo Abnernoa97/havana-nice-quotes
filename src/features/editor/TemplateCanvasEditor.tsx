@@ -36,7 +36,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   useEffect(() => {
-    setPage(0); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
+    setPage(carolinaPageOrder(item.carolinaLayout)[0]); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
     setLastTextId(null); setTrashHovered(false);
   }, [item.id, item.style]);
   const updateLayout = (patch: Partial<CarolinaLayout>) => {

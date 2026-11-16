@@ -5,7 +5,8 @@ import { PageFlip } from 'page-flip';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
 import { money, quoteCurrency } from '../../shared/lib/formatters';
 import { coverBackground } from '../../shared/lib/coverBackground';
-import { CarolinaCover, CarolinaCollage, CarolinaTerms, CarolinaBlankReverse } from '../templates/CarolinaTemplate';
+import { CarolinaCover, CarolinaCollage, CarolinaTerms } from '../templates/CarolinaTemplate';
+import { carolinaPageOrder } from '../templates/carolina-layout';
 import './flip-magazine.css';
 
 function MagazineLeaf({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -25,7 +26,8 @@ export default function FlipMagazine({ item }: { item: Quote }) {
   const [page, setPage] = useState(0);
   const [orientation, setOrientation] = useState('portrait');
   const [failure, setFailure] = useState(false);
-  const total = item.style === 'carolina' ? 4 : 6;
+  const selectedPages = carolinaPageOrder(item.carolinaLayout);
+  const total = item.style === 'carolina' ? selectedPages.length : 6;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -39,6 +41,14 @@ export default function FlipMagazine({ item }: { item: Quote }) {
       const pages = Array.from(source.children).map(node => node.cloneNode(true));
       host.replaceChildren(...pages);
       mount.replaceChildren(host);
+      // One selected page is a real single leaf, not a fabricated blank book page.
+      if (pages.length === 1) {
+        host.classList.add('hn-flip-single');
+        flipRef.current = null;
+        setPage(0);
+        setFailure(false);
+        return () => { mount.replaceChildren(); };
+      }
       flip = new PageFlip(host, {
         width: 410,
         height: 580,
@@ -123,10 +133,13 @@ export default function FlipMagazine({ item }: { item: Quote }) {
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
         {item.style === 'carolina' ? (
           <>
-            <MagazineLeaf className="hn-carolina-leaf"><CarolinaCover item={item}/></MagazineLeaf>
-            <MagazineLeaf className="hn-carolina-leaf"><CarolinaCollage item={item}/></MagazineLeaf>
-            <MagazineLeaf className="hn-carolina-leaf"><CarolinaTerms item={item}/></MagazineLeaf>
-            <MagazineLeaf className="hn-carolina-leaf"><CarolinaBlankReverse/></MagazineLeaf>
+            {selectedPages.map(selectedPage => (
+              <MagazineLeaf key={selectedPage} className="hn-carolina-leaf">
+                {selectedPage === 0 ? <CarolinaCover item={item}/> :
+                  selectedPage === 1 ? <CarolinaCollage item={item}/> :
+                  <CarolinaTerms item={item}/>}
+              </MagazineLeaf>
+            ))}
           </>
         ) : (
           <>

@@ -3,7 +3,7 @@ import type { CarolinaTextInteraction } from './CarolinaTextNode';
 import CarolinaTextNode from './CarolinaTextNode';
 import CarolinaPhotoNode from './CarolinaPhotoNode';
 import type { CarolinaFixedKey } from './carolina-layout';
-import { fixedText, carolinaPhotoOrder, CAROLINA_MAX_SLOTS } from './carolina-layout';
+import { fixedText, carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS } from './carolina-layout';
 import { quoteCurrency, usd } from '../../shared/lib/formatters';
 import './carolina-template.css';
 
@@ -66,8 +66,25 @@ function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
     </div>
   );
 }
-export function CarolinaCover({ item, interaction, onSelectCover }: PageProps & {
+/** Additional photo layers belong to an individual page, not to the fixed collage grid. */
+function ExtraPhotos({ item, page, interaction, onSelectPhoto }: PageProps & {
+  page: number; onSelectPhoto?: (id:string)=>void;
+}) {
+  const photos=item.carolinaLayout?.extraPhotos?.filter(p=>p.page===page)||[];
+  if (!photos.length) return null;
+  return <div className="hn-carolina-photo-overlay">
+    {photos.map(photo=>{
+      const id='photo-extra:'+photo.id;
+      return <CarolinaPhotoNode key={id} id={id} url={photo.url} extra
+        transform={item.carolinaLayout?.transforms?.[id]}
+        interaction={interaction}
+        onSelect={onSelectPhoto ? ()=>onSelectPhoto(photo.id) : undefined}/>;
+    })}
+  </div>;
+}
+export function CarolinaCover({ item, interaction, onSelectCover, onSelectExtraPhoto }: PageProps & {
   onSelectCover?: () => void;
+  onSelectExtraPhoto?: (id:string)=>void;
 }) {
   return (
     <div className={'hn-carolina-page hn-carolina-cover' +
@@ -91,12 +108,14 @@ export function CarolinaCover({ item, interaction, onSelectCover }: PageProps & 
           </small>
         </div>
       )}
+      <ExtraPhotos item={item} page={0} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
       <ExtraTexts item={item} page={0} interaction={interaction}/>
     </div>
   );
 }
-export function CarolinaCollage({ item, onSelectPhoto, interaction }: PageProps & {
+export function CarolinaCollage({ item, onSelectPhoto, interaction, onSelectExtraPhoto }: PageProps & {
   onSelectPhoto?: (index: number) => void;
+  onSelectExtraPhoto?: (id:string)=>void;
 }) {
   const images = carolinaPhotos(item);
   const order = carolinaPhotoOrder(item.carolinaLayout);
@@ -119,11 +138,12 @@ export function CarolinaCollage({ item, onSelectPhoto, interaction }: PageProps 
           transform={item.carolinaLayout?.transforms?.['photo:' + slot]}
           interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(slot) : undefined}/>)}
       </div>
+      <ExtraPhotos item={item} page={1} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
       <ExtraTexts item={item} page={1} interaction={interaction}/>
     </div>
   );
 }
-export function CarolinaTerms({ item, interaction }: PageProps) {
+export function CarolinaTerms({ item, interaction, onSelectExtraPhoto }: PageProps & {onSelectExtraPhoto?: (id:string)=>void}) {
   const copy = carolinaCopy(item);
   return (
     <div className={'hn-carolina-page hn-carolina-terms' +
@@ -174,6 +194,7 @@ export function CarolinaTerms({ item, interaction }: PageProps) {
             <FieldNode item={item} field="space" value={copy.space} interaction={interaction}/></p>
         </div>
       </section>
+      <ExtraPhotos item={item} page={2} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
       <ExtraTexts item={item} page={2} interaction={interaction}/>
     </div>
   );
@@ -181,9 +202,11 @@ export function CarolinaTerms({ item, interaction }: PageProps) {
 export default function CarolinaDocument({ item }: { item: Quote }) {
   return (
     <div className="hn-carolina-document">
-      <CarolinaCover item={item}/>
-      <CarolinaCollage item={item}/>
-      <CarolinaTerms item={item}/>
+      {carolinaPageOrder(item.carolinaLayout).map(page=>{
+        if (page===0) return <CarolinaCover key="cover" item={item}/>;
+        if (page===1) return <CarolinaCollage key="collage" item={item}/>;
+        return <CarolinaTerms key="terms" item={item}/>;
+      })}
     </div>
   );
 }

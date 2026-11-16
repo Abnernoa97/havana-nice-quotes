@@ -190,7 +190,8 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.match(canvas, /edit\('gallery', gallery\)/);
   assert.doesNotMatch(details, /carolinaCopy|hn-carolina-copy-editor/);
   assert.match(magazine, /item\.style === 'carolina'/);
-  assert.match(magazine, /<CarolinaBlankReverse\/>/);
+  assert.doesNotMatch(magazine, /<CarolinaBlankReverse\/>/);
+  assert.match(magazine, /selectedPages\.map\(selectedPage =>/);
   assert.match(magazine, /flippingTime: 1080/);
   assert.doesNotMatch(template, /<iframe|<embed|<object|\.pdf/);
 });
@@ -447,4 +448,49 @@ test('Pulsación larga: papelera por click o arrastrar, sin afectar las fotos de
   assert.match(gesture, /onDrop\?\.\(id,x,y\)/);
   assert.match(gesture, /if \(!dropped && JSON\.stringify\(current\.current\)/);
   assert.match(canvas, /if \(transformingId && !event\.isPrimary\) return/);
+});
+
+
+test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada ficticia',()=>{
+  const flip=src('features/magazine/FlipMagazine.tsx');
+  const document=src('features/templates/CarolinaTemplate.tsx');
+  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const layout=src('features/templates/carolina-layout.ts');
+  assert.match(flip,/const selectedPages = carolinaPageOrder\(item\.carolinaLayout\)/);
+  assert.match(flip,/const total = item\.style === 'carolina' \? selectedPages\.length : 6/);
+  assert.match(flip,/if \(pages\.length === 1\)/);
+  assert.match(flip,/selectedPages\.map\(selectedPage =>/);
+  assert.doesNotMatch(flip,/<CarolinaBlankReverse\/>/);
+  assert.match(document,/carolinaPageOrder\(item\.carolinaLayout\)\.map\(page=>/);
+  assert.match(canvas,/setPageOrder=\(order:CarolinaPageId\[\]\)=>/);
+  assert.match(canvas,/const togglePage=\(id:CarolinaPageId\)=>/);
+  assert.match(canvas,/const shiftPage=\(id:CarolinaPageId,delta:-1\|1\)=>/);
+  assert.match(canvas,/Páginas seleccionadas para la revista/);
+  assert.match(canvas,/setPage\(selectedPages\[pageIndex\+1\]\)/);
+  assert.match(layout,/pageOrder\?: CarolinaPageId\[\]/);
+});
+
+test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2',()=>{
+  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const app=src('app/App.tsx');
+  const template=src('features/templates/CarolinaTemplate.tsx');
+  const photo=src('features/templates/CarolinaPhotoNode.tsx');
+  const layout=src('features/templates/carolina-layout.ts');
+  assert.match(canvas,/<button type="button" onClick=\{addPhotoAnywhere\}/);
+  assert.match(canvas,/const addPhotoAnywhere=\(\)=>/);
+  assert.match(canvas,/if \(page===1\) \{ addPhotoBlock\(\); return; \}/);
+  assert.match(canvas,/setTarget\('extra:'\+id\)/);
+  assert.match(canvas,/onSelectExtraPhoto=\{id=>open\('extra:'\+id\)\}/);
+  assert.match(canvas,/const removePhoto = \(id:string\) =>/);
+  assert.match(canvas,/const removeElement=\(id:string\) => isPhotoId\(id\) \? removePhoto\(id\) : removeText\(id\)/);
+  assert.match(canvas,/onClick=\{\(\)=>removeElement\(transformingId\)\}/);
+  assert.match(canvas,/const hit=overTrash\(x,y\)/);
+  assert.doesNotMatch(canvas, /original && transformingId && !transformingId\.startsWith\('photo:'\)/);
+  assert.match(template,/function ExtraPhotos/);
+  assert.match(template,/page=\{0\} interaction=\{interaction\} onSelectPhoto/);
+  assert.match(template,/page=\{1\} interaction=\{interaction\} onSelectPhoto/);
+  assert.match(template,/page=\{2\} interaction=\{interaction\} onSelectPhoto/);
+  assert.match(photo,/hn-carolina-floating-photo/);
+  assert.match(app,/target\.startsWith\('extra:'\)/);
+  assert.match(layout,/photo-extra:\[a-f0-9-\]\{36\}/);
 });

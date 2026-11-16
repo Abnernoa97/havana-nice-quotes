@@ -179,3 +179,42 @@ test('Portada y condiciones permiten tipografías independientes al mostrar el m
   assert.match(template,/field="date" instance="cover"/);
   assert.match(editor,/id\.slice\(6\)\.split\(':'\)\[0\]/);
 });
+
+
+test('Tres hojas reales por defecto; la selección conserva solo las solicitadas',async()=>{
+  const {carolinaPageOrder,CAROLINA_DEFAULT_PAGES,validCarolinaLayout}=
+    await import('../src/features/templates/carolina-layout.ts');
+  assert.deepEqual(CAROLINA_DEFAULT_PAGES,[0,1,2]);
+  assert.deepEqual(carolinaPageOrder(undefined),[0,1,2]);
+  assert.deepEqual(carolinaPageOrder({pageOrder:[2,0]}),[2,0]);
+  assert.deepEqual(carolinaPageOrder({pageOrder:[1]}),[1]);
+  assert.equal(validCarolinaLayout({pageOrder:[0,1,2]}),true);
+  assert.equal(validCarolinaLayout({pageOrder:[0]}),true);
+  assert.equal(validCarolinaLayout({pageOrder:[2,0]}),true);
+  assert.equal(validCarolinaLayout({pageOrder:[]}),false);
+  assert.equal(validCarolinaLayout({pageOrder:[0,0]}),false);
+  assert.equal(validCarolinaLayout({pageOrder:[0,3]}),false);
+  assert.equal(validCarolinaLayout({pageOrder:[0,1,2,0]}),false);
+});
+
+test('Fotografías libres en portada, collage y propuesta con IDs y URL privada verificados',()=>{
+  const valid=validCarolinaLayout({
+    extraPhotos:[
+      {id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:0,url:'/api/media/11111111-1111-1111-1111-111111111111'},
+      {id:'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',page:1,url:''},
+      {id:'cccccccc-cccc-cccc-cccc-cccccccccccc',page:2,url:'/api/media/22222222-2222-2222-2222-222222222222'},
+    ],
+    transforms:{'photo-extra:cccccccc-cccc-cccc-cccc-cccccccccccc':
+      {x:10,y:5,scale:1.5,rotation:14}},
+  });
+  assert.equal(valid,true);
+  assert.equal(validCarolinaLayout({extraPhotos:[
+    {id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:2,url:'https://evil.example/photo.jpg'}]}),false);
+  assert.equal(validCarolinaLayout({extraPhotos:[
+    {id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:3,url:''}]}),false);
+  assert.equal(validCarolinaLayout({extraPhotos:[
+    {id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:0,url:''},
+    {id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:1,url:''}]}),false);
+  assert.equal(validCarolinaLayout({transforms:{
+    'photo-extra:garbage':{x:0,y:0,scale:1,rotation:0}}}),false);
+});
