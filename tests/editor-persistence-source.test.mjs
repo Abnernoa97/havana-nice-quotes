@@ -104,7 +104,8 @@ test('Fotos admite diez imágenes por lote y Diseño una imagen dirigida a cada 
   const app = src('app/App.tsx');
   assert.match(bank, /multiple hidden disabled=\{uploading \|\| trashing\}/);
   const canvas = src('features/editor/canvas/TemplateCanvasEditor.tsx');
-  assert.match(canvas, /type="file" accept="image\/jpeg/);
+  const picker = src('features/editor/photos/PhotoSourcePicker.tsx');
+  assert.match(picker, /type="file" accept="image\/jpeg/);
   assert.match(canvas, /onUploadPhoto\(file, target\)/);
   assert.match(batch, /MAX_PHOTOS_PER_UPLOAD = 10/);
   assert.match(hook, /await processPhotoBatch\(files,/);
