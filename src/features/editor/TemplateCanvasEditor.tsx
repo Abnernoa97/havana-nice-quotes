@@ -220,7 +220,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       )}
       {original && <div className="hn-canvas-toolbar">
         <button type="button" onClick={addFreeText}>+ Texto</button>
-        {transformingId && <span>Arrastra · Amplía o gira con dos dedos</span>
+        {transformingId && <span>Arrastra · Amplía o gira con dos dedos</span>}
       </div>}
       <div className="hn-canvas-sheet" onPointerDown={event => {
         const target=event.target;
