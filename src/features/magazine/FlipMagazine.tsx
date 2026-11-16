@@ -37,10 +37,29 @@ export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
     if (!mount || !source) return;
     let flip: PageFlip | undefined;
     let host: HTMLDivElement | undefined;
+    let onVisibility: (()=>void) | undefined;
+    const syncCoverVideos=(index:number)=>{
+      host?.querySelectorAll<HTMLElement>('.hn-leaf').forEach((leaf,leafIndex)=>{
+        leaf.querySelectorAll('video').forEach(media=>{
+          media.muted=true;media.loop=true;media.controls=false;
+          if(!document.hidden&&leafIndex===index)void media.play().catch(()=>{});
+          else media.pause();
+        });
+      });
+    };
     try {
       host = document.createElement('div');
       host.className = 'hn-flip-host';
       const pages = Array.from(source.children).map(node => node.cloneNode(true));
+      // The hidden source is layout-only; play only the visible PageFlip clone.
+      source.querySelectorAll('video').forEach(media=>{
+        media.autoplay=false;media.pause();
+      });
+      onVisibility=()=>{
+        if(document.hidden)host?.querySelectorAll('video').forEach(media=>media.pause());
+        else syncCoverVideos(flip?.getCurrentPageIndex()??0);
+      };
+      document.addEventListener('visibilitychange',onVisibility);
       host.replaceChildren(...pages);
       mount.replaceChildren(host);
       // One selected page is a real single leaf, not a fabricated blank book page.
@@ -49,7 +68,12 @@ export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
         flipRef.current = null;
         setPage(0);
         setFailure(false);
-        return () => { mount.replaceChildren(); };
+        syncCoverVideos(0);
+        return () => {
+          if(onVisibility)document.removeEventListener('visibilitychange',onVisibility);
+          host?.querySelectorAll('video').forEach(media=>media.pause());
+          mount.replaceChildren();
+        };
       }
       flip = new PageFlip(host, {
         width: 410,
@@ -73,19 +97,23 @@ export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
       });
       flip.loadFromHTML(host.querySelectorAll<HTMLElement>('.hn-leaf'));
       flip.on('flip', e => {
-        // Native video players on a previous page must never keep sounding.
-        host?.querySelectorAll('video').forEach(media => media.pause());
-        setPage(Number(e.data || 0));
+        const next=Number(e.data||0);
+        // Stop old leaves; resume the muted infinite loop when cover returns.
+        syncCoverVideos(next);
+        setPage(next);
       });
       flip.on('changeOrientation', e => setOrientation(String(e.data)));
       flipRef.current = flip;
       setPage(0);
       setFailure(false);
+      syncCoverVideos(0);
     } catch (error) {
       console.error('Magazine preview failed', error);
       setFailure(true);
     }
     return () => {
+      if(onVisibility)document.removeEventListener('visibilitychange',onVisibility);
+      host?.querySelectorAll('video').forEach(media=>media.pause());
       flipRef.current = null;
       try { flip?.destroy(); } catch (error) { console.warn('Page flip cleanup', error); }
       mount.replaceChildren();
