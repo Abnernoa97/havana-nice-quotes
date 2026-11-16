@@ -27,6 +27,7 @@ test('Diseño nuevo puede serializarse y validarse sin alterar otros campos', ()
   assert.equal(validCarolinaLayout(value),true);
   assert.deepEqual(JSON.parse(JSON.stringify(value)),value);
   assert.equal(validCarolinaLayout({fixed:{test:'Not allowed'}}),false);
+  assert.equal(validCarolinaLayout({fixed:{constructor:'Not allowed'}}),false);
   assert.equal(validCarolinaLayout({transforms:{'field:date':{x:0,y:0,scale:0,rotation:0}}}),false);
   assert.equal(validCarolinaLayout({extras:[{id:uuid,page:5,text:'Invalid'}]}),false);
 });

@@ -51,7 +51,7 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     if (!layout.fixed || typeof layout.fixed !== 'object' || Array.isArray(layout.fixed)) return false;
     const entries = Object.entries(layout.fixed);
     if (entries.length > Object.keys(CAROLINA_FIXED).length ||
-      entries.some(([k, v]) => !(k in CAROLINA_FIXED) || typeof v !== 'string' || v.length > 1200)) return false;
+      entries.some(([k, v]) => !Object.prototype.hasOwnProperty.call(CAROLINA_FIXED, k) || typeof v !== 'string' || v.length > 1200)) return false;
   }
   if (layout.transforms !== undefined) {
     if (!layout.transforms || typeof layout.transforms !== 'object' || Array.isArray(layout.transforms)) return false;
