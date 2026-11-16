@@ -23,7 +23,7 @@ test('La biblioteca R2 y las fotos subidas alimentan la portada', () => {
   const canvas = src('features/editor/TemplateCanvasEditor.tsx');
   assert.match(design, /<TemplateCanvasEditor item=\{item\}/);
   assert.match(canvas, /photos\.map\(photo =>/);
-  assert.match(canvas, /edit\('cover', url\)/);
+  assert.match(canvas, /edit\('cover',\s*url\)/);
   assert.match(app, /uploadPhotos\(\[file\]\)/);
   assert.match(app, /onUploadPhoto=\{uploadDesignPhoto\}/);
   assert.doesNotMatch(app, /readAsDataURL|localStorage/);
@@ -293,7 +293,7 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
   assert.match(canvas, /const pages = \['Portada', 'Collage', 'Propuesta'\]/);
   assert.match(canvas, /<CarolinaCover item=\{item\} interaction=\{textInteraction\}[\s\S]*?onSelectCover=/);
   assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
-  assert.match(canvas, /<CarolinaTerms item=\{item\} interaction=\{textInteraction\}\/>/);
+  assert.match(canvas, /<CarolinaTerms item=\{item\} interaction=\{textInteraction\}\s+onSelectExtraPhoto=/);
   assert.match(canvas, /Mi teléfono/);
   assert.match(canvas, /Banco de fotos/);
   assert.match(canvas, /photos\.map\(photo =>/);
@@ -446,7 +446,7 @@ test('Pulsación larga: papelera compartida para fotos y texto, sin borrar R2', 
   assert.match(canvas,/if \(hit\) removeElement\(id\)/);
   assert.match(canvas,/const isPhotoId =/);
   assert.match(canvas,/const removePhoto = \(id:string\) =>/);
-  assert.match(canvas,/const removeElement=\(id:string\) => isPhotoId\(id\) \? removePhoto\(id\) : removeText\(id\)/);
+  assert.match(canvas,/const removeElement\s*=\s*\(id:string\) => isPhotoId\(id\) \? removePhoto\(id\) : removeText\(id\)/);
   assert.match(canvas,/onDrop: \(id,x,y\) =>/);
   assert.match(canvas,/setTrashHovered\(overTrash\(x,y\)\)/);
   assert.match(canvas,/delete transforms\[id\]; delete fonts\[id\]; delete textStyles\[id\]/);
@@ -487,7 +487,7 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
   assert.match(canvas,/setTarget\('extra:'\+id\)/);
   assert.match(canvas,/onSelectExtraPhoto=\{id=>open\('extra:'\+id\)\}/);
   assert.match(canvas,/const removePhoto = \(id:string\) =>/);
-  assert.match(canvas,/const removeElement=\(id:string\) => isPhotoId\(id\) \? removePhoto\(id\) : removeText\(id\)/);
+  assert.match(canvas,/const removeElement\s*=\s*\(id:string\) => isPhotoId\(id\) \? removePhoto\(id\) : removeText\(id\)/);
   assert.match(canvas,/onClick=\{\(\)=>removeElement\(transformingId\)\}/);
   assert.match(canvas,/const hit=overTrash\(x,y\)/);
   assert.doesNotMatch(canvas, /original && transformingId && !transformingId\.startsWith\('photo:'\)/);
