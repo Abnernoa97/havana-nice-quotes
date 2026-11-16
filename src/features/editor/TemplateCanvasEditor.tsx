@@ -152,7 +152,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
               </div>
             ) : textField === 'price' ? (
               <>
-                <input autoFocus type="text" inputMode="numeric" placeholder="0"
+                <input autoFocus type="text" inputMode="numeric"
                   aria-label="Precio total" value={item.price || ''}
                   onChange={event => changeText('price', event.target.value)}/>
                 <div className="hn-canvas-currency" role="group" aria-label="Moneda">

@@ -52,14 +52,6 @@
   background: #eecb7d22;
 }
 .hn-canvas-inline-text.empty { min-width: 1.6em; min-height: 1em; color: #ad9366; }
-.hn-carolina-cover-personal {
-  position: absolute; bottom: 8%; left: 10%; right: 10%;
-  display: flex; align-items: center; flex-direction: column; gap: .7cqw;
-  text-align: center; color: #fff; text-shadow: 0 2px 6px #21150c88;
-}
-.hn-carolina-cover-personal h2 { margin: 0; font: 500 clamp(13px,4.3cqw,35px)/1.15 'Cormorant Garamond',Georgia,serif; }
-.hn-carolina-cover-personal p { margin: 0; font: 400 clamp(8px,2.4cqw,18px)/1.1 'Jost',sans-serif; max-height: 2.4em; overflow: hidden; }
-.hn-carolina-cover-personal small { display:flex; gap:.3em; justify-content:center; flex-wrap:wrap; font: 400 clamp(8px,2.1cqw,16px)/1.2 'Jost',sans-serif; }
 .hn-canvas-cover .hn-carolina-cover-personal { z-index: 2; }
 .hn-canvas-cover-button { z-index: 1; }
 .hn-canvas-text-picker { display: flex; flex-direction: column; gap: 10px; }

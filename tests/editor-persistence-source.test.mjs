@@ -286,9 +286,9 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
   const app = src('app/App.tsx');
   const stylesheet = readFileSync(new URL('../src/shared/styles/index.css', import.meta.url),'utf8');
   assert.match(canvas, /const pages = \['Portada', 'Collage', 'Propuesta'\]/);
-  assert.match(canvas, /<CarolinaCover item=\{item\}\/>/);
+  assert.match(canvas, /<CarolinaCover item=\{item\} onEditText=\{openText\}\/>/);
   assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
-  assert.match(canvas, /<CarolinaTerms item=\{item\}\/>/);
+  assert.match(canvas, /<CarolinaTerms item=\{item\} onEditText=\{openText\}\/>/);
   assert.match(canvas, /Mi teléfono/);
   assert.match(canvas, /Banco de fotos/);
   assert.match(canvas, /photos\.map\(photo =>/);
@@ -296,4 +296,44 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
   assert.match(app, /gallery\[target\] = saved\.url/);
   assert.doesNotMatch(design, /font-options|swatches|photo-options|CarolinaGalleryEditor|upload-btn/);
   assert.doesNotMatch(stylesheet, /\.photo-options \{|\.font-options \{|\.swatches \{/);
+});
+
+
+test('Carolina: todos los textos variables se editan tocando la página y llegan al mismo modelo', async () => {
+  const model = src('features/quotes/types.ts');
+  const editor = src('features/editor/TemplateCanvasEditor.tsx');
+  const template = src('features/templates/CarolinaTemplate.tsx');
+  const fields = src('features/templates/carolina-edit-fields.ts');
+  const client = src('features/client/Proposal.tsx');
+  const magazine = src('features/magazine/FlipMagazine.tsx');
+  assert.match(editor, /const openText = \(field: CarolinaTextField\)/);
+  assert.match(editor, /edit\('carolinaCopy', \{ \.\.\.item\.carolinaCopy, \[field\]: value\.slice\(0, 1500\) \}\)/);
+  assert.match(editor, /edit\(field, value\)/);
+  assert.match(editor, /edit\('date', iso\)/);
+  assert.match(editor, /edit\('price', safeQuotePrice\(normalizePriceInput\(value\)\)\)/);
+  assert.match(editor, /edit\('deposit', percent\)/);
+  for (const field of ['name', 'date', 'location', 'note', 'package', 'desc', 'price', 'deposit',
+    'performance', 'musicians', 'crew', 'backline', 'logistics', 'balance', 'production',
+    'connections', 'space']) assert.match(fields, new RegExp('\\\\b' + field + ':'));
+  assert.match(template, /export function CarolinaTerms\(\{ item, onEditText \}/);
+  assert.match(template, /onEditText\?: OnTextEdit/);
+  assert.match(model, /carolinaCopy\?: Partial<CarolinaCopy>/);
+  // No editable buttons are embedded in the client's pages.
+  assert.match(template, /if \(!onEditText\) return <>\{value\}<\/>/);
+  assert.match(client, /<CarolinaDocument item=\{item\}\/>/);
+  assert.match(magazine, /<CarolinaTerms item=\{item\}\/>/);
+});
+
+test('Carolina: los valores editables mantienen el contrato D1 y la validación original', async () => {
+  const { CAROLINA_FIELD_LABELS, CAROLINA_TERMS_FIELDS, isCarolinaCopyField } =
+    await import('../src/features/templates/carolina-edit-fields.ts');
+  assert.equal(Object.keys(CAROLINA_FIELD_LABELS).length, 17);
+  assert.equal(CAROLINA_TERMS_FIELDS.length, 9);
+  assert.ok(isCarolinaCopyField('production'));
+  assert.ok(!isCarolinaCopyField('date'));
+  const worker = readFileSync(new URL('../worker/index.ts', import.meta.url), 'utf8');
+  for (const field of CAROLINA_TERMS_FIELDS) {
+    assert.ok(worker.includes("'" + field + "'"), 'D1 still accepts '+field);
+  }
+  assert.match(worker, /value\.length <= 1500/);
 });
