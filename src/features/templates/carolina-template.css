@@ -134,3 +134,11 @@
 .hn-carolina-cover .hn-carolina-added-text{color:#fff;background:#17382b66}
 .hn-carolina-page.hn-layout-grid::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:6;background-image:linear-gradient(to right,#2c8b7766 1px,transparent 1px),linear-gradient(to bottom,#2c8b7766 1px,transparent 1px);background-size:10% 7.7%;opacity:.7}
 .hn-carolina-text-node.transforming{position:relative;z-index:8;outline:1px dashed #a88d52;outline-offset:4px;background:#fff9}
+
+/* Center guides are visible only during an active text transform, never to clients. */
+.hn-carolina-page.hn-layout-grid::after {
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:6;
+  background-image:linear-gradient(to right,transparent calc(50% - .75px),#b69561 calc(50% - .75px),#b69561 calc(50% + .75px),transparent calc(50% + .75px)),
+    linear-gradient(to bottom,transparent calc(50% - .75px),#b69561 calc(50% - .75px),#b69561 calc(50% + .75px),transparent calc(50% + .75px));
+  opacity:.8;
+}

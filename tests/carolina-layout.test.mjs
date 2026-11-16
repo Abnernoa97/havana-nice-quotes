@@ -40,7 +40,9 @@ test('Edición directa, presión larga y gesto de dos dedos mantienen un solo gu
   assert.match(gesture,/onPointerDown=\{down\} onPointerMove=\{move\}/);
   assert.match(gesture,/onBlur=\{\(\) =>/);
   assert.match(gesture,/Math\.hypot/);
-  assert.match(gesture,/onCommitTransform\(id, current\.current\)/);
+  assert.match(gesture,/page\.addEventListener\('pointerdown', down\)/);
+  assert.match(gesture,/pointers\.current\.size === 0/);
+  assert.match(gesture,/interaction\.onCommitTransform\(id, current\.current\)/);
   assert.match(canvas,/onCommitTransform: \(id: string, transform: CarolinaTransform\)/);
   assert.match(canvas,/setTransformingId\(null\)/);
   assert.match(worker,/validCarolinaLayout\(q\.carolinaLayout\)/);

@@ -65,3 +65,6 @@
 .hn-canvas .hn-carolina-cover-brand,.hn-canvas .hn-carolina-cover-personal{z-index:3}
 .hn-canvas .hn-carolina-extra-layer{z-index:5}
 .hn-canvas .hn-carolina-page.hn-layout-grid::before{z-index:4}
+
+.hn-canvas .hn-carolina-page.hn-layout-grid { touch-action:none; }
+.hn-canvas .hn-carolina-text-node.editing { font-size:max(16px, 1em); }
