@@ -190,7 +190,7 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   const canvas = src('features/editor/TemplateCanvasEditor.tsx');
   assert.match(design, /<TemplateCanvasEditor item=\{item\}/);
   assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
-  assert.match(canvas, /edit\('gallery', gallery\)/);
+  assert.match(canvas, /edit\('gallery',\s*gallery\)/);
   assert.doesNotMatch(details, /carolinaCopy|hn-carolina-copy-editor/);
   assert.match(magazine, /item\.style === 'carolina'/);
   assert.doesNotMatch(magazine, /<CarolinaBlankReverse\/>/);
@@ -484,7 +484,7 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
   assert.match(canvas,/const addPhotoAnywhere=\(\)=>/);
   assert.match(canvas,/if \(page===1\) \{ addPhotoBlock\(\); return; \}/);
   assert.match(canvas,/setTarget\(`extra:\$\{id\}`\)/);
-  assert.match(canvas,/onSelectExtraPhoto=\{id=>open\(`extra:\$\{id\}`\)\}/);
+  assert.match(canvas,/onSelectExtraPhoto=\{id=>selectPhoto\(`photo-extra:\$\{id\}`\)\}/);
   assert.match(canvas,/const removePhoto = \(id:string\) =>/);
   assert.match(canvas,/const removeElement\s*=\s*\(id:string\) => isPhotoId\(id\) \? removePhoto\(id\) : removeText\(id\)/);
   assert.match(canvas,/onClick=\{\(\)=>removeElement\(transformingId\)\}/);
