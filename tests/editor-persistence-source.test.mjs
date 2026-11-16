@@ -381,7 +381,7 @@ test('Diseño respeta las fotos originales y admite collage de 3, 5, 6 o hasta 1
   assert.match(template,/const right = order\.slice\(leftCount\)/);
   assert.match(canvas,/const selectPhoto = \(id:string\) =>/);
   assert.match(canvas,/updateLayout\(\{transforms,photoStyles\}\)/);
-  assert.doesNotMatch(canvas,/reorderPhotoBlock|duplicatePhotoBlock|photoOrder\.filter\(/);
+  assert.doesNotMatch(canvas,/reorderPhotoBlock|duplicatePhotoBlock|setPhotoOrder\(photoOrder\.filter\(/);
   assert.match(layout,/photoOrder\?: number\[\]/);
   assert.match(app,/Array\.from\(\{ length: CAROLINA_MAX_SLOTS \}/);
 });
@@ -538,7 +538,7 @@ test('Panel único de imágenes: un toque edita y una presión larga mueve o eli
   assert.match(dock,/onReplace\(\)/);
   assert.match(dock,/onToolChange\(next==='crop'\|\|next==='vignette'/);
   assert.match(workspace,/onStyleChange\(\{vignetteX:Math\.round/);
-  assert.match(workspace,/onStyleChange\(next\)/);
+  assert.match(workspace,/onStyleChange\(patch\)/);
   assert.match(gesture,/LONG_PRESS_MS = 550/);
   assert.match(photo,/effectMoved\.current/);
   assert.match(template,/photoStyle=\{item\.carolinaLayout\?\.photoStyles\?\.\[id\]\}/);
