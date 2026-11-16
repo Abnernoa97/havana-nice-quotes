@@ -276,6 +276,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
                 <small>{index+1}</small>{pages[id]}
               </button>
             ))}
+          </nav>
         </>
       )}
       {original && <div className="hn-canvas-toolbar">
