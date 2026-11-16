@@ -4,7 +4,7 @@ import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createQuoteDraft } from '../src/features/quotes/model.ts';
-import { coverBackground } from '../src/shared/lib/coverBackground.ts';
+
 
 const sourceRoot = fileURLToPath(new URL('../src/', import.meta.url));
 const files = dir => readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
@@ -21,20 +21,22 @@ test('Producción no contiene fotos de stock ni semillas de ejemplo', () => {
   assert.equal(createQuoteDraft('hn-draft').cover, '');
 });
 
-test('Las portadas vacías no provocan peticiones de imágenes y las reales sí aparecen', () => {
-  const gradient = 'linear-gradient(180deg,#123,#456)';
-  assert.equal(coverBackground('', gradient), gradient);
-  assert.equal(coverBackground('/api/media/example-photo', gradient),
-    gradient + ', url("/api/media/example-photo")');
-  assert.equal(coverBackground('', gradient).includes('url('), false);
+test('Todas las portadas reales usan únicamente su imagen guardada; nunca imágenes de prueba',()=>{
+ const node=readFileSync(new URL('../src/features/templates/CarolinaPhotoNode.tsx',import.meta.url),'utf8');
+ const editorial=readFileSync(new URL('../src/features/templates/EditorialTemplate.tsx',import.meta.url),'utf8');
+ assert.match(node,/backgroundImage: url \? 'url\("'/);
+ assert.match(editorial,/<CarolinaPhotoNode id="photo:cover" url=\{item\.cover\}/);
+ assert.doesNotMatch(editorial,/unsplash|dummyimage|placeholder\.com/i);
 });
 
 test('El lector 3D sigue intacto y sus hojas no traen fotos de prueba', () => {
   const magazine = readFileSync(new URL('../src/features/magazine/FlipMagazine.tsx', import.meta.url), 'utf8');
   assert.match(magazine, /flippingTime: 1080/);
   assert.match(magazine, /maxShadowOpacity: 0\.72/);
-  assert.match(magazine, /coverBackground\(item\.cover/);
-  for (const classname of ['hn-editorial-picture', 'hn-vision-picture', 'hn-end-photo']) {
-    assert.ok(magazine.includes('className="' + classname + '" aria-hidden="true"'));
-  }
+  const editorial=readFileSync(new URL('../src/features/templates/EditorialTemplate.tsx',import.meta.url),'utf8');
+  assert.match(magazine, /<EditorialCover item=\{item\}/);
+  assert.match(magazine, /<EditorialCollage item=\{item\}/);
+  assert.match(magazine, /<EditorialTerms item=\{item\}/);
+  assert.match(editorial, /ExtraPhotos item=\{item\} page=\{0\}/);
+  assert.doesNotMatch(magazine, /dummyimage|unsplash|placeholder\.com/i);
 });
