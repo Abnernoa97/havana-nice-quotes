@@ -166,3 +166,16 @@ test('Estilos independientes de letras con dimensiones y colores validados', () 
   assert.equal(validCarolinaLayout({textStyles:{'field:name':{size:Infinity}}}),false);
   assert.equal(validCarolinaLayout({textStyles:{'field:name':[]}}),false);
 });
+
+
+test('Portada y condiciones permiten tipografías independientes al mostrar el mismo dato', () => {
+  const value={fonts:{'field:date:cover':'cinzel','field:date':'jost','field:location:cover':'allura'},
+    textStyles:{'field:date:cover':{color:'#FFFFFF',size:160},'field:date':{color:'#244A37',size:100}},
+    transforms:{'field:location:cover':{x:2,y:0,scale:1.2,rotation:0}}};
+  assert.equal(validCarolinaLayout(value),true);
+  const template=readFileSync(new URL('../src/features/templates/CarolinaTemplate.tsx',import.meta.url),'utf8');
+  const editor=readFileSync(new URL('../src/features/editor/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
+  assert.match(template,/field="location" instance="cover"/);
+  assert.match(template,/field="date" instance="cover"/);
+  assert.match(editor,/id\.slice\(6\)\.split\(':'\)\[0\]/);
+});

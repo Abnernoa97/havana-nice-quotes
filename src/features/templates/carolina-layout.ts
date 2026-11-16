@@ -65,14 +65,14 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     if (!layout.fonts || typeof layout.fonts !== 'object' || Array.isArray(layout.fonts)) return false;
     const entries=Object.entries(layout.fonts);
     if (entries.length > 100 || entries.some(([id,font]) =>
-      !/^(fixed:[a-zA-Z]+|field:[a-z]+|extra:[a-f0-9-]{36})$/.test(id) ||
+      !/^(fixed:[a-zA-Z]+|field:[a-z]+(?::cover)?|extra:[a-f0-9-]{36})$/.test(id) ||
       !isElegantFontId(font))) return false;
   }
   if (layout.textStyles !== undefined) {
     if (!layout.textStyles || typeof layout.textStyles !== 'object' || Array.isArray(layout.textStyles)) return false;
     const entries=Object.entries(layout.textStyles);
     if (entries.length>100 || entries.some(([id,raw])=>{
-      if (!/^(fixed:[a-zA-Z]+|field:[a-z]+|extra:[a-f0-9-]{36})$/.test(id) ||
+      if (!/^(fixed:[a-zA-Z]+|field:[a-z]+(?::cover)?|extra:[a-f0-9-]{36})$/.test(id) ||
         !raw || typeof raw!=='object' || Array.isArray(raw)) return true;
       const style=raw as Record<string,unknown>;
       const validPct=(key:string,min:number,max:number)=>
@@ -101,7 +101,7 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     if (!layout.transforms || typeof layout.transforms !== 'object' || Array.isArray(layout.transforms)) return false;
     if (Object.entries(layout.transforms).length > 100) return false;
     for (const [id, raw] of Object.entries(layout.transforms)) {
-      if (!/^(fixed:[a-zA-Z]+|field:[a-z]+|extra:[a-f0-9-]{36}|photo:(?:cover|1[01]|[0-9]))$/.test(id) ||
+      if (!/^(fixed:[a-zA-Z]+|field:[a-z]+(?::cover)?|extra:[a-f0-9-]{36}|photo:(?:cover|1[01]|[0-9]))$/.test(id) ||
         !raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
       const t = raw as Record<string, unknown>;
       if (Object.keys(t).sort().join(',') !== 'rotation,scale,x,y') return false;

@@ -31,9 +31,9 @@ export function carolinaInvestment(item: Quote): string {
   return usd(item.price) + (quoteCurrency(item.currency) === 'MX' ? ' Mexican Pesos' : ' USD');
 }
 type PageProps = { item: Quote; interaction?: CarolinaTextInteraction };
-type FieldNodeProps = PageProps & { field: string; value: string };
-function FieldNode({ item, field, value, interaction }: FieldNodeProps) {
-  const id = 'field:' + field;
+type FieldNodeProps = PageProps & { field: string; value: string; instance?: 'cover' };
+function FieldNode({ item, field, value, interaction, instance }: FieldNodeProps) {
+  const id = 'field:' + field + (instance ? ':' + instance : '');
   return <CarolinaTextNode id={id} text={value}
     transform={item.carolinaLayout?.transforms?.[id]}
     fontId={item.carolinaLayout?.fonts?.[id] || item.carolinaLayout?.defaultFont}
@@ -84,9 +84,9 @@ export function CarolinaCover({ item, interaction, onSelectCover }: PageProps & 
           <h2><FieldNode item={item} field="name" value={item.name} interaction={interaction}/></h2>
           <p><FieldNode item={item} field="note" value={item.note} interaction={interaction}/></p>
           <small>
-            <FieldNode item={item} field="location" value={item.location} interaction={interaction}/>
+            <FieldNode item={item} field="location" instance="cover" value={item.location} interaction={interaction}/>
             {(item.location && item.date) && <span aria-hidden="true"> · </span>}
-            <FieldNode item={item} field="date"
+            <FieldNode item={item} field="date" instance="cover"
               value={carolinaDate(item.date)} interaction={interaction}/>
           </small>
         </div>

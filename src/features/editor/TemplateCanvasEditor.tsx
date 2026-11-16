@@ -58,7 +58,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           ? extras.map(e => 'extra:' + e.id === id ? { ...e, text: value } : e)
           : extras.filter(e => 'extra:' + e.id !== id) });
       } else if (id.startsWith('field:')) {
-        const field = id.slice(6) as CarolinaTextField;
+        const field = id.slice(6).split(':')[0] as CarolinaTextField;
         if (field === 'date') {
           const date = value ? parseWeddingDate(value) : '';
           if (date !== null) edit('date', date);
@@ -121,7 +121,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       updateLayout({...clean,extras:(item.carolinaLayout?.extras||[])
         .filter(extra=>'extra:'+extra.id!==id)});
     } else {
-      const field=id.slice(6) as CarolinaTextField;
+      const field=id.slice(6).split(':')[0] as CarolinaTextField;
       if (field==='price' || field==='deposit') edit(field,0);
       else if (isCarolinaCopyField(field)) {
         edit('carolinaCopy',{...item.carolinaCopy,[field]:''});
