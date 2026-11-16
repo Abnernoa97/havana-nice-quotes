@@ -158,7 +158,8 @@ test('Papelera visible desde el menú, sin sexta pestaña móvil', () => {
   assert.match(app, /pages\.filter\(p => p\.id !== 'trash'\)/);
   assert.match(trash, /Restaurar/);
   assert.match(trash, /Eliminar/);
-  assert.match(trash, /Archivos/);
+  const menu = src('features/trash/TrashFilterMenu.tsx');
+  assert.match(menu, /Archivos/);
   assert.match(worker, /deleted_at IS NOT NULL/);
   assert.match(worker, /await env\.MEDIA\.delete\(photo\.object_key\)/);
 });
