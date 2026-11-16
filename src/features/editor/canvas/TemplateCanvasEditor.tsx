@@ -151,6 +151,7 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
     delete transforms[id]; delete photoStyles[id];
     if (id==='photo:cover') {
       edit('cover','');
+      edit('coverVideo','');
       updateLayout({transforms,photoStyles});
     } else if (id.startsWith('photo-extra:')) {
       const photoId=id.slice('photo-extra:'.length);
@@ -205,7 +206,7 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
   const setPhotoOrder = (order:number[]) => updateLayout({photoOrder:order});
   const selectPhoto = (id:string) => {
     // Empty frames open the source picker, populated photos open the immersive editor.
-    const url = id==='photo:cover' ? item.cover :
+    const url = id==='photo:cover' ? (item.coverVideo ? '' : item.cover) :
       id.startsWith('photo-extra:') ?
         item.carolinaLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===id)?.url :
         carolinaPhotos(item)[Number(id.slice(6))];
@@ -261,11 +262,11 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
     setTarget(slot);
     setBank(false);
   };
-  const open = (slot: PhotoTarget) => { setTarget(slot); setBank(false); setError(''); };
+  const open = (slot: PhotoTarget) => { setSelectedPhotoId(null); setPhotoTool(null); setTarget(slot); setBank(false); setError(''); };
   const close = () => { if (!busy) { setTarget(null); setBank(false); setError(''); } };
   const choose = (url: string) => {
     if (target === null) return;
-    if (target==='cover') edit('cover',url);
+    if (target==='cover') { edit('cover',url); edit('coverVideo',''); }
     else if (typeof target==='string' && target.startsWith('extra:')) {
       const photoId=target.slice(6);
       updateLayout({extraPhotos:(item.carolinaLayout?.extraPhotos||[]).map(photo=>
@@ -275,6 +276,12 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
       gallery[target]=url;
       edit('gallery',gallery);
     }
+    close();
+  };
+  const chooseVideo = (url:string) => {
+    if (target!=='cover'||!/^\/api\/videos\/[a-f0-9-]{36}$/.test(url)) return;
+    edit('coverVideo',url);
+    edit('cover','');
     close();
   };
   const selectPhone = async (file?: File) => {
@@ -383,7 +390,7 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
         <PhotoSourcePicker target={target} item={item} photos={photos}
           bank={bank} busy={busy} error={error} onClose={close}
           onToggleBank={()=>setBank(v=>!v)} onPhoneFile={file=>{void selectPhone(file);}}
-          onChoose={choose}/>,document.body
+          onChoose={choose} onChooseVideo={chooseVideo}/>,document.body
       )}
     </section>
   );

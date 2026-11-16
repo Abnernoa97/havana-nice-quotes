@@ -1,3 +1,14 @@
+## Fase 2 · Selección de portada desde la nube (16/11/2026)
+- El mismo + de portada abre un selector de **Fotografías** o **Videos** ya guardados en la nube; sigue aceptando fotos del teléfono.
+- El botón pasa de «Añadir archivo» a «Cambiar archivo» cuando ya existe contenido. No se agrega un segundo botón ni una opción +Video en todas las páginas.
+- Cotizaciones antiguas mantienen `cover`; se agrega `coverVideo?:string` solo cuando corresponde, validada como URL privada `/api/videos/{uuid}`.
+- Carolina, cinco plantillas editoriales, Scroll y el origen de hojas 3D comparten `CoverMediaNode`. Si la portada es video, muestra un reproductor con controles de audio. La conversión **no** se repite: usa el video web existente de R2.
+- Se limpian referencias de portada al enviar un video a Papelera. La fuente queda en R2 hasta su purga definitiva.
+- Limitación a revisar físicamente: el motor de PageFlip clona páginas HTML. El video puede renderizarse, pero la interacción con controles nativos y los gestos 3D requieren pruebas en Android/iPhone. Se pausa cualquier video al cambiar de hoja.
+- No se activó Cloudflare Stream, procesamiento extra ni facturación nueva.
+
+---
+
 ## Fase 1 implementada · 16/11/2026
 
 Ya existe una biblioteca independiente de video, dentro de Fotos → Videos:

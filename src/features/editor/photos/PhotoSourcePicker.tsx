@@ -1,4 +1,6 @@
-import { Check, Images, Smartphone, X } from 'lucide-react';
+import { Check, Images, Smartphone, X, Clapperboard, Play } from 'lucide-react';
+import { useState } from 'react';
+import { useCloudVideoOptions } from '../../videos/useCloudVideoOptions';
 import type { Quote } from '../../quotes/types';
 import type { CloudPhoto } from '../../photos/useMediaLibrary';
 import type { PhotoTarget } from '../shared/editor-types';
@@ -8,16 +10,20 @@ type Props = {
   target:PhotoTarget;item:Quote;photos:CloudPhoto[];busy:boolean;bank:boolean;error:string;
   onClose:()=>void;onToggleBank:()=>void;
   onPhoneFile:(file?:File)=>void;onChoose:(url:string)=>void;
+  onChooseVideo?:(url:string)=>void;
 };
 export default function PhotoSourcePicker({
-  target,item,photos,busy,bank,error,onClose,onToggleBank,onPhoneFile,onChoose,
+  target,item,photos,busy,bank,error,onClose,onToggleBank,onPhoneFile,onChoose,onChooseVideo,
 }:Props){
+  const cover=target==='cover';
+  const [kind,setKind]=useState<'photos'|'videos'>('photos');
+  const cloudVideos=useCloudVideoOptions(cover&&bank&&kind==='videos');
   return <div className="hn-canvas-shade" onClick={event=>{
       if(event.target===event.currentTarget)onClose();
     }}>
     <div className="hn-canvas-picker" role="dialog" aria-modal="true"
-      aria-label={target==='cover'?'Foto de portada':typeof target==='string'?'Foto adicional':'Foto '+(target+1)}>
-      <header><strong>{target==='cover'?'Foto de portada':typeof target==='string'?'Foto adicional':'Foto '+(target+1)}</strong>
+      aria-label={cover?'Archivo de portada':typeof target==='string'?'Foto adicional':'Foto '+(target+1)}>
+      <header><strong>{cover?'Archivo de portada':typeof target==='string'?'Foto adicional':'Foto '+(target+1)}</strong>
         <button type="button" disabled={busy} aria-label="Cerrar" onClick={onClose}><X size={19}/></button>
       </header>
       <div className="hn-canvas-sources">
@@ -28,21 +34,49 @@ export default function PhotoSourcePicker({
             }}/>
         </label>
         <button type="button" className={bank?'hn-canvas-source selected':'hn-canvas-source'}
-          disabled={busy} onClick={onToggleBank}><Images size={21}/> Banco de fotos</button>
+          disabled={busy} onClick={onToggleBank}><Images size={21}/> {cover?'Archivos de la nube':'Banco de fotos'}</button>
       </div>
-      {bank && <div className="hn-canvas-bank">
-        {photos.map(photo=><button type="button" key={photo.id} disabled={busy}
-          aria-label={'Elegir '+photo.name} onClick={()=>onChoose(photo.url)}>
-          <img src={photo.url} alt="" loading="lazy"/>
-          {(target==='cover'?item.cover===photo.url:
-            typeof target==='string'?item.carolinaLayout?.extraPhotos?.some(extra=>
-              extra.id===target.slice(6)&&extra.url===photo.url):
-            (item.gallery||[])[target]===photo.url)&&<Check size={16}/>}
-        </button>)}
-        {!photos.length&&<p>Tu banco está vacío.</p>}
+      {bank && <>
+        {cover&&<div className="hn-canvas-cloud-categories" role="group" aria-label="Tipo de archivo en la nube">
+          <button type="button" className={kind==='photos'?'active':''}
+            aria-pressed={kind==='photos'} onClick={()=>setKind('photos')}>
+            <Images size={16}/> Fotografías
+          </button>
+          <button type="button" className={kind==='videos'?'active':''}
+            aria-pressed={kind==='videos'} onClick={()=>setKind('videos')}>
+            <Clapperboard size={16}/> Videos
+          </button>
+        </div>}
+        {(!cover||kind==='photos')&&<div className="hn-canvas-bank">
+          {photos.map(photo=><button type="button" key={photo.id} disabled={busy}
+            aria-label={'Elegir '+photo.name} onClick={()=>onChoose(photo.url)}>
+            <img src={photo.url} alt="" loading="lazy"/>
+            {(cover?item.cover===photo.url&&!item.coverVideo:
+              typeof target==='string'?item.carolinaLayout?.extraPhotos?.some(extra=>
+                extra.id===target.slice(6)&&extra.url===photo.url):
+              (item.gallery||[])[target as number]===photo.url)&&<Check size={16}/>}
+          </button>)}
+          {!photos.length&&<p>Tu banco de fotografías está vacío.</p>}
+        </div>}
+        {cover&&kind==='videos'&&<div className="hn-canvas-cloud-videos" aria-label="Videos en la nube">
+          {cloudVideos.videos.map(video=><button type="button" key={video.id}
+             className="hn-canvas-cloud-video" disabled={busy}
+             aria-label={'Elegir video '+video.name} onClick={()=>onChooseVideo?.(video.url)}>
+            <div className="hn-canvas-cloud-video-preview">
+              <video src={video.url} muted playsInline preload="metadata" aria-hidden="true"/>
+              <Play size={20} aria-hidden="true"/>
+              {item.coverVideo===video.url&&<Check size={16} className="hn-cover-selected"/>}
+            </div>
+            <span title={video.name}>{video.name}</span>
+          </button>)}
+          {cloudVideos.loading&&<p>Cargando videos…</p>}
+          {cloudVideos.error&&<p role="alert">{cloudVideos.error}</p>}
+          {!cloudVideos.loading&&!cloudVideos.error&&!cloudVideos.videos.length&&
+            <p>Aún no hay videos convertidos en la biblioteca.</p>}
+        </div>}
         <button type="button" className="hn-canvas-remove" disabled={busy}
-          onClick={()=>onChoose('')}>Quitar fotografía</button>
-      </div>}
+          onClick={()=>onChoose('')}>Quitar archivo{cover?' de portada':' fotográfico'}</button>
+      </>}
       {busy&&<p className="hn-canvas-message" role="status">Subiendo fotografía...</p>}
       {error&&<p className="hn-canvas-error" role="alert">{error}</p>}
     </div>

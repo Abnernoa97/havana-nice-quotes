@@ -10,3 +10,10 @@
 }
 .hn-template-cover-add .hn-template-cover-plus{font-size:clamp(23px,6cqw,32px);line-height:1}
 .hn-template-cover-add:focus-visible{outline:3px solid #d4bd8a;outline-offset:3px}
+
+/* Compact + remains reachable when a photo or video already occupies the cover. */
+.hn-template-cover-add.is-occupied{left:auto;right:3%;top:3%;transform:none;min-width:0;
+ min-height:42px;padding:7px 10px;flex-direction:row;gap:5px;border-radius:9px;
+ background:#17382bed;box-shadow:0 2px 9px #081c1870;
+ font-size:clamp(9px,1.8cqw,13px)}
+.hn-template-cover-add.is-occupied .hn-template-cover-plus{font-size:clamp(20px,3.4cqw,25px)}

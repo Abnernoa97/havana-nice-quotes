@@ -2,6 +2,7 @@ import type { Quote } from '../quotes/types';
 import type { CarolinaTextInteraction } from './CarolinaTextNode';
 import CarolinaTextNode from './CarolinaTextNode';
 import CarolinaPhotoNode from './CarolinaPhotoNode';
+import CoverMediaNode from './CoverMediaNode';
 import CoverAddPrompt from './CoverAddPrompt';
 import type { CarolinaFixedKey } from './carolina-layout';
 import { fixedText, carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS } from './carolina-layout';
@@ -91,10 +92,7 @@ export function CarolinaCover({ item, interaction, onSelectCover, onSelectExtraP
   return (
     <div className={'hn-carolina-page hn-carolina-cover' +
       (interaction?.transformingId ? ' hn-layout-grid' : '')}>
-      <CarolinaPhotoNode cover id="photo:cover" url={item.cover}
-        transform={item.carolinaLayout?.transforms?.['photo:cover']}
-        photoStyle={item.carolinaLayout?.photoStyles?.['photo:cover']}
-        interaction={interaction} onSelect={onSelectCover}/>
+      <CoverMediaNode item={item} interaction={interaction} onSelect={onSelectCover}/>
       <div className="hn-carolina-cover-brand">
         <strong><FixedNode item={item} field="brand" interaction={interaction}/></strong>
         <span><FixedNode item={item} field="subtitle" interaction={interaction}/></span>
@@ -111,7 +109,7 @@ export function CarolinaCover({ item, interaction, onSelectCover, onSelectExtraP
           </small>
         </div>
       )}
-      {!item.cover && <CoverAddPrompt onAdd={onSelectCover}/>}
+      <CoverAddPrompt onAdd={onSelectCover} occupied={Boolean(item.cover || item.coverVideo)}/>
       <ExtraPhotos item={item} page={0} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
       <ExtraTexts item={item} page={0} interaction={interaction}/>
     </div>

@@ -53,7 +53,7 @@ test('Todos los estilos comparten tres páginas reales, controles y componentes'
  assert.match(canvas,/<PhotoEditingWorkspace photoId=\{selectedPhotoId\}/);
  assert.match(canvas,/<TextStyleDock textId=\{lastTextId\}/);
  assert.match(canvas,/<PhotoLayersPanel layers=\{photoLayers\}/);
- assert.match(doc,/CarolinaPhotoNode/);
+ assert.match(doc,/CoverMediaNode/);
  assert.match(doc,/CarolinaTextNode/);
  assert.match(doc,/CarolinaCollage/);
  assert.match(doc,/ExtraPhotos/);

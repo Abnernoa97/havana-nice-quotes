@@ -118,6 +118,8 @@ function validQuote(input: unknown, id: string): input is Record<string, unknown
     (q.currency === undefined || q.currency === 'USD' || q.currency === 'MX') &&
     VALID_STATES.has(String(q.status)) &&
     (q.style === undefined || isTemplateStyle(q.style)) &&
+    (q.coverVideo === undefined || typeof q.coverVideo === 'string' &&
+      (q.coverVideo === '' || /^\/api\/videos\/[a-f0-9-]{36}$/.test(q.coverVideo))) &&
     (q.gallery === undefined || Array.isArray(q.gallery) && q.gallery.length <= 12 &&
       q.gallery.every((photo: unknown) => typeof photo === 'string' && (photo === '' ||
         /^\/api\/media\/[a-f0-9-]{36}$/.test(photo)))) &&

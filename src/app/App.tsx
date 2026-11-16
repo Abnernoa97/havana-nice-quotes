@@ -198,7 +198,7 @@ function App() {
     if (!saved) throw new Error('No se pudo guardar la fotografía en R2.');
     setQuotes(current => current.map(quote => {
       if (quote.id !== quoteId) return quote;
-      if (target === 'cover') return { ...quote, cover: saved.url };
+      if (target === 'cover') return { ...quote, cover: saved.url, coverVideo: '' };
       if (typeof target === 'string' && target.startsWith('extra:')) {
         const id=target.slice(6);
         const previous=getDesignLayout(quote)?.extraPhotos || [];

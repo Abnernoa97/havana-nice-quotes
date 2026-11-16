@@ -25,7 +25,7 @@ test('Todas las portadas reales usan únicamente su imagen guardada; nunca imág
  const node=readFileSync(new URL('../src/features/templates/CarolinaPhotoNode.tsx',import.meta.url),'utf8');
  const editorial=readFileSync(new URL('../src/features/templates/EditorialTemplate.tsx',import.meta.url),'utf8');
  assert.match(node,/backgroundImage: url \? 'url\("'/);
- assert.match(editorial,/<CarolinaPhotoNode id="photo:cover" url=\{item\.cover\}/);
+ assert.match(editorial,/<CoverMediaNode item=\{item\} interaction=\{interaction\}/);
  assert.doesNotMatch(editorial,/unsplash|dummyimage|placeholder\.com/i);
 });
 

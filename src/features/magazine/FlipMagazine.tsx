@@ -72,7 +72,11 @@ export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
         disableFlipByClick: false,
       });
       flip.loadFromHTML(host.querySelectorAll<HTMLElement>('.hn-leaf'));
-      flip.on('flip', e => setPage(Number(e.data || 0)));
+      flip.on('flip', e => {
+        // Native video players on a previous page must never keep sounding.
+        host?.querySelectorAll('video').forEach(media => media.pause());
+        setPage(Number(e.data || 0));
+      });
       flip.on('changeOrientation', e => setOrientation(String(e.data)));
       flipRef.current = flip;
       setPage(0);
@@ -86,7 +90,7 @@ export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
       try { flip?.destroy(); } catch (error) { console.warn('Page flip cleanup', error); }
       mount.replaceChildren();
     };
-  }, [item.id, item.cover, item.name, item.note, item.package, item.price, item.location, item.deposit, item.desc, item.date, item.currency, item.style,
+  }, [item.id, item.cover, item.coverVideo, item.name, item.note, item.package, item.price, item.location, item.deposit, item.desc, item.date, item.currency, item.style,
     JSON.stringify(item.gallery), JSON.stringify(item.carolinaCopy), JSON.stringify(item.carolinaLayout)]);
 
   const changePage = (direction: 'next' | 'prev') => {

@@ -93,10 +93,12 @@ function environment() {
           }
           if (sql.startsWith('UPDATE quotes SET payload = json_set')) {
             let changed = 0;
+            const field=sql.includes("'$.coverVideo'")?'coverVideo':'cover';
             for (const [id, row] of quotes) {
+              if(row.deleted_at != null)continue;
               const quote = JSON.parse(row.payload);
-              if (quote.cover === values[0]) {
-                quotes.set(id, { ...row, payload: JSON.stringify({ ...quote, cover: '' }), revision: row.revision + 1 });
+              if (quote[field] === values[0]) {
+                quotes.set(id, { ...row, payload: JSON.stringify({ ...quote, [field]: '' }), revision: row.revision + 1 });
                 changed++;
               }
             }
@@ -747,4 +749,66 @@ test('Video web: no se confirma si faltan partes y se puede abortar subida incom
  assert.equal(env.objects.size,0);
  const list=await worker.fetch(request('/api/videos',{headers:{Cookie:cookie}}),env);
  assert.equal((await list.json()).videos.length,0);
+});
+
+test('Video de portada se guarda en D1, sigue privado y no altera cotizaciones antiguas',async()=>{
+ const env=environment(),cookie=await authorizeDevice(env);
+ const basic={
+  id:'hn-77777777-7777-7777-7777-777777777777',
+  name:'Fer y Noa',client:'',email:'',location:'San Miguel de Allende',
+  date:'',price:120000,deposit:40,status:'Borrador',cover:'',
+  font:'editorial',color:'#18342f',note:'',package:'',desc:'',
+  style:'vogue',readingMode:'flip',
+ };
+ const previous=await worker.fetch(jsonRequest('/api/quotes/'+basic.id,'PUT',
+  {quote:basic,expectedRevision:0},cookie),env);
+ assert.equal(previous.status,200);
+ const url='/api/videos/12345678-1234-1234-1234-123456789abc';
+ const newCover={...basic,coverVideo:url};
+ const saved=await worker.fetch(jsonRequest('/api/quotes/'+basic.id,'PUT',
+  {quote:newCover,expectedRevision:1},cookie),env);
+ assert.equal(saved.status,200);
+ const list=await worker.fetch(request('/api/quotes',{headers:{Cookie:cookie}}),env);
+ assert.equal((await list.json()).quotes.find(row=>row.quote.id===basic.id).quote.coverVideo,url);
+ const bad=await worker.fetch(jsonRequest('/api/quotes/'+basic.id,'PUT',
+  {quote:{...newCover,coverVideo:'https://evil.example/any.mp4'},expectedRevision:2},cookie),env);
+ assert.equal(bad.status,400);
+ const other=await worker.fetch(jsonRequest('/api/quotes/'+basic.id,'PUT',
+  {quote:{...newCover,coverVideo:'/'},expectedRevision:2},cookie),env);
+ assert.equal(other.status,400);
+ const reset=await worker.fetch(jsonRequest('/api/quotes/'+basic.id,'PUT',
+  {quote:{...newCover,coverVideo:'',cover:'/api/media/12345678-1234-1234-1234-123456789abc'},expectedRevision:2},cookie),env);
+ assert.equal(reset.status,200);
+});
+
+test('Eliminar video de galería limpia la portada que lo usaba, pero no borra R2 hasta purgar',async()=>{
+ const env=environment(),cookie=await authorizeDevice(env);
+ const bytes=new Uint8Array([3,1,4,1]);
+ const init=await worker.fetch(jsonRequest('/api/videos/init','POST',{
+  name:'original-web.mp4',mime:'video/mp4',size:bytes.length
+ },cookie),env);
+ const {id,uploadId}=await init.json();
+ const part=await worker.fetch(request('/api/videos/'+id+'/part?uploadId='+uploadId+'&part=1',{
+  method:'PUT',headers:{Origin:origin,Cookie:cookie},body:bytes,
+ }),env);
+ const partInfo=await part.json();
+ await worker.fetch(jsonRequest('/api/videos/'+id+'/complete','POST',{
+  uploadId,name:'original-web.mp4',mime:'video/mp4',size:bytes.length,parts:[partInfo]
+ },cookie),env);
+ const quote={
+  id:'hn-99999999-9999-9999-9999-999999999999',name:'Cover Video',client:'',email:'',
+  location:'',date:'',price:2000,deposit:40,status:'Borrador',cover:'',coverVideo:'/api/videos/'+id,
+  font:'editorial',color:'#18342f',note:'',package:'',desc:''
+ };
+ assert.equal((await worker.fetch(jsonRequest('/api/quotes/'+quote.id,'PUT',{
+  quote,expectedRevision:0
+ },cookie),env)).status,200);
+ const deletion=await worker.fetch(request('/api/videos/'+id,{
+  method:'DELETE',headers:{Origin:origin,Cookie:cookie},
+ }),env);
+ assert.equal(deletion.status,200);
+ assert.equal((await deletion.json()).clearedCovers,1);
+ const records=await worker.fetch(request('/api/quotes',{headers:{Cookie:cookie}}),env);
+ assert.equal((await records.json()).quotes.find(row=>row.quote.id===quote.id).quote.coverVideo,'');
+ assert.equal(env.objects.size,1);
 });

@@ -1,7 +1,7 @@
 import type { Quote } from '../quotes/types';
 import type { CarolinaTextInteraction } from './CarolinaTextNode';
 import CarolinaTextNode from './CarolinaTextNode';
-import CarolinaPhotoNode from './CarolinaPhotoNode';
+import CoverMediaNode from './CoverMediaNode';
 import CoverAddPrompt from './CoverAddPrompt';
 import { carolinaPageOrder, fixedText } from './carolina-layout';
 import type { CarolinaFixedKey } from './carolina-layout';
@@ -31,10 +31,7 @@ const skin=(item:Quote)=>'hn-style-'+(item.style||'libre');
 export function EditorialCover({item,interaction,onSelectCover,onSelectExtraPhoto}:Props){
  return <div className={'hn-carolina-page hn-editorial-page hn-editorial-cover '+skin(item)+
    (interaction?.transformingId?' hn-layout-grid':'')}>
-   <CarolinaPhotoNode id="photo:cover" url={item.cover} cover
-    transform={item.carolinaLayout?.transforms?.['photo:cover']}
-    photoStyle={item.carolinaLayout?.photoStyles?.['photo:cover']}
-    interaction={interaction} onSelect={onSelectCover}/>
+   <CoverMediaNode item={item} interaction={interaction} onSelect={onSelectCover}/>
    <div className="hn-editorial-photo-shade"/>
    <div className="hn-editorial-top">
     <strong><Fixed item={item} name="brand" interaction={interaction}/></strong>
@@ -52,7 +49,7 @@ export function EditorialCover({item,interaction,onSelectCover,onSelectExtraPhot
      <Node item={item} id="field:date:cover" value={carolinaDate(item.date)} interaction={interaction}/>
     </small>
    </div>
-   {!item.cover && <CoverAddPrompt onAdd={onSelectCover}/>}
+   <CoverAddPrompt onAdd={onSelectCover} occupied={Boolean(item.cover || item.coverVideo)}/>
    <ExtraPhotos item={item} page={0} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
    <ExtraTexts item={item} page={0} interaction={interaction}/>
  </div>;

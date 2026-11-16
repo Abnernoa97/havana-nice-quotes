@@ -19,7 +19,8 @@ export type Quote = {
   deposit: number;
   currency?: QuoteCurrency;
   status: QuoteStatus;
-  cover: string;
+  cover: string; // Existing photographic cover, always preserved for legacy quotes
+  coverVideo?: string; // Optional authenticated /api/videos/{id} web cover
   gallery?: string[];
   carolinaCopy?: Partial<CarolinaCopy>;
   carolinaLayout?: CarolinaLayout; // Legacy data retained for all existing quotations

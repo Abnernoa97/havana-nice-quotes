@@ -13,9 +13,9 @@ export function listPhotoLayers(item:Quote,page:CarolinaPageId):PhotoLayer[] {
       id:'photo-extra:'+photo.id,url:photo.url,label:'Foto '+(index+1),
       behindText:!!item.carolinaLayout?.photoStyles?.['photo-extra:'+photo.id]?.behindText,
     }));
-  const backgroundCover=page===0 && item.cover &&
+  const backgroundCover=page===0 && (item.cover || item.coverVideo) &&
     item.carolinaLayout?.photoStyles?.['photo:cover']?.behindText
-    ? [{id:'photo:cover',url:item.cover,label:'Portada',behindText:true}] : [];
+    ? [{id:'photo:cover',url:item.coverVideo || item.cover,label:'Portada',behindText:true}] : [];
   const backgroundCollage=page===1
     ? carolinaPhotoOrder(item.carolinaLayout).filter(slot=>!!carolinaPhotos(item)[slot] &&
         !!item.carolinaLayout?.photoStyles?.['photo:'+slot]?.behindText)

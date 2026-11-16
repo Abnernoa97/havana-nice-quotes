@@ -155,7 +155,12 @@ export async function handleVideoApi(request:Request,store:VideoStore):Promise<R
   const moved=await store.DB.prepare(
    'UPDATE media SET deleted_at = unixepoch() WHERE id = ? AND deleted_at IS NULL AND object_key = ?'
   ).bind(id,row.object_key).run();
-  return moved.meta.changes?respond({trashed:true}):err('Video no encontrado.',404);
+  if(!moved.meta.changes)return err('Video no encontrado.',404);
+  // Match photo deletion: prevent missing-file cover videos in active quotes.
+  const cleared=await store.DB.prepare(
+   "UPDATE quotes SET payload = json_set(payload, '$.coverVideo', ''), revision = revision + 1, updated_at = unixepoch() WHERE json_extract(payload, '$.coverVideo') = ? AND deleted_at IS NULL"
+  ).bind('/api/videos/'+id).run();
+  return respond({trashed:true,clearedCovers:cleared.meta.changes});
  }
  if(method!=='GET'&&method!=='HEAD')return err('Método no permitido.',405);
  const range=parseRange(request.headers.get('Range'),row.size);

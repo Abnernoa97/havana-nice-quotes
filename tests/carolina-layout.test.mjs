@@ -62,9 +62,10 @@ test('Fotografías de portada y collage comparten gestos, posiciones y escala pe
   assert.match(photo,/onPointerMove=\{gesture\.onPointerMove\}/);
   assert.match(photo,/if \(!gesture\.suppressTap\(\)\) onSelect\(\)/);
   assert.doesNotMatch(photo,/effectMoved\.current|imageEdit/);
-  assert.match(template,/id="photo:cover"/);
+  const cover=readFileSync(new URL('../src/features/templates/CoverMediaNode.tsx',import.meta.url),'utf8');
+  assert.match(cover,/id="photo:cover"/);
   assert.equal((template.match(/id=\{'photo:' \+ slot\}/g)||[]).length,2);
-  assert.match(template,/transform=\{item\.carolinaLayout\?\.transforms\?\.\['photo:cover'\]\}/);
+  assert.match(cover,/transform=\{item\.carolinaLayout\?\.transforms\?\.\['photo:cover'\]\}/);
   assert.match(canvas,/onSelectCover=\{\(\)=>selectPhoto\('photo:cover'\)\}/);
   assert.match(canvas,/\.hn-carolina-photo, \.hn-carolina-cover-photo/);
   assert.match(layout,/photo:\(\?:cover\|1\[01\]\|\[0-9\]\)/);
