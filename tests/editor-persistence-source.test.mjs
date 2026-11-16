@@ -577,7 +577,7 @@ test('Editor inmersivo: giro real, scroll independiente y controles anclados',()
   assert.match(photo,/rotate\(' \+ \(photoStyle\?\.cropRotation/);
   assert.match(model,/cropRotation:\[-180,180\]/);
   assert.match(css,/\.hn-photo-workspace-stage\{overflow-y:auto/);
-  assert.match(css,/\.hn-photo-workspace \.hn-photo-expanded\{overscroll-behavior-y:contain;touch-action:pan-y\}/);
+  assert.match(css,/\.hn-photo-workspace \.hn-photo-expanded\{overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch\}/);
   assert.match(css,/\.hn-photo-workspace \.hn-photo-tools-rail\{flex-shrink:0\}/);
   assert.match(css,/\.hn-photo-workspace \.hn-photo-switches\{touch-action:pan-x\}/);
   assert.match(workspace,/const closeRef=useRef\(onClose\)/);
