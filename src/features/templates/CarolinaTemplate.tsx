@@ -1,7 +1,7 @@
-import type { CSSProperties } from 'react';
 import type { Quote } from '../quotes/types';
 import type { CarolinaTextInteraction } from './CarolinaTextNode';
 import CarolinaTextNode from './CarolinaTextNode';
+import CarolinaPhotoNode from './CarolinaPhotoNode';
 import type { CarolinaFixedKey } from './carolina-layout';
 import { fixedText } from './carolina-layout';
 import { quoteCurrency, usd } from '../../shared/lib/formatters';
@@ -57,13 +57,15 @@ function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
     </div>
   );
 }
-export function CarolinaCover({ item, interaction }: PageProps) {
-  const style: CSSProperties = item.cover
-    ? { backgroundImage: 'linear-gradient(180deg,rgba(20,15,13,.33),rgba(20,15,13,.09) 55%,rgba(20,15,13,.42)),url("' + item.cover + '")' }
-    : {};
+export function CarolinaCover({ item, interaction, onSelectCover }: PageProps & {
+  onSelectCover?: () => void;
+}) {
   return (
     <div className={'hn-carolina-page hn-carolina-cover' +
-      (interaction?.transformingId ? ' hn-layout-grid' : '')} style={style}>
+      (interaction?.transformingId ? ' hn-layout-grid' : '')}>
+      <CarolinaPhotoNode cover id="photo:cover" url={item.cover}
+        transform={item.carolinaLayout?.transforms?.['photo:cover']}
+        interaction={interaction} onSelect={onSelectCover}/>
       <div className="hn-carolina-cover-brand">
         <strong><FixedNode item={item} field="brand" interaction={interaction}/></strong>
         <span><FixedNode item={item} field="subtitle" interaction={interaction}/></span>
@@ -84,23 +86,6 @@ export function CarolinaCover({ item, interaction }: PageProps) {
     </div>
   );
 }
-function PhotoCell({ url, position, onSelect }: {
-  url: string; position: number; onSelect?: (index: number) => void;
-}) {
-  const className = 'hn-carolina-photo hn-carolina-photo-' + position;
-  const style = url ? { backgroundImage: 'url("' + url + '")' } : undefined;
-  if (onSelect) return (
-    <button type="button" className={className + ' hn-carolina-editable-photo'}
-      aria-label={'Elegir fotografía del recuadro ' + position}
-      onClick={() => onSelect(position - 1)} style={style}>
-      {!url && <span className="hn-carolina-empty-photo">+</span>}
-      <span className="hn-carolina-photo-index">{String(position).padStart(2, '0')}</span>
-    </button>
-  );
-  return <div className={className} role="img"
-    aria-label={url ? 'Wedding photograph ' + position : 'Photograph slot ' + position}
-    style={style}/>;
-}
 export function CarolinaCollage({ item, onSelectPhoto, interaction }: PageProps & {
   onSelectPhoto?: (index: number) => void;
 }) {
@@ -109,12 +94,16 @@ export function CarolinaCollage({ item, onSelectPhoto, interaction }: PageProps 
     <div className={'hn-carolina-page hn-carolina-collage' +
       (interaction?.transformingId ? ' hn-layout-grid' : '')}>
       <div className="hn-carolina-photo-column left">
-        {images.slice(0, 2).map((url, i) => <PhotoCell key={i} url={url}
-          position={i + 1} onSelect={onSelectPhoto}/>)}
+        {images.slice(0, 2).map((url, i) => <CarolinaPhotoNode key={i} id={'photo:' + i}
+          url={url} position={i + 1}
+          transform={item.carolinaLayout?.transforms?.['photo:' + i]}
+          interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(i) : undefined}/>)}
       </div>
       <div className="hn-carolina-photo-column right">
-        {images.slice(2).map((url, i) => <PhotoCell key={i + 2} url={url}
-          position={i + 3} onSelect={onSelectPhoto}/>)}
+        {images.slice(2).map((url, i) => <CarolinaPhotoNode key={i + 2} id={'photo:' + (i + 2)}
+          url={url} position={i + 3}
+          transform={item.carolinaLayout?.transforms?.['photo:' + (i + 2)]}
+          interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(i + 2) : undefined}/>)}
       </div>
       <ExtraTexts item={item} page={1} interaction={interaction}/>
     </div>

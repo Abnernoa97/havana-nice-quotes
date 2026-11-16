@@ -7,9 +7,6 @@
 .hn-canvas-sheet{width:min(100%,620px);min-width:0;margin:auto;background:#fff;box-shadow:0 12px 32px #21382916}
 .hn-canvas-cover{position:relative;aspect-ratio:612/792}
 .hn-canvas-cover .hn-carolina-page{height:100%;width:100%}
-.hn-canvas-cover-button{position:absolute;inset:0;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:#fff}
-.hn-canvas-cover-button span{display:flex;align-items:center;gap:8px;padding:13px 17px;background:#204333c7;border:1px solid #fff8;border-radius:12px;font-size:13px}
-.hn-canvas-cover-button:hover{box-shadow:inset 0 0 0 3px #c2ad82}
 .hn-carolina-editable-photo{appearance:none;display:flex;align-items:center;justify-content:center;border:0;padding:0;cursor:pointer;color:#668a70}
 .hn-carolina-editable-photo:hover{box-shadow:inset 0 0 0 3px #c2ad82}
 .hn-carolina-empty-photo{font-size:clamp(27px,7cqw,47px);opacity:.6}
@@ -68,3 +65,9 @@
 
 .hn-canvas .hn-carolina-page.hn-layout-grid { touch-action:none; }
 .hn-canvas .hn-carolina-text-node.editing { font-size:max(16px, 1em); }
+
+/* Same long-hold gesture used by text; no duplicate transform controls. */
+.hn-canvas .hn-carolina-editable-photo,
+.hn-canvas .hn-carolina-cover-photo { touch-action:none; -webkit-user-select:none; user-select:none; }
+.hn-canvas .hn-carolina-cover-photo:hover,
+.hn-canvas .hn-carolina-editable-photo:hover { outline:1px dashed #bc9f69; outline-offset:-2px; }

@@ -529,6 +529,9 @@ test('Carolina conserva títulos, textos adicionales y geometría entre disposit
       transforms:{
         'fixed:experience':{x:12,y:-8,scale:1.7,rotation:21},
         ['extra:'+extraId]:{x:0,y:24,scale:.8,rotation:-35},
+        'photo:cover':{x:-10,y:2,scale:1.4,rotation:9},
+        'photo:0':{x:10,y:-3,scale:1.1,rotation:0},
+        'photo:5':{x:4,y:8,scale:2,rotation:55},
       },
     },
   };
@@ -558,6 +561,8 @@ test('API bloquea layouts con tamaños infinitos, campos no admitidos o extras c
     {transforms:{'field:name':{x:Infinity,y:0,scale:1,rotation:0}}},
     {transforms:{'field:name':{x:0,y:0,scale:5,rotation:0}}},
     {transforms:{'field:name':{x:0,y:0,scale:1,rotation:181}}},
+    {transforms:{'photo:6':{x:0,y:0,scale:1,rotation:0}}},
+    {transforms:{'photo:cover':{x:0,y:0,scale:0,rotation:0}}},
     {extras:[{id:'not-an-id',page:0,text:'X'}]},
     {extras:[{id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:3,text:'X'}]},
     {unapproved:{test:'X'}},

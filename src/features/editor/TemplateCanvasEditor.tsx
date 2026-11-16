@@ -123,7 +123,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       </div>}
       <div className="hn-canvas-sheet" onPointerDown={event => {
         const target = event.target;
-        if (target instanceof Element && !target.closest('[data-carolina-text]')) {
+        if (target instanceof Element && !target.closest('[data-carolina-text], .hn-carolina-photo, .hn-carolina-cover-photo')) {
           setTransformingId(null);
           if (editingId && document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
@@ -134,11 +134,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           <>
             {page === 0 && (
               <div className="hn-canvas-cover">
-                <CarolinaCover item={item} interaction={textInteraction}/>
-                <button type="button" className="hn-canvas-cover-button"
-                  onClick={() => open('cover')} aria-label="Elegir foto de portada">
-                  {!item.cover && <span><ImagePlus size={22}/> Añadir foto</span>}
-                </button>
+                <CarolinaCover item={item} interaction={textInteraction}
+                  onSelectCover={() => open('cover')}/>
               </div>
             )}
             {page === 1 && <CarolinaCollage item={item} onSelectPhoto={index => open(index)} interaction={textInteraction}/>}

@@ -33,18 +33,45 @@ test('Diseño nuevo puede serializarse y validarse sin alterar otros campos', ()
 });
 
 test('Edición directa, presión larga y gesto de dos dedos mantienen un solo guardado', () => {
-  const gesture=readFileSync(new URL('../src/features/templates/CarolinaTextNode.tsx',import.meta.url),'utf8');
+  const gesture=readFileSync(new URL('../src/features/templates/useCarolinaGesture.ts',import.meta.url),'utf8');
+  const node=readFileSync(new URL('../src/features/templates/CarolinaTextNode.tsx',import.meta.url),'utf8');
   const canvas=readFileSync(new URL('../src/features/editor/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
   const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
-  assert.match(gesture,/const HOLD_MS = 550/);
-  assert.match(gesture,/contentEditable=\{editing \? 'plaintext-only' : undefined\}/);
-  assert.match(gesture,/onPointerDown=\{down\} onPointerMove=\{move\}/);
-  assert.match(gesture,/onBlur=\{\(\) =>/);
+  assert.match(gesture,/LONG_PRESS_MS = 550/);
+  assert.match(node,/contentEditable=\{editing \? 'plaintext-only' : undefined\}/);
+  assert.match(node,/onPointerDown=\{gesture\.onPointerDown\} onPointerMove=\{gesture\.onPointerMove\}/);
+  assert.match(node,/onBlur=\{\(\) =>/);
   assert.match(gesture,/Math\.hypot/);
   assert.match(gesture,/page\.addEventListener\('pointerdown', down\)/);
-  assert.match(gesture,/pointers\.current\.size === 0/);
-  assert.match(gesture,/interaction\.onCommitTransform\(id, current\.current\)/);
+  assert.match(gesture,/pointers\.current\.size/);
+  assert.match(gesture,/onCommitTransform\(id, current\.current\)/);
   assert.match(canvas,/onCommitTransform: \(id: string, transform: CarolinaTransform\)/);
   assert.match(canvas,/setTransformingId\(null\)/);
   assert.match(worker,/validCarolinaLayout\(q\.carolinaLayout\)/);
+});
+
+
+test('Fotografías de portada y collage comparten gestos, posiciones y escala persistente', () => {
+  const layout=readFileSync(new URL('../src/features/templates/carolina-layout.ts',import.meta.url),'utf8');
+  const template=readFileSync(new URL('../src/features/templates/CarolinaTemplate.tsx',import.meta.url),'utf8');
+  const photo=readFileSync(new URL('../src/features/templates/CarolinaPhotoNode.tsx',import.meta.url),'utf8');
+  const gestures=readFileSync(new URL('../src/features/templates/useCarolinaGesture.ts',import.meta.url),'utf8');
+  const canvas=readFileSync(new URL('../src/features/editor/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
+  assert.match(photo,/useCarolinaGesture\(id, element, transform, interaction\)/);
+  assert.match(photo,/onPointerDown=\{gesture\.onPointerDown\}/);
+  assert.match(photo,/if \(!gesture\.suppressTap\(\)\) onSelect\(\)/);
+  assert.match(template,/id="photo:cover"/);
+  assert.match(template,/id=\{'photo:' \+ i\}/);
+  assert.match(template,/id=\{'photo:' \+ \(i \+ 2\)\}/);
+  assert.match(template,/transform=\{item\.carolinaLayout\?\.transforms\?\.\['photo:cover'\]\}/);
+  assert.match(canvas,/onSelectCover=\{\(\) => open\('cover'\)\}/);
+  assert.match(canvas,/\.hn-carolina-photo, \.hn-carolina-cover-photo/);
+  assert.match(layout,/photo:\(\?:cover\|\[0-5\]\)/);
+  assert.match(gestures,/page\.addEventListener\('pointerdown', down\)/);
+  for(const id of ['photo:cover','photo:0','photo:1','photo:2','photo:3','photo:4','photo:5']) {
+    assert.ok(validCarolinaLayout({transforms:{[id]:{x:-15,y:7,scale:1.8,rotation:18}}}),id);
+  }
+  assert.equal(validCarolinaLayout({transforms:{'photo:6':{x:0,y:0,scale:1,rotation:0}}}),false);
+  assert.equal(validCarolinaLayout({transforms:{'photo:outside':{x:0,y:0,scale:1,rotation:0}}}),false);
+  assert.equal(validCarolinaLayout({transforms:{'photo:cover':{x:0,y:0,scale:50,rotation:0}}}),false);
 });
