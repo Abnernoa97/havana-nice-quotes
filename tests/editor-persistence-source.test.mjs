@@ -314,7 +314,7 @@ test('Carolina: todos los textos variables se editan tocando la página y llegan
   assert.match(editor, /edit\('deposit', percent\)/);
   for (const field of ['name', 'date', 'location', 'note', 'package', 'desc', 'price', 'deposit',
     'performance', 'musicians', 'crew', 'backline', 'logistics', 'balance', 'production',
-    'connections', 'space']) assert.match(fields, new RegExp('\\\\b' + field + ':'));
+    'connections', 'space']) assert.ok(fields.includes('  ' + field + ':'), 'Falta el campo '+field);
   assert.match(template, /export function CarolinaTerms\(\{ item, onEditText \}/);
   assert.match(template, /onEditText\?: OnTextEdit/);
   assert.match(model, /carolinaCopy\?: Partial<CarolinaCopy>/);
