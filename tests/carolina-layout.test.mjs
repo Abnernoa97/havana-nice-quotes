@@ -103,7 +103,7 @@ test('El diseñador usa una sola barra de fotos sin acciones antiguas ni duplica
   const css=readFileSync(new URL('../src/features/editor/template-canvas.css',import.meta.url),'utf8');
   assert.match(canvas,/const addPhotoBlock = \(\) =>/);
   assert.match(canvas,/const selectPhoto = \(id:string\) =>/);
-  assert.match(canvas,/<PhotoStyleDock photoId=\{selectedPhotoId\}/);
+  assert.match(canvas,/<PhotoEditingWorkspace photoId=\{selectedPhotoId\}/);
   assert.match(canvas,/const replacePhoto = \(\) =>/);
   assert.doesNotMatch(canvas,/hn-canvas-photo-actions|reorderPhotoBlock|duplicatePhotoBlock|clearPhotoBlock/);
   assert.doesNotMatch(css,/hn-canvas-photo-actions/);
