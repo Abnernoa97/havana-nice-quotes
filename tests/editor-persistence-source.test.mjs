@@ -7,7 +7,10 @@ test('Plantilla real y cinco estilos mantienen ambos modos editor/cliente', () =
   const editor = src('features/editor/QuoteEditorScreen.tsx');
   const app = src('app/App.tsx');
   const styles = src('features/editor/styles/EditorialStyles.tsx');
-  for (const id of ['carolina', 'libre', 'vogue', 'lane', 'junebug', 'nyt']) assert.ok(styles.includes("id:'" + id + "'"));
+  const registry=src('features/templates/template-registry.ts');
+  for (const id of ['carolina','libre','vogue','lane','junebug','nyt'])
+    assert.ok(registry.includes(id+':{name:'),id);
+  assert.match(styles,/TEMPLATE_IDS\.map/);
   assert.match(editor, /onChange=\{style => edit\('style', style\)\}/);
   const publish = src('features/editor/QuotePublishPanel.tsx');
   assert.match(editor, /<QuotePublishPanel item=\{item\}/);
@@ -55,7 +58,9 @@ test('La revista mantiene intactos los parámetros de plegado 3D', () => {
   const magazine = src('features/magazine/FlipMagazine.tsx');
   assert.match(magazine, /flippingTime: 1080/);
   assert.match(magazine, /maxShadowOpacity: 0\.72/);
-  assert.match(magazine, /<p>\{item\.note\}<\/p>/);
+  const editorial=src('features/templates/EditorialTemplate.tsx');
+  assert.match(magazine,/EditorialCover/);
+  assert.match(editorial,/id="field:note" value=\{item\.note\}/);
 });
 
 test('El acceso a la nube es por dispositivo autorizado, sin formulario de contraseña', () => {
@@ -163,7 +168,8 @@ test('Carolina es la plantilla real principal y separada de los estilos editoria
   const styles = src('features/editor/styles/EditorialStyles.tsx');
   const types = src('features/quotes/types.ts');
   const editor = src('features/editor/QuoteEditorScreen.tsx');
-  assert.match(styles, /name:'HAVANA NICE Original · Carolina'/);
+  const registry=src('features/templates/template-registry.ts');
+  assert.match(registry,/name:'HAVANA NICE Original · Carolina'/);
   assert.match(styles, /Plantillas originales/);
   assert.match(styles, /Estilos editoriales especiales/);
   assert.match(types, /QuoteStyle = TemplateStyle/);
@@ -196,7 +202,7 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.doesNotMatch(details, /carolinaCopy|hn-carolina-copy-editor/);
   assert.match(magazine, /templateFamily\(item\.style\)==='carolina'/);
   assert.doesNotMatch(magazine, /<CarolinaBlankReverse\/>/);
-  assert.match(magazine, /selectedPages\.map\(selectedPage =>/);
+  assert.match(magazine, /selectedPages\.map\(selectedPage=>/);
   assert.match(magazine, /flippingTime: 1080/);
   assert.doesNotMatch(template, /<iframe|<embed|<object|\.pdf/);
 });
@@ -468,7 +474,7 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   assert.match(flip,/const selectedPages = carolinaPageOrder\(item\.carolinaLayout\)/);
   assert.match(flip,/const total = selectedPages\.length/);
   assert.match(flip,/if \(pages\.length === 1\)/);
-  assert.match(flip,/selectedPages\.map\(selectedPage =>/);
+  assert.match(flip,/selectedPages\.map\(selectedPage=>/);
   assert.doesNotMatch(flip,/<CarolinaBlankReverse\/>/);
   assert.match(document,/carolinaPageOrder\(item\.carolinaLayout\)\.map\(page=>/);
   assert.doesNotMatch(canvas,/pageManager|setPageOrder|togglePage|shiftPage|Hojas \{/);
@@ -530,7 +536,7 @@ test('Panel único de imágenes: un toque edita y una presión larga mueve o eli
   const gesture=src('features/templates/useCarolinaGesture.ts');
   const css=readFileSync(new URL('../src/features/editor/canvas/template-canvas.css',import.meta.url),'utf8');
   assert.match(canvas,/selectPhoto\('photo:cover'\)/);
-  assert.match(canvas,/onSelectPhoto=\{index => selectPhoto\('photo:'\+index\)\}/);
+  assert.match(canvas,/onSelectPhoto=\{index=>selectPhoto\('photo:'\+index\)\}/);
   assert.match(canvas,/<PhotoEditingWorkspace photoId=\{selectedPhotoId\}/);
   const workspace=src('features/editor/photos/PhotoEditingWorkspace.tsx');
   assert.match(workspace,/<PhotoStyleDock photoId=\{photoId\}/);
