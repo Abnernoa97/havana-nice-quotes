@@ -564,7 +564,7 @@ test('Reemplazar una fotografía mantiene sus efectos previos',()=>{
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
   assert.match(canvas,/styles\[selectedPhotoId\] = \{ \.\.\.styles\[selectedPhotoId\], \.\.\.patch \}/);
   assert.match(canvas,/const replacePhoto = \(\) =>/);
-  assert.match(canvas,/if \(target==='cover'\) edit\('cover',url\)/);
+  assert.match(canvas,/if \(target==='cover'\) \{ edit\('cover',url\); edit\('coverVideo',''\); \}/);
   assert.match(canvas,/gallery\[target\]=url/);
   assert.doesNotMatch(canvas,/delete styles\[selectedPhotoId\]/);
   assert.match(app,/gallery\[target\] = saved\.url/);

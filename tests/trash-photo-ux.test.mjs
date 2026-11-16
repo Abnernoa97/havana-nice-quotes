@@ -57,15 +57,15 @@ test('Añadir fotografía es botón real tanto en Carolina como en todas las edi
  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
  const css=src('features/templates/cover-add-prompt.css');
  for(const view of [carolina,editorial]){
-   assert.match(view,/!item\.cover && <CoverAddPrompt onAdd=\{onSelectCover\}\/>/);
+   assert.match(view,/<CoverAddPrompt onAdd=\{onSelectCover\} occupied=\{Boolean\(item\.cover \|\| item\.coverVideo\)\}/);
  }
- assert.match(prompt,/<button type="button" className="hn-template-cover-add"/);
+ assert.match(prompt,/<button type="button" className=\{'hn-template-cover-add'/);
  assert.match(prompt,/onClick=\{event=>\{event\.stopPropagation\(\);onAdd\(\);\}\}/);
- assert.match(prompt,/Añadir fotografía/);
+ assert.match(prompt,/Añadir archivo/);
  assert.match(canvas,/onSelectCover=\{\(\)=>selectPhoto\('photo:cover'\)\}/);
  assert.match(canvas,/if \(!url\)/);
  assert.match(canvas,/if \(id==='photo:cover'\) open\('cover'\)/);
- assert.match(canvas,/if \(target==='cover'\) edit\('cover',url\)/);
+ assert.match(canvas,/if \(target==='cover'\) \{ edit\('cover',url\); edit\('coverVideo',''\); \}/);
  assert.match(css,/z-index:10/);
  assert.doesNotMatch(photo,/hn-carolina-cover-invite/);
 });
