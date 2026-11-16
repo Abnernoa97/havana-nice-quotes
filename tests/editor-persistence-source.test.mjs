@@ -512,4 +512,6 @@ test('Edición móvil sin selección nativa y 3D con scroll vertical', () => {
   assert.match(textNode,/onPointerCancel=\{gesture\.onPointerCancel\}/);
   assert.match(editCss,/-webkit-touch-callout:none/);
   assert.match(magazineCss,/touch-action:pan-y pinch-zoom!important/);
+  const magazine=src('features/magazine/FlipMagazine.tsx');
+  assert.match(magazine,/mobileScrollSupport: true/);
 });

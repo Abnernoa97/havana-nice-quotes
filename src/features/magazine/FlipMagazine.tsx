@@ -63,7 +63,8 @@ export default function FlipMagazine({ item }: { item: Quote }) {
         usePortrait: true,
         autoSize: true,
         showCover: false,
-        mobileScrollSupport: false,
+        // Keep vertical touch scrolling available while horizontal swipes still turn pages.
+        mobileScrollSupport: true,
         swipeDistance: 25,
         showPageCorners: true,
         disableFlipByClick: false,
