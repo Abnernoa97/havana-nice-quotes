@@ -59,7 +59,7 @@
 .hn-canvas .hn-carolina-text-node:hover:not(.editing){outline:1px dashed #ad915f}
 .hn-canvas .hn-carolina-text-node.editing{min-width:1.5em;outline:1px solid #ad915f;outline-offset:2px;background:#fff9;border-radius:3px;user-select:text;-webkit-user-select:text;touch-action:auto;cursor:text}
 .hn-canvas .hn-carolina-cover-brand,.hn-canvas .hn-carolina-cover-personal{z-index:3}
-.hn-canvas .hn-carolina-extra-layer{z-index:5}
+.hn-canvas .hn-carolina-extra-layer{z-index:3}
 .hn-canvas .hn-carolina-page.hn-layout-grid::before{z-index:4}
 
 .hn-canvas .hn-carolina-page.hn-layout-grid { touch-action:none; }
@@ -75,23 +75,6 @@
 /* Controls appear only on the collage; original six-photo layout stays unchanged. */
 .hn-canvas-toolbar button:disabled { opacity:.4; cursor:default; }
 .hn-canvas-toolbar span { margin-left:auto; }
-.hn-canvas-photo-actions {
-  width:min(100%,620px); box-sizing:border-box; margin:12px auto 0; display:flex;
-  align-items:center; flex-wrap:wrap; gap:6px; padding:9px; background:#edf3ec;
-  border:1px solid #dce7da; border-radius:11px;
-}
-.hn-canvas-photo-actions span {
-  font-weight:700; font-size:12px; color:#315840; margin:0 6px;
-}
-.hn-canvas-photo-actions button {
-  flex:1 1 auto; border:1px solid #d5e2d2; border-radius:8px;
-  background:#fff; color:#35573f; min-height:37px;
-  padding:7px 11px; font-size:12px; font-weight:600; cursor:pointer;
-}
-.hn-canvas-photo-actions button:disabled { opacity:.35; cursor:default; }
-.hn-canvas-photo-actions button:last-child { color:#975547; }
-
-
 /* Only shown after a long press on text. Also accepts the captured pointer on drop. */
 .hn-canvas-trash{position:fixed;z-index:84;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);min-width:210px;max-width:88vw;min-height:62px;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 18px;border:1px dashed #be8e85;border-radius:15px;background:#fff8f5;box-shadow:0 10px 35px #41211d30;color:#985447;cursor:pointer;font-size:12px;font-weight:750;transition:background .15s ease,color .15s ease,scale .15s ease}
 .hn-canvas-trash.hot{background:#9e4c42;color:#fff;border-color:#9e4c42;scale:1.06}
@@ -102,3 +85,6 @@
 .hn-canvas-toolbar>button{flex:0 1 130px;min-width:0}
 .hn-canvas-toolbar>span{flex:1 1 100%;text-align:center;font-size:11px}
 .hn-canvas .hn-carolina-floating-photo{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+
+/* While a photo effect is active, finger movement edits crop or vignette; a hold still moves the frame. */
+.hn-canvas .hn-carolina-editable-photo{overscroll-behavior:contain;-webkit-touch-callout:none}

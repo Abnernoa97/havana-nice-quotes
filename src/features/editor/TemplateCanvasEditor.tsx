@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight, ImagePlus, Images, Smartphone, Trash2, X } from 'lucide-react';
 import { isCarolinaCopyField } from '../templates/carolina-edit-fields';
 import TextStyleDock from './TextStyleDock';
+import PhotoStyleDock from './PhotoStyleDock';
 import type { ElegantFontId } from '../templates/elegant-fonts';
 import type { CarolinaTextField } from '../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../templates/CarolinaTextNode';
-import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaTransform } from '../templates/carolina-layout';
-import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, emptyPhotoSlotToDuplicate, CAROLINA_MAX_SLOTS } from '../templates/carolina-layout';
+import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle, CarolinaTransform } from '../templates/carolina-layout';
+import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS } from '../templates/carolina-layout';
 import type { CarolinaPageId } from '../templates/carolina-layout';
 import { normalizePriceInput, safeQuotePrice } from '../quotes/model';
 import type { Quote } from '../quotes/types';
@@ -30,6 +31,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [page, setPage] = useState<CarolinaPageId>(0);
   const [target, setTarget] = useState<PhotoTarget | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
+  const [photoTool, setPhotoTool] = useState<'crop'|'vignette'|null>(null);
   const [lastTextId, setLastTextId] = useState<string | null>(null);
   const [trashHovered, setTrashHovered] = useState(false);
   const [transformingId, setTransformingId] = useState<string | null>(null);
@@ -38,15 +41,15 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [error, setError] = useState('');
   useEffect(() => {
     setPage(carolinaPageOrder(item.carolinaLayout)[0]); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
-    setLastTextId(null); setTrashHovered(false);
+    setLastTextId(null); setSelectedPhotoId(null); setPhotoTool(null); setTrashHovered(false);
   }, [item.id, item.style]);
   const updateLayout = (patch: Partial<CarolinaLayout>) => {
     edit('carolinaLayout', { ...item.carolinaLayout, ...patch });
   };
   const textInteraction: CarolinaTextInteraction = {
     editingId, transformingId,
-    onTap: id => { setTransformingId(null); setEditingId(id); setLastTextId(id); setError(''); },
-    onSelectTransform: id => { setEditingId(null); setTransformingId(id);
+    onTap: id => { setSelectedPhotoId(null); setTransformingId(null); setEditingId(id); setLastTextId(id); setError(''); },
+    onSelectTransform: id => { setEditingId(null); setSelectedPhotoId(null); setPhotoTool(null); setTransformingId(id);
       setLastTextId(isPhotoId(id) ? null : id); setTrashHovered(false); setError(''); },
     onCommitText: (id, raw) => {
       const value = raw.trim().slice(0, 3000);
@@ -84,6 +87,17 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     onDrag: (_id,x,y) => {
       setTrashHovered(overTrash(x,y));
     },
+    imageEdit: selectedPhotoId && photoTool ? {
+      id: selectedPhotoId, tool: photoTool,
+      onDrag: (x:number,y:number) => {
+        const id=selectedPhotoId;
+        if (!id || !photoTool) return;
+        const styles={...item.carolinaLayout?.photoStyles};
+        styles[id]={...styles[id],...(photoTool==='vignette' ?
+          {vignetteX:x,vignetteY:y} : {cropX:x,cropY:y})};
+        updateLayout({photoStyles:styles});
+      },
+    } : undefined,
     onDrop: (id,x,y) => {
       const hit=overTrash(x,y);
       setTrashHovered(false);
@@ -135,13 +149,14 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   /** Only remove image references from the current quote; never delete its R2 media. */
   const removePhoto = (id:string) => {
     const transforms={...item.carolinaLayout?.transforms};
-    delete transforms[id];
+    const photoStyles={...item.carolinaLayout?.photoStyles};
+    delete transforms[id]; delete photoStyles[id];
     if (id==='photo:cover') {
       edit('cover','');
-      updateLayout({transforms});
+      updateLayout({transforms,photoStyles});
     } else if (id.startsWith('photo-extra:')) {
       const photoId=id.slice('photo-extra:'.length);
-      updateLayout({transforms,extraPhotos:(item.carolinaLayout?.extraPhotos||[])
+      updateLayout({transforms,photoStyles,extraPhotos:(item.carolinaLayout?.extraPhotos||[])
         .filter(photo=>photo.id!==photoId)});
     } else {
       const match=/^photo:(1[01]|[0-9])$/.exec(id);
@@ -151,9 +166,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       gallery[slot]='';
       edit('gallery',gallery);
       // Keep the collage frame in place when its image is cleared.
-      updateLayout({transforms});
+      updateLayout({transforms,photoStyles});
     }
-    setTransformingId(null);setLastTextId(null);setTrashHovered(false);setError('');
+    setTransformingId(null);setSelectedPhotoId(null);setLastTextId(null);setTrashHovered(false);setError('');
   };
   const removeElement = (id:string) => isPhotoId(id) ? removePhoto(id) : removeText(id);
   const selectedPages=carolinaPageOrder(item.carolinaLayout);
@@ -164,7 +179,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       const next = Math.max(0, Math.min(selectedPages.length - 1, index + direction));
       return selectedPages[next] ?? current;
     });
-    setTransformingId(null); setEditingId(null); setLastTextId(null); setTrashHovered(false);
+    setTransformingId(null); setEditingId(null); setLastTextId(null); setSelectedPhotoId(null); setPhotoTool(null); setTrashHovered(false);
   };
   const chooseFont = (font:ElegantFontId|null) => {
     if (!lastTextId) return;
@@ -187,54 +202,43 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     updateLayout({textStyles});
   };
   const photoOrder = carolinaPhotoOrder(item.carolinaLayout);
-  const activePhoto = transformingId?.match(/^photo:(\d+)$/);
-  const selectedPhoto = activePhoto ? Number(activePhoto[1]) : null;
-  const setPhotoOrder = (order: number[]) => updateLayout({ photoOrder: order });
+  const selectPhoto = (id:string) => {
+    setPhotoTool(null);
+    setSelectedPhotoId(id);
+    setTransformingId(null);
+    setEditingId(null);
+    setLastTextId(null);
+    setError('');
+  };
+  const updatePhotoStyle = (patch: Partial<CarolinaPhotoStyle>) => {
+    if (!selectedPhotoId) return;
+    const styles = { ...item.carolinaLayout?.photoStyles };
+    styles[selectedPhotoId] = { ...styles[selectedPhotoId], ...patch };
+    updateLayout({ photoStyles: styles });
+  };
+  const replacePhoto = () => {
+    if (!selectedPhotoId) return;
+    if (selectedPhotoId === 'photo:cover') open('cover');
+    else if (selectedPhotoId.startsWith('photo-extra:'))
+      open('extra:' + selectedPhotoId.slice('photo-extra:'.length));
+    else if (/^photo:(1[01]|[0-9])$/.test(selectedPhotoId))
+      open(Number(selectedPhotoId.slice(6)));
+  };
   const addPhotoAnywhere=()=>{
     if (page===1) { addPhotoBlock(); return; }
     const extras=item.carolinaLayout?.extraPhotos||[];
     if (extras.length>=24) { setError('Máximo 24 fotografías añadidas.'); return; }
     const id=crypto.randomUUID();
     updateLayout({extraPhotos:[...extras,{id,page,url:''}]});
-    setTransformingId(null);setLastTextId(null);setBank(false);setTarget(`extra:${id}`);
+    setTransformingId(null);setSelectedPhotoId(null);setLastTextId(null);setBank(false);setTarget(`extra:${id}`);
   };
   const addPhotoBlock = () => {
     const slot = photoSlotToAdd(photoOrder, carolinaPhotos(item));
     if (slot === null) return;
     setPhotoOrder([...photoOrder, slot]);
-    setTransformingId(null);
+    setTransformingId(null);setSelectedPhotoId(null);
     setTarget(slot);
     setBank(false);
-  };
-  const reorderPhotoBlock = (slot: number, direction: -1 | 1) => {
-    const index = photoOrder.indexOf(slot), neighbor = photoOrder[index + direction];
-    if (index < 0 || neighbor === undefined) return;
-    // Swap content within fixed frames, not DOM slots or column layout.
-    const gallery = carolinaPhotos(item);
-    [gallery[slot], gallery[neighbor]] = [gallery[neighbor], gallery[slot]];
-    edit('gallery', gallery);
-    const transforms = { ...item.carolinaLayout?.transforms };
-    const source = 'photo:' + slot, destination = 'photo:' + neighbor;
-    const from = transforms[source], to = transforms[destination];
-    if (to) transforms[source] = to; else delete transforms[source];
-    if (from) transforms[destination] = from; else delete transforms[destination];
-    updateLayout({ transforms });
-    setTransformingId(destination);
-    setError('');
-  };
-  const clearPhotoBlock = (slot: number) => removePhoto('photo:' + slot);
-  const duplicatePhotoBlock = (slot: number) => {
-    const gallery = carolinaPhotos(item);
-    const next = emptyPhotoSlotToDuplicate(photoOrder, gallery);
-    if (next === null) {
-      setError('Las 12 posiciones están ocupadas. Quita un recuadro o reutiliza uno.');
-      return;
-    }
-    gallery[next] = gallery[slot] || '';
-    edit('gallery', gallery); // Same R2 photograph, no copied or uploaded file.
-    setPhotoOrder([...photoOrder, next]);
-    setTransformingId('photo:' + next);
-    setError('');
   };
   const open = (slot: PhotoTarget) => { setTarget(slot); setBank(false); setError(''); };
   const close = () => { if (!busy) { setTarget(null); setBank(false); setError(''); } };
@@ -272,7 +276,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
             {selectedPages.map((id,index) => (
               <button key={id} type="button" className={page===id?'selected':''}
                 aria-current={page===id?'page':undefined}
-                onClick={()=>{setPage(id);setTransformingId(null);setEditingId(null);setLastTextId(null);}}>
+                onClick={()=>{setPage(id);setTransformingId(null);setEditingId(null);setLastTextId(null);setSelectedPhotoId(null);setPhotoTool(null);}}>
                 <small>{index+1}</small>{pages[id]}
               </button>
             ))}
@@ -290,6 +294,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         if (transformingId && !event.isPrimary) return;
         if (target instanceof Element && !target.closest('[data-carolina-text], .hn-carolina-photo, .hn-carolina-cover-photo, .hn-carolina-floating-photo')) {
           setTransformingId(null);
+          setSelectedPhotoId(null);
+          setPhotoTool(null);
           setLastTextId(null);
           if (editingId && document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
@@ -301,13 +307,13 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
             {page === 0 && (
               <div className="hn-canvas-cover">
                 <CarolinaCover item={item} interaction={textInteraction}
-                  onSelectCover={() => open('cover')}
-                  onSelectExtraPhoto={id=>open(`extra:${id}`)}/>
+                  onSelectCover={() => selectPhoto('photo:cover')}
+                  onSelectExtraPhoto={id=>selectPhoto(`photo-extra:${id}`)}/>
               </div>
             )}
-            {page === 1 && <CarolinaCollage item={item} onSelectPhoto={index => open(index)}
-              onSelectExtraPhoto={id=>open(`extra:${id}`)} interaction={textInteraction}/>}
-            {page === 2 && <CarolinaTerms item={item} interaction={textInteraction} onSelectExtraPhoto={id=>open(`extra:${id}`)}/>}
+            {page === 1 && <CarolinaCollage item={item} onSelectPhoto={index => selectPhoto('photo:'+index)}
+              onSelectExtraPhoto={id=>selectPhoto(`photo-extra:${id}`)} interaction={textInteraction}/>}
+            {page === 2 && <CarolinaTerms item={item} interaction={textInteraction} onSelectExtraPhoto={id=>selectPhoto(`photo-extra:${id}`)}/>}
           </>
         ) : (
           <div className="hn-canvas-editorial">
@@ -318,20 +324,6 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           </div>
         )}
       </div>
-      {original && page === 1 && selectedPhoto !== null &&
-        photoOrder.includes(selectedPhoto) && (
-        <div className="hn-canvas-photo-actions" role="group" aria-label="Ordenar fotografías">
-          <span>Foto {photoOrder.indexOf(selectedPhoto) + 1}</span>
-          <button type="button" disabled={photoOrder.indexOf(selectedPhoto) === 0}
-            onClick={() => reorderPhotoBlock(selectedPhoto, -1)}>Mover antes</button>
-          <button type="button" disabled={photoOrder.indexOf(selectedPhoto) === photoOrder.length - 1}
-            onClick={() => reorderPhotoBlock(selectedPhoto, 1)}>Mover después</button>
-          <button type="button" disabled={photoOrder.length >= CAROLINA_MAX_SLOTS}
-            onClick={() => duplicatePhotoBlock(selectedPhoto)}>Duplicar</button>
-          <button type="button" disabled={!carolinaPhotos(item)[selectedPhoto]}
-            onClick={() => clearPhotoBlock(selectedPhoto)}>Borrar foto</button>
-        </div>
-      )}
       {original && <div className="hn-canvas-pager">
         <button type="button" disabled={pageIndex<=0} aria-label="Página anterior"
           onClick={()=>changePage(-1)}>
@@ -352,6 +344,16 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
             if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
             setEditingId(null); setLastTextId(null);
           }}/>
+      )}
+      {original && selectedPhotoId && !transformingId && !editingId && target===null && (
+        <PhotoStyleDock photoId={selectedPhotoId}
+          url={selectedPhotoId==='photo:cover' ? item.cover :
+            selectedPhotoId.startsWith('photo-extra:') ?
+              item.carolinaLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===selectedPhotoId)?.url || '' :
+              carolinaPhotos(item)[Number(selectedPhotoId.slice(6))] || ''}
+          style={item.carolinaLayout?.photoStyles?.[selectedPhotoId]}
+          onStyleChange={updatePhotoStyle} onReplace={replacePhoto}
+          onToolChange={setPhotoTool} onClose={()=>{setSelectedPhotoId(null);setPhotoTool(null);}}/>
       )}
       {original && transformingId && (
         <button type="button" data-hn-text-trash

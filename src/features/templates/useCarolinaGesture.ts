@@ -10,6 +10,7 @@ export type CarolinaGestureInteraction = {
   onDrag?: (id: string, x: number, y: number) => void;
   /** Return true when the gesture ended on a destructive drop zone. */
   onDrop?: (id: string, x: number, y: number) => boolean;
+  imageEdit?: { id:string; tool:'crop'|'vignette'; onDrag:(x:number,y:number)=>void };
 };
 type Point = { x: number; y: number };
 type Frame = Point & { distance: number; angle: number; transform: CarolinaTransform };
@@ -55,9 +56,9 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const pageWidth = () => node.current?.closest('.hn-carolina-page')?.getBoundingClientRect().width || 1;
 
   const begin = (pointerId: number, x: number, y: number) => {
-    if (!selected && !longPressed.current) swallowClick.current = false;
+    if (!longPressed.current) swallowClick.current = false;
     pointers.current.set(pointerId, { x, y });
-    if (selected || longPressed.current) { cancelHold(); resetBaseline(); return; }
+    if (longPressed.current) { cancelHold(); resetBaseline(); return; }
     if (pointers.current.size === 1) {
       press.current = { x, y };
       cancelHold();
@@ -73,7 +74,7 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const update = (pointerId: number, x: number, y: number) => {
     if (!pointers.current.has(pointerId)) return;
     pointers.current.set(pointerId, { x, y });
-    if (!selected && !longPressed.current) {
+    if (!longPressed.current) {
       if (press.current && Math.hypot(x - press.current.x, y - press.current.y) > 8) cancelHold();
       return;
     }
@@ -99,7 +100,7 @@ export function useCarolinaGesture<T extends HTMLElement>(
     if (pointers.current.size) { resetBaseline(); return; }
     baseline.current = null;
     press.current = null;
-    if (selected || longPressed.current) {
+    if (longPressed.current) {
       const dropped=x!==undefined && y!==undefined &&
         interactionRef.current?.onDrop?.(id,x,y) === true;
       if (!dropped && JSON.stringify(current.current) !== JSON.stringify(saved || ZERO_TRANSFORM)) {
@@ -132,12 +133,20 @@ export function useCarolinaGesture<T extends HTMLElement>(
     page.addEventListener('pointerdown', down);
     page.addEventListener('pointermove', move);
     page.addEventListener('pointerup', up);
-    page.addEventListener('pointercancel', up);
+    const cancel = (event: PointerEvent) => {
+      if (outsideNode(event)) {
+        cancelHold();
+        pointers.current.delete(event.pointerId);
+        baseline.current = null;
+        longPressed.current = false;
+      }
+    };
+    page.addEventListener('pointercancel', cancel);
     return () => {
       page.removeEventListener('pointerdown', down);
       page.removeEventListener('pointermove', move);
       page.removeEventListener('pointerup', up);
-      page.removeEventListener('pointercancel', up);
+      page.removeEventListener('pointercancel', cancel);
     };
   }, [selected, disabled]);
 
@@ -160,7 +169,6 @@ export function useCarolinaGesture<T extends HTMLElement>(
     setLive(saved || ZERO_TRANSFORM);
   };
   const suppressTap = () => {
-    if (selected) return true;
     if (!swallowClick.current) return false;
     swallowClick.current = false;
     return true;

@@ -1,0 +1,31 @@
+/* Photo controls intentionally reuse the single contextual typography dock design. */
+.hn-photo-dock{z-index:82}
+.hn-photo-switches{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.hn-photo-switches button{min-height:48px;gap:3px}
+.hn-photo-switches button span{font-size:11px}
+.hn-photo-expanded{padding:10px 13px;max-height:min(48dvh,390px)}
+.hn-photo-controls{display:flex;flex-direction:column;gap:10px}
+.hn-photo-slider{display:flex;flex-direction:column;gap:3px}
+.hn-photo-slider>span{display:flex;justify-content:space-between;align-items:center;color:#53705b;font-size:12px}
+.hn-photo-slider strong{font-variant-numeric:tabular-nums;color:#254937;font-weight:750}
+.hn-photo-slider input{width:100%;accent-color:#244a37;min-height:22px;touch-action:pan-x}
+.hn-photo-option{display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+.hn-photo-option>button,.hn-photo-options>button,.hn-photo-presets button{
+  border:1px solid #d8e4d6;background:#fff;color:#365d42;
+  min-height:38px;border-radius:9px;padding:8px 12px;font-size:12px;font-weight:700;
+}
+.hn-photo-option>button{display:flex;align-items:center;gap:7px}
+.hn-photo-options,.hn-photo-presets{display:flex;gap:6px;flex-wrap:wrap}
+.hn-photo-options>button,.hn-photo-presets>button{flex:1 1 auto}
+.hn-photo-option .chosen,.hn-photo-options .chosen,.hn-photo-presets .chosen{background:#244a37;color:#fff;border-color:#244a37}
+.hn-photo-controls small,.hn-photo-option small{font-size:11px;color:#778e7b;line-height:1.4}
+.hn-photo-tint{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#53705b}
+.hn-photo-tint input{border:0;padding:0;width:50px;height:35px;background:transparent}
+.hn-photo-reset{align-self:flex-end;border:0;background:transparent;color:#365c42;padding:7px;font-weight:650;font-size:11px;text-decoration:underline}
+.hn-photo-touch-preview{height:120px;max-width:100%;border:1px solid #b5c8ba;
+  border-radius:12px;background-color:#edf2ed;background-size:cover;background-position:center;
+  position:relative;touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair}
+.hn-photo-touch-preview>span{position:absolute;width:18px;height:18px;border:2px solid #fff;
+  border-radius:50%;background:#244a37ad;box-shadow:0 0 0 1px #244a37;
+  transform:translate(-50%,-50%);pointer-events:none}
+@media(max-width:400px){.hn-photo-switches{gap:4px}.hn-photo-switches button span{font-size:10px}}

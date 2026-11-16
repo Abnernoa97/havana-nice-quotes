@@ -36,6 +36,27 @@ export function carolinaPageOrder(layout: CarolinaLayout | undefined): CarolinaP
 export type CarolinaTransform = { x: number; y: number; scale: number; rotation: number };
 /** Appearance is scoped to an individual text block; never inherited by its siblings. */
 export type CarolinaTextStyle = { color?: string; size?: number; stretchX?: number; stretchY?: number };
+/** Image effects are tied to a stable frame ID, never to the R2 asset URL.
+ * Replacing a photo therefore preserves its entire treatment. */
+export type CarolinaPhotoStyle = {
+  behindText?: boolean;
+  brightness?: number; contrast?: number; saturate?: number;
+  hue?: number; grayscale?: number; sepia?: number;
+  tint?: string; tintAmount?: number;
+  cropZoom?: number; cropX?: number; cropY?: number;
+  opacity?: number;
+  vignetteShape?: 'none' | 'square' | 'round';
+  vignetteColor?: 'black' | 'white';
+  vignetteStrength?: number; vignetteSize?: number;
+  vignetteX?: number; vignetteY?: number;
+};
+export const CAROLINA_PHOTO_DEFAULTS = {
+  brightness: 100, contrast: 100, saturate: 100, hue: 0,
+  grayscale: 0, sepia: 0, tintAmount: 0,
+  cropZoom: 100, cropX: 50, cropY: 50, opacity: 100,
+  vignetteStrength: 45, vignetteSize: 55, vignetteX: 50, vignetteY: 50,
+} as const;
+
 export type CarolinaExtra = { id: string; page: CarolinaPageId; text: string };
 export type CarolinaExtraPhoto = { id: string; page: CarolinaPageId; url: string };
 export type CarolinaLayout = {
@@ -48,6 +69,7 @@ export type CarolinaLayout = {
   defaultFont?: ElegantFontId;
   fonts?: Record<string, ElegantFontId>;
   textStyles?: Record<string, CarolinaTextStyle>;
+  photoStyles?: Record<string, CarolinaPhotoStyle>;
 };
 export const ZERO_TRANSFORM: CarolinaTransform = { x: 0, y: 0, scale: 1, rotation: 0 };
 
@@ -68,7 +90,7 @@ export function clampTransform(value: CarolinaTransform): CarolinaTransform {
 export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const layout = value as Record<string, unknown>;
-  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder', 'pageOrder', 'extraPhotos', 'defaultFont', 'fonts', 'textStyles'].includes(k))) return false;
+  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder', 'pageOrder', 'extraPhotos', 'defaultFont', 'fonts', 'textStyles', 'photoStyles'].includes(k))) return false;
   if (layout.defaultFont !== undefined && !isElegantFontId(layout.defaultFont)) return false;
   if (layout.fonts !== undefined) {
     if (!layout.fonts || typeof layout.fonts !== 'object' || Array.isArray(layout.fonts)) return false;
@@ -92,6 +114,37 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
           !/^#[0-9a-fA-F]{6}$/.test(style.color)) ||
         !validPct('size',50,300) || !validPct('stretchX',50,200) || !validPct('stretchY',50,200);
     })) return false;
+  }
+  if (layout.photoStyles !== undefined) {
+    if (!layout.photoStyles || typeof layout.photoStyles !== 'object' || Array.isArray(layout.photoStyles)) return false;
+    const entries = Object.entries(layout.photoStyles);
+    if (entries.length > 40) return false;
+    const numeric: Record<string,[number,number]> = {
+      brightness:[0,200], contrast:[0,200], saturate:[0,200],
+      hue:[-180,180], grayscale:[0,100], sepia:[0,100],
+      tintAmount:[0,100], cropZoom:[100,300], cropX:[0,100],
+      cropY:[0,100], opacity:[0,100], vignetteStrength:[0,100],
+      vignetteSize:[0,100], vignetteX:[0,100], vignetteY:[0,100],
+    };
+    for (const [id,raw] of entries) {
+      if (!/^(photo:(?:cover|1[01]|[0-9])|photo-extra:[a-f0-9-]{36})$/.test(id) ||
+        !raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
+      const style = raw as Record<string,unknown>;
+      for (const [key,val] of Object.entries(style)) {
+        if (key === 'behindText') { if (typeof val !== 'boolean') return false; }
+        else if (key === 'tint') {
+          if (typeof val !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(val)) return false;
+        } else if (key === 'vignetteShape') {
+          if (val !== 'none' && val !== 'square' && val !== 'round') return false;
+        } else if (key === 'vignetteColor') {
+          if (val !== 'black' && val !== 'white') return false;
+        } else {
+          const range = numeric[key];
+          if (!range || typeof val !== 'number' || !Number.isInteger(val) ||
+            val < range[0] || val > range[1]) return false;
+        }
+      }
+    }
   }
   if (layout.pageOrder !== undefined) {
     if (!Array.isArray(layout.pageOrder) || !layout.pageOrder.length || layout.pageOrder.length>3 ||
@@ -164,8 +217,4 @@ export function photoSlotToAdd(order: readonly number[], gallery: readonly strin
   const remaining = Array.from({ length: CAROLINA_MAX_SLOTS }, (_, i) => i)
     .filter(index => !order.includes(index));
   return remaining.find(index => !gallery[index]) ?? remaining[0] ?? null;
-}
-export function emptyPhotoSlotToDuplicate(order: readonly number[], gallery: readonly string[]): number | null {
-  return Array.from({ length: CAROLINA_MAX_SLOTS }, (_, i) => i)
-    .find(index => !order.includes(index) && !gallery[index]) ?? null;
 }

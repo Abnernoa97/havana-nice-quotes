@@ -379,10 +379,9 @@ test('Diseño respeta las fotos originales y admite collage de 3, 5, 6 o hasta 1
   assert.match(template,/const leftCount = order\.length === CAROLINA_SLOTS \? 2/);
   assert.match(template,/const left = order\.slice\(0, leftCount\)/);
   assert.match(template,/const right = order\.slice\(leftCount\)/);
-  assert.match(canvas,/\[gallery\[slot\], gallery\[neighbor\]\] = \[gallery\[neighbor\], gallery\[slot\]\]/);
-  assert.match(canvas,/updateLayout\(\{transforms\}\)/);
-  assert.doesNotMatch(canvas,/photoOrder:current\.length|photoOrder\.filter\(/);
-  assert.match(canvas,/gallery\[next\] = gallery\[slot\] \|\| ''/);
+  assert.match(canvas,/const selectPhoto = \(id:string\) =>/);
+  assert.match(canvas,/updateLayout\(\{transforms,photoStyles\}\)/);
+  assert.doesNotMatch(canvas,/reorderPhotoBlock|duplicatePhotoBlock|photoOrder\.filter\(/);
   assert.match(layout,/photoOrder\?: number\[\]/);
   assert.match(app,/Array\.from\(\{ length: CAROLINA_MAX_SLOTS \}/);
 });
@@ -421,7 +420,7 @@ test('Un toque abre cinco switches contextuales para personalizar una sola letra
   const bank=src('features/editor/ElegantFontBank.tsx');
   const node=src('features/templates/CarolinaTextNode.tsx');
   const template=src('features/templates/CarolinaTemplate.tsx');
-  assert.match(canvas, /onTap: id => \{ setTransformingId\(null\); setEditingId\(id\); setLastTextId\(id\)/);
+  assert.match(canvas, /onTap: id => \{ setSelectedPhotoId\(null\); setTransformingId\(null\); setEditingId\(id\); setLastTextId\(id\)/);
   assert.match(canvas, /<TextStyleDock textId=\{lastTextId\}/);
   assert.match(canvas, /<button type="button" onClick=\{addFreeText\}>\+ Texto<\/button>/);
   assert.doesNotMatch(canvas, /<Type size=\{16\}\/> Tipografías/);
@@ -508,10 +507,51 @@ test('Edición móvil sin selección nativa y 3D con scroll vertical', () => {
   const editCss=readFileSync(new URL('../src/features/editor/template-canvas.css',import.meta.url),'utf8');
   const magazineCss=readFileSync(new URL('../src/features/magazine/flip-magazine.css',import.meta.url),'utf8');
   assert.match(gesture,/const onPointerCancel =/);
-  assert.match(photo,/onPointerCancel=\{gesture\.onPointerCancel\}/);
+  assert.match(photo,/gesture\.onPointerCancel\(event\)/);
   assert.match(textNode,/onPointerCancel=\{gesture\.onPointerCancel\}/);
   assert.match(editCss,/-webkit-touch-callout:none/);
   assert.match(magazineCss,/touch-action:pan-y pinch-zoom!important/);
   const magazine=src('features/magazine/FlipMagazine.tsx');
   assert.match(magazine,/mobileScrollSupport: true/);
+});
+
+
+test('Panel único de imágenes: un toque edita y una presión larga mueve o elimina', () => {
+  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const dock=src('features/editor/PhotoStyleDock.tsx');
+  const photo=src('features/templates/CarolinaPhotoNode.tsx');
+  const template=src('features/templates/CarolinaTemplate.tsx');
+  const magazine=src('features/magazine/FlipMagazine.tsx');
+  const gesture=src('features/templates/useCarolinaGesture.ts');
+  const css=readFileSync(new URL('../src/features/editor/template-canvas.css',import.meta.url),'utf8');
+  assert.match(canvas,/selectPhoto\('photo:cover'\)/);
+  assert.match(canvas,/onSelectPhoto=\{index => selectPhoto\('photo:'\+index\)\}/);
+  assert.match(canvas,/<PhotoStyleDock photoId=\{selectedPhotoId\}/);
+  assert.match(canvas,/onStyleChange=\{updatePhotoStyle\} onReplace=\{replacePhoto\}/);
+  assert.match(canvas,/target===null/);
+  assert.doesNotMatch(canvas,/hn-canvas-photo-actions|reorderPhotoBlock|duplicatePhotoBlock/);
+  assert.doesNotMatch(css,/hn-canvas-photo-actions/);
+  for(const label of ['Fondo','Colorizar','Recortar','Opacidad','Reemplazar','Viñeta'])
+    assert.match(dock,new RegExp(label));
+  assert.match(dock,/onReplace\(\)/);
+  assert.match(dock,/onToolChange\(next==='crop'\|\|next==='vignette'/);
+  assert.match(dock,/vignetteX:x,vignetteY:y/);
+  assert.match(dock,/cropX:x,cropY:y/);
+  assert.match(gesture,/LONG_PRESS_MS = 550/);
+  assert.match(photo,/effectMoved\.current/);
+  assert.match(template,/photoStyle=\{item\.carolinaLayout\?\.photoStyles\?\.\[id\]\}/);
+  assert.match(magazine,/<CarolinaCollage item=\{item\}/);
+});
+
+test('Reemplazar una fotografía mantiene sus efectos previos',()=>{
+  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const app=src('app/App.tsx');
+  const photo=src('features/templates/CarolinaPhotoNode.tsx');
+  assert.match(canvas,/styles\[selectedPhotoId\] = \{ \.\.\.styles\[selectedPhotoId\], \.\.\.patch \}/);
+  assert.match(canvas,/const replacePhoto = \(\) =>/);
+  assert.match(canvas,/if \(target==='cover'\) edit\('cover',url\)/);
+  assert.match(canvas,/gallery\[target\]=url/);
+  assert.doesNotMatch(canvas,/delete styles\[selectedPhotoId\]/);
+  assert.match(app,/gallery\[target\] = saved\.url/);
+  assert.match(photo,/photoStyle\?\.opacity/);
 });

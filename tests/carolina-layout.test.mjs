@@ -58,12 +58,14 @@ test('Fotografías de portada y collage comparten gestos, posiciones y escala pe
   const gestures=readFileSync(new URL('../src/features/templates/useCarolinaGesture.ts',import.meta.url),'utf8');
   const canvas=readFileSync(new URL('../src/features/editor/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
   assert.match(photo,/useCarolinaGesture\(id, element, transform, interaction\)/);
-  assert.match(photo,/onPointerDown=\{gesture\.onPointerDown\}/);
+  assert.match(photo,/onPointerDown=\{onDown\}/);
+  assert.match(photo,/onPointerMove=\{onMove\}/);
   assert.match(photo,/if \(!gesture\.suppressTap\(\)\) onSelect\(\)/);
+  assert.match(photo,/effectMoved\.current/);
   assert.match(template,/id="photo:cover"/);
   assert.equal((template.match(/id=\{'photo:' \+ slot\}/g)||[]).length,2);
   assert.match(template,/transform=\{item\.carolinaLayout\?\.transforms\?\.\['photo:cover'\]\}/);
-  assert.match(canvas,/onSelectCover=\{\(\) => open\('cover'\)\}/);
+  assert.match(canvas,/onSelectCover=\{\(\) => selectPhoto\('photo:cover'\)\}/);
   assert.match(canvas,/\.hn-carolina-photo, \.hn-carolina-cover-photo/);
   assert.match(layout,/photo:\(\?:cover\|1\[01\]\|\[0-9\]\)/);
   assert.match(gestures,/page\.addEventListener\('pointerdown', down\)/);
@@ -80,13 +82,12 @@ test('Fotografías de portada y collage comparten gestos, posiciones y escala pe
 test('Collage variable conserva los seis originales y admite 1 a 12 recuadros con orden estable', async () => {
   const {
     CAROLINA_DEFAULT_ORDER, CAROLINA_MAX_SLOTS, carolinaPhotoOrder,
-    photoSlotToAdd, emptyPhotoSlotToDuplicate,
+    photoSlotToAdd,
   } = await import('../src/features/templates/carolina-layout.ts');
   assert.deepEqual(CAROLINA_DEFAULT_ORDER,[0,1,2,3,4,5]);
   assert.equal(CAROLINA_MAX_SLOTS,12);
   assert.deepEqual(carolinaPhotoOrder(undefined),[0,1,2,3,4,5]);
   assert.equal(photoSlotToAdd([0,1,2,3,4,5],Array(12).fill('')),6);
-  assert.equal(emptyPhotoSlotToDuplicate([0,1,2,3,4,5],Array(12).fill('')),6);
   assert.equal(validCarolinaLayout({photoOrder:[0,1,2]}),true);
   assert.equal(validCarolinaLayout({photoOrder:[0,1,2,3,4,5,6,7,8,9,10,11]}),true);
   assert.equal(validCarolinaLayout({photoOrder:[0,0,1]}),false);
@@ -95,21 +96,20 @@ test('Collage variable conserva los seis originales y admite 1 a 12 recuadros co
   assert.equal(validCarolinaLayout({photoOrder:[0.5]}),false);
 });
 
-test('El diseñador añade, quita, duplica y reordena sin duplicar archivos R2', () => {
+test('El diseñador usa una sola barra de fotos sin acciones antiguas ni duplicación', () => {
   const canvas=readFileSync(new URL('../src/features/editor/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
   const template=readFileSync(new URL('../src/features/templates/CarolinaTemplate.tsx',import.meta.url),'utf8');
   const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../src/features/editor/template-canvas.css',import.meta.url),'utf8');
   assert.match(canvas,/const addPhotoBlock = \(\) =>/);
-  assert.match(canvas,/const clearPhotoBlock = \(slot: number\) =>/);
-  assert.match(canvas,/onClick=\{\(\) => clearPhotoBlock\(selectedPhoto\)\}>Borrar foto/);
-  assert.doesNotMatch(canvas,/photoOrder:current\.length|photoOrder\.filter\(/);
-  assert.match(canvas,/const duplicatePhotoBlock = \(slot: number\) =>/);
-  assert.match(canvas,/const reorderPhotoBlock = \(slot: number, direction: -1 \| 1\)/);
-  assert.match(canvas,/gallery\[next\] = gallery\[slot\] \|\| ''/);
+  assert.match(canvas,/const selectPhoto = \(id:string\) =>/);
+  assert.match(canvas,/<PhotoStyleDock photoId=\{selectedPhotoId\}/);
+  assert.match(canvas,/const replacePhoto = \(\) =>/);
+  assert.doesNotMatch(canvas,/hn-canvas-photo-actions|reorderPhotoBlock|duplicatePhotoBlock|clearPhotoBlock/);
+  assert.doesNotMatch(css,/hn-canvas-photo-actions/);
   assert.match(template,/carolinaPhotoOrder\(item\.carolinaLayout\)/);
   assert.match(worker,/q\.gallery\.length <= 12/);
 });
-
 
 test('Banco de 42 familias elegantes: incluye Cinzel y organiza los estilos de la boda', async () => {
   const {ELEGANT_FONTS,ELEGANT_FONT_GROUPS,isElegantFontId,elegantFontFamily} =
@@ -217,4 +217,26 @@ test('Fotografías libres en portada, collage y propuesta con IDs y URL privada 
     {id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:1,url:''}]}),false);
   assert.equal(validCarolinaLayout({transforms:{
     'photo-extra:garbage':{x:0,y:0,scale:1,rotation:0}}}),false);
+});
+
+
+test('Los seis efectos se guardan por recuadro y se validan en la nube', () => {
+  const valid={
+    photoStyles:{
+      'photo:cover':{behindText:true,opacity:11,brightness:140,contrast:90,saturate:160,
+        hue:-35,grayscale:0,sepia:12,tint:'#ACCED0',tintAmount:25,cropZoom:180,
+        cropX:42,cropY:75,vignetteShape:'round',vignetteColor:'white',
+        vignetteStrength:66,vignetteSize:73,vignetteX:41,vignetteY:39},
+      'photo-extra:cccccccc-cccc-cccc-cccc-cccccccccccc':
+        {vignetteShape:'square',vignetteColor:'black'}
+    }
+  };
+  assert.equal(validCarolinaLayout(valid),true);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:12':{opacity:50}}}),false);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{opacity:-1}}}),false);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{cropZoom:500}}}),false);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{vignetteShape:'triangle'}}}),false);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{tint:'red'}}}),false);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{weirdKey:10}}}),false);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{opacity:Infinity}}}),false);
 });

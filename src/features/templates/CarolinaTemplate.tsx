@@ -77,6 +77,7 @@ function ExtraPhotos({ item, page, interaction, onSelectPhoto }: PageProps & {
       const id='photo-extra:'+photo.id;
       return <CarolinaPhotoNode key={id} id={id} url={photo.url} extra
         transform={item.carolinaLayout?.transforms?.[id]}
+        photoStyle={item.carolinaLayout?.photoStyles?.[id]}
         interaction={interaction}
         onSelect={onSelectPhoto ? ()=>onSelectPhoto(photo.id) : undefined}/>;
     })}
@@ -91,6 +92,7 @@ export function CarolinaCover({ item, interaction, onSelectCover, onSelectExtraP
       (interaction?.transformingId ? ' hn-layout-grid' : '')}>
       <CarolinaPhotoNode cover id="photo:cover" url={item.cover}
         transform={item.carolinaLayout?.transforms?.['photo:cover']}
+        photoStyle={item.carolinaLayout?.photoStyles?.['photo:cover']}
         interaction={interaction} onSelect={onSelectCover}/>
       <div className="hn-carolina-cover-brand">
         <strong><FixedNode item={item} field="brand" interaction={interaction}/></strong>
@@ -130,12 +132,14 @@ export function CarolinaCollage({ item, onSelectPhoto, interaction, onSelectExtr
         {left.map((slot, i) => <CarolinaPhotoNode key={slot} id={'photo:' + slot}
           url={images[slot]} position={i + 1}
           transform={item.carolinaLayout?.transforms?.['photo:' + slot]}
+          photoStyle={item.carolinaLayout?.photoStyles?.['photo:' + slot]}
           interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(slot) : undefined}/>)}
       </div>
       <div className="hn-carolina-photo-column right">
         {right.map((slot, i) => <CarolinaPhotoNode key={slot} id={'photo:' + slot}
           url={images[slot]} position={leftCount + i + 1}
           transform={item.carolinaLayout?.transforms?.['photo:' + slot]}
+          photoStyle={item.carolinaLayout?.photoStyles?.['photo:' + slot]}
           interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(slot) : undefined}/>)}
       </div>
       <ExtraPhotos item={item} page={1} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
