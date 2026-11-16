@@ -41,26 +41,7 @@ export default function CarolinaPhotoNode({
   id, url, transform, photoStyle, interaction, onSelect, cover = false, position, extra = false,
 }: Props) {
   const element = useRef<HTMLButtonElement>(null);
-  const touchStart = useRef<{x:number;y:number}|null>(null);
-  const effectMoved = useRef(false);
   const gesture = useCarolinaGesture(id, element, transform, interaction);
-  const effectMode = interaction?.imageEdit?.id === id ? interaction.imageEdit.tool : null;
-  const onDown = (event: import('react').PointerEvent<HTMLButtonElement>) => {
-    touchStart.current={x:event.clientX,y:event.clientY};
-    effectMoved.current=false;
-    gesture.onPointerDown(event);
-  };
-  const onMove = (event: import('react').PointerEvent<HTMLButtonElement>) => {
-    gesture.onPointerMove(event);
-    const start=touchStart.current;
-    if (!start || !effectMode || gesture.selected ||
-      Math.hypot(event.clientX-start.x,event.clientY-start.y)<9) return;
-    effectMoved.current=true;
-    const rect=event.currentTarget.getBoundingClientRect();
-    const x=Math.max(0,Math.min(100,Math.round((event.clientX-rect.left)*100/rect.width)));
-    const y=Math.max(0,Math.min(100,Math.round((event.clientY-rect.top)*100/rect.height)));
-    interaction?.imageEdit?.onDrag(x,y);
-  };
   const className = (extra ? 'hn-carolina-floating-photo' : cover ? 'hn-carolina-cover-photo' : 'hn-carolina-photo hn-carolina-photo-' + position) +
     (onSelect ? ' hn-carolina-editable-photo' : '') +
     (gesture.selected ? ' hn-photo-transforming' : '');
@@ -100,14 +81,10 @@ export default function CarolinaPhotoNode({
   if (onSelect) return (
     <button type="button" ref={element} data-hn-photo-id={id} className={className} style={mainStyle}
       aria-label={extra ? 'Editar fotografía añadida' : cover ? 'Editar fotografía de portada' : 'Editar fotografía del recuadro ' + position}
-      onPointerDown={onDown} onPointerMove={onMove}
-      onPointerUp={event=>{gesture.onPointerUp(event);touchStart.current=null;}}
-      onPointerCancel={event=>{gesture.onPointerCancel(event);touchStart.current=null;}}
+      onPointerDown={gesture.onPointerDown} onPointerMove={gesture.onPointerMove}
+      onPointerUp={gesture.onPointerUp} onPointerCancel={gesture.onPointerCancel}
       onContextMenu={event => event.preventDefault()}
-      onClick={() => {
-        if (effectMoved.current) { effectMoved.current=false;return; }
-        if (!gesture.suppressTap()) onSelect();
-      }}>
+      onClick={() => { if (!gesture.suppressTap()) onSelect(); }}>
       {content}
     </button>
   );

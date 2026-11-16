@@ -20,9 +20,10 @@ test('Plantilla real y cinco estilos mantienen ambos modos editor/cliente', () =
 test('La biblioteca R2 y las fotos subidas alimentan la portada', () => {
   const design = src('features/editor/QuoteDesignPanel.tsx');
   const app = src('app/App.tsx');
-  const canvas = src('features/editor/TemplateCanvasEditor.tsx');
+  const canvas = src('features/editor/canvas/TemplateCanvasEditor.tsx');
   assert.match(design, /<TemplateCanvasEditor item=\{item\}/);
-  assert.match(canvas, /photos\.map\(photo =>/);
+  const picker=src('features/editor/photos/PhotoSourcePicker.tsx');
+  assert.match(picker, /photos\.map\(photo=>/);
   assert.match(canvas, /edit\('cover',\s*url\)/);
   assert.match(app, /uploadPhotos\(\[file\]\)/);
   assert.match(app, /onUploadPhoto=\{uploadDesignPhoto\}/);
@@ -102,7 +103,7 @@ test('Fotos admite diez imágenes por lote y Diseño una imagen dirigida a cada 
   const batch = src('features/photos/photo-batch.ts');
   const app = src('app/App.tsx');
   assert.match(bank, /multiple hidden disabled=\{uploading \|\| trashing\}/);
-  const canvas = src('features/editor/TemplateCanvasEditor.tsx');
+  const canvas = src('features/editor/canvas/TemplateCanvasEditor.tsx');
   assert.match(canvas, /type="file" accept="image\/jpeg/);
   assert.match(canvas, /onUploadPhoto\(file, target\)/);
   assert.match(batch, /MAX_PHOTOS_PER_UPLOAD = 10/);
@@ -187,7 +188,7 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.match(template, /<CarolinaCollage key="collage" item=\{item\}\/>/);
   assert.match(template, /<CarolinaTerms key="terms" item=\{item\}\/>/);
   assert.match(proposal, /styleName === 'carolina'/);
-  const canvas = src('features/editor/TemplateCanvasEditor.tsx');
+  const canvas = src('features/editor/canvas/TemplateCanvasEditor.tsx');
   assert.match(design, /<TemplateCanvasEditor item=\{item\}/);
   assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
   assert.match(canvas, /edit\('gallery',\s*gallery\)/);
@@ -286,7 +287,7 @@ test('Datos: fecha directa sin calendario nativo, anticipo solo por menú de nue
 
 test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadro, sin widgets antiguos', () => {
   const design = src('features/editor/QuoteDesignPanel.tsx');
-  const canvas = src('features/editor/TemplateCanvasEditor.tsx');
+  const canvas = src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const template = src('features/templates/CarolinaTemplate.tsx');
   const app = src('app/App.tsx');
   const stylesheet = readFileSync(new URL('../src/shared/styles/index.css', import.meta.url),'utf8');
@@ -294,9 +295,11 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
   assert.match(canvas, /<CarolinaCover item=\{item\} interaction=\{textInteraction\}[\s\S]*?onSelectCover=/);
   assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
   assert.match(canvas, /<CarolinaTerms item=\{item\} interaction=\{textInteraction\}\s+onSelectExtraPhoto=/);
-  assert.match(canvas, /Mi teléfono/);
-  assert.match(canvas, /Banco de fotos/);
-  assert.match(canvas, /photos\.map\(photo =>/);
+  const picker=src('features/editor/photos/PhotoSourcePicker.tsx');
+  assert.match(canvas, /<PhotoSourcePicker target=\{target\}/);
+  assert.match(picker, /Mi teléfono/);
+  assert.match(picker, /Banco de fotos/);
+  assert.match(picker, /photos\.map\(photo=>/);
   assert.match(template, /onSelectPhoto\?: \(index: number\) => void/);
   assert.match(app, /gallery\[target\] = saved\.url/);
   assert.doesNotMatch(design, /font-options|swatches|photo-options|CarolinaGalleryEditor|upload-btn/);
@@ -306,7 +309,7 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
 
 test('Carolina: todos los textos variables se editan tocando la página y llegan al mismo modelo', async () => {
   const model = src('features/quotes/types.ts');
-  const editor = src('features/editor/TemplateCanvasEditor.tsx');
+  const editor = src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const template = src('features/templates/CarolinaTemplate.tsx');
   const fields = src('features/templates/carolina-edit-fields.ts');
   const client = src('features/client/Proposal.tsx');
@@ -372,7 +375,7 @@ test('Fotos editables en el diseño real y visor: los 7 recuadros usan un solo g
 
 test('Diseño respeta las fotos originales y admite collage de 3, 5, 6 o hasta 12 bloques', () => {
   const template=src('features/templates/CarolinaTemplate.tsx');
-  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const layout=src('features/templates/carolina-layout.ts');
   const app=src('app/App.tsx');
   assert.match(template,/CAROLINA_SLOTS = 6/);
@@ -389,8 +392,8 @@ test('Diseño respeta las fotos originales y admite collage de 3, 5, 6 o hasta 1
 
 test('Diseño tiene banco elegante dentro del panel contextual y fuentes por texto', () => {
   const catalog=src('features/templates/elegant-fonts.ts');
-  const bank=src('features/editor/ElegantFontBank.tsx');
-  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const bank=src('features/editor/texts/ElegantFontBank.tsx');
+  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const node=src('features/templates/CarolinaTextNode.tsx');
   const template=src('features/templates/CarolinaTemplate.tsx');
   const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
@@ -400,7 +403,7 @@ test('Diseño tiene banco elegante dentro del panel contextual y fuentes por tex
   assert.match(bank,/elegantFontFamily\(font\.id\)/);
   assert.match(bank,/ELEGANT_FONT_GROUPS\.map/);
   assert.match(bank,/input type="search"/);
-  const dock=src('features/editor/TextStyleDock.tsx');
+  const dock=src('features/editor/texts/TextStyleDock.tsx');
   assert.match(dock, /<ElegantFontBank inline/);
   assert.match(canvas, /<TextStyleDock textId=\{lastTextId\}/);
   assert.match(canvas, /updateLayout\(\{fonts\}\)/);
@@ -415,9 +418,9 @@ test('Diseño tiene banco elegante dentro del panel contextual y fuentes por tex
 
 
 test('Un toque abre cinco switches contextuales para personalizar una sola letra o párrafo', () => {
-  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
-  const dock=src('features/editor/TextStyleDock.tsx');
-  const bank=src('features/editor/ElegantFontBank.tsx');
+  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+  const dock=src('features/editor/texts/TextStyleDock.tsx');
+  const bank=src('features/editor/texts/ElegantFontBank.tsx');
   const node=src('features/templates/CarolinaTextNode.tsx');
   const template=src('features/templates/CarolinaTemplate.tsx');
   assert.match(canvas, /onTap: id => \{ setSelectedPhotoId\(null\); setTransformingId\(null\); setEditingId\(id\); setLastTextId\(id\)/);
@@ -439,7 +442,7 @@ test('Un toque abre cinco switches contextuales para personalizar una sola letra
 });
 
 test('Pulsación larga: papelera compartida para fotos y texto, sin borrar R2', () => {
-  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const gesture=src('features/templates/useCarolinaGesture.ts');
   assert.match(canvas,/data-hn-text-trash/);
   assert.match(canvas,/onClick=\{\(\)=>removeElement\(transformingId\)\}/);
@@ -459,7 +462,7 @@ test('Pulsación larga: papelera compartida para fotos y texto, sin borrar R2', 
 test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada ficticia',()=>{
   const flip=src('features/magazine/FlipMagazine.tsx');
   const document=src('features/templates/CarolinaTemplate.tsx');
-  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const layout=src('features/templates/carolina-layout.ts');
   assert.match(flip,/const selectedPages = carolinaPageOrder\(item\.carolinaLayout\)/);
   assert.match(flip,/const total = item\.style === 'carolina' \? selectedPages\.length : 6/);
@@ -475,7 +478,7 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
 });
 
 test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2',()=>{
-  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const app=src('app/App.tsx');
   const template=src('features/templates/CarolinaTemplate.tsx');
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
@@ -504,10 +507,10 @@ test('Edición móvil sin selección nativa y 3D con scroll vertical', () => {
   const gesture=src('features/templates/useCarolinaGesture.ts');
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
   const textNode=src('features/templates/CarolinaTextNode.tsx');
-  const editCss=readFileSync(new URL('../src/features/editor/template-canvas.css',import.meta.url),'utf8');
+  const editCss=readFileSync(new URL('../src/features/editor/canvas/template-canvas.css',import.meta.url),'utf8');
   const magazineCss=readFileSync(new URL('../src/features/magazine/flip-magazine.css',import.meta.url),'utf8');
   assert.match(gesture,/const onPointerCancel =/);
-  assert.match(photo,/gesture\.onPointerCancel\(event\)/);
+  assert.match(photo,/onPointerCancel=\{gesture\.onPointerCancel\}/);
   assert.match(textNode,/onPointerCancel=\{gesture\.onPointerCancel\}/);
   assert.match(editCss,/-webkit-touch-callout:none/);
   assert.match(magazineCss,/touch-action:pan-y pinch-zoom!important/);
@@ -517,17 +520,17 @@ test('Edición móvil sin selección nativa y 3D con scroll vertical', () => {
 
 
 test('Panel único de imágenes: un toque edita y una presión larga mueve o elimina', () => {
-  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
-  const dock=src('features/editor/PhotoStyleDock.tsx');
+  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+  const dock=src('features/editor/photos/PhotoStyleDock.tsx');
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
   const template=src('features/templates/CarolinaTemplate.tsx');
   const magazine=src('features/magazine/FlipMagazine.tsx');
   const gesture=src('features/templates/useCarolinaGesture.ts');
-  const css=readFileSync(new URL('../src/features/editor/template-canvas.css',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../src/features/editor/canvas/template-canvas.css',import.meta.url),'utf8');
   assert.match(canvas,/selectPhoto\('photo:cover'\)/);
   assert.match(canvas,/onSelectPhoto=\{index => selectPhoto\('photo:'\+index\)\}/);
   assert.match(canvas,/<PhotoEditingWorkspace photoId=\{selectedPhotoId\}/);
-  const workspace=src('features/editor/PhotoEditingWorkspace.tsx');
+  const workspace=src('features/editor/photos/PhotoEditingWorkspace.tsx');
   assert.match(workspace,/<PhotoStyleDock photoId=\{photoId\}/);
   assert.match(canvas,/onStyleChange=\{updatePhotoStyle\} onReplace=\{replacePhoto\}/);
   assert.match(canvas,/target===null/);
@@ -540,13 +543,13 @@ test('Panel único de imágenes: un toque edita y una presión larga mueve o eli
   assert.match(workspace,/onStyleChange\(\{vignetteX:Math\.round/);
   assert.match(workspace,/onStyleChange\(patch\)/);
   assert.match(gesture,/LONG_PRESS_MS = 550/);
-  assert.match(photo,/effectMoved\.current/);
+  assert.doesNotMatch(photo,/effectMoved\.current|imageEdit/);
   assert.match(template,/photoStyle=\{item\.carolinaLayout\?\.photoStyles\?\.\[id\]\}/);
   assert.match(magazine,/<CarolinaCollage item=\{item\}/);
 });
 
 test('Reemplazar una fotografía mantiene sus efectos previos',()=>{
-  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const app=src('app/App.tsx');
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
   assert.match(canvas,/styles\[selectedPhotoId\] = \{ \.\.\.styles\[selectedPhotoId\], \.\.\.patch \}/);
@@ -560,11 +563,11 @@ test('Reemplazar una fotografía mantiene sus efectos previos',()=>{
 
 
 test('Editor inmersivo: giro real, scroll independiente y controles anclados',()=>{
-  const workspace=src('features/editor/PhotoEditingWorkspace.tsx');
-  const dock=src('features/editor/PhotoStyleDock.tsx');
+  const workspace=src('features/editor/photos/PhotoEditingWorkspace.tsx');
+  const dock=src('features/editor/photos/PhotoStyleDock.tsx');
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
   const model=src('features/templates/carolina-layout.ts');
-  const css=readFileSync(new URL('../src/features/editor/photo-style-dock.css',import.meta.url),'utf8');
+  const css=readFileSync(new URL('../src/features/editor/photos/photo-style-dock.css',import.meta.url),'utf8');
   assert.match(workspace,/rotateCrop\(g\.startRotation,g\.angle,angle\(positions\[0\],positions\[1\]\)\)/);
   assert.match(workspace,/positions\.length>1/);
   assert.match(workspace,/cropRotation:rotation/);
@@ -580,19 +583,35 @@ test('Editor inmersivo: giro real, scroll independiente y controles anclados',()
 });
 
 test('Fotos en fondo se recuperan por capas aunque el texto o una foto las cubra',()=>{
-  const editor=src('features/editor/TemplateCanvasEditor.tsx');
-  const css=readFileSync(new URL('../src/features/editor/template-canvas.css',import.meta.url),'utf8');
+  const editor=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+  const css=readFileSync(new URL('../src/features/editor/canvas/template-canvas.css',import.meta.url),'utf8');
   const templateCss=readFileSync(new URL('../src/features/templates/carolina-template.css',import.meta.url),'utf8');
   const gestures=src('features/templates/useCarolinaGesture.ts');
-  assert.match(editor,/const photoLayers=\[\.\.\.backgroundCover,\.\.\.backgroundCollage,\.\.\.layeredPhotos\]/);
-  assert.match(editor,/Capas de fotos/);
-  assert.match(editor,/onClick=\{\(\)=>selectPhoto\(layer\.id\)\}/);
-  assert.match(editor,/onClick=\{\(\)=>movePhotoLayer\(layer\.id\)\}/);
-  assert.match(editor,/onClick=\{\(\)=>removePhoto\(layer\.id\)\}/);
+  const layerModel=src('features/editor/photos/photo-layers.ts');
+  const layerPanel=src('features/editor/photos/PhotoLayersPanel.tsx');
+  assert.match(editor,/const photoLayers=listPhotoLayers\(item,page\)/);
+  assert.match(layerModel,/return \[\.\.\.backgroundCover,\.\.\.backgroundCollage,\.\.\.layeredPhotos\]/);
+  assert.match(layerPanel,/Capas de fotos/);
+  assert.match(editor,/onEdit=\{selectPhoto\} onMove=\{movePhotoLayer\} onDelete=\{removePhoto\}/);
+  assert.match(layerPanel,/onClick=\{\(\)=>onEdit\(layer\.id\)\}/);
+  assert.match(layerPanel,/onClick=\{\(\)=>onMove\(layer\.id\)\}/);
+  assert.match(layerPanel,/onClick=\{\(\)=>onDelete\(layer\.id\)\}/);
   assert.match(editor,/delete transforms\[id\]; delete photoStyles\[id\]/);
-  assert.match(css,/\.hn-canvas-layers-list\{/);
+  const layerCss=readFileSync(new URL('../src/features/editor/photos/photo-layers.css',import.meta.url),'utf8');
+  assert.match(layerCss,/\.hn-canvas-layers-list\{/);
   assert.match(templateCss,/\.hn-canvas \.hn-carolina-term-group\{pointer-events:none\}/);
   assert.match(templateCss,/\.hn-canvas \.hn-carolina-term-group \.hn-carolina-text-node\{pointer-events:auto\}/);
   assert.match(templateCss,/hn-carolina-floating-photo\.hn-photo-transforming/);
   assert.match(gestures,/interactionRef\.current\?\.transformingId===id/);
+});
+
+
+test('Edición de efectos fotográficos tiene un solo propietario',()=>{
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const photo=src('features/templates/CarolinaPhotoNode.tsx');
+ const gesture=src('features/templates/useCarolinaGesture.ts');
+ assert.doesNotMatch(canvas,/imageEdit:/);
+ assert.doesNotMatch(photo,/effectMoved|touchStart|effectMode|onDown =|onMove =/);
+ assert.doesNotMatch(gesture,/imageEdit\?:/);
+ assert.match(canvas,/<PhotoEditingWorkspace photoId=\{selectedPhotoId\}/);
 });

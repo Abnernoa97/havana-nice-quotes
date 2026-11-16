@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check, ChevronRight, CircleDot, Crop, Droplets, Layers3, Palette, RefreshCw } from 'lucide-react';
-import type { CarolinaPhotoStyle } from '../templates/carolina-layout';
-import { CAROLINA_PHOTO_DEFAULTS as D } from '../templates/carolina-layout';
+import type { CarolinaPhotoStyle } from '../../templates/carolina-layout';
+import { CAROLINA_PHOTO_DEFAULTS as D } from '../../templates/carolina-layout';
 import './photo-style-dock.css';
 
 type Tool = 'background'|'color'|'crop'|'opacity'|'replace'|'vignette';

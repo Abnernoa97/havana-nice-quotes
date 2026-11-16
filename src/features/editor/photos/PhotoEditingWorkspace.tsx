@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react';
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { Check } from 'lucide-react';
-import type { CarolinaPhotoStyle } from '../templates/carolina-layout';
-import { CAROLINA_PHOTO_DEFAULTS as D } from '../templates/carolina-layout';
-import { panCrop, pinchCrop, handleCropZoom, rotateCrop } from '../templates/photo-crop';
-import type { CropValues } from '../templates/photo-crop';
-import CarolinaPhotoNode from '../templates/CarolinaPhotoNode';
+import type { CarolinaPhotoStyle } from '../../templates/carolina-layout';
+import { CAROLINA_PHOTO_DEFAULTS as D } from '../../templates/carolina-layout';
+import { panCrop, pinchCrop, handleCropZoom, rotateCrop } from '../../templates/photo-crop';
+import type { CropValues } from '../../templates/photo-crop';
+import CarolinaPhotoNode from '../../templates/CarolinaPhotoNode';
 import PhotoStyleDock from './PhotoStyleDock';
 
 type Tool = 'crop' | 'vignette' | null;

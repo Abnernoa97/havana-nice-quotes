@@ -10,7 +10,6 @@ export type CarolinaGestureInteraction = {
   onDrag?: (id: string, x: number, y: number) => void;
   /** Return true when the gesture ended on a destructive drop zone. */
   onDrop?: (id: string, x: number, y: number) => boolean;
-  imageEdit?: { id:string; tool:'crop'|'vignette'; onDrag:(x:number,y:number)=>void };
 };
 type Point = { x: number; y: number };
 type Frame = Point & { distance: number; angle: number; transform: CarolinaTransform };

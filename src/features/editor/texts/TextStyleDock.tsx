@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ArrowDownUp, ArrowLeftRight, Check, Palette, Type, X } from 'lucide-react';
 import ElegantFontBank from './ElegantFontBank';
-import type { ElegantFontId } from '../templates/elegant-fonts';
-import type { CarolinaTextStyle } from '../templates/carolina-layout';
+import type { ElegantFontId } from '../../templates/elegant-fonts';
+import type { CarolinaTextStyle } from '../../templates/carolina-layout';
 import './text-style-dock.css';
 
 type Tab='fonts'|'color'|'size'|'stretchX'|'stretchY';

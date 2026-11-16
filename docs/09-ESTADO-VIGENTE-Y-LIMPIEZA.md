@@ -4,7 +4,7 @@ Datos incluye precio/moneda/anticipo sin duplicación; Estilos tiene dos acordeo
 
 # 09 · Estado vigente y limpieza
 
-**Actualizado 15/11/2026 · Cambio de prototipo local a sincronización privada cloud.**
+**Actualizado 16/11/2026 · Editor modular y sincronización privada cloud.**
 
 - Repo `Abnernoa97/havana-nice-quotes`, rama única `main`; publicación automática en el Worker Cloudflare existente `havana-nice-quotes`.
 - React + Vite, editor/Inicio/Cotizaciones/Mensajes/Vista cliente, lectura Scroll y PageFlip 3D conservados.
@@ -24,6 +24,10 @@ Datos incluye precio/moneda/anticipo sin duplicación; Estilos tiene dos acordeo
 ## Principios operativos
 
 Fer & Noa indican cambios; el asistente modifica, comprueba y publica sin exigir tareas técnicas manuales. Eliminar implica quitar código y conexiones muertas, no ocultarlas. Una sola implementación vigente, sin ramas adicionales ni recursos de pago innecesarios.
+
+## Arquitectura del editor
+
+La estructura vigente de Fotos, Textos, Lienzo y módulos compartidos está en [Arquitectura del editor](10-ARQUITECTURA-EDITOR.md). No se mantienen archivos duplicados de editores antiguos. Las plantillas y el modelo compartido siguen sirviendo al diseñador, Scroll y 3D.
 
 ## Fuentes activas
 - [Visión](03-VISION-DEL-PRODUCTO.md)

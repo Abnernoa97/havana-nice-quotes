@@ -1,24 +1,27 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, ChevronDown, ChevronLeft, ChevronRight, ImagePlus, Images, Layers3, Move, Smartphone, Trash2, X } from 'lucide-react';
-import { isCarolinaCopyField } from '../templates/carolina-edit-fields';
-import TextStyleDock from './TextStyleDock';
-import PhotoEditingWorkspace from './PhotoEditingWorkspace';
-import type { ElegantFontId } from '../templates/elegant-fonts';
-import type { CarolinaTextField } from '../templates/carolina-edit-fields';
-import { parseWeddingDate } from '../../shared/lib/wedding-date';
-import type { CarolinaTextInteraction } from '../templates/CarolinaTextNode';
-import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle, CarolinaTransform } from '../templates/carolina-layout';
-import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS } from '../templates/carolina-layout';
-import type { CarolinaPageId } from '../templates/carolina-layout';
-import { normalizePriceInput, safeQuotePrice } from '../quotes/model';
-import type { Quote } from '../quotes/types';
-import type { CloudPhoto } from '../photos/useMediaLibrary';
-import Proposal from '../client/Proposal';
-import { CarolinaCover, CarolinaCollage, CarolinaTerms, carolinaPhotos } from '../templates/CarolinaTemplate';
+import { ChevronLeft, ChevronRight, ImagePlus, Trash2 } from 'lucide-react';
+import { isCarolinaCopyField } from '../../templates/carolina-edit-fields';
+import TextStyleDock from '../texts/TextStyleDock';
+import PhotoLayersPanel from '../photos/PhotoLayersPanel';
+import PhotoSourcePicker from '../photos/PhotoSourcePicker';
+import { listPhotoLayers } from '../photos/photo-layers';
+import type { PhotoTarget } from '../shared/editor-types';
+import PhotoEditingWorkspace from '../photos/PhotoEditingWorkspace';
+import type { ElegantFontId } from '../../templates/elegant-fonts';
+import type { CarolinaTextField } from '../../templates/carolina-edit-fields';
+import { parseWeddingDate } from '../../../shared/lib/wedding-date';
+import type { CarolinaTextInteraction } from '../../templates/CarolinaTextNode';
+import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle, CarolinaTransform } from '../../templates/carolina-layout';
+import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS } from '../../templates/carolina-layout';
+import type { CarolinaPageId } from '../../templates/carolina-layout';
+import { normalizePriceInput, safeQuotePrice } from '../../quotes/model';
+import type { Quote } from '../../quotes/types';
+import type { CloudPhoto } from '../../photos/useMediaLibrary';
+import Proposal from '../../client/Proposal';
+import { CarolinaCover, CarolinaCollage, CarolinaTerms, carolinaPhotos } from '../../templates/CarolinaTemplate';
 import './template-canvas.css';
 
-export type PhotoTarget = 'cover' | number | `extra:${string}`;
 type Props = {
   item: Quote;
   edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
@@ -90,17 +93,6 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     onDrag: (_id,x,y) => {
       setTrashHovered(overTrash(x,y));
     },
-    imageEdit: selectedPhotoId && photoTool ? {
-      id: selectedPhotoId, tool: photoTool,
-      onDrag: (x:number,y:number) => {
-        const id=selectedPhotoId;
-        if (!id || !photoTool) return;
-        const styles={...item.carolinaLayout?.photoStyles};
-        styles[id]={...styles[id],...(photoTool==='vignette' ?
-          {vignetteX:x,vignetteY:y} : {cropX:x,cropY:y})};
-        updateLayout({photoStyles:styles});
-      },
-    } : undefined,
     onDrop: (id,x,y) => {
       const hit=overTrash(x,y);
       setTrashHovered(false);
@@ -206,21 +198,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     updateLayout({textStyles});
   };
   const photoOrder = carolinaPhotoOrder(item.carolinaLayout);
-  const layeredPhotos = (item.carolinaLayout?.extraPhotos||[])
-    .filter(photo=>photo.page===page && !!photo.url)
-    .map((photo,index)=>({
-      id:'photo-extra:'+photo.id, url:photo.url, label:'Foto '+(index+1),
-      behindText:!!item.carolinaLayout?.photoStyles?.['photo-extra:'+photo.id]?.behindText,
-    }));
-  const backgroundCover = page===0 && item.cover &&
-    item.carolinaLayout?.photoStyles?.['photo:cover']?.behindText
-    ? [{id:'photo:cover',url:item.cover,label:'Portada',behindText:true}] : [];
-  const backgroundCollage = page===1
-    ? photoOrder.filter(slot=>!!carolinaPhotos(item)[slot] &&
-        !!item.carolinaLayout?.photoStyles?.['photo:'+slot]?.behindText)
-        .map(slot=>({id:'photo:'+slot,url:carolinaPhotos(item)[slot],label:'Collage '+(slot+1),behindText:true}))
-    : [];
-  const photoLayers=[...backgroundCover,...backgroundCollage,...layeredPhotos];
+  const photoLayers=listPhotoLayers(item,page);
   const setPhotoOrder = (order:number[]) => updateLayout({photoOrder:order});
   const selectPhoto = (id:string) => {
     // Empty frames open the source picker, populated photos open the immersive editor.
@@ -329,28 +307,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           disabled={page===1&&photoOrder.length>=CAROLINA_MAX_SLOTS}>+ Foto</button>
         {transformingId && <span>Arrastra · Amplía o gira con dos dedos</span>}
       </div>}
-      {original && photoLayers.length>0 && <div className="hn-canvas-layers">
-        <button type="button" className="hn-canvas-layers-trigger"
-          aria-expanded={photoLayersOpen} aria-controls="hn-photo-layers-list"
-          onClick={()=>setPhotoLayersOpen(open=>!open)}>
-          <Layers3 size={16}/> Capas de fotos <strong>{photoLayers.length}</strong>
-          <ChevronDown size={15} className={photoLayersOpen?'open':''}/>
-        </button>
-        {photoLayersOpen && <div id="hn-photo-layers-list" className="hn-canvas-layers-list"
-          role="group" aria-label="Recuperar, editar, mover o borrar fotografías superpuestas">
-          {photoLayers.map(layer=><div className="hn-canvas-layer" key={layer.id}>
-            <img src={layer.url} alt="" loading="lazy"/>
-            <span className="hn-canvas-layer-name">{layer.label}{layer.behindText && <small> · Fondo</small>}</span>
-            <button type="button" onClick={()=>selectPhoto(layer.id)} aria-label={'Editar '+layer.label}>Editar</button>
-            <button type="button" onClick={()=>movePhotoLayer(layer.id)} aria-label={'Mover '+layer.label}>
-              <Move size={15}/>
-            </button>
-            <button type="button" onClick={()=>removePhoto(layer.id)} aria-label={'Borrar '+layer.label}>
-              <Trash2 size={15}/>
-            </button>
-          </div>)}
-        </div>}
-      </div>}
+      {original && <PhotoLayersPanel layers={photoLayers} open={photoLayersOpen}
+        onToggle={()=>setPhotoLayersOpen(open=>!open)}
+        onEdit={selectPhoto} onMove={movePhotoLayer} onDelete={removePhoto}/>}
       <div className="hn-canvas-sheet" onPointerDown={event => {
         const target=event.target;
         if (transformingId && !event.isPrimary) return;
@@ -432,48 +391,10 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       )}
       {error && !target && <p className="hn-canvas-error" role="alert">{error}</p>}
       {target !== null && createPortal(
-        <div className="hn-canvas-shade" onClick={event => {
-          if (event.target === event.currentTarget) close();
-        }}>
-          <div className="hn-canvas-picker" role="dialog" aria-modal="true"
-            aria-label={target==='cover'?'Foto de portada':typeof target==='string'?'Foto adicional':'Foto '+(target+1)}>
-            <header><strong>{target==='cover'?'Foto de portada':typeof target==='string'?'Foto adicional':'Foto '+(target+1)}</strong>
-              <button type="button" disabled={busy} aria-label="Cerrar" onClick={close}><X size={19}/></button>
-            </header>
-            <div className="hn-canvas-sources">
-              <label className="hn-canvas-source"><Smartphone size={21}/> Mi teléfono
-                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
-                  disabled={busy} onChange={e => {
-                    const file = e.target.files?.[0];
-                    e.target.value = '';
-                    void selectPhone(file);
-                  }}/>
-              </label>
-              <button type="button" className={bank ? 'hn-canvas-source selected' : 'hn-canvas-source'}
-                disabled={busy} onClick={() => setBank(v => !v)}><Images size={21}/> Banco de fotos</button>
-            </div>
-            {bank && (
-              <div className="hn-canvas-bank">
-                {photos.map(photo => (
-                  <button type="button" key={photo.id} disabled={busy}
-                    aria-label={'Elegir ' + photo.name} onClick={() => choose(photo.url)}>
-                    <img src={photo.url} alt="" loading="lazy"/>
-                    {(target==='cover'?item.cover===photo.url:
-                      typeof target==='string' ? item.carolinaLayout?.extraPhotos?.some(extra=>
-                        extra.id===target.slice(6)&&extra.url===photo.url):
-                      carolinaPhotos(item)[target]===photo.url) && <Check size={16}/>}
-                  </button>
-                ))}
-                {!photos.length && <p>Tu banco está vacío.</p>}
-                <button type="button" className="hn-canvas-remove" disabled={busy}
-                  onClick={() => choose('')}>Quitar fotografía</button>
-              </div>
-            )}
-            {busy && <p className="hn-canvas-message" role="status">Subiendo fotografía...</p>}
-            {error && <p className="hn-canvas-error" role="alert">{error}</p>}
-          </div>
-        </div>,
-        document.body
+        <PhotoSourcePicker target={target} item={item} photos={photos}
+          bank={bank} busy={busy} error={error} onClose={close}
+          onToggleBank={()=>setBank(v=>!v)} onPhoneFile={file=>{void selectPhone(file);}}
+          onChoose={choose}/>,document.body
       )}
     </section>
   );

@@ -5,7 +5,7 @@ import type { CloudPhoto } from '../photos/useMediaLibrary';
 import EditorialStyles from './styles/EditorialStyles';
 import QuoteDetailsPanel from './QuoteDetailsPanel';
 import QuoteDesignPanel from './QuoteDesignPanel';
-import type { PhotoTarget } from './TemplateCanvasEditor';
+import type { PhotoTarget } from './shared/editor-types';
 import QuotePublishPanel from './QuotePublishPanel';
 
 type Props = {

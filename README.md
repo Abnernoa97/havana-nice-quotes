@@ -18,12 +18,13 @@
 
 - Tres páginas reales: **Portada, Collage y Propuesta**, compartidas entre diseñador y vista cliente. El motor PageFlip 3D no se modifica.
 - Textos: toque para escribir sobre la página y guardar al tocar fuera; pulsación larga para mover, giro y escala con dos dedos y cuadrícula temporal. Títulos originales y textos añadidos se guardan por cotización en `carolinaLayout`, sin alterar la plantilla fuente.
-- Fotos: toque para cambiar de imagen; pulsación larga para mover, ampliar, reducir o rotar portada y recuadros. Se reutiliza el **mismo módulo de gestos** que en los textos.
-- El collage de Carolina mantiene **seis bloques por defecto**, organizados como en el diseño original. En Diseño pueden añadirse hasta **12** o quitarse hasta dejar **uno**, reordenarse o duplicarse sin copiar medios en R2. Los recuadros ocultos no borran las fotografías de la biblioteca.
+- Fotos: un toque abre el editor de imagen (color, recorte, giro, opacidad y viñeta); pulsación larga mueve el marco y muestra la papelera. Reemplazar conserva los ajustes y Capas recupera fotos bajo textos. Se reutiliza el **mismo módulo de gestos** que en los textos.
+- El collage de Carolina mantiene **seis bloques por defecto**, organizados como en el diseño original. En Diseño pueden añadirse hasta **12** recuadros; borrar la foto de un recuadro no reorganiza las demás. El antiguo panel de duplicación/reordenamiento ya no existe. Los recuadros ocultos no borran las fotografías de la biblioteca.
 - Los cambios se guardan en D1 y se leen en Scroll/3D. **Pendiente:** QA táctil Samsung real, páginas variables y sincronización con Havana Calendario. Envíos reales no disponibles.
 
 ## Documentos
 - [Estado vigente](docs/09-ESTADO-VIGENTE-Y-LIMPIEZA.md)
+- [Arquitectura del editor](docs/10-ARQUITECTURA-EDITOR.md)
 - [Visión](docs/03-VISION-DEL-PRODUCTO.md)
 - [Roadmap](docs/04-ROADMAP.md)
 - [Protocolo de desarrollo](docs/05-PROTOCOLO-DE-DESARROLLO.md)

@@ -1,7 +1,7 @@
 import type { Quote } from '../quotes/types';
 import type { CloudPhoto } from '../photos/useMediaLibrary';
-import TemplateCanvasEditor from './TemplateCanvasEditor';
-import type { PhotoTarget } from './TemplateCanvasEditor';
+import TemplateCanvasEditor from './canvas/TemplateCanvasEditor';
+import type { PhotoTarget } from './shared/editor-types';
 
 type Props = {
   item: Quote;

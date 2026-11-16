@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Check, Search, X } from 'lucide-react';
-import { ELEGANT_FONTS, ELEGANT_FONT_GROUPS, elegantFontFamily, loadElegantFont } from '../templates/elegant-fonts';
-import type { ElegantFontGroup, ElegantFontId } from '../templates/elegant-fonts';
+import { ELEGANT_FONTS, ELEGANT_FONT_GROUPS, elegantFontFamily, loadElegantFont } from '../../templates/elegant-fonts';
+import type { ElegantFontGroup, ElegantFontId } from '../../templates/elegant-fonts';
 import './elegant-font-bank.css';
 
 type Props = {

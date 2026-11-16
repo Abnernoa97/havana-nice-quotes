@@ -164,6 +164,45 @@ const fmtCopies = sourceFiles.flatMap(p => {
 check('Un solo formateador internacional de importes', fmtCopies.length === 1 &&
   fmtCopies[0] === 'src/shared/lib/formatters.ts',
   'Intl.NumberFormat aparece en: ' + fmtCopies.join(', '));
+
+const currentEditorPaths=[
+  'src/features/editor/canvas/TemplateCanvasEditor.tsx',
+  'src/features/editor/canvas/template-canvas.css',
+  'src/features/editor/photos/PhotoEditingWorkspace.tsx',
+  'src/features/editor/photos/PhotoStyleDock.tsx',
+  'src/features/editor/photos/PhotoLayersPanel.tsx',
+  'src/features/editor/photos/photo-layers.ts',
+  'src/features/editor/photos/PhotoSourcePicker.tsx',
+  'src/features/editor/texts/TextStyleDock.tsx',
+  'src/features/editor/texts/ElegantFontBank.tsx',
+  'src/features/editor/shared/editor-types.ts',
+];
+const obsoleteEditorPaths=[
+  'src/features/editor/TemplateCanvasEditor.tsx',
+  'src/features/editor/PhotoEditingWorkspace.tsx',
+  'src/features/editor/PhotoStyleDock.tsx',
+  'src/features/editor/TextStyleDock.tsx',
+  'src/features/editor/ElegantFontBank.tsx',
+  'src/features/editor/template-canvas.css',
+  'src/features/editor/photo-style-dock.css',
+  'src/features/editor/text-style-dock.css',
+  'src/features/editor/elegant-font-bank.css',
+];
+check('Editor modular sin copias de archivos antiguos',
+  currentEditorPaths.every(p=>fileSet.has(p)) &&
+  obsoleteEditorPaths.every(p=>!fileSet.has(p)),
+  'Módulo del editor ausente o archivo antiguo todavía presente');
+if (fileSet.has('src/features/editor/canvas/TemplateCanvasEditor.tsx')) {
+  const source = file => fs.readFileSync(path.join(ROOT,file),'utf8');
+  const canvas = source('src/features/editor/canvas/TemplateCanvasEditor.tsx');
+  const image = source('src/features/templates/CarolinaPhotoNode.tsx');
+  const gestures = source('src/features/templates/useCarolinaGesture.ts');
+  check('Una sola edición de efectos fotográficos',
+    !canvas.includes('imageEdit:') && !image.includes('effectMoved.current') &&
+    !image.includes('effectMode =') && !gestures.includes('imageEdit?:'),
+    'Queda la ruta antigua de recorte dentro del lienzo');
+}
+
 const magazinePath = 'src/features/magazine/FlipMagazine.tsx';
 if (fileSet.has(magazinePath)) {
   const magazine = fs.readFileSync(path.join(ROOT, magazinePath), 'utf8');
