@@ -566,7 +566,7 @@ test('API bloquea layouts con tamaños infinitos, campos no admitidos o extras c
     {transforms:{'field:name':{x:Infinity,y:0,scale:1,rotation:0}}},
     {transforms:{'field:name':{x:0,y:0,scale:5,rotation:0}}},
     {transforms:{'field:name':{x:0,y:0,scale:1,rotation:181}}},
-    {transforms:{'photo:6':{x:0,y:0,scale:1,rotation:0}}},
+    {transforms:{'photo:12':{x:0,y:0,scale:1,rotation:0}}},
     {transforms:{'photo:cover':{x:0,y:0,scale:0,rotation:0}}},
     {extras:[{id:'not-an-id',page:0,text:'X'}]},
     {extras:[{id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:3,text:'X'}]},
