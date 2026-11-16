@@ -194,3 +194,8 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
 .hn-carolina-photo-overlay{display:contents}
 .hn-carolina-term-group{position:relative;z-index:2}
 .hn-carolina-extra-layer{z-index:3}
+
+/* Crop aspect is confined to the image; page and collage frames never reflow. */
+.hn-carolina-photo,.hn-carolina-cover-photo,.hn-carolina-floating-photo{container-type:size}
+.hn-carolina-crop-viewport{position:absolute;inset:0;display:block;overflow:hidden;pointer-events:none}
+.hn-carolina-crop-viewport.is-ratio{inset:auto;top:50%;left:50%;transform:translate(-50%,-50%);width:min(100cqw,calc(100cqh * var(--crop-ratio)));height:min(100cqh,calc(100cqw / var(--crop-ratio)))}

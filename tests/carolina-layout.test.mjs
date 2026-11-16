@@ -240,3 +240,8 @@ test('Los seis efectos se guardan por recuadro y se validan en la nube', () => {
   assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{weirdKey:10}}}),false);
   assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{opacity:Infinity}}}),false);
 });
+
+test('Validación de relaciones de recorte dentro de un recuadro estable',()=>{
+  for(const a of ['frame','1:1','4:5','9:16','16:9'])assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{cropAspect:a,cropZoom:135}}}),true);
+  assert.equal(validCarolinaLayout({photoStyles:{'photo:0':{cropAspect:'4:3'}}}),false);
+});

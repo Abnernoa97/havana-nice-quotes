@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import type { CSSProperties } from 'react';
 import type { CarolinaPhotoStyle, CarolinaTransform } from './carolina-layout';
 import { CAROLINA_PHOTO_DEFAULTS as D } from './carolina-layout';
+import { CROP_ASPECT_RATIOS } from './photo-crop';
 import { useCarolinaGesture } from './useCarolinaGesture';
 import type { CarolinaGestureInteraction } from './useCarolinaGesture';
 
@@ -67,10 +68,13 @@ export default function CarolinaPhotoNode({
     transform: gesture.transform,
     ...(extra ? {zIndex: photoStyle?.behindText ? 1 : 4} : {}),
   };
+  const ratio = photoStyle?.cropAspect || 'frame';
+  const ratioStyle = ratio !== 'frame' ? {'--crop-ratio': String(CROP_ASPECT_RATIOS[ratio])} as CSSProperties : undefined;
   const picture: CSSProperties = {
     backgroundImage: url ? 'url("' + url + '")' : undefined,
     backgroundPosition: (photoStyle?.cropX ?? D.cropX) + '% ' + (photoStyle?.cropY ?? D.cropY) + '%',
     transform: 'scale(' + ((photoStyle?.cropZoom ?? D.cropZoom) / 100) + ')',
+    transformOrigin: (photoStyle?.cropX ?? D.cropX) + '% ' + (photoStyle?.cropY ?? D.cropY) + '%',
     filter: 'brightness(' + (photoStyle?.brightness ?? D.brightness) + '%) ' +
       'contrast(' + (photoStyle?.contrast ?? D.contrast) + '%) ' +
       'saturate(' + (photoStyle?.saturate ?? D.saturate) + '%) ' +
@@ -81,12 +85,14 @@ export default function CarolinaPhotoNode({
   };
   const tintOpacity = (photoStyle?.tintAmount ?? D.tintAmount) / 100;
   const content = <>
-    {url && <span className="hn-carolina-image-fill" style={picture} aria-hidden="true"/>}
-    {url && tintOpacity > 0 && <span className="hn-carolina-image-tint"
-      style={{ background:photoStyle?.tint || '#244a37', opacity:tintOpacity }} aria-hidden="true"/>}
-    {cover && url && <span className="hn-carolina-photo-shade" aria-hidden="true"/>}
-    {url && photoStyle?.vignetteShape && photoStyle.vignetteShape !== 'none' &&
-      <span className="hn-carolina-image-vignette" style={vignette(photoStyle)} aria-hidden="true"/>}
+    <span className={'hn-carolina-crop-viewport'+(ratio!=='frame'?' is-ratio':'')} style={ratioStyle} aria-hidden="true">
+      {url && <span className="hn-carolina-image-fill" style={picture}/>}
+      {url && tintOpacity>0 && <span className="hn-carolina-image-tint"
+        style={{background:photoStyle?.tint || '#244a37',opacity:tintOpacity}}/>}
+      {cover && url && <span className="hn-carolina-photo-shade"/>}
+      {url && photoStyle?.vignetteShape && photoStyle.vignetteShape!=='none' &&
+        <span className="hn-carolina-image-vignette" style={vignette(photoStyle)}/>}
+    </span>
     {!url && onSelect && <span className="hn-carolina-empty-photo">+</span>}
     {!cover && !extra && onSelect && <span className="hn-carolina-photo-index">{String(position).padStart(2,'0')}</span>}
     {cover && !url && onSelect && <span className="hn-carolina-cover-invite">Añadir fotografía</span>}

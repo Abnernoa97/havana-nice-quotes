@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Check, CircleDot, Crop, Droplets, Layers3, Palette, RefreshCw } from 'lucide-react';
+import { Check, ChevronRight, CircleDot, Crop, Droplets, Layers3, Palette, RefreshCw } from 'lucide-react';
 import type { CarolinaPhotoStyle } from '../templates/carolina-layout';
 import { CAROLINA_PHOTO_DEFAULTS as D } from '../templates/carolina-layout';
 import './photo-style-dock.css';
 
 type Tool = 'background'|'color'|'crop'|'opacity'|'replace'|'vignette';
 type NumberKey = Exclude<keyof CarolinaPhotoStyle,
-  'behindText'|'tint'|'vignetteShape'|'vignetteColor'>;
+  'behindText'|'tint'|'vignetteShape'|'vignetteColor'|'cropAspect'>;
 type Props = {
   photoId:string; style?:CarolinaPhotoStyle;
   onStyleChange:(patch:Partial<CarolinaPhotoStyle>)=>void;
@@ -79,14 +79,24 @@ export default function PhotoStyleDock({
           brightness:100,contrast:100,saturate:100,hue:0,grayscale:0,sepia:0,tintAmount:0
         })}>Restablecer colores</button>
       </div>}
-      {tab==='crop' && <div className="hn-photo-controls">
-        {slider('Zoom de la foto','cropZoom',100,300)}
-        {slider('Encuadre horizontal','cropX',0,100)}
-        {slider('Encuadre vertical','cropY',0,100)}
-        <small>Desliza sobre la fotografía de arriba para ajustar el encuadre.</small>
-        <button className="hn-photo-reset" type="button" onClick={()=>onStyleChange({
-          cropZoom:100,cropX:50,cropY:50
-        })}>Restablecer recorte</button>
+      {tab==='crop' && <div className="hn-photo-controls hn-photo-crop-controls">
+        <div className="hn-photo-crop-aspect-title">Aspecto</div>
+        <div className="hn-photo-crop-aspects" role="group" aria-label="Proporciones de recorte">
+          {([
+            {id:'frame',label:'Recuadro'}, {id:'1:1',label:'1:1'},
+            {id:'4:5',label:'4:5'}, {id:'9:16',label:'9:16'}, {id:'16:9',label:'16:9'},
+          ] as const).map(option=><button key={option.id} type="button"
+            className={(style?.cropAspect||'frame')===option.id?'chosen':''}
+            aria-pressed={(style?.cropAspect||'frame')===option.id}
+            onClick={()=>onStyleChange({cropAspect:option.id})}>{option.label}</button>)}
+        </div>
+        {slider('Zoom','cropZoom',100,300)}
+        <div className="hn-photo-crop-footer">
+          <small>Mueve la foto con un dedo · Pellizca para ampliar · Ajusta desde las esquinas</small>
+          <button className="hn-photo-reset" type="button" onClick={()=>onStyleChange({
+            cropZoom:100,cropX:50,cropY:50,cropAspect:'frame'
+          })}>Restablecer</button>
+        </div>
       </div>}
       {tab==='opacity' && <div className="hn-photo-controls">
         {slider('Opacidad de la imagen','opacity',0,100)}
@@ -116,10 +126,14 @@ export default function PhotoStyleDock({
         <small>Mueve la viñeta con un dedo sobre la fotografía de arriba.</small>
       </div>}
     </div>}
-    <div className="hn-text-dock-switches hn-photo-switches" role="group" aria-label="Ajustes de fotografía">
-      {tools.map(({id,label,Icon})=><button type="button" key={id}
-        className={tab===id?'active':''} aria-pressed={tab===id}
-        onClick={()=>toggle(id)}><Icon size={17} strokeWidth={1.8}/><span>{label}</span></button>)}
+    <div className="hn-photo-tools-rail">
+      <div className="hn-text-dock-switches hn-photo-switches" role="group"
+        aria-label="Herramientas de fotografía. Desliza horizontalmente para ver más">
+        {tools.map(({id,label,Icon})=><button type="button" key={id}
+          className={tab===id?'active':''} aria-pressed={tab===id}
+          onClick={()=>toggle(id)}><Icon size={16} strokeWidth={1.8}/><span>{label}</span></button>)}
+      </div>
+      <span className="hn-photo-rail-more" aria-hidden="true"><ChevronRight size={16}/></span>
     </div>
   </aside>;
 }

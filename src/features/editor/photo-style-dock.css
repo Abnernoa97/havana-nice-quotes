@@ -26,18 +26,22 @@
 .hn-photo-workspace-frame .hn-carolina-image-fill,
 .hn-photo-workspace-frame .hn-carolina-image-vignette{pointer-events:none}
 .hn-photo-workspace .hn-photo-dock{position:relative;flex:0 0 auto;left:auto;bottom:auto;transform:none;
-  width:100%;max-width:none;max-height:min(51dvh,430px);border:0;border-top:1px solid #d6e0d4;
+  width:100%;max-width:none;max-height:min(43dvh,340px);border:0;border-top:1px solid #d6e0d4;
   border-radius:16px 16px 0 0;box-shadow:0 -6px 25px #142e2518;
   display:flex;flex-direction:column;overflow:hidden;background:#fafcf9;margin:0}
-.hn-photo-workspace .hn-photo-expanded{flex:0 1 auto;min-height:0;max-height:min(34dvh,300px);
-  overflow-y:auto;overscroll-behavior:contain;padding:9px 12px 12px;scrollbar-width:thin}
-.hn-photo-workspace .hn-photo-switches{flex:0 0 auto;display:flex;grid-template-columns:none;
-  flex-wrap:nowrap;gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
-  padding:8px 10px 10px;border-top:1px solid #e1e8e0;justify-content:flex-start}
+.hn-photo-workspace .hn-photo-expanded{flex:0 1 auto;min-height:0;max-height:min(27dvh,225px);
+  overflow-y:auto;overscroll-behavior:contain;padding:7px 12px 9px;scrollbar-width:thin}
+.hn-photo-workspace .hn-photo-tools-rail{position:relative;flex:0 0 auto;border-top:1px solid #e1e8e0}
+.hn-photo-workspace .hn-photo-switches{display:flex;grid-template-columns:none;flex-wrap:nowrap;
+  gap:4px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
+  padding:6px 19px 7px 7px;scroll-snap-type:x proximity;justify-content:flex-start}
 .hn-photo-workspace .hn-photo-switches::-webkit-scrollbar{display:none}
-.hn-photo-workspace .hn-photo-switches button{flex:0 0 80px;min-height:58px;min-width:0;gap:5px;
-  padding:7px 4px;border-radius:10px}
-.hn-photo-workspace .hn-photo-switches button span{font-size:10px;white-space:nowrap}
+.hn-photo-workspace .hn-photo-switches button{flex:0 0 65px;min-height:47px;min-width:0;
+  gap:3px;padding:5px 3px;border-radius:9px;scroll-snap-align:start}
+.hn-photo-workspace .hn-photo-switches button span{font-size:9px;white-space:nowrap}
+.hn-photo-rail-more{position:absolute;right:0;top:0;bottom:0;width:21px;display:flex;
+  align-items:center;justify-content:center;pointer-events:none;color:#254937;
+  background:linear-gradient(90deg,#fafcf900,#fafcf9 55%)}
 .hn-photo-controls{display:flex;flex-direction:column;gap:10px}
 .hn-photo-slider{display:flex;flex-direction:column;gap:3px}
 .hn-photo-slider>span{display:flex;justify-content:space-between;align-items:center;color:#53705b;font-size:12px}
@@ -58,4 +62,27 @@
 .hn-photo-reset{align-self:flex-end;border:0;background:transparent;color:#365c42;padding:7px;font-weight:650;font-size:11px;text-decoration:underline}
 @media(max-height:590px){.hn-photo-workspace-header{min-height:39px;padding:3px 10px}
   .hn-photo-workspace .hn-photo-expanded{max-height:30dvh}
-  .hn-photo-workspace .hn-photo-switches button{min-height:49px}}
+  .hn-photo-workspace .hn-photo-switches button{min-height:44px}}
+
+/* Lightroom-like crop guides: thirds, four touch handles and aspect choices. */
+.hn-photo-crop-guides{position:absolute;inset:0;pointer-events:none;z-index:7;
+  border:1px solid #fff;box-sizing:border-box;box-shadow:inset 0 0 0 1px #152c2540}
+.hn-photo-crop-grid{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(to right,transparent calc(33.333% - .5px),#ffffffba 33.333%,transparent calc(33.333% + .5px),
+    transparent calc(66.666% - .5px),#ffffffba 66.666%,transparent calc(66.666% + .5px)),
+    linear-gradient(to bottom,transparent calc(33.333% - .5px),#ffffffba 33.333%,transparent calc(33.333% + .5px),
+    transparent calc(66.666% - .5px),#ffffffba 66.666%,transparent calc(66.666% + .5px))}
+.hn-photo-crop-handle{position:absolute;width:25px;height:25px;pointer-events:auto;touch-action:none}
+.hn-photo-crop-handle.top-left{top:0;left:0;border-top:4px solid #fff;border-left:4px solid #fff}
+.hn-photo-crop-handle.top-right{top:0;right:0;border-top:4px solid #fff;border-right:4px solid #fff}
+.hn-photo-crop-handle.bottom-left{bottom:0;left:0;border-bottom:4px solid #fff;border-left:4px solid #fff}
+.hn-photo-crop-handle.bottom-right{bottom:0;right:0;border-bottom:4px solid #fff;border-right:4px solid #fff}
+.hn-photo-crop-aspect-title{font-size:12px;font-weight:750;color:#315741}
+.hn-photo-crop-aspects{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none}
+.hn-photo-crop-aspects::-webkit-scrollbar{display:none}
+.hn-photo-crop-aspects button{flex:1 0 auto;min-height:34px;padding:6px 9px;
+  border:1px solid #d6e2d6;border-radius:8px;background:#fff;color:#477054;font-size:11px;font-weight:700}
+.hn-photo-crop-aspects button.chosen{background:#244a37;color:#fff;border-color:#244a37}
+.hn-photo-crop-footer{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hn-photo-crop-footer small{flex:1;font-size:10px}
+.hn-photo-crop-footer .hn-photo-reset{flex:0 0 auto;text-decoration:none;font-size:10px}

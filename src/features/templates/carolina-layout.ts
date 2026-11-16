@@ -44,6 +44,7 @@ export type CarolinaPhotoStyle = {
   hue?: number; grayscale?: number; sepia?: number;
   tint?: string; tintAmount?: number;
   cropZoom?: number; cropX?: number; cropY?: number;
+  cropAspect?: 'frame'|'1:1'|'4:5'|'9:16'|'16:9';
   opacity?: number;
   vignetteShape?: 'none' | 'square' | 'round';
   vignetteColor?: 'black' | 'white';
@@ -134,6 +135,8 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
         if (key === 'behindText') { if (typeof val !== 'boolean') return false; }
         else if (key === 'tint') {
           if (typeof val !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(val)) return false;
+        } else if (key === 'cropAspect') {
+          if (!['frame','1:1','4:5','9:16','16:9'].includes(val as string)) return false;
         } else if (key === 'vignetteShape') {
           if (val !== 'none' && val !== 'square' && val !== 'round') return false;
         } else if (key === 'vignetteColor') {

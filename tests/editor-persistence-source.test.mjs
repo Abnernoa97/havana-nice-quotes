@@ -537,8 +537,8 @@ test('Panel único de imágenes: un toque edita y una presión larga mueve o eli
     assert.match(dock,new RegExp(label));
   assert.match(dock,/onReplace\(\)/);
   assert.match(dock,/onToolChange\(next==='crop'\|\|next==='vignette'/);
-  assert.match(workspace,/onStyleChange\(\{vignetteX:px,vignetteY:py\}\)/);
-  assert.match(workspace,/onStyleChange\(\{cropX:px,cropY:py\}\)/);
+  assert.match(workspace,/onStyleChange\(\{vignetteX:Math\.round/);
+  assert.match(workspace,/onStyleChange\(next\)/);
   assert.match(gesture,/LONG_PRESS_MS = 550/);
   assert.match(photo,/effectMoved\.current/);
   assert.match(template,/photoStyle=\{item\.carolinaLayout\?\.photoStyles\?\.\[id\]\}/);
