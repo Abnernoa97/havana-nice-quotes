@@ -71,3 +71,24 @@
 .hn-canvas .hn-carolina-cover-photo { touch-action:none; -webkit-user-select:none; user-select:none; }
 .hn-canvas .hn-carolina-cover-photo:hover,
 .hn-canvas .hn-carolina-editable-photo:hover { outline:1px dashed #bc9f69; outline-offset:-2px; }
+
+
+/* Controls appear only on the collage; original six-photo layout stays unchanged. */
+.hn-canvas-toolbar { justify-content:flex-start; flex-wrap:wrap; }
+.hn-canvas-toolbar button:disabled { opacity:.4; cursor:default; }
+.hn-canvas-toolbar span { margin-left:auto; }
+.hn-canvas-photo-actions {
+  width:min(100%,620px); box-sizing:border-box; margin:12px auto 0; display:flex;
+  align-items:center; flex-wrap:wrap; gap:6px; padding:9px; background:#edf3ec;
+  border:1px solid #dce7da; border-radius:11px;
+}
+.hn-canvas-photo-actions span {
+  font-weight:700; font-size:12px; color:#315840; margin:0 6px;
+}
+.hn-canvas-photo-actions button {
+  flex:1 1 auto; border:1px solid #d5e2d2; border-radius:8px;
+  background:#fff; color:#35573f; min-height:37px;
+  padding:7px 11px; font-size:12px; font-weight:600; cursor:pointer;
+}
+.hn-canvas-photo-actions button:disabled { opacity:.35; cursor:default; }
+.hn-canvas-photo-actions button:last-child { color:#975547; }

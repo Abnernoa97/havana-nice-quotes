@@ -3,7 +3,7 @@ import type { CarolinaTextInteraction } from './CarolinaTextNode';
 import CarolinaTextNode from './CarolinaTextNode';
 import CarolinaPhotoNode from './CarolinaPhotoNode';
 import type { CarolinaFixedKey } from './carolina-layout';
-import { fixedText } from './carolina-layout';
+import { fixedText, carolinaPhotoOrder, CAROLINA_MAX_SLOTS } from './carolina-layout';
 import { quoteCurrency, usd } from '../../shared/lib/formatters';
 import './carolina-template.css';
 
@@ -18,7 +18,7 @@ export function carolinaCopy(item: Quote): CarolinaCopy {
   return { ...CAROLINA_COPY, ...item.carolinaCopy };
 }
 export function carolinaPhotos(item: Quote): string[] {
-  return Array.from({ length: CAROLINA_SLOTS }, (_, i) => item.gallery?.[i] || '');
+  return Array.from({ length: CAROLINA_MAX_SLOTS }, (_, i) => item.gallery?.[i] || '');
 }
 export function carolinaDate(value: string): string {
   if (!value) return '';
@@ -90,20 +90,25 @@ export function CarolinaCollage({ item, onSelectPhoto, interaction }: PageProps 
   onSelectPhoto?: (index: number) => void;
 }) {
   const images = carolinaPhotos(item);
+  const order = carolinaPhotoOrder(item.carolinaLayout);
+  const leftCount = order.length === CAROLINA_SLOTS ? 2 : Math.ceil(order.length / 2);
+  const left = order.slice(0, leftCount);
+  const right = order.slice(leftCount);
   return (
     <div className={'hn-carolina-page hn-carolina-collage' +
+      (order.length === CAROLINA_SLOTS ? ' original-six' : ' flexible-collage') +
       (interaction?.transformingId ? ' hn-layout-grid' : '')}>
       <div className="hn-carolina-photo-column left">
-        {images.slice(0, 2).map((url, i) => <CarolinaPhotoNode key={i} id={'photo:' + i}
-          url={url} position={i + 1}
-          transform={item.carolinaLayout?.transforms?.['photo:' + i]}
-          interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(i) : undefined}/>)}
+        {left.map((slot, i) => <CarolinaPhotoNode key={slot} id={'photo:' + slot}
+          url={images[slot]} position={i + 1}
+          transform={item.carolinaLayout?.transforms?.['photo:' + slot]}
+          interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(slot) : undefined}/>)}
       </div>
       <div className="hn-carolina-photo-column right">
-        {images.slice(2).map((url, i) => <CarolinaPhotoNode key={i + 2} id={'photo:' + (i + 2)}
-          url={url} position={i + 3}
-          transform={item.carolinaLayout?.transforms?.['photo:' + (i + 2)]}
-          interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(i + 2) : undefined}/>)}
+        {right.map((slot, i) => <CarolinaPhotoNode key={slot} id={'photo:' + slot}
+          url={images[slot]} position={leftCount + i + 1}
+          transform={item.carolinaLayout?.transforms?.['photo:' + slot]}
+          interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(slot) : undefined}/>)}
       </div>
       <ExtraTexts item={item} page={1} interaction={interaction}/>
     </div>

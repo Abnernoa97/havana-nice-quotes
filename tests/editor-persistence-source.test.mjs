@@ -365,3 +365,20 @@ test('Fotos editables en el diseño real y visor: los 7 recuadros usan un solo g
   assert.match(magazine,/<CarolinaCover item=\{item\}\/>/);
   assert.match(worker,/validCarolinaLayout\(q\.carolinaLayout\)/);
 });
+
+
+test('Diseño respeta las fotos originales y admite collage de 3, 5, 6 o hasta 12 bloques', () => {
+  const template=src('features/templates/CarolinaTemplate.tsx');
+  const canvas=src('features/editor/TemplateCanvasEditor.tsx');
+  const layout=src('features/templates/carolina-layout.ts');
+  const app=src('app/App.tsx');
+  assert.match(template,/CAROLINA_SLOTS = 6/);
+  assert.match(template,/const leftCount = order\.length === CAROLINA_SLOTS \? 2/);
+  assert.match(template,/const left = order\.slice\(0, leftCount\)/);
+  assert.match(template,/const right = order\.slice\(leftCount\)/);
+  assert.match(canvas,/setPhotoOrder\(movePhotoSlot\(photoOrder, slot, direction\)\)/);
+  assert.match(canvas,/setPhotoOrder\(photoOrder\.filter\(index => index !== slot\)\)/);
+  assert.match(canvas,/gallery\[next\] = gallery\[slot\] \|\| ''/);
+  assert.match(layout,/photoOrder\?: number\[\]/);
+  assert.match(app,/Array\.from\(\{ length: CAROLINA_MAX_SLOTS \}/);
+});

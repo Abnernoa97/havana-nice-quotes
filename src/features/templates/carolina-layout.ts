@@ -20,12 +20,17 @@ export const CAROLINA_FIXED = {
   space: '• Space: ',
 } as const;
 export type CarolinaFixedKey = keyof typeof CAROLINA_FIXED;
+export const CAROLINA_DEFAULT_SLOTS = 6;
+export const CAROLINA_MAX_SLOTS = 12;
+export const CAROLINA_DEFAULT_ORDER = Array.from({ length: CAROLINA_DEFAULT_SLOTS }, (_, i) => i);
+
 export type CarolinaTransform = { x: number; y: number; scale: number; rotation: number };
 export type CarolinaExtra = { id: string; page: 0 | 1 | 2; text: string };
 export type CarolinaLayout = {
   fixed?: Partial<Record<CarolinaFixedKey, string>>;
   transforms?: Record<string, CarolinaTransform>;
   extras?: CarolinaExtra[];
+  photoOrder?: number[];
 };
 export const ZERO_TRANSFORM: CarolinaTransform = { x: 0, y: 0, scale: 1, rotation: 0 };
 
@@ -46,7 +51,14 @@ export function clampTransform(value: CarolinaTransform): CarolinaTransform {
 export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const layout = value as Record<string, unknown>;
-  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras'].includes(k))) return false;
+  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder'].includes(k))) return false;
+  if (layout.photoOrder !== undefined) {
+    if (!Array.isArray(layout.photoOrder) || layout.photoOrder.length < 1 ||
+      layout.photoOrder.length > CAROLINA_MAX_SLOTS ||
+      new Set(layout.photoOrder).size !== layout.photoOrder.length ||
+      layout.photoOrder.some((index: unknown) => !Number.isInteger(index) ||
+        (index as number) < 0 || (index as number) >= CAROLINA_MAX_SLOTS)) return false;
+  }
   if (layout.fixed !== undefined) {
     if (!layout.fixed || typeof layout.fixed !== 'object' || Array.isArray(layout.fixed)) return false;
     const entries = Object.entries(layout.fixed);
@@ -81,4 +93,27 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     }
   }
   return true;
+}
+
+
+/** IDs are stable gallery slots; order changes never move original R2 objects or lose hidden photos. */
+export function carolinaPhotoOrder(layout: CarolinaLayout | undefined): number[] {
+  return [...(layout?.photoOrder || CAROLINA_DEFAULT_ORDER)];
+}
+export function movePhotoSlot(order: readonly number[], slot: number, direction: -1 | 1): number[] {
+  const index = order.indexOf(slot);
+  const next = index + direction;
+  if (index < 0 || next < 0 || next >= order.length) return [...order];
+  const changed = [...order];
+  [changed[index], changed[next]] = [changed[next], changed[index]];
+  return changed;
+}
+export function photoSlotToAdd(order: readonly number[], gallery: readonly string[]): number | null {
+  const remaining = Array.from({ length: CAROLINA_MAX_SLOTS }, (_, i) => i)
+    .filter(index => !order.includes(index));
+  return remaining.find(index => !gallery[index]) ?? remaining[0] ?? null;
+}
+export function emptyPhotoSlotToDuplicate(order: readonly number[], gallery: readonly string[]): number | null {
+  return Array.from({ length: CAROLINA_MAX_SLOTS }, (_, i) => i)
+    .find(index => !order.includes(index) && !gallery[index]) ?? null;
 }

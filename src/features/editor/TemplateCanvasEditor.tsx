@@ -5,6 +5,7 @@ import type { CarolinaTextField } from '../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../templates/CarolinaTextNode';
 import type { CarolinaFixedKey, CarolinaLayout, CarolinaTransform } from '../templates/carolina-layout';
+import { carolinaPhotoOrder, movePhotoSlot, photoSlotToAdd, emptyPhotoSlotToDuplicate, CAROLINA_MAX_SLOTS } from '../templates/carolina-layout';
 import { normalizePriceInput, safeQuotePrice } from '../quotes/model';
 import type { Quote } from '../quotes/types';
 import type { CloudPhoto } from '../photos/useMediaLibrary';
@@ -82,6 +83,38 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setTransformingId(null);
     setEditingId('extra:' + id);
   };
+  const photoOrder = carolinaPhotoOrder(item.carolinaLayout);
+  const activePhoto = transformingId?.match(/^photo:(\d+)$/);
+  const selectedPhoto = activePhoto ? Number(activePhoto[1]) : null;
+  const setPhotoOrder = (order: number[]) => updateLayout({ photoOrder: order });
+  const addPhotoBlock = () => {
+    const slot = photoSlotToAdd(photoOrder, carolinaPhotos(item));
+    if (slot === null) return;
+    setPhotoOrder([...photoOrder, slot]);
+    setTransformingId(null);
+    setTarget(slot);
+    setBank(false);
+  };
+  const reorderPhotoBlock = (slot: number, direction: -1 | 1) =>
+    setPhotoOrder(movePhotoSlot(photoOrder, slot, direction));
+  const hidePhotoBlock = (slot: number) => {
+    if (photoOrder.length <= 1) return;
+    setPhotoOrder(photoOrder.filter(index => index !== slot));
+    setTransformingId(null);
+  };
+  const duplicatePhotoBlock = (slot: number) => {
+    const gallery = carolinaPhotos(item);
+    const next = emptyPhotoSlotToDuplicate(photoOrder, gallery);
+    if (next === null) {
+      setError('Las 12 posiciones están ocupadas. Quita un recuadro o reutiliza uno.');
+      return;
+    }
+    gallery[next] = gallery[slot] || '';
+    edit('gallery', gallery); // Same R2 photograph, no copied or uploaded file.
+    setPhotoOrder([...photoOrder, next]);
+    setTransformingId('photo:' + next);
+    setError('');
+  };
   const open = (slot: PhotoTarget) => { setTarget(slot); setBank(false); setError(''); };
   const close = () => { if (!busy) { setTarget(null); setBank(false); setError(''); } };
   const choose = (url: string) => {
@@ -119,6 +152,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       )}
       {original && <div className="hn-canvas-toolbar">
         <button type="button" onClick={addFreeText}>+ Texto</button>
+        {page === 1 && <button type="button" disabled={photoOrder.length >= CAROLINA_MAX_SLOTS}
+          onClick={addPhotoBlock}>+ Foto</button>}
+        {page === 1 && <span>{photoOrder.length} fotos</span>}
         {transformingId && <span>Arrastra · Amplía o gira con dos dedos</span>}
       </div>}
       <div className="hn-canvas-sheet" onPointerDown={event => {
@@ -150,6 +186,20 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           </div>
         )}
       </div>
+      {original && page === 1 && selectedPhoto !== null &&
+        photoOrder.includes(selectedPhoto) && (
+        <div className="hn-canvas-photo-actions" role="group" aria-label="Ordenar fotografías">
+          <span>Foto {photoOrder.indexOf(selectedPhoto) + 1}</span>
+          <button type="button" disabled={photoOrder.indexOf(selectedPhoto) === 0}
+            onClick={() => reorderPhotoBlock(selectedPhoto, -1)}>Anterior</button>
+          <button type="button" disabled={photoOrder.indexOf(selectedPhoto) === photoOrder.length - 1}
+            onClick={() => reorderPhotoBlock(selectedPhoto, 1)}>Siguiente</button>
+          <button type="button" disabled={photoOrder.length >= CAROLINA_MAX_SLOTS}
+            onClick={() => duplicatePhotoBlock(selectedPhoto)}>Duplicar</button>
+          <button type="button" disabled={photoOrder.length <= 1}
+            onClick={() => hidePhotoBlock(selectedPhoto)}>Quitar</button>
+        </div>
+      )}
       {original && (
         <div className="hn-canvas-pager">
           <button type="button" disabled={page === 0} aria-label="Página anterior"

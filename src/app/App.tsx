@@ -18,6 +18,7 @@ import MessagesScreen from '../features/messages/MessagesScreen';
 import ClientPage from '../features/client/ClientPage';
 import QuoteEditorScreen from '../features/editor/QuoteEditorScreen';
 import type { PhotoTarget } from '../features/editor/TemplateCanvasEditor';
+import { CAROLINA_MAX_SLOTS } from '../features/templates/carolina-layout';
 import { Sidebar, Topbar } from './WorkspaceChrome';
 import { useInstallPrompt } from '../features/pwa/useInstallPrompt';
 import InstallGuide from '../features/pwa/InstallGuide';
@@ -197,7 +198,7 @@ function App() {
     setQuotes(current => current.map(quote => {
       if (quote.id !== quoteId) return quote;
       if (target === 'cover') return { ...quote, cover: saved.url };
-      const gallery = Array.from({ length: 6 }, (_, i) => quote.gallery?.[i] || '');
+      const gallery = Array.from({ length: CAROLINA_MAX_SLOTS }, (_, i) => quote.gallery?.[i] || '');
       gallery[target] = saved.url;
       return { ...quote, gallery };
     }));

@@ -75,3 +75,37 @@ test('Fotografías de portada y collage comparten gestos, posiciones y escala pe
   assert.equal(validCarolinaLayout({transforms:{'photo:outside':{x:0,y:0,scale:1,rotation:0}}}),false);
   assert.equal(validCarolinaLayout({transforms:{'photo:cover':{x:0,y:0,scale:50,rotation:0}}}),false);
 });
+
+
+test('Collage variable conserva los seis originales y admite 1 a 12 recuadros con orden estable', async () => {
+  const {
+    CAROLINA_DEFAULT_ORDER, CAROLINA_MAX_SLOTS, carolinaPhotoOrder,
+    movePhotoSlot, photoSlotToAdd, emptyPhotoSlotToDuplicate,
+  } = await import('../src/features/templates/carolina-layout.ts');
+  assert.deepEqual(CAROLINA_DEFAULT_ORDER,[0,1,2,3,4,5]);
+  assert.equal(CAROLINA_MAX_SLOTS,12);
+  assert.deepEqual(carolinaPhotoOrder(undefined),[0,1,2,3,4,5]);
+  assert.deepEqual(movePhotoSlot([0,1,2],1,1),[0,2,1]);
+  assert.deepEqual(movePhotoSlot([0,1,2],0,-1),[0,1,2]);
+  assert.equal(photoSlotToAdd([0,1,2,3,4,5],Array(12).fill('')),6);
+  assert.equal(emptyPhotoSlotToDuplicate([0,1,2,3,4,5],Array(12).fill('')),6);
+  assert.equal(validCarolinaLayout({photoOrder:[0,1,2]}),true);
+  assert.equal(validCarolinaLayout({photoOrder:[0,1,2,3,4,5,6,7,8,9,10,11]}),true);
+  assert.equal(validCarolinaLayout({photoOrder:[0,0,1]}),false);
+  assert.equal(validCarolinaLayout({photoOrder:[12]}),false);
+  assert.equal(validCarolinaLayout({photoOrder:[]}),false);
+  assert.equal(validCarolinaLayout({photoOrder:[0.5]}),false);
+});
+
+test('El diseñador añade, quita, duplica y reordena sin duplicar archivos R2', () => {
+  const canvas=readFileSync(new URL('../src/features/editor/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
+  const template=readFileSync(new URL('../src/features/templates/CarolinaTemplate.tsx',import.meta.url),'utf8');
+  const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
+  assert.match(canvas,/const addPhotoBlock = \(\) =>/);
+  assert.match(canvas,/const hidePhotoBlock = \(slot: number\) =>/);
+  assert.match(canvas,/const duplicatePhotoBlock = \(slot: number\) =>/);
+  assert.match(canvas,/const reorderPhotoBlock = \(slot: number, direction: -1 \| 1\)/);
+  assert.match(canvas,/gallery\[next\] = gallery\[slot\] \|\| ''/);
+  assert.match(template,/carolinaPhotoOrder\(item\.carolinaLayout\)/);
+  assert.match(worker,/q\.gallery\.length <= 12/);
+});

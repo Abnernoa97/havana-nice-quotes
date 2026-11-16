@@ -507,10 +507,14 @@ test('Cotización Carolina guarda 6 fotos privadas y su texto editable en D1 sin
   const loaded=await worker.fetch(request('/api/quotes',{headers:{Cookie:cookie}}),env);
   assert.deepEqual((await loaded.json()).quotes[0].quote,quote);
   const over=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
-    {quote:{...quote,gallery:[...gallery,'']},expectedRevision:1},cookie),env);
+    {quote:{...quote,gallery:[...gallery,...Array(7).fill('')]},expectedRevision:1},cookie),env);
   assert.equal(over.status,400);
+  const expanded=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+    {quote:{...quote,gallery:[...gallery,...Array(6).fill('')],
+      carolinaLayout:{photoOrder:[0,1,2,3,4,5,6,7,8,9,10,11]}},expectedRevision:1},cookie),env);
+  assert.equal(expanded.status,200);
   const external=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
-    {quote:{...quote,gallery:['https://stock.example/photo.jpg']},expectedRevision:1},cookie),env);
+    {quote:{...quote,gallery:['https://stock.example/photo.jpg']},expectedRevision:2},cookie),env);
   assert.equal(external.status,400);
 });
 

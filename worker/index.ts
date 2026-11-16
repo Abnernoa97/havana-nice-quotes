@@ -104,7 +104,7 @@ function validQuote(input: unknown, id: string): input is Record<string, unknown
     (q.currency === undefined || q.currency === 'USD' || q.currency === 'MX') &&
     VALID_STATES.has(String(q.status)) &&
     (q.style === undefined || ['carolina', 'libre', 'vogue', 'lane', 'junebug', 'nyt'].includes(String(q.style))) &&
-    (q.gallery === undefined || Array.isArray(q.gallery) && q.gallery.length <= 6 &&
+    (q.gallery === undefined || Array.isArray(q.gallery) && q.gallery.length <= 12 &&
       q.gallery.every((photo: unknown) => typeof photo === 'string' && (photo === '' ||
         /^\/api\/media\/[a-f0-9-]{36}$/.test(photo)))) &&
     (q.carolinaCopy === undefined || (!!q.carolinaCopy && typeof q.carolinaCopy === 'object' &&

@@ -66,8 +66,9 @@
   flex-direction: column;
   gap: .8%;
 }
-.hn-carolina-photo-column.left > :first-child { flex: 1.1; }
-.hn-carolina-photo-column.left > :last-child { flex: .9; }
+.hn-carolina-photo-column.left > * { flex: 1; }
+.hn-carolina-collage.original-six .hn-carolina-photo-column.left > :first-child { flex: 1.1; }
+.hn-carolina-collage.original-six .hn-carolina-photo-column.left > :last-child { flex: .9; }
 .hn-carolina-photo-column.right > * { flex: 1; }
 .hn-carolina-photo {
   position: relative;
@@ -158,3 +159,8 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
 .hn-carolina-photo { transform-origin:50% 50%; }
 .hn-carolina-photo.hn-photo-transforming { z-index:8; outline:2px dashed #af965e; outline-offset:-3px; }
 .hn-carolina-cover-photo.hn-photo-transforming { z-index:1; outline:2px dashed #af965e; outline-offset:-3px; }
+
+/* An empty second column is hidden only for one-photo layouts. */
+.hn-carolina-collage.flexible-collage:has(.hn-carolina-photo-column.right:empty) {
+  grid-template-columns:1fr;
+}
