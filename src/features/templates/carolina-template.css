@@ -153,8 +153,6 @@
 }
 button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
   display:flex; justify-content:center; align-items:center; flex-direction:column; gap:.7em; }
-.hn-carolina-cover-invite { font:600 clamp(9px,2.3cqw,16px)/1.2 'Jost',sans-serif;
-  padding:5px 9px; background:#17382b99; border-radius:6px; }
 .hn-carolina-cover-brand,.hn-carolina-cover-personal { z-index:2; pointer-events:auto; }
 .hn-carolina-photo { transform-origin:50% 50%; }
 .hn-carolina-photo.hn-photo-transforming { z-index:8; outline:2px dashed #af965e; outline-offset:-3px; }
@@ -190,7 +188,7 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
 .hn-carolina-image-tint{mix-blend-mode:color}
 .hn-carolina-photo-shade{background:linear-gradient(180deg,rgba(20,15,13,.33),rgba(20,15,13,.09) 55%,rgba(20,15,13,.42))}
 .hn-carolina-image-vignette{z-index:1}
-.hn-carolina-photo-index,.hn-carolina-empty-photo,.hn-carolina-cover-invite{position:relative;z-index:2}
+.hn-carolina-photo-index,.hn-carolina-empty-photo{position:relative;z-index:2}
 .hn-carolina-photo-overlay{display:contents}
 .hn-carolina-term-group{position:relative;z-index:2}
 .hn-carolina-extra-layer{z-index:3}

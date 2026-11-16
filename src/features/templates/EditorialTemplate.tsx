@@ -2,6 +2,7 @@ import type { Quote } from '../quotes/types';
 import type { CarolinaTextInteraction } from './CarolinaTextNode';
 import CarolinaTextNode from './CarolinaTextNode';
 import CarolinaPhotoNode from './CarolinaPhotoNode';
+import CoverAddPrompt from './CoverAddPrompt';
 import { carolinaPageOrder, fixedText } from './carolina-layout';
 import type { CarolinaFixedKey } from './carolina-layout';
 import { CarolinaCollage, ExtraPhotos, ExtraTexts, carolinaDate } from './CarolinaTemplate';
@@ -51,6 +52,7 @@ export function EditorialCover({item,interaction,onSelectCover,onSelectExtraPhot
      <Node item={item} id="field:date:cover" value={carolinaDate(item.date)} interaction={interaction}/>
     </small>
    </div>
+   {!item.cover && <CoverAddPrompt onAdd={onSelectCover}/>}
    <ExtraPhotos item={item} page={0} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
    <ExtraTexts item={item} page={0} interaction={interaction}/>
  </div>;

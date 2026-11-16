@@ -74,9 +74,8 @@ export default function CarolinaPhotoNode({
       {url && photoStyle?.vignetteShape && photoStyle.vignetteShape!=='none' &&
         <span className="hn-carolina-image-vignette" style={vignette(photoStyle)}/>}
     </span>
-    {!url && onSelect && <span className="hn-carolina-empty-photo">+</span>}
+    {!url && onSelect && !cover && <span className="hn-carolina-empty-photo">+</span>}
     {!cover && !extra && onSelect && <span className="hn-carolina-photo-index">{String(position).padStart(2,'0')}</span>}
-    {cover && !url && onSelect && <span className="hn-carolina-cover-invite">Añadir fotografía</span>}
   </>;
   if (onSelect) return (
     <button type="button" ref={element} data-hn-photo-id={id} className={className} style={mainStyle}

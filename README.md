@@ -25,6 +25,7 @@
 ## Documentos
 - [Estado vigente](docs/09-ESTADO-VIGENTE-Y-LIMPIEZA.md)
 - [Arquitectura del editor](docs/10-ARQUITECTURA-EDITOR.md)
+- [Estudio de videos en portada y 3D (próxima intervención)](docs/11-PLAN-VIDEOS-3D.md)
 - [Visión](docs/03-VISION-DEL-PRODUCTO.md)
 - [Roadmap](docs/04-ROADMAP.md)
 - [Protocolo de desarrollo](docs/05-PROTOCOLO-DE-DESARROLLO.md)

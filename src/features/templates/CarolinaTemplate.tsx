@@ -2,6 +2,7 @@ import type { Quote } from '../quotes/types';
 import type { CarolinaTextInteraction } from './CarolinaTextNode';
 import CarolinaTextNode from './CarolinaTextNode';
 import CarolinaPhotoNode from './CarolinaPhotoNode';
+import CoverAddPrompt from './CoverAddPrompt';
 import type { CarolinaFixedKey } from './carolina-layout';
 import { fixedText, carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS } from './carolina-layout';
 import { quoteCurrency, usd } from '../../shared/lib/formatters';
@@ -110,6 +111,7 @@ export function CarolinaCover({ item, interaction, onSelectCover, onSelectExtraP
           </small>
         </div>
       )}
+      {!item.cover && <CoverAddPrompt onAdd={onSelectCover}/>}
       <ExtraPhotos item={item} page={0} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
       <ExtraTexts item={item} page={0} interaction={interaction}/>
     </div>
