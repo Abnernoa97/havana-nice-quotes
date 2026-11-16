@@ -38,6 +38,7 @@ export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
     let flip: PageFlip | undefined;
     let host: HTMLDivElement | undefined;
     let onVisibility: (()=>void) | undefined;
+    let activePageIndex=0;
     const syncCoverVideos=(index:number)=>{
       host?.querySelectorAll<HTMLElement>('.hn-leaf').forEach((leaf,leafIndex)=>{
         leaf.querySelectorAll('video').forEach(media=>{
@@ -57,7 +58,7 @@ export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
       });
       onVisibility=()=>{
         if(document.hidden)host?.querySelectorAll('video').forEach(media=>media.pause());
-        else syncCoverVideos(flip?.getCurrentPageIndex()??0);
+        else syncCoverVideos(activePageIndex);
       };
       document.addEventListener('visibilitychange',onVisibility);
       host.replaceChildren(...pages);
@@ -98,6 +99,7 @@ export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
       flip.loadFromHTML(host.querySelectorAll<HTMLElement>('.hn-leaf'));
       flip.on('flip', e => {
         const next=Number(e.data||0);
+        activePageIndex=next;
         // Stop old leaves; resume the muted infinite loop when cover returns.
         syncCoverVideos(next);
         setPage(next);
