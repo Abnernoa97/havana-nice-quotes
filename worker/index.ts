@@ -1,4 +1,5 @@
 import { validCarolinaLayout } from '../src/features/templates/carolina-layout.ts';
+import { isTemplateStyle } from '../src/features/templates/template-registry.ts';
 /**
  * HAVANA NICE Quotes Studio · Cloudflare Worker
  * Private D1 quotes + media index; private R2 objects in quotes-studio/.
@@ -103,7 +104,7 @@ function validQuote(input: unknown, id: string): input is Record<string, unknown
     typeof q.deposit === 'number' && Number.isFinite(q.deposit) && q.deposit >= 0 && q.deposit <= 100 &&
     (q.currency === undefined || q.currency === 'USD' || q.currency === 'MX') &&
     VALID_STATES.has(String(q.status)) &&
-    (q.style === undefined || ['carolina', 'libre', 'vogue', 'lane', 'junebug', 'nyt'].includes(String(q.style))) &&
+    (q.style === undefined || isTemplateStyle(q.style)) &&
     (q.gallery === undefined || Array.isArray(q.gallery) && q.gallery.length <= 12 &&
       q.gallery.every((photo: unknown) => typeof photo === 'string' && (photo === '' ||
         /^\/api\/media\/[a-f0-9-]{36}$/.test(photo)))) &&
@@ -112,6 +113,7 @@ function validQuote(input: unknown, id: string): input is Record<string, unknown
         ['performance', 'musicians', 'crew', 'backline', 'logistics', 'balance', 'production', 'connections', 'space'].includes(field) &&
         typeof value === 'string' && value.length <= 1500))) &&
     (q.carolinaLayout === undefined || validCarolinaLayout(q.carolinaLayout)) &&
+    (q.designLayout === undefined || validCarolinaLayout(q.designLayout)) &&
     (q.readingMode === undefined || ['flip', 'scroll'].includes(String(q.readingMode))) &&
     (q.messages === undefined || Array.isArray(q.messages) && q.messages.length < 500 &&
       q.messages.every((m: unknown) => !!m && typeof m === 'object' &&

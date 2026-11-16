@@ -3,9 +3,10 @@ import type { CSSProperties, ReactNode } from 'react';
 import type { Quote } from '../quotes/types';
 import { PageFlip } from 'page-flip';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
-import { money, quoteCurrency } from '../../shared/lib/formatters';
-import { coverBackground } from '../../shared/lib/coverBackground';
 import { CarolinaCover, CarolinaCollage, CarolinaTerms } from '../templates/CarolinaTemplate';
+import { EditorialCover, EditorialCollage, EditorialTerms } from '../templates/EditorialTemplate';
+import { withDesignLayout } from '../templates/design-layout';
+import { templateFamily } from '../templates/template-registry';
 import { carolinaPageOrder } from '../templates/carolina-layout';
 import './flip-magazine.css';
 
@@ -19,7 +20,8 @@ function MagazineLeaf({ children, className = '' }: { children: ReactNode; class
  * The source leaves are kept outside the flip container so a React
  * StrictMode remount always gets fresh page nodes.
  */
-export default function FlipMagazine({ item }: { item: Quote }) {
+export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
+  const item=withDesignLayout(rawItem);
   const mountRef = useRef<HTMLDivElement | null>(null);
   const sourceRef = useRef<HTMLDivElement | null>(null);
   const flipRef = useRef<PageFlip | null>(null);
@@ -27,7 +29,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
   const [orientation, setOrientation] = useState('portrait');
   const [failure, setFailure] = useState(false);
   const selectedPages = carolinaPageOrder(item.carolinaLayout);
-  const total = item.style === 'carolina' ? selectedPages.length : 6;
+  const total = selectedPages.length;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -94,12 +96,8 @@ export default function FlipMagazine({ item }: { item: Quote }) {
     if (direction === 'prev' && page > 0) flip.flipPrev('bottom');
   };
 
-  const dateLabel = item.date
-    ? new Date(item.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    : 'DATE TO BE CONFIRMED';
-
   return (
-    <section className={'hn-magazine hn-font-' + item.font} style={{ '--paper-accent': item.color } as CSSProperties} aria-label="Propuesta de música en vivo en formato revista">
+    <section className={'hn-magazine hn-font-' + item.font + ' hn-style-' + (item.style || 'carolina')} style={{ '--paper-accent': item.color } as CSSProperties} aria-label="Propuesta de música en vivo en formato revista">
       <header className="hn-magazine-intro">
         <span className="hn-magazine-kicker">HAVANA NICE / THE PRIVATE EDITION</span>
         <h1>A proposal for <em>{item.name}.</em></h1>
@@ -132,89 +130,14 @@ export default function FlipMagazine({ item }: { item: Quote }) {
       <p className="hn-magazine-disclaimer">Design preview only · Delivery and acceptance are not active.</p>
 
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
-        {item.style === 'carolina' ? (
-          <>
-            {selectedPages.map(selectedPage => (
-              <MagazineLeaf key={selectedPage} className="hn-carolina-leaf">
-                {selectedPage === 0 ? <CarolinaCover item={item}/> :
-                  selectedPage === 1 ? <CarolinaCollage item={item}/> :
-                  <CarolinaTerms item={item}/>}
-              </MagazineLeaf>
-            ))}
-          </>
-        ) : (
-          <>
-        <MagazineLeaf className="hn-cover-leaf">
-          <div className="hn-cover-image" style={{ backgroundImage: coverBackground(item.cover, 'linear-gradient(180deg, rgba(7,19,16,.24), rgba(7,19,16,.03) 36%, rgba(7,19,16,.73))') }}>
-            <div className="hn-cover-top"><span>HAVANA NICE</span><small>THE PRIVATE EDITION</small></div>
-            <div className="hn-cover-bottom">
-              <small>A PRIVATE LIVE MUSIC PROPOSAL</small>
-              <h2>{item.name}</h2>
-              <div className="hn-cover-rule"></div>
-              <p>{item.location}<br/>{dateLabel}</p>
-            </div>
-            <span className="hn-cover-number">ISSUE 001 · MEXICO</span>
-          </div>
-        </MagazineLeaf>
-        <MagazineLeaf className="hn-editorial-leaf">
-          <div className="hn-leaf-heading"><span>01 / A PERSONAL NOTE</span><span>HAVANA NICE</span></div>
-          <div className="hn-editorial-content">
-            <span className="hn-micro">FOR {item.name.toUpperCase()}</span>
-            <h2>Live music.<br/><em>Made personal.</em></h2>
-            <p>{item.note}</p>
-            <div className="hn-editorial-picture" aria-hidden="true"></div>
-            <div className="hn-signature">Fer & Noa<span>HAVANA NICE</span></div>
-          </div>
-          <div className="hn-leaf-foot"><span>PRIVATE PROPOSAL</span><span>02</span></div>
-        </MagazineLeaf>
-        <MagazineLeaf className="hn-vision-leaf">
-          <div className="hn-leaf-heading"><span>02 / THE EXPERIENCE</span><span>HAVANA NICE</span></div>
-          <div className="hn-vision-content">
-            <h2>One celebration.<br/><em>Every moment.</em></h2>
-            <div className="hn-vision-picture" aria-hidden="true"></div>
-            <div className="hn-vision-rows">
-              <div><strong>01</strong><span><b>COCKTAIL</b><small>A warm welcome with a fully live band.</small></span></div>
-              <div><strong>02</strong><span><b>DINNER</b><small>Music that complements conversation and atmosphere.</small></span></div>
-              <div><strong>03</strong><span><b>CELEBRATION</b><small>Real musicians and a room ready to dance.</small></span></div>
-            </div>
-          </div>
-          <div className="hn-leaf-foot"><span>{item.location.toUpperCase()}</span><span>03</span></div>
-        </MagazineLeaf>
-        <MagazineLeaf className="hn-ensemble-leaf">
-          <div className="hn-ensemble-cover">
-            <div className="hn-leaf-heading light"><span>03 / THE BAND</span><span>HAVANA NICE</span></div>
-            <div className="hn-ensemble-body">
-              <h2>The<br/>Ensemble.</h2>
-              <span className="hn-ensemble-band">{item.package}</span>
-              <div className="hn-ensemble-list"><span>LIVE MUSICIANS</span><span>REAL INSTRUMENTS</span><span>PERSONAL MUSIC PLANNING</span></div>
-              <p>Played live, from the first note to the last.</p>
-            </div>
-            <div className="hn-leaf-foot light"><span>LIVE MUSIC IN MEXICO</span><span>04</span></div>
-          </div>
-        </MagazineLeaf>
-        <MagazineLeaf className="hn-investment-leaf">
-          <div className="hn-leaf-heading"><span>04 / PRIVATE PROPOSAL</span><span>HAVANA NICE</span></div>
-          <div className="hn-investment-body">
-            <span className="hn-micro">YOUR LIVE MUSIC EXPERIENCE</span>
-            <h2>The<br/><em>Investment.</em></h2>
-            <p>{item.package}</p>
-            <div className="hn-investment-total">{money(item.price, item.currency)}<small>{quoteCurrency(item.currency)} · PROPOSAL TOTAL</small></div>
-            <div className="hn-investment-rule"/>
-            <div className="hn-investment-details"><span>RESERVATION DEPOSIT · {item.deposit}%</span><strong>{money(item.price * item.deposit / 100, item.currency)}</strong></div>
-            <div className="hn-investment-rule"/>
-            <p className="hn-investment-copy">{item.desc}</p>
-            <small className="hn-investment-notice">VISUAL SAMPLE ONLY — NOT A FORMAL QUOTE.</small>
-          </div>
-          <div className="hn-leaf-foot"><span>HAVANA NICE / QUOTES STUDIO</span><span>05</span></div>
-        </MagazineLeaf>
-        <MagazineLeaf className="hn-end-leaf">
-          <div className="hn-leaf-heading"><span>05 / END NOTE</span><span>HAVANA NICE</span></div>
-          <div className="hn-end-photo" aria-hidden="true"></div>
-          <div className="hn-end-body"><span className="hn-micro">FER & NOA</span><h2>We'd love to<br/><em>be part of it.</em></h2><p>Thanks for considering HAVANA NICE for your celebration. We're here for questions, ideas, and the details that matter to you.</p><strong>HAVANA NICE</strong></div>
-          <div className="hn-leaf-foot"><span>SERVING LOVE THROUGH LIVE MUSIC</span><span>06</span></div>
-        </MagazineLeaf>
-          </>
-        )}
+        {selectedPages.map(selectedPage=><MagazineLeaf key={selectedPage}
+          className={templateFamily(item.style)==='carolina'?'hn-carolina-leaf':'hn-editorial-leaf'}>
+          {templateFamily(item.style)==='carolina'
+            ? selectedPage===0?<CarolinaCover item={item}/>:
+              selectedPage===1?<CarolinaCollage item={item}/>:<CarolinaTerms item={item}/>
+            : selectedPage===0?<EditorialCover item={item}/>:
+              selectedPage===1?<EditorialCollage item={item}/>:<EditorialTerms item={item}/>}
+        </MagazineLeaf>)}
       </div>
     </section>
   );

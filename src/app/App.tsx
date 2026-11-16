@@ -19,6 +19,7 @@ import ClientPage from '../features/client/ClientPage';
 import QuoteEditorScreen from '../features/editor/QuoteEditorScreen';
 import type { PhotoTarget } from '../features/editor/shared/editor-types';
 import { CAROLINA_MAX_SLOTS } from '../features/templates/carolina-layout';
+import { getDesignLayout } from '../features/templates/design-layout';
 import { Sidebar, Topbar } from './WorkspaceChrome';
 import { useInstallPrompt } from '../features/pwa/useInstallPrompt';
 import InstallGuide from '../features/pwa/InstallGuide';
@@ -200,9 +201,9 @@ function App() {
       if (target === 'cover') return { ...quote, cover: saved.url };
       if (typeof target === 'string' && target.startsWith('extra:')) {
         const id=target.slice(6);
-        const previous=quote.carolinaLayout?.extraPhotos || [];
+        const previous=getDesignLayout(quote)?.extraPhotos || [];
         if (!previous.some(photo=>photo.id===id)) return quote;
-        return { ...quote, carolinaLayout: { ...quote.carolinaLayout,
+        return { ...quote, designLayout: { ...getDesignLayout(quote),
           extraPhotos: previous.map(photo=>photo.id===id ? {...photo,url:saved.url} : photo),
         } };
       }

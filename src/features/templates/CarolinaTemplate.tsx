@@ -48,7 +48,7 @@ function FixedNode({ item, field, interaction }: PageProps & { field: CarolinaFi
     textStyle={item.carolinaLayout?.textStyles?.[id]}
     interaction={interaction}/>;
 }
-function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
+export function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
   const entries = item.carolinaLayout?.extras?.filter(e => e.page === page) || [];
   if (!entries.length) return null;
   return (
@@ -67,7 +67,7 @@ function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
   );
 }
 /** Additional photo layers belong to an individual page, not to the fixed collage grid. */
-function ExtraPhotos({ item, page, interaction, onSelectPhoto }: PageProps & {
+export function ExtraPhotos({ item, page, interaction, onSelectPhoto }: PageProps & {
   page: number; onSelectPhoto?: (id:string)=>void;
 }) {
   const photos=item.carolinaLayout?.extraPhotos?.filter(p=>p.page===page)||[];

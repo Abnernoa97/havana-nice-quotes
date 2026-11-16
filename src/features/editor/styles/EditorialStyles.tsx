@@ -1,14 +1,8 @@
 import { Check, ChevronRight, ChevronDown } from 'lucide-react';
+import { TEMPLATE_REGISTRY, TEMPLATE_IDS } from '../../templates/template-registry';
 import './editorial-styles.css';
 
-export const editorialStyles = [
-  {id:'carolina',name:'HAVANA NICE Original · Carolina'},
-  {id:'libre',name:'Estilo libre'},
-  {id:'vogue',name:'Vogue'},
-  {id:'lane',name:'The Lane'},
-  {id:'junebug',name:'Junebug Weddings'},
-  {id:'nyt',name:'The New York Times'},
-];
+export const editorialStyles=TEMPLATE_IDS.map(id=>({id,name:TEMPLATE_REGISTRY[id].name}));
 
 type Props = {
   value: string;

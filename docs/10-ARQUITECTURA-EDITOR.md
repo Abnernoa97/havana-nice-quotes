@@ -56,3 +56,11 @@ src/features/editor/
 4. Mantener las tres páginas, scroll, revista 3D, guardado y controles aprobados.
 5. Validar con auditoría, tests, TypeScript, build Cloudflare y deployment. El comportamiento táctil en Android requiere prueba física adicional.
 6. No habilitar GitHub Actions ni proveedores nuevos para este mantenimiento.
+
+## Universalización · 16/11/2026
+
+Un único motor de edición para todas las plantillas; `template-registry.ts` contiene todas las opciones oficiales. `design-layout.ts` define `designLayout` y su lectura de compatibilidad con `carolinaLayout` sin modificar ni eliminar cotizaciones antiguas. Las páginas editoriales, de Carolina, Scroll y 3D utilizan los mismos IDs y nodos editables de fotografía, texto, tipografía, viñeta, recorte, capas y gestos.
+
+**Cómo añadir una plantilla:** agregar su ID y nombre al registro y su hoja de estilo. Automáticamente recibirá las tres páginas, herramientas de fotos/textos, persistencia en D1, selector de imágenes R2 y lectura Scroll/3D. Para estructura exclusiva, crear un nuevo adaptador de páginas que emplee los componentes compartidos, sin duplicar el motor de edición.
+
+**Importante:** la migración de diseños viejos es *de lectura*: `designLayout ?? carolinaLayout`; la primera modificación guarda el modelo universal. El campo antiguo queda conservado como respaldo. No migrar masivamente cotizaciones D1 sin consentimiento y respaldo.

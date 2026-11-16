@@ -1,0 +1,43 @@
+/* All editorial skins share a persistent three-page editable geometry. */
+.hn-editorial-document{width:min(100%,720px);display:grid;gap:16px;margin:0 auto}
+.hn-editorial-page{container-type:inline-size}
+.hn-editorial-cover{background:#2a332c;color:#fff}
+.hn-editorial-cover .hn-carolina-cover-photo{z-index:0}
+.hn-editorial-cover .hn-editorial-photo-shade{position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(180deg,#07120e66,transparent 30%,#07120ed4)}
+.hn-editorial-top{position:absolute;top:5%;left:7%;right:7%;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid #ffffff77;padding-bottom:2.2%;font:600 clamp(9px,2.5cqw,19px)/1.3 Georgia,serif}
+.hn-editorial-top small{font:500 clamp(7px,1.8cqw,14px)/1.2 'DM Sans',sans-serif;text-align:right}
+.hn-editorial-hero{position:absolute;top:36%;bottom:9%;left:9%;right:9%;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;gap:2.4cqw;text-shadow:0 2px 8px #11221a96}
+.hn-editorial-hero h1{margin:0;font:400 clamp(31px,7.2cqw,63px)/1 'Cormorant Garamond',Georgia,serif;overflow-wrap:anywhere}
+.hn-editorial-hero p{font:400 clamp(11px,2.9cqw,22px)/1.32 Georgia,serif;margin:0;max-height:28%;overflow:hidden}
+.hn-editorial-hero small,.hn-editorial-intro{font:600 clamp(9px,1.8cqw,16px)/1.4 'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.09em}
+.hn-editorial-cover .hn-carolina-cover-invite{z-index:2}
+.hn-editorial-terms{background:#f9f8f4;color:#212a23;padding:7% 7% 5%;display:flex;flex-direction:column;gap:4%;font-family:Georgia,serif}
+.hn-editorial-rule{font:600 clamp(11px,3.2cqw,24px)/1.1 Georgia,serif;padding-bottom:3%;border-bottom:3px double currentColor;text-align:center}
+.hn-editorial-story{display:flex;flex-direction:column;gap:2.5%;flex:1;min-height:0}
+.hn-editorial-eyebrow{font:650 clamp(9px,2cqw,15px)/1.2 'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.11em}
+.hn-editorial-story h2{font:400 clamp(21px,5.8cqw,49px)/1.05 'Cormorant Garamond',Georgia,serif;margin:0}
+.hn-editorial-story p{font:400 clamp(10px,2.5cqw,19px)/1.33 Georgia,serif;margin:0;max-height:35%;overflow:auto}
+.hn-editorial-divider{border-top:1px solid currentColor;opacity:.34}
+.hn-editorial-package{display:flex;flex-direction:column;gap:3px}
+.hn-editorial-package small,.hn-editorial-finance small{font:600 clamp(8px,1.8cqw,14px)/1.3 'DM Sans',sans-serif;text-transform:uppercase}
+.hn-editorial-package strong,.hn-editorial-finance strong{font:500 clamp(11px,3cqw,23px)/1.15 Georgia,serif}
+.hn-editorial-finance{display:flex;justify-content:space-between;gap:5%}
+.hn-editorial-finance>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.hn-editorial-signoff{font:500 clamp(10px,2.4cqw,18px)/1.2 Georgia,serif;text-align:center;opacity:.65}
+.hn-editorial-collage{height:auto}
+.hn-editorial-collage .hn-carolina-collage{width:100%}
+.hn-style-vogue.hn-editorial-cover .hn-editorial-hero h1,.hn-style-vogue.hn-editorial-terms .hn-editorial-story h2{font-family:'Bodoni Moda',Georgia,serif;text-transform:uppercase;letter-spacing:-.05em}
+.hn-style-vogue.hn-editorial-terms{background:#fff;color:#191919}
+.hn-style-vogue.hn-editorial-cover .hn-editorial-photo-shade{background:linear-gradient(180deg,#0707076b,transparent 25%,#070707c9)}
+.hn-style-lane.hn-editorial-cover .hn-editorial-hero h1,.hn-style-lane.hn-editorial-terms .hn-editorial-story h2{font-family:'Cormorant Garamond',Georgia,serif}
+.hn-style-lane.hn-editorial-terms{background:#f4efe6;color:#453d34}
+.hn-style-junebug.hn-editorial-cover .hn-editorial-hero h1,.hn-style-junebug.hn-editorial-terms .hn-editorial-story h2{font-family:'Fraunces',Georgia,serif}
+.hn-style-junebug.hn-editorial-terms{background:#fff4e9;color:#634334}
+.hn-style-nyt.hn-editorial-cover .hn-editorial-hero h1,.hn-style-nyt.hn-editorial-terms .hn-editorial-story h2{font-family:Georgia,serif;font-weight:700}
+.hn-style-nyt.hn-editorial-terms{background:#f9f8f4;color:#222}
+.hn-style-nyt .hn-editorial-rule{border-top:3px double currentColor;border-bottom:3px double currentColor}
+.hn-style-libre.hn-editorial-terms{background:#fff;color:#18342f}
+.hn-magazine .hn-editorial-collage{height:100%}
+.hn-magazine .hn-editorial-collage .hn-carolina-collage{height:100%;aspect-ratio:auto}
+.hn-magazine .hn-editorial-page{height:100%;aspect-ratio:auto}
+@media(max-width:650px){.hn-editorial-document{gap:10px}.hn-editorial-terms{gap:3%}}

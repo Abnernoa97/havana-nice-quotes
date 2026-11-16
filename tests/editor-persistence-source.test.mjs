@@ -166,7 +166,7 @@ test('Carolina es la plantilla real principal y separada de los estilos editoria
   assert.match(styles, /name:'HAVANA NICE Original · Carolina'/);
   assert.match(styles, /Plantillas originales/);
   assert.match(styles, /Estilos editoriales especiales/);
-  assert.match(types, /'carolina' \| 'libre'/);
+  assert.match(types, /QuoteStyle = TemplateStyle/);
   assert.match(editor, /<EditorialStyles value=\{styleName\}/);
 });
 
@@ -188,13 +188,13 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.match(template, /<CarolinaCover key="cover" item=\{item\}\/>/);
   assert.match(template, /<CarolinaCollage key="collage" item=\{item\}\/>/);
   assert.match(template, /<CarolinaTerms key="terms" item=\{item\}\/>/);
-  assert.match(proposal, /styleName === 'carolina'/);
+  assert.match(proposal, /templateFamily\(styleName\)==='carolina'/);
   const canvas = src('features/editor/canvas/TemplateCanvasEditor.tsx');
   assert.match(design, /<TemplateCanvasEditor item=\{item\}/);
-  assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
+  assert.match(canvas, /<CarolinaCollage item=\{item\} interaction=\{textInteraction\}/);
   assert.match(canvas, /edit\('gallery',\s*gallery\)/);
   assert.doesNotMatch(details, /carolinaCopy|hn-carolina-copy-editor/);
-  assert.match(magazine, /item\.style === 'carolina'/);
+  assert.match(magazine, /templateFamily\(item\.style\)==='carolina'/);
   assert.doesNotMatch(magazine, /<CarolinaBlankReverse\/>/);
   assert.match(magazine, /selectedPages\.map\(selectedPage =>/);
   assert.match(magazine, /flippingTime: 1080/);
@@ -294,7 +294,7 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
   const stylesheet = readFileSync(new URL('../src/shared/styles/index.css', import.meta.url),'utf8');
   assert.match(canvas, /const pages = \['Portada', 'Collage', 'Propuesta'\]/);
   assert.match(canvas, /<CarolinaCover item=\{item\} interaction=\{textInteraction\}[\s\S]*?onSelectCover=/);
-  assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
+  assert.match(canvas, /<CarolinaCollage item=\{item\} interaction=\{textInteraction\}/);
   assert.match(canvas, /<CarolinaTerms item=\{item\} interaction=\{textInteraction\}\s+onSelectExtraPhoto=/);
   const picker=src('features/editor/photos/PhotoSourcePicker.tsx');
   assert.match(canvas, /<PhotoSourcePicker target=\{target\}/);
@@ -324,7 +324,7 @@ test('Carolina: todos los textos variables se editan tocando la página y llegan
   assert.match(editor, /edit\('price', safeQuotePrice\(normalizePriceInput\(value\)\)\)/);
   assert.match(editor, /edit\('deposit', value \? percent : 0\)/);
   assert.match(editor, /onCommitTransform: \(id: string, transform: CarolinaTransform\)/);
-  assert.match(editor, /edit\('carolinaLayout',/);
+  assert.match(editor, /edit\('designLayout',/);
   for (const field of ['name', 'date', 'location', 'note', 'package', 'desc', 'price', 'deposit',
     'performance', 'musicians', 'crew', 'backline', 'logistics', 'balance', 'production',
     'connections', 'space']) assert.ok(fields.includes('  ' + field + ':'), 'Falta el campo '+field);
@@ -466,7 +466,7 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const layout=src('features/templates/carolina-layout.ts');
   assert.match(flip,/const selectedPages = carolinaPageOrder\(item\.carolinaLayout\)/);
-  assert.match(flip,/const total = item\.style === 'carolina' \? selectedPages\.length : 6/);
+  assert.match(flip,/const total = selectedPages\.length/);
   assert.match(flip,/if \(pages\.length === 1\)/);
   assert.match(flip,/selectedPages\.map\(selectedPage =>/);
   assert.doesNotMatch(flip,/<CarolinaBlankReverse\/>/);
@@ -475,7 +475,7 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   assert.doesNotMatch(canvas,/hn-canvas-pages|Páginas seleccionadas para la revista/);
   assert.match(canvas,/className="hn-canvas-pager"/);
   assert.match(canvas,/onClick=\{\(\)=>changePage\(1\)\}/);
-  assert.match(canvas,/page === 2 && <CarolinaTerms/);
+  assert.match(canvas,/page===2 && \(editorial/);
   assert.match(layout,/pageOrder\?: CarolinaPageId\[\]/);
 });
 
@@ -489,7 +489,7 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
   assert.match(canvas,/const addPhotoAnywhere=\(\)=>/);
   assert.match(canvas,/if \(page===1\) \{ addPhotoBlock\(\); return; \}/);
   assert.match(canvas,/setTarget\(`extra:\$\{id\}`\)/);
-  assert.match(canvas,/onSelectExtraPhoto=\{id=>selectPhoto\(`photo-extra:\$\{id\}`\)\}/);
+  assert.match(canvas,/onSelectExtraPhoto=\{id=>selectPhoto\('photo-extra:'\+id\)\}/);
   assert.match(canvas,/const removePhoto = \(id:string\) =>/);
   assert.match(canvas,/const removeElement\s*=\s*\(id:string\) => isPhotoId\(id\) \? removePhoto\(id\) : removeText\(id\)/);
   assert.match(canvas,/onClick=\{\(\)=>removeElement\(transformingId\)\}/);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, ImagePlus, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { isCarolinaCopyField } from '../../templates/carolina-edit-fields';
 import TextStyleDock from '../texts/TextStyleDock';
 import PhotoLayersPanel from '../photos/PhotoLayersPanel';
@@ -18,7 +18,9 @@ import type { CarolinaPageId } from '../../templates/carolina-layout';
 import { normalizePriceInput, safeQuotePrice } from '../../quotes/model';
 import type { Quote } from '../../quotes/types';
 import type { CloudPhoto } from '../../photos/useMediaLibrary';
-import Proposal from '../../client/Proposal';
+import { withDesignLayout } from '../../templates/design-layout';
+import { templateFamily } from '../../templates/template-registry';
+import { EditorialCover, EditorialCollage, EditorialTerms } from '../../templates/EditorialTemplate';
 import { CarolinaCover, CarolinaCollage, CarolinaTerms, carolinaPhotos } from '../../templates/CarolinaTemplate';
 import './template-canvas.css';
 
@@ -31,7 +33,9 @@ type Props = {
 const pages = ['Portada', 'Collage', 'Propuesta'] as const;
 
 /** A real preview becomes the editor: 3 Canva pages, 7 independently selectable photo regions. */
-export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto }: Props) {
+export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUploadPhoto }: Props) {
+  const item=withDesignLayout(rawItem);
+  const editorial=templateFamily(item.style)==='editorial';
   const [page, setPage] = useState<CarolinaPageId>(0);
   const [target, setTarget] = useState<PhotoTarget | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -50,7 +54,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setLastTextId(null); setSelectedPhotoId(null); setPhotoTool(null); setPhotoLayersOpen(false); setTrashHovered(false);
   }, [item.id, item.style]);
   const updateLayout = (patch: Partial<CarolinaLayout>) => {
-    edit('carolinaLayout', { ...item.carolinaLayout, ...patch });
+    edit('designLayout', { ...item.carolinaLayout, ...patch });
   };
   const textInteraction: CarolinaTextInteraction = {
     editingId, transformingId,
@@ -101,7 +105,6 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     },
   };
   const addFreeText = () => {
-    if (!original) return;
     const id = crypto.randomUUID();
     updateLayout({ extras: [...(item.carolinaLayout?.extras || []), {
       id, page: page as 0 | 1 | 2, text: '',
@@ -285,16 +288,15 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'No se pudo guardar la fotografía.'); }
     finally { setBusy(false); }
   };
-  const original = !item.style || item.style === 'carolina';
   return (
     <section className="hn-canvas">
-      {original && <div className="hn-canvas-toolbar">
+      {<div className="hn-canvas-toolbar">
         <button type="button" onClick={addFreeText}>+ Texto</button>
         <button type="button" onClick={addPhotoAnywhere}
           disabled={page===1&&photoOrder.length>=CAROLINA_MAX_SLOTS}>+ Foto</button>
         {transformingId && <span>Arrastra · Amplía o gira con dos dedos</span>}
       </div>}
-      {original && <PhotoLayersPanel layers={photoLayers} open={photoLayersOpen}
+      {<PhotoLayersPanel layers={photoLayers} open={photoLayersOpen}
         onToggle={()=>setPhotoLayersOpen(open=>!open)}
         onEdit={selectPhoto} onMove={movePhotoLayer} onDelete={removePhoto}/>}
       <div className="hn-canvas-sheet" onPointerDown={event => {
@@ -310,29 +312,29 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           }
         }
       }}>
-        {original ? (
-          <>
-            {page === 0 && (
-              <div className="hn-canvas-cover">
-                <CarolinaCover item={item} interaction={textInteraction}
-                  onSelectCover={() => selectPhoto('photo:cover')}
-                  onSelectExtraPhoto={id=>selectPhoto(`photo-extra:${id}`)}/>
-              </div>
-            )}
-            {page === 1 && <CarolinaCollage item={item} onSelectPhoto={index => selectPhoto('photo:'+index)}
-              onSelectExtraPhoto={id=>selectPhoto(`photo-extra:${id}`)} interaction={textInteraction}/>}
-            {page === 2 && <CarolinaTerms item={item} interaction={textInteraction} onSelectExtraPhoto={id=>selectPhoto(`photo-extra:${id}`)}/>}
-          </>
-        ) : (
-          <div className="hn-canvas-editorial">
-            <Proposal item={item} styleName={item.style || 'libre'} embedded/>
-            <button type="button" onClick={() => open('cover')}>
-              <ImagePlus size={17}/> Cambiar portada
-            </button>
-          </div>
-        )}
+        {page===0 && <div className="hn-canvas-cover">
+          {editorial
+            ? <EditorialCover item={item} interaction={textInteraction}
+                onSelectCover={()=>selectPhoto('photo:cover')}
+                onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
+            : <CarolinaCover item={item} interaction={textInteraction}
+                onSelectCover={()=>selectPhoto('photo:cover')}
+                onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>}
+        </div>}
+        {page===1 && (editorial
+          ? <EditorialCollage item={item} interaction={textInteraction}
+              onSelectPhoto={index=>selectPhoto('photo:'+index)}
+              onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
+          : <CarolinaCollage item={item} interaction={textInteraction}
+              onSelectPhoto={index=>selectPhoto('photo:'+index)}
+              onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>)}
+        {page===2 && (editorial
+          ? <EditorialTerms item={item} interaction={textInteraction}
+              onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
+          : <CarolinaTerms item={item} interaction={textInteraction}
+              onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>)}
       </div>
-      {original && <div className="hn-canvas-pager">
+      {<div className="hn-canvas-pager">
         <button type="button" disabled={pageIndex<=0} aria-label="Página anterior"
           onClick={()=>changePage(-1)}>
           <ChevronLeft size={18}/>
@@ -343,7 +345,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           <ChevronRight size={18}/>
         </button>
       </div>}
-      {original && lastTextId && transformingId!==lastTextId && (
+      {lastTextId && transformingId!==lastTextId && (
         <TextStyleDock textId={lastTextId}
           fontId={item.carolinaLayout?.fonts?.[lastTextId] || item.carolinaLayout?.defaultFont}
           style={item.carolinaLayout?.textStyles?.[lastTextId]}
@@ -353,7 +355,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
             setEditingId(null); setLastTextId(null);
           }}/>
       )}
-      {original && selectedPhotoId && !transformingId && !editingId && target===null &&
+      {selectedPhotoId && !transformingId && !editingId && target===null &&
         createPortal(
           <PhotoEditingWorkspace photoId={selectedPhotoId}
             aspect={photoAspect} pageName={pages[page]} activeTool={photoTool}
@@ -367,7 +369,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
             onClose={()=>{setSelectedPhotoId(null);setPhotoTool(null);}}/>,
           document.body
         )}
-      {original && transformingId && (
+      {transformingId && (
         <button type="button" data-hn-text-trash
           className={'hn-canvas-trash' + (trashHovered ? ' hot' : '')}
           aria-label={isPhotoId(transformingId)?'Eliminar fotografía seleccionada':'Eliminar texto seleccionado'}
