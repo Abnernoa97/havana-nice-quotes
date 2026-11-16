@@ -17,7 +17,7 @@ import HomeScreen from '../features/home/HomeScreen';
 import MessagesScreen from '../features/messages/MessagesScreen';
 import ClientPage from '../features/client/ClientPage';
 import QuoteEditorScreen from '../features/editor/QuoteEditorScreen';
-import type { PhotoTarget } from '../features/editor/TemplateCanvasEditor';
+import type { PhotoTarget } from '../features/editor/shared/editor-types';
 import { CAROLINA_MAX_SLOTS } from '../features/templates/carolina-layout';
 import { Sidebar, Topbar } from './WorkspaceChrome';
 import { useInstallPrompt } from '../features/pwa/useInstallPrompt';
