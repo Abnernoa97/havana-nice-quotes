@@ -287,7 +287,7 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
   const app = src('app/App.tsx');
   const stylesheet = readFileSync(new URL('../src/shared/styles/index.css', import.meta.url),'utf8');
   assert.match(canvas, /const pages = \['Portada', 'Collage', 'Propuesta'\]/);
-  assert.match(canvas, /<CarolinaCover item=\{item\} interaction=\{textInteraction\}\/>/);
+  assert.match(canvas, /<CarolinaCover item=\{item\} interaction=\{textInteraction\}[\s\S]*?onSelectCover=/);
   assert.match(canvas, /<CarolinaCollage item=\{item\} onSelectPhoto=/);
   assert.match(canvas, /<CarolinaTerms item=\{item\} interaction=\{textInteraction\}\/>/);
   assert.match(canvas, /Mi teléfono/);
