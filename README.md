@@ -9,10 +9,18 @@
 - **Almacenamiento:** D1 `havana-nice-quotes-sync` guarda cotizaciones por ID y revisión; R2 privado existente `havana-nice-v2-media`, prefijo exclusivo `quotes-studio/photos/`, guarda imágenes. No se tocan archivos de Book v2 ni Calendario.
 - **Borradores y fotografías:** los borradores nuevos empiezan sin portada de prueba. Se eliminó el archivo de cotizaciones ficticias y todas las referencias a bancos de imágenes de stock en la interfaz y revista; únicamente se usan las fotografías reales subidas desde Fotos o Diseño. No se leen borradores de `localStorage`. Las fotografías existentes subidas por los dueños se conservan.
 - **Sincronización:** edición con auto-guardado, lectura cada 15 s y control de versión. Si otro teléfono modifica una cotización concurrentemente, no se sobrescribe en silencio: se muestra una incidencia para resolver. No dar por guardado si la nube está fuera de línea.
-- **Banco de fotografías:** **solo fotos subidas manualmente desde Quotes Studio**, mediante el selector nativo del teléfono. Se pueden seleccionar hasta 10 fotos a la vez desde Fotos o Diseño (sin límite total de la biblioteca). Las fotos JPG, PNG, WebP, GIF, HEIC/HEIF hasta 12 MB cada una se guardan en `quotes-studio/photos/`; cantidad y tamaño total corresponden exclusivamente a esta biblioteca. La galería no consulta ni presenta imágenes de otras aplicaciones aunque compartan el mismo R2. El botón de actualizar recarga solo esta biblioteca.
+- **Banco de fotografías:** solo material subido manualmente en Quotes Studio; en **Fotos** se seleccionan hasta 10 archivos por lote y en **Diseño** se asigna una foto a cada recuadro desde el teléfono o desde el banco privado de R2. JPG, PNG, WebP, GIF, HEIC/HEIF hasta 12 MB cada una en `quotes-studio/photos/`. Se reutilizan las fotos del banco sin duplicar archivos; otras aplicaciones y sus carpetas no se consultan.
 - **Primer acceso:** el enlace inicial se genera una sola vez por Cloudflare desde una autorización administrativa segura. Se utiliza en el navegador o PWA que se desea vincular. El token solo viaja en el fragmento de la URL y se consume al abrirse; no se guarda en Git.
 - **Aún NO disponible:** envío real a clientes, acceso público por propuesta, notificación de lectura, firma, mensajería externa o permisos individuales. La vista cliente sigue siendo previa interna.
 - **No hay borrados automáticos de los antiguos datos locales**; la aplicación nueva simplemente no los utiliza. No borrar información de otros proyectos.
+
+## Editor visual Carolina · 16/11/2026
+
+- Tres páginas reales: **Portada, Collage y Propuesta**, compartidas entre diseñador y vista cliente. El motor PageFlip 3D no se modifica.
+- Textos: toque para escribir sobre la página y guardar al tocar fuera; pulsación larga para mover, giro y escala con dos dedos y cuadrícula temporal. Títulos originales y textos añadidos se guardan por cotización en `carolinaLayout`, sin alterar la plantilla fuente.
+- Fotos: toque para cambiar de imagen; pulsación larga para mover, ampliar, reducir o rotar portada y recuadros. Se reutiliza el **mismo módulo de gestos** que en los textos.
+- El collage de Carolina mantiene **seis bloques por defecto**, organizados como en el diseño original. En Diseño pueden añadirse hasta **12** o quitarse hasta dejar **uno**, reordenarse o duplicarse sin copiar medios en R2. Los recuadros ocultos no borran las fotografías de la biblioteca.
+- Los cambios se guardan en D1 y se leen en Scroll/3D. **Pendiente:** QA táctil Samsung real, páginas variables y sincronización con Havana Calendario. Envíos reales no disponibles.
 
 ## Documentos
 - [Estado vigente](docs/09-ESTADO-VIGENTE-Y-LIMPIEZA.md)
