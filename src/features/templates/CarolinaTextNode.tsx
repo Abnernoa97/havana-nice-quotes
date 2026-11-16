@@ -136,7 +136,7 @@ export default function CarolinaTextNode({ id, text, transform, interaction, ext
   // The second finger can land anywhere on this sheet, even if the text is tiny.
   useEffect(() => {
     if (!moving || !node.current) return;
-    const page = node.current.closest('.hn-carolina-page');
+    const page = node.current.closest('.hn-carolina-page') as HTMLElement | null;
     if (!page) return;
     const outsideText = (event: PointerEvent) =>
       !!node.current && !node.current.contains(event.target as Node);
