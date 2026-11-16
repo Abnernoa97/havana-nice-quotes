@@ -1,5 +1,5 @@
-import { isElegantFontId } from './elegant-fonts';
-import type { ElegantFontId } from './elegant-fonts';
+import { isElegantFontId } from './elegant-fonts.ts';
+import type { ElegantFontId } from './elegant-fonts.ts';
 
 /** Device-independent geometry and per-quotation text customization. */
 export const CAROLINA_FIXED = {
