@@ -35,7 +35,7 @@ const safeBody=async(request:Request)=>{
  if(str.length>1024)return null;
  try{const x:unknown=JSON.parse(str);return x&&typeof x==='object'?x as Record<string,unknown>:null;}catch{return null;}
 };
-async function readShare(store:ShareStore,token:string){
+export async function readShare(store:ShareStore,token:string){
  if(!tokenRE.test(token))return null;
  const link=await store.DB.prepare(
   'SELECT token,quote_id,created_at,expires_at,revoked_at FROM quote_links WHERE token = ?'
