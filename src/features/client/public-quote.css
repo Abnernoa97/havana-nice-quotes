@@ -1,0 +1,10 @@
+.hn-public-proposal{min-height:100dvh;background:#ecece6;color:#17362d}
+.hn-public-document{min-height:75vh;padding:0 0 max(24px,env(safe-area-inset-bottom))}
+.hn-public-document .hn-carolina-document{padding:12px}
+.hn-public-proposal .hn-magazine{margin:0 auto}
+.hn-public-loading,.hn-public-error{min-height:100dvh;display:grid;align-content:center;justify-items:center;gap:14px;text-align:center;padding:28px;background:#eeeee8;color:#274437}
+.hn-public-error h1{font:400 46px/1 'Cormorant Garamond',Georgia,serif}
+.hn-public-error p{font:15px/1.5 system-ui,sans-serif}
+.hn-public-head{display:flex;gap:8px;align-items:center;justify-content:center;background:#f6f6f2;padding:12px;position:sticky;top:0;z-index:35}
+.hn-public-head button{padding:11px 18px;border:1px solid #d6e0d6;border-radius:10px;background:white;color:#214a37;font-size:13px;font-weight:600}
+.hn-public-head button.active{background:#1d4334;color:white}
