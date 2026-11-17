@@ -33,16 +33,17 @@ test('Selector reutiliza fotos y videos privados en portada y páginas libres',(
  assert.match(canvas,/onChoose=\{choose\} onChooseVideo=\{chooseVideo\}/);
  assert.match(app,/return saved\.url/);
 });
-test('Video seleccionado funciona en plantillas y lector 3D como medio, no como imagen rota',()=>{
- const node=src('features/templates/CoverMediaNode.tsx');
+test('Foto y video de portada comparten edición, efectos y reproducción con pausa fuera de pantalla',()=>{
+ const cover=src('features/templates/CoverMediaNode.tsx');
+ const shared=src('features/templates/CarolinaPhotoNode.tsx');
  const mag=src('features/magazine/FlipMagazine.tsx');
- assert.match(node,/if\(video\)/);
- assert.match(node,/<video ref=\{player\} className="hn-cover-video" src=\{video\}/);
- assert.match(node,/autoPlay muted loop playsInline disablePictureInPicture/);
- assert.doesNotMatch(node,/<video[^>]*\scontrols(?:\s|\/>)/);
- assert.match(node,/IntersectionObserver/);
- assert.match(node,/media\.pause\(\)/);
- assert.match(node,/return <CarolinaPhotoNode cover id="photo:cover"/);
+ assert.match(cover,/url=\{item\.coverVideo\|\|item\.cover\}/);
+ assert.match(cover,/photoStyle=\{item\.designLayout\?\.photoStyles\?\.\['photo:cover'\]\}/);
+ assert.match(cover,/interaction=\{interaction\} onSelect=\{onSelect\}/);
+ assert.match(shared,/src=\{url\} autoPlay muted loop playsInline disablePictureInPicture/);
+ assert.match(shared,/IntersectionObserver/);
+ assert.match(shared,/media\.pause\(\)/);
+ assert.match(shared,/photoStyle\?\.opacity/);
  assert.match(mag,/item\.coverVideo/);
  assert.match(mag,/const syncCoverVideos=/);
  assert.match(mag,/syncCoverVideos\(next\)/);
