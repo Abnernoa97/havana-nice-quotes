@@ -173,7 +173,7 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
         typeof p.id!=='string' || !/^[a-f0-9-]{36}$/.test(p.id) ||
         seen.has(p.id) || !isDesignPage(p.page) || (p.page as number)>=3 && !visiblePages.includes(p.page as number) ||
         typeof p.url!=='string' || p.url!=='' &&
-        !/^\/api\/media\/[a-f0-9-]{36}$/.test(p.url)) return false;
+        !/^\/api\/(?:media|videos)\/[a-f0-9-]{36}$/.test(p.url)) return false;
       seen.add(p.id);
     }
   }
