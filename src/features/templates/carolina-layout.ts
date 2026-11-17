@@ -65,7 +65,7 @@ export const CAROLINA_PHOTO_DEFAULTS = {
   vignetteStrength: 45, vignetteSize: 55, vignetteX: 50, vignetteY: 50,
 } as const;
 
-export type CarolinaExtra = { id: string; page: CarolinaPageId; text: string };
+export type CarolinaExtra = { id: string; page: CarolinaPageId; text: string; centered?: true };
 export type CarolinaExtraPhoto = { id: string; page: CarolinaPageId; url: string };
 export type CarolinaLayout = {
   fixed?: Partial<Record<CarolinaFixedKey, string>>;
@@ -224,7 +224,8 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     for (const raw of layout.extras) {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
       const e = raw as Record<string, unknown>;
-      if (Object.keys(e).sort().join(',') !== 'id,page,text' ||
+      if (!['id,page,text','centered,id,page,text'].includes(Object.keys(e).sort().join(',')) ||
+        (e.centered!==undefined && e.centered!==true) ||
         typeof e.id !== 'string' || !/^[a-f0-9-]{36}$/.test(e.id) || ids.has(e.id) ||
         !isDesignPage(e.page) || (e.page as number)>=3 && !visiblePages.includes(e.page as number) || typeof e.text !== 'string' ||
         e.text.length > 3000) return false;
