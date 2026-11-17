@@ -14,6 +14,7 @@ import { parseWeddingDate } from '../../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../../templates/CarolinaTextNode';
 import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle, CarolinaTransform } from '../../templates/carolina-layout';
 import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage } from '../../templates/carolina-layout';
+import { pageBackgroundMediaId } from '../../templates/page-background';
 import { insertBlankPage, duplicateBlankPage, shiftPage, removeDesignPage } from '../../templates/blank-pages';
 import type { CarolinaPageId } from '../../templates/carolina-layout';
 import { normalizePriceInput, safeQuotePrice } from '../../quotes/model';
@@ -240,9 +241,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   };
   const photoOrder = carolinaPhotoOrder(item.designLayout);
   const photoLayers=listPhotoLayers(item,page);
-  const pageBackgroundId=isBlankPage(page)
-    ? item.designLayout?.extraPhotos?.find(photo=>photo.page===page&&!!photo.url)?.id
-    : undefined;
+  const pageBackgroundId=pageBackgroundMediaId(item.designLayout,page);
   const setPhotoOrder = (order:number[]) => updateLayout({photoOrder:order});
   const selectPhoto = (id:string) => {
     // Empty frames open the source picker, populated photos open the immersive editor.
