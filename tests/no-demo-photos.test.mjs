@@ -24,7 +24,7 @@ test('Producción no contiene fotos de stock ni semillas de ejemplo', () => {
 test('Todas las portadas reales usan únicamente su imagen guardada; nunca imágenes de prueba',()=>{
  const node=readFileSync(new URL('../src/features/templates/CarolinaPhotoNode.tsx',import.meta.url),'utf8');
  const editorial=readFileSync(new URL('../src/features/templates/EditorialTemplate.tsx',import.meta.url),'utf8');
- assert.match(node,/backgroundImage: url \? 'url\("'/);
+ assert.match(node,/backgroundImage: url && !isVideo/);
  assert.match(editorial,/<CoverMediaNode item=\{item\} interaction=\{interaction\}/);
  assert.doesNotMatch(editorial,/unsplash|dummyimage|placeholder\.com/i);
 });
