@@ -45,7 +45,8 @@ export default function CarolinaPhotoNode({
   const videoRef = useRef<HTMLVideoElement>(null);
   const posterAttempt=useRef('');
   const [posterRevision,setPosterRevision]=useState(0);
-  const isVideo = /^\/api\/videos\/[a-f0-9-]{36}$/.test(url);
+  const isVideo = /^\/api\/videos\/[a-f0-9-]{36}$/.test(url) ||
+    /^\/api\/shared\/[a-f0-9]{64}\/media\/video\/[a-f0-9-]{36}$/.test(url);
   // Existing private R2 JPEG (~tens of KB), not a decoded video frame.
   // Use it everywhere: designer, quote drafts, Scroll and cloned 3D pages.
   const posterUrl=isVideo?url+'/poster':undefined;
