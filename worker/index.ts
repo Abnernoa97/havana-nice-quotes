@@ -2,6 +2,7 @@ import { validCarolinaLayout } from '../src/features/templates/carolina-layout.t
 import { isTemplateStyle } from '../src/features/templates/template-registry.ts';
 import { handleVideoApi, videoPrefix, videoPosterKey } from './videos.ts';
 import { ownerSharing, publicSharing } from './quote-sharing.ts';
+import { quoteChatApi } from './quote-chat.ts';
 import {syncCalendarQuote,reconcileCalendarQuotes} from './calendar-bridge.ts';
 import type {CalendarDatabase,CalendarQuote} from './calendar-bridge.ts';
 /**
@@ -195,9 +196,13 @@ async function api(request: Request, env: Env,
   }
   // The only unauthenticated API is a scoped read-only client proposal.
   // Its random token never grants access to the editor or the media library.
-  if (path.startsWith('/api/shared/'))
-    return await publicSharing(request, env) || bad('Ruta no encontrada.',404);
+  if(path.startsWith('/api/shared/')){
+    const chat=await quoteChatApi(request,env,true);
+    return chat||await publicSharing(request,env)||bad('Ruta no encontrada.',404);
+  }
   if (!await authorized(request, env)) return unauthorized();
+  if(path.startsWith('/api/quote-chat/'))
+    return await quoteChatApi(request,env,false)||bad('Ruta no encontrada.',404);
   if (path.startsWith('/api/share-links'))
     return await ownerSharing(request, env) || bad('Ruta no encontrada.',404);
   if (path === '/api/device/invite' && method === 'POST') {
