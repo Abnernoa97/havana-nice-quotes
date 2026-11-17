@@ -228,3 +228,12 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
 .hn-blank-page .hn-carolina-photo-overlay .hn-page-background{z-index:0!important}
 .hn-blank-page .hn-carolina-photo-overlay .hn-page-background.hn-photo-transforming{z-index:12!important}
 .hn-blank-page .hn-carolina-extra-layer{position:absolute;z-index:16;pointer-events:none}
+
+/* In every output (designer, Scroll and 3D), free-form text stays above media. */
+.hn-blank-page:has(.hn-page-background) .hn-carolina-added-text{
+ background:transparent;color:#fff;text-shadow:0 1px 7px #0008;
+}
+.hn-blank-page:not(:has(.hn-page-background)) .hn-carolina-added-text{
+ color:#243d31;
+}
+.hn-carolina-extra-layer{z-index:16}
