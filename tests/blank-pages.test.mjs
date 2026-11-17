@@ -110,7 +110,7 @@ test('Selección de archivo es requisito para persistir un nuevo recuadro',()=>{
  assert.match(canvas,/const savedUrl=await onUploadPhoto\(file,target\)/);
  assert.match(canvas,/onChooseVideo=\{chooseVideo\}/);
  assert.match(picker,/canPickVideo&&kind==='videos'/);
- assert.match(node,/<video className="hn-carolina-image-fill hn-carolina-video-fill"/);
+ assert.match(node,/<video ref=\{videoRef\} className="hn-carolina-image-fill hn-carolina-video-fill"/);
  const sheet=canvas.split('<div className="hn-canvas-sheet"')[1].split('<div className="hn-canvas-pager">')[0];
  assert.match(sheet,/data-hn-text-trash/);
  assert.doesNotMatch(sheet,/Eliminar foto · Arrastra aquí/);
