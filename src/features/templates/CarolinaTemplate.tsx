@@ -52,7 +52,8 @@ function FixedNode({ item, field, interaction }: PageProps & { field: CarolinaFi
     interaction={interaction}/>;
 }
 export function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
-  const entries = item.designLayout?.extras?.filter(e => e.page === page) || [];
+  const entries = item.designLayout?.extras?.filter(e =>
+    e.page===page && (Boolean(e.text.trim()) || interaction?.editingId==='extra:'+e.id)) || [];
   if (!entries.length) return null;
   return (
     <div className="hn-carolina-extra-layer">
