@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import type {ReactNode} from 'react';
 import {BookOpen,ChevronLeft,FileText,Send,Wrench} from 'lucide-react';
 import type {Quote,ReadingMode} from './types';
 import FlipMagazine from '../magazine/FlipMagazine';
@@ -10,10 +11,10 @@ import './quote-share.css';
 type Props={
  item:Quote;styleName:string;mode:ReadingMode;
  onMode:(mode:ReadingMode)=>void;onBack:()=>void;onReadjust:()=>void;
- onMarkedSent:()=>Promise<boolean>;toast:string;
+ onMarkedSent:()=>Promise<boolean>;toast:string;draftScroll?:ReactNode;
 };
 export default function QuoteReviewPage({
- item,styleName,mode,onMode,onBack,onReadjust,onMarkedSent,toast
+ item,styleName,mode,onMode,onBack,onReadjust,onMarkedSent,toast,draftScroll
 }:Props){
  const [showShare,setShowShare]=useState(false);
  const ready=['Listo para enviar','Enviada','En revisión','Aceptada'].includes(item.status)
@@ -37,7 +38,7 @@ export default function QuoteReviewPage({
   </header>
   <div className={'hn-review-reader hn-style-'+styleName}>
    {mode==='flip'?<FlipMagazine item={item} clientView={ready}/>:
-     <Proposal item={item} styleName={styleName}/>}
+     ready?<Proposal item={item} styleName={styleName}/>:draftScroll||<Proposal item={item} styleName={styleName}/>}
   </div>
   {toast&&<div className="toast">{toast}</div>}
   {showShare&&<QuoteShareDialog quoteId={item.id} quoteLabel={quoteDisplayName(item)}
