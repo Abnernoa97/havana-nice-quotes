@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { useAppHistory } from './useAppHistory';
 import type { AppSection, EditorTab, ReadingView } from './native-navigation';
-import type { Quote } from '../features/quotes/types';
+import type { Quote, QuoteStatus } from '../features/quotes/types';
 import FlipMagazine from '../features/magazine/FlipMagazine';
 import { editorialStyles } from '../features/editor/styles/EditorialStyles';
 import { createQuoteDraft, createOwnTemplate, duplicateQuote, editSampleQuote, statusClass } from '../features/quotes/model';
@@ -17,6 +17,7 @@ import HomeScreen from '../features/home/HomeScreen';
 import MessagesScreen from '../features/messages/MessagesScreen';
 import ClientPage from '../features/client/ClientPage';
 import QuoteEditorScreen from '../features/editor/QuoteEditorScreen';
+import QuoteSaveDialog from '../features/editor/QuoteSaveDialog';
 import { Sidebar, Topbar } from './WorkspaceChrome';
 import { useInstallPrompt } from '../features/pwa/useInstallPrompt';
 import InstallGuide from '../features/pwa/InstallGuide';
@@ -69,6 +70,11 @@ function App() {
   const [inviteUrl, setInviteUrl] = useState('');
   const [inviteBusy, setInviteBusy] = useState(false);
   const [filter, setFilter] = useState('Todas');
+  // New quotations are private editor work until an explicit named Save.
+  // A saved reusable template remains separate from quotations.
+  const [workingQuote,setWorkingQuote]=useState<Quote|null>(null);
+  const [saveDialogOpen,setSaveDialogOpen]=useState(false);
+  const [saveBusy,setSaveBusy]=useState(false);
   const [search, setSearch] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [clientMessage, setClientMessage] = useState('');
@@ -79,21 +85,26 @@ function App() {
 
   const clientQuotes = quotes.filter(quote => !quote.isTemplate);
   const ownTemplates = quotes.filter(quote => quote.isTemplate);
-  const item = quotes.find(q => q.id === active) || clientQuotes[0] || ownTemplates[0];
+  const item = (workingQuote?.id===active ? workingQuote : null) || quotes.find(q => q.id === active) || clientQuotes[0] || ownTemplates[0];
   const styleName = item?.style && editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
   useEffect(() => {
-    if (enabled && syncStatus !== 'loading' && quotes.length && !quotes.some(q => q.id === active)) {
+    if (enabled && syncStatus !== 'loading' && quotes.length && workingQuote?.id!==active && !quotes.some(q => q.id === active)) {
       routeTo({ active: quotes[0].id }, 'replace');
     }
-  }, [enabled, syncStatus, quotes, active, routeTo]);
+  }, [enabled, syncStatus, quotes, active, routeTo, workingQuote?.id]);
   useEffect(() => {
     if (toast) {
       const t = setTimeout(() => setToast(''), 3600);
       return () => clearTimeout(t);
     }
   }, [toast]);
-  const edit = (key: keyof Quote, value: Quote[keyof Quote]) =>
-    setQuotes(list => editSampleQuote(list, active, key, value));
+  const edit = (key: keyof Quote, value: Quote[keyof Quote]) => {
+    if(workingQuote?.id===active){
+      setWorkingQuote(current=>current?.id===active?{...current,[key]:value}:current);
+      return;
+    }
+    setQuotes(list=>editSampleQuote(list,active,key,value));
+  };
   const openClientPreview = () => {
     routeTo({
       previewMode: item?.readingMode === 'scroll' ? 'scroll' : 'flip',
@@ -119,16 +130,15 @@ function App() {
     routeTo({ active: id });
   };
   const addQuote = () => {
-    const id = 'hn-' + crypto.randomUUID();
-    const q = createQuoteDraft(id);
-    setQuotes(list => [q, ...list]);
-    setNewMessage('');
-    setClientMessage('');
-    routeTo({ active: id, tab: 'styles', section: 'editor', preview: false, mobileMenu: false });
-    setToast('Cotización creada. Guardando en Cloudflare...');
+    const id='hn-'+crypto.randomUUID();
+    setWorkingQuote(createQuoteDraft(id));
+    setNewMessage('');setClientMessage('');setSaveDialogOpen(false);
+    routeTo({active:id,tab:'styles',section:'editor',preview:false,mobileMenu:false});
+    setToast('Propuesta nueva. Se guardará en Cotizaciones al elegir Guardar.');
   };
   const createTemplate = () => {
     const id='hn-'+crypto.randomUUID();
+    setWorkingQuote(null);setSaveDialogOpen(false);
     setQuotes(list=>[createOwnTemplate(id),...list]);
     setNewMessage('');setClientMessage('');
     routeTo({active:id,tab:'design',section:'editor',preview:false,mobileMenu:false});
@@ -139,13 +149,14 @@ function App() {
     if(!source)return;
     const id='hn-'+crypto.randomUUID();
     const clone=duplicateQuote(source,id,resetClient);
-    setQuotes(list=>[clone,...list]);
+    setWorkingQuote(clone);setSaveDialogOpen(false);
     setNewMessage('');setClientMessage('');
     routeTo({active:id,tab:'details',section:'editor',preview:false,mobileMenu:false});
-    setToast('Copia independiente creada. Puedes cambiar sus datos y el diseño.');
+    setToast('Propuesta creada desde el diseño original. No será cotización hasta que la guardes.');
   };
   const editOwnTemplate = (id:string) => {
     if(!ownTemplates.some(template=>template.id===id))return;
+    setWorkingQuote(null);setSaveDialogOpen(false);
     routeTo({active:id,tab:'design',section:'editor',preview:false,mobileMenu:false});
   };
   const moveQuoteToTrash = async (id: string) => {
@@ -178,9 +189,39 @@ function App() {
   };
 
   const save = () => {
-    void flush().then(ok => setToast(ok
-      ? 'Cotización guardada y sincronizada en Cloudflare'
-      : 'No se pudo guardar ahora. Tus cambios siguen abiertos; comprueba la conexión.'));
+    if(!item)return;
+    if(item.isTemplate){
+      void flush().then(ok=>setToast(ok
+        ? 'Plantilla guardada en Mis plantillas. No se creó una cotización.'
+        : 'Plantilla pendiente de sincronizar. Comprueba la conexión.'));
+      return;
+    }
+    setSaveDialogOpen(true);
+  };
+  const saveNamedQuote = async (title:string,status:Extract<QuoteStatus,'Borrador'|'Lista para enviar'>) => {
+    if(!item||item.isTemplate||saveBusy)return;
+    const cleanTitle=title.trim();
+    if(!cleanTitle||cleanTitle.length>150)return;
+    setSaveBusy(true);
+    try {
+      const saved:Quote={...item,quoteTitle:cleanTitle,status};
+      if(workingQuote?.id===saved.id){
+        // The FIRST write to D1 happens here, never when a template is selected.
+        setQuotes(list=>[saved,...list.filter(q=>q.id!==saved.id)]);
+        setWorkingQuote(null);
+      }else{
+        setQuotes(list=>list.map(q=>q.id===saved.id?saved:q));
+      }
+      const ok=await flush();
+      if(ok){
+        setSaveDialogOpen(false);
+        setToast(status==='Borrador'
+          ? 'Cotización guardada en Borrador.'
+          : 'Cotización guardada en Listas para enviar. Aún no se envió al cliente.');
+      }else{
+        setToast('No se pudo completar la sincronización. Conservamos los cambios pendientes.');
+      }
+    }finally{setSaveBusy(false);}
   };
   const updateStatus = (status: string) => {
     edit('status', status);
@@ -412,6 +453,10 @@ function App() {
         ))}
       </div>
       {toast && <div className="toast">{toast}</div>}
+      {saveDialogOpen && item && !item.isTemplate && (
+        <QuoteSaveDialog item={item} busy={saveBusy} onClose={()=>setSaveDialogOpen(false)}
+          onSave={(title,status)=>{void saveNamedQuote(title,status);}}/>
+      )}
       {installationGuide}
       {inviteUrl && (
         <div className="hn-device-modal-backdrop" onClick={() => setInviteUrl('')}>
