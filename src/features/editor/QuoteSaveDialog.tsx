@@ -31,21 +31,19 @@ export default function QuoteSaveDialog({item,busy,onClose,onSave}:Props){
     <button type="button" aria-label="Cerrar" disabled={busy} onClick={onClose}><X size={21}/></button>
    </header>
    <label htmlFor="hn-quote-file-name">Nombre de la cotización</label>
-   <input id="hn-quote-file-name" type="text" value={title} autoFocus
+   <input id="hn-quote-file-name" type="text" value={title}
      maxLength={150} placeholder="Cotización para Ella y Él · Mayo 2027"
      onChange={e=>{setTitle(e.target.value);setError('');}}
      onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();save('Borrador');}}}/>
-   <p className="hn-save-hint">Así aparecerá en Cotizaciones. {item.isTemplate?'Se creará una copia independiente y la plantilla quedará intacta.':'No cambia los nombres de la pareja dentro del diseño.'}</p>
    {error&&<p className="hn-save-error" role="alert">{error}</p>}
    <div className="hn-save-options">
     <button type="button" disabled={busy} className="hn-save-draft" onClick={()=>save('Borrador')}>
-     <FileText size={20}/><span><strong>Guardar como borrador</strong><small>Para continuar editándola después</small></span>
+     <FileText size={20}/><span><strong>Guardar como borrador</strong></span>
     </button>
     <button type="button" disabled={busy} className="hn-save-ready" onClick={()=>save('Listo para enviar')}>
-     <Send size={20}/><span><strong>Guardar como listo para enviar</strong><small>Preparar para revisar y enviar después</small></span>
+     <Send size={20}/><span><strong>Guardar como listo para enviar</strong></span>
     </button>
    </div>
-   <p className="hn-save-note">Listo para enviar no envía nada automáticamente al cliente.</p>
   </section>
  </div>;
 }
