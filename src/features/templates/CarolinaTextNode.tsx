@@ -69,7 +69,7 @@ export default function CarolinaTextNode({ id, text, transform, interaction, ext
       onBlur={() => {
         if (editing && interaction) interaction.onCommitText(id, node.current?.textContent || '');
       }}>
-      {text || (interaction ? '✎' : '')}
+      {text || (interaction && !extra ? '✎' : '')}
     </span>
   );
 }
