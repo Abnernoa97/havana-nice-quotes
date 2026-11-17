@@ -290,7 +290,7 @@ test('Datos: fecha directa sin calendario nativo, anticipo solo por menú de nue
   assert.match(pricing, /DEPOSIT_OPTIONS = \[20, 30, 40, 50, 60, 70, 80, 90, 100\]/);
   assert.doesNotMatch(pricing, /id="hn-quote-deposit"|type="number"|Elegir porcentaje<\/span>/);
   assert.match(pricing, /className="hn-deposit-row"/);
-  assert.match(css, /position:absolute; top:calc\(100% \+ 6px\)/);
+  assert.match(css, /position:static; width:100%; margin-top:9px/);
 });
 
 
