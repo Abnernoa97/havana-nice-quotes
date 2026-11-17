@@ -27,7 +27,7 @@ test('La biblioteca R2 y las fotos subidas alimentan la portada', () => {
   assert.match(design, /<TemplateCanvasEditor item=\{item\}/);
   const picker=src('features/editor/photos/PhotoSourcePicker.tsx');
   assert.match(picker, /photos\.map\(photo=>/);
-  assert.match(canvas, /edit\('cover',\s*url\)/);
+  assert.match(canvas, /edit\('cover',video\?'':url\)/);
   assert.match(app, /uploadPhotos\(\[file\]\)/);
   assert.match(app, /onUploadPhoto=\{uploadDesignPhoto\}/);
   assert.doesNotMatch(app, /readAsDataURL|localStorage/);
@@ -112,7 +112,7 @@ test('Fotos admite diez imágenes por lote y Diseño una imagen dirigida a cada 
   const canvas = src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const picker = src('features/editor/photos/PhotoSourcePicker.tsx');
   assert.match(picker, /type="file" accept="image\/jpeg/);
-  assert.match(canvas, /onUploadPhoto\(file, target\)/);
+  assert.match(canvas, /onUploadPhoto\(file,target\)/);
   assert.match(batch, /MAX_PHOTOS_PER_UPLOAD = 10/);
   assert.match(hook, /await processPhotoBatch\(files,/);
   assert.match(hook, /if \(result\.uploaded\.length\) await refreshPhotos\(\)/);
@@ -310,7 +310,7 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
   assert.match(picker, /Banco de fotos/);
   assert.match(picker, /photos\.map\(photo=>/);
   assert.match(template, /onSelectPhoto\?: \(index: number\) => void/);
-  assert.match(app, /gallery\[target\] = saved\.url/);
+  assert.match(canvas, /gallery\[target\]=url/);
   assert.doesNotMatch(design, /font-options|swatches|photo-options|CarolinaGalleryEditor|upload-btn/);
   assert.doesNotMatch(stylesheet, /\.photo-options \{|\.font-options \{|\.swatches \{/);
 });
@@ -396,7 +396,7 @@ test('Diseño respeta las fotos originales y admite collage de 3, 5, 6 o hasta 1
   assert.match(canvas,/updateLayout\(\{transforms,photoStyles\}\)/);
   assert.doesNotMatch(canvas,/reorderPhotoBlock|duplicatePhotoBlock|setPhotoOrder\(photoOrder\.filter\(/);
   assert.match(layout,/photoOrder\?: number\[\]/);
-  assert.match(app,/Array\.from\(\{ length: CAROLINA_MAX_SLOTS \}/);
+  assert.match(template,/Array\.from\(\{ length: CAROLINA_MAX_SLOTS \}/);
 });
 
 
@@ -499,7 +499,7 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
   assert.match(canvas,/onClick=\{addPhotoAnywhere\}/);
   assert.match(canvas,/const addPhotoAnywhere=\(\)=>/);
   assert.match(canvas,/if \(page===1\) \{ addPhotoBlock\(\); return; \}/);
-  assert.match(canvas,/setTarget\(`extra:\$\{id\}`\)/);
+  assert.match(canvas,/setTarget\('extra:'\+crypto\.randomUUID\(\)\)/);
   assert.match(canvas,/onSelectExtraPhoto=\{id=>selectPhoto\('photo-extra:'\+id\)\}/);
   assert.match(canvas,/const removePhoto = \(id:string\) =>/);
   assert.match(canvas,/const removeElement\s*=\s*\(id:string\) => isPhotoId\(id\) \? removePhoto\(id\) : removeText\(id\)/);
@@ -511,7 +511,7 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
   assert.match(template,/page=\{1\} interaction=\{interaction\} onSelectPhoto/);
   assert.match(template,/page=\{2\} interaction=\{interaction\} onSelectPhoto/);
   assert.match(photo,/hn-carolina-floating-photo/);
-  assert.match(app,/target\.startsWith\('extra:'\)/);
+  assert.match(canvas,/target\.startsWith\('extra:'\)/);
   assert.match(layout,/photo-extra:\[a-f0-9-\]\{36\}/);
 });
 
@@ -567,7 +567,8 @@ test('Reemplazar una fotografía mantiene sus efectos previos',()=>{
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
   assert.match(canvas,/styles\[selectedPhotoId\] = \{ \.\.\.styles\[selectedPhotoId\], \.\.\.patch \}/);
   assert.match(canvas,/const replacePhoto = \(\) =>/);
-  assert.match(canvas,/if \(target==='cover'\) \{ edit\('cover',url\); edit\('coverVideo',''\); \}/);
+  assert.match(canvas,/if\(target==='cover'\)\{/);
+  assert.match(canvas,/edit\('coverVideo',video\?url:''\)/);
   assert.match(canvas,/gallery\[target\]=url/);
   assert.doesNotMatch(canvas,/delete styles\[selectedPhotoId\]/);
   assert.match(app,/gallery\[target\] = saved\.url/);
