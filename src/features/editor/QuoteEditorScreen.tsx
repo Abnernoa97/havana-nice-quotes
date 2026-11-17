@@ -41,7 +41,7 @@ export default function QuoteEditorScreen({
         </div>
         <div className="editor-actions">
           <button type="button" className="btn primary" onClick={save}>
-            <Save size={16}/> Guardar
+            <Save size={16}/> {item.isTemplate ? 'Guardar plantilla' : 'Guardar'}
           </button>
         </div>
       </div>
