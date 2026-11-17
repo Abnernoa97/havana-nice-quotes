@@ -41,6 +41,7 @@ export default function CarolinaPhotoNode({
   id, url, transform, photoStyle, interaction, onSelect, cover = false, position, extra = false,
 }: Props) {
   const element = useRef<HTMLButtonElement>(null);
+  const isVideo = url.startsWith('/api/videos/');
   const gesture = useCarolinaGesture(id, element, transform, interaction);
   const className = (extra ? 'hn-carolina-floating-photo' : cover ? 'hn-carolina-cover-photo' : 'hn-carolina-photo hn-carolina-photo-' + position) +
     (onSelect ? ' hn-carolina-editable-photo' : '') +
@@ -52,7 +53,7 @@ export default function CarolinaPhotoNode({
   const ratio = photoStyle?.cropAspect || 'frame';
   const ratioStyle = ratio !== 'frame' ? {'--crop-ratio': String(CROP_ASPECT_RATIOS[ratio])} as CSSProperties : undefined;
   const picture: CSSProperties = {
-    backgroundImage: url ? 'url("' + url + '")' : undefined,
+    backgroundImage: url && !isVideo ? 'url("' + url + '")' : undefined,
     backgroundPosition: (photoStyle?.cropX ?? D.cropX) + '% ' + (photoStyle?.cropY ?? D.cropY) + '%',
     transform: 'rotate(' + (photoStyle?.cropRotation ?? D.cropRotation) + 'deg) scale(' + ((photoStyle?.cropZoom ?? D.cropZoom) / 100) + ')',
     transformOrigin: (photoStyle?.cropX ?? D.cropX) + '% ' + (photoStyle?.cropY ?? D.cropY) + '%',
@@ -67,7 +68,12 @@ export default function CarolinaPhotoNode({
   const tintOpacity = (photoStyle?.tintAmount ?? D.tintAmount) / 100;
   const content = <>
     <span className={'hn-carolina-crop-viewport'+(ratio!=='frame'?' is-ratio':'')} style={ratioStyle} aria-hidden="true">
-      {url && <span className="hn-carolina-image-fill" style={picture}/>}
+      {url && (isVideo
+        ? <video className="hn-carolina-image-fill hn-carolina-video-fill"
+            src={url} autoPlay muted loop playsInline preload="metadata"
+            style={{...picture,backgroundImage:undefined,
+              objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
+        : <span className="hn-carolina-image-fill" style={picture}/>)}
       {url && tintOpacity>0 && <span className="hn-carolina-image-tint"
         style={{background:photoStyle?.tint || '#244a37',opacity:tintOpacity}}/>}
       {cover && url && <span className="hn-carolina-photo-shade"/>}
@@ -79,7 +85,7 @@ export default function CarolinaPhotoNode({
   </>;
   if (onSelect) return (
     <button type="button" ref={element} data-hn-photo-id={id} className={className} style={mainStyle}
-      aria-label={extra ? 'Editar fotografía añadida' : cover ? 'Editar fotografía de portada' : 'Editar fotografía del recuadro ' + position}
+      aria-label={extra ? 'Editar foto o video añadido' : cover ? 'Editar fotografía de portada' : 'Editar fotografía del recuadro ' + position}
       onPointerDown={gesture.onPointerDown} onPointerMove={gesture.onPointerMove}
       onPointerUp={gesture.onPointerUp} onPointerCancel={gesture.onPointerCancel}
       onContextMenu={event => event.preventDefault()}
@@ -88,7 +94,7 @@ export default function CarolinaPhotoNode({
     </button>
   );
   return <div className={className} role="img" style={mainStyle}
-    aria-label={extra ? 'Fotografía adicional' : cover ? 'Fotografía de portada' : 'Fotografía ' + position}>
+    aria-label={extra ? 'Foto o video adicional' : cover ? 'Fotografía de portada' : 'Fotografía ' + position}>
     {content}
   </div>;
 }
