@@ -402,14 +402,14 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   },[]);
   useEffect(()=>{
     if(!transformingId&&!activeTextTool)return;
-    let candidate:{id:number;x:number;y:number}|null=null;
+    let candidate:{id:number;x:number;y:number;insideSheet:boolean}|null=null;
     const down=(event:PointerEvent)=>{
       if(!(event.target instanceof Element)||event.button!==0)return;
       const el=event.target;
       if(el.closest('.hn-text-dock,.hn-photo-workspace,[data-hn-text-trash]'))return;
-      if(!activeTextTool&&el.closest('.hn-canvas-sheet'))return;
       if(candidate){candidate=null;return;} // multiple fingers are not a confirming tap
-      candidate={id:event.pointerId,x:event.clientX,y:event.clientY};
+      candidate={id:event.pointerId,x:event.clientX,y:event.clientY,
+        insideSheet:!!el.closest('.hn-canvas-sheet')};
       if(activeTextTool){event.preventDefault();event.stopPropagation();}
     };
     const move=(event:PointerEvent)=>{
@@ -423,7 +423,11 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       if(editingId&&document.activeElement instanceof HTMLElement)document.activeElement.blur();
       blockClickUntil.current=Date.now()+650;
       clearSelection();
-      event.preventDefault();event.stopPropagation();
+      // Inside the page, allow the gesture hook to receive pointerup and release
+      // capture. Only swallow the eventual click so no other edit opens.
+      if(!original.insideSheet || activeTextTool){
+        event.preventDefault();event.stopPropagation();
+      }
     };
     const cancel=()=>{candidate=null;};
     document.addEventListener('pointerdown',down,true);
