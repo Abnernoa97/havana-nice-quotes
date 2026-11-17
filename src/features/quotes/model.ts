@@ -2,7 +2,7 @@ import type { Quote } from './types';
 
 /** Templates and unsaved work never appear as quotations. Legacy response
  * states are still retrievable under Sent without deleting their history. */
-export const QUOTE_FILTERS=['Todas','Enviadas','Borrador','Listas para enviar'] as const;
+export const QUOTE_FILTERS=['Todas','Enviadas','Borrador','Listo para enviar'] as const;
 export function quoteDisplayStatus(status:Quote['status']):string {
  return status==='En revisión'||status==='Aceptada'?'Enviada':status;
 }
@@ -13,13 +13,13 @@ export function filterQuotes(quotes: Quote[], filter: string, search: string): Q
   const state=quoteDisplayStatus(q.status);
   const matches=filter==='Todas'||
     (filter==='Enviadas'&&state==='Enviada')||
-    (filter==='Listas para enviar'&&state==='Lista para enviar')||
+    (filter==='Listo para enviar'&&state==='Listo para enviar')||
     state===filter;
   return matches&&[q.quoteTitle,q.name,q.location].join(' ').toLocaleLowerCase('es').includes(query);
  });
 }
 export function statusClass(s:string):string {
- return s==='Lista para enviar'?'gold':
+ return s==='Listo para enviar'?'gold':
    ['Enviada','En revisión','Aceptada'].includes(s)?'blue':'gray';
 }
 export const quoteDisplayName=(q:Quote):string=>q.quoteTitle?.trim()||q.name.trim()||'Cotización sin nombre';
