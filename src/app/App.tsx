@@ -66,8 +66,7 @@ function App() {
     else if (!next && mobileMenu) goBack();
   };
   const [toast, setToast] = useState('');
-  const [inviteUrl, setInviteUrl] = useState('');
-  const [inviteBusy, setInviteBusy] = useState(false);
+  const [inviteUrl, setInviteUrl] = useState(''); const [inviteBusy, setInviteBusy] = useState(false);
   const [filter, setFilter] = useState('Todas');
   // New quotations are private editor work until an explicit named Save.
   // A saved reusable template remains separate from quotations.
