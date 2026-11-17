@@ -399,12 +399,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           clearSelection();
         }
       }}>
-      <div className="hn-canvas-sheet" onPointerDown={event => {
-        const target=event.target;
-        if (transformingId && !event.isPrimary) return;
-        // Dismiss on click, not pointerdown: a gesture must not lose its tools mid-drag.
-        if (!(target instanceof Element)) return;
-      }} onClickCapture={event=>{
+      <div className="hn-canvas-sheet" onClickCapture={event=>{
         // Pointer capture can produce a synthetic click after a drag. Never let it
         // silently close the toolbar: only a separate, intentional tap does that.
         if(Date.now()-lastGestureMoveAt.current<180){
