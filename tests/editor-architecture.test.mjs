@@ -20,7 +20,7 @@ test('Editor tiene una sola arquitectura activa y ningún archivo antiguo',()=>{
   assert.match(main,/<TextStyleDock textId=\{lastTextId\}/);
   assert.match(workspace,/<PhotoStyleDock photoId=\{photoId\}/);
   assert.match(dock,/Colorizar/);
-  assert.match(layers,/Capas de fotos/);
+  assert.match(layers,/> Capas <strong>/);
   assert.match(picker,/Banco de fotos/);
   assert.match(text,/Tipografía/);
   assert.doesNotMatch(main,/imageEdit:/);
