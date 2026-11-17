@@ -1,6 +1,6 @@
 /* Page-centered editing canvas; the reader components remain the source of truth. */
 .hn-canvas{padding:9px 10px 26px;background:#f6f8f4;touch-action:pan-y}
-.hn-canvas-sheet{width:min(100%,620px);min-width:0;margin:auto;background:#fff;box-shadow:0 12px 32px #21382916;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.hn-canvas-sheet{position:relative;width:min(100%,620px);min-width:0;margin:auto;background:#fff;box-shadow:0 12px 32px #21382916;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .hn-canvas-cover{position:relative;aspect-ratio:612/792}
 .hn-canvas-cover .hn-carolina-page{height:100%;width:100%}
 .hn-carolina-editable-photo{appearance:none;display:flex;align-items:center;justify-content:center;border:0;padding:0;cursor:pointer;color:#668a70}
@@ -56,9 +56,13 @@
 /* Shared canvas actions and original collage geometry remain unchanged. */
 .hn-canvas-toolbar button:disabled { opacity:.4; cursor:default; }
 .hn-canvas-toolbar span { margin-left:auto; }
-/* Only shown after a long press on text. Also accepts the captured pointer on drop. */
-.hn-canvas-trash{position:fixed;z-index:84;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);min-width:210px;max-width:88vw;min-height:62px;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 18px;border:1px dashed #be8e85;border-radius:15px;background:#fff8f5;box-shadow:0 10px 35px #41211d30;color:#985447;cursor:pointer;font-size:12px;font-weight:750;transition:background .15s ease,color .15s ease,scale .15s ease}
-.hn-canvas-trash.hot{background:#9e4c42;color:#fff;border-color:#9e4c42;scale:1.06}
+/* Compact drop target is INSIDE the edited sheet, not over the mobile toolbar. */
+.hn-canvas-trash{position:absolute;z-index:30;left:50%;bottom:clamp(10px,3.5%,24px);
+ transform:translateX(-50%);width:48px;height:48px;min-width:48px;
+ border:2px solid #ba3939;border-radius:50%;background:#fff;color:#ba3939;
+ display:grid;place-items:center;cursor:pointer;box-shadow:0 3px 13px #301b1b35;
+ touch-action:none;transition:background .15s ease,color .15s ease,scale .15s ease}
+.hn-canvas-trash.hot{background:#ba3939;color:#fff;box-shadow:0 4px 20px #ba393955;scale:1.07}
 .hn-canvas-trash:focus-visible{outline:3px solid #bd9860;outline-offset:3px}
 
 /* Edit on the selected page, without the obsolete page manager. */
