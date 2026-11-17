@@ -1,12 +1,11 @@
 import { formatHomeDate, homeGreeting } from './greeting';
 import { Image as ImageIcon } from 'lucide-react';
-import { findClientActivity } from '../quotes/model';
+import { findClientActivity, quoteDisplayName, quoteDisplayStatus } from '../quotes/model';
 import type { Quote } from '../quotes/types';
 import {
   FileText,
   Send,
   Clock3,
-  CheckCircle2,
   ArrowUpRight,
   ArrowRight,
   Plus,
@@ -61,19 +60,19 @@ export default function HomeScreen({
         {[
           { num: quotes.length, name: 'Cotizaciones', icon: FileText },
           {
-            num: quotes.filter(q => q.status === 'Enviada').length,
+            num: quotes.filter(q => ['Enviada','En revisión','Aceptada'].includes(q.status)).length,
             name: 'Enviadas',
             icon: Send,
           },
           {
-            num: quotes.filter(q => q.status === 'En revisión').length,
-            name: 'En revisión',
+            num: quotes.filter(q => q.status === 'Borrador').length,
+            name: 'Borrador',
             icon: Clock3,
           },
           {
-            num: quotes.filter(q => q.status === 'Aceptada').length,
-            name: 'Aceptadas',
-            icon: CheckCircle2,
+            num: quotes.filter(q => q.status === 'Lista para enviar').length,
+            name: 'Listas para enviar',
+            icon: Clock3,
           },
         ].map((s, i) => (
           <div className="stat" key={i}>
@@ -97,7 +96,7 @@ export default function HomeScreen({
               Ver todas <ArrowRight size={15} />
             </button>
           </div>
-          {!quotes.length && <p className="panel-intro">Todavía no hay propuestas. Tu primera cotización se guardará en Cloudflare.</p>}
+          {!quotes.length && <p className="panel-intro">Todavía no hay propuestas. Tu primera cotización aparecerá cuando elijas Guardar.</p>}
           {quotes.slice(0, 3).map(q => (
             <button
               className="recent-row"
@@ -106,11 +105,11 @@ export default function HomeScreen({
             >
               {q.cover ? <img src={q.cover} alt="" /> : <span className="quote-cover-empty" aria-hidden="true"><ImageIcon size={19}/></span>}
               <div>
-                <strong>{q.name}</strong>
-                <small>{q.location}</small>
+                <strong>{quoteDisplayName(q)}</strong>
+                <small>{q.name && q.quoteTitle ? q.name+' · ' : ''}{q.location}</small>
               </div>
               <span className={'pill ' + statusClass(q.status)}>
-                {q.status}
+                {quoteDisplayStatus(q.status)}
               </span>
               <ArrowUpRight size={15} />
             </button>
