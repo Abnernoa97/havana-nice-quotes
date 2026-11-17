@@ -27,3 +27,26 @@
 .hn-text-scale-presets button.reset{background:transparent;color:#697c6b;font-weight:500}
 .hn-text-dock button:focus-visible,.hn-text-dock input:focus-visible{outline:2px solid #bc9d63;outline-offset:2px}
 @media(max-width:410px){.hn-text-dock{width:98vw;border-radius:13px}.hn-text-dock-switches{gap:3px;padding:5px 6px 8px}.hn-text-dock-switches button{min-height:51px}.hn-text-dock-switches button span{font-size:9px}.hn-text-color-swatches{gap:6px}.hn-text-color-swatches button{width:30px;height:30px}}
+
+/* Single focused workspace: compact horizontal tools and a scrollable bank underneath. */
+.hn-canvas.hn-text-focus>.hn-text-dock{position:relative;z-index:1;left:auto;bottom:auto;
+ transform:none;margin:0 -8px 0;width:calc(100% + 16px);max-width:none;flex:0 0 auto;
+ max-height:min(46dvh,390px);display:flex;flex-direction:column;overflow:hidden;border-radius:13px 13px 0 0;
+ box-shadow:0 -6px 20px #142e2515}
+.hn-canvas.hn-text-focus .hn-text-dock-title{flex:0 0 auto;padding:5px 11px 2px}
+.hn-canvas.hn-text-focus .hn-text-dock-switches{flex:0 0 auto;display:flex;gap:5px;
+  padding:3px 8px 5px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+.hn-canvas.hn-text-focus .hn-text-dock-switches button{flex:1 0 54px;min-width:0;
+  min-height:36px;padding:4px 2px;gap:2px}
+.hn-canvas.hn-text-focus .hn-text-dock-switches button span{font-size:9px}
+.hn-canvas.hn-text-focus .hn-text-dock-expanded{flex:0 1 auto;min-height:0;
+  max-height:min(33dvh,260px);padding:3px 5px 7px;overflow-y:auto;overscroll-behavior:contain}
+.hn-canvas.hn-text-focus .hn-font-inline{max-height:none}
+.hn-canvas.hn-text-focus .hn-font-inline .hn-font-search{height:32px;margin:3px 7px 6px}
+.hn-canvas.hn-text-focus .hn-font-inline .hn-font-groups{padding:0 6px 5px}
+.hn-canvas.hn-text-focus .hn-font-inline .hn-font-groups button{min-height:28px;padding:4px 8px}
+.hn-canvas.hn-text-focus .hn-font-inline .hn-font-gallery{max-height:min(17dvh,145px);
+  padding:2px 7px 6px;gap:5px}
+.hn-canvas.hn-text-focus .hn-font-inline .hn-font-option{min-height:64px;padding:6px}
+.hn-canvas.hn-text-focus .hn-font-inline .hn-font-example{min-height:29px;font-size:18px}
+.hn-canvas.hn-text-focus .hn-font-inline .hn-font-bank-footer{padding:3px 8px}
