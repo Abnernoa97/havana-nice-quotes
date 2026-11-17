@@ -44,12 +44,12 @@ test('Guardar exige nombre y diferencia borrador de lista para enviar sin enviar
  assert.match(modal,/Guardar como borrador/);
  assert.match(modal,/Guardar y enviar/);
  assert.match(modal,/save\('Borrador'\)/);
- assert.match(modal,/save\('Lista para enviar'\)/);
+ assert.match(modal,/save\('Listo para enviar'\)/);
  assert.match(modal,/No la envía al cliente automáticamente/);
  assert.match(app,/if\(!cleanTitle\|\|cleanTitle\.length>150\)return/);
  assert.match(api,/q\.quoteTitle === undefined/);
- assert.match(api,/Lista para enviar/);
- assert.deepEqual(QUOTE_FILTERS,['Todas','Enviadas','Borrador','Listas para enviar']);
+ assert.match(api,/Listo para enviar/);
+ assert.deepEqual(QUOTE_FILTERS,['Todas','Enviadas','Borrador','Listo para enviar']);
  assert.doesNotMatch(app,/window\.location\.href=['"]mailto:/);
 });
 
@@ -61,8 +61,8 @@ test('El listado usa título del archivo, preserva nombre de pareja y estados hi
  assert.match(list,/quoteDisplayStatus\(q\.status\)/);
  assert.match(home,/quoteDisplayName\(q\)/);
  assert.match(types,/quoteTitle\?: string/);
- const q={...createQuoteDraft('hn-test'),name:'Ellie & Liam',quoteTitle:'Cotización Ellie y Liam 2027',status:'Lista para enviar'};
- assert.equal(filterQuotes([q],'Listas para enviar','Ellie y Liam').length,1);
+ const q={...createQuoteDraft('hn-test'),name:'Ellie & Liam',quoteTitle:'Cotización Ellie y Liam 2027',status:'Listo para enviar'};
+ assert.equal(filterQuotes([q],'Listo para enviar','Ellie y Liam').length,1);
  assert.equal(filterQuotes([q],'Enviadas','Ellie').length,0);
  const historic={...q,id:'hn-sent',status:'Aceptada'};
  assert.equal(filterQuotes([historic],'Enviadas','').length,1);
