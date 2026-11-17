@@ -571,7 +571,7 @@ test('Reemplazar una fotografía mantiene sus efectos previos',()=>{
   assert.match(canvas,/edit\('coverVideo',video\?url:''\)/);
   assert.match(canvas,/gallery\[target\]=url/);
   assert.doesNotMatch(canvas,/delete styles\[selectedPhotoId\]/);
-  assert.match(app,/gallery\[target\] = saved\.url/);
+  assert.match(canvas,/gallery\[target\]=url/);
   assert.match(photo,/photoStyle\?\.opacity/);
 });
 
