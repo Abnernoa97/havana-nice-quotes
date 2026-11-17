@@ -167,9 +167,9 @@ test('Tocar la hoja cierra la transformación y Capas aparece solo al editar',()
  const workspace=src('features/editor/photos/PhotoEditingWorkspace.tsx');
  assert.match(gesture,/selectedAtPress\.current/);
  assert.match(gesture,/onDeselectTransform\?\.\(id\)/);
- assert.match(canvas,/onDeselectTransform: \(\) =>/);
+ assert.match(canvas,/onDeselectTransform: id =>/);
  assert.match(canvas,/onClickCapture=\{event=>/);
- assert.match(canvas,/clearSelection\(\);event\.stopPropagation\(\);return/);
+ assert.match(canvas,/clearSelection\(\);\s*event\.preventDefault\(\);event\.stopPropagation\(\)/);
  assert.match(canvas,/layersPanel=\{<PhotoLayersPanel/);
  assert.match(workspace,/\{layersPanel\}/);
 });
