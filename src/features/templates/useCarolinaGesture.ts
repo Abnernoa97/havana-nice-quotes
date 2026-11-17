@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, RefObject } from 'react';
 import type { CarolinaTransform } from './carolina-layout';
 import { ZERO_TRANSFORM, clampTransform } from './carolina-layout';
+import { classifyTwoFingerAction, shortestTurnDegrees, snapToOrigin } from './gesture-intent';
+import type { TwoFingerAction } from './gesture-intent';
 
 export type CarolinaGestureInteraction = {
   transformingId: string | null;
@@ -42,6 +44,8 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const selectedAtPress = useRef(false);
   const movedDuringPress = useRef(false);
   const pendingPageEdit = useRef(false);
+  const twoFingerAction=useRef<TwoFingerAction>('pending');
+  const pinchUsed=useRef(false);
   const selected = interaction?.transformingId === id;
   const editingHere = interaction?.editingId === id;
   const interactionRef = useRef(interaction);
@@ -67,7 +71,8 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const cancelHold = () => { if (hold.current) clearTimeout(hold.current); hold.current = null; };
   const resetBaseline = () => {
     if (!pointers.current.size) return;
-    baseline.current = { ...geometry([...pointers.current.values()]), transform: { ...current.current } };
+    baseline.current={...geometry([...pointers.current.values()]),transform:{...current.current}};
+    twoFingerAction.current='pending';
   };
   const beginEditDrag=(pointerId:number,x:number,y:number)=>{
     pendingPageEdit.current=true;
@@ -87,9 +92,11 @@ export function useCarolinaGesture<T extends HTMLElement>(
     if (!pointers.current.size) {
       selectedAtPress.current = interactionRef.current?.transformingId === id;
       movedDuringPress.current = false;
+      pinchUsed.current=false;
     }
     if (!longPressed.current) swallowClick.current = false;
     pointers.current.set(pointerId, { x, y });
+    if(pointers.current.size>1)pinchUsed.current=true;
     // A layer chosen explicitly from the layer list is ready to drag immediately.
     if (interactionRef.current?.transformingId===id) {
       longPressed.current = true;
@@ -113,29 +120,48 @@ export function useCarolinaGesture<T extends HTMLElement>(
     }
   };
   const update = (pointerId: number, x: number, y: number) => {
-    if (!pointers.current.has(pointerId)) return;
-    pointers.current.set(pointerId, { x, y });
-    if (!longPressed.current) {
-      if (press.current && Math.hypot(x - press.current.x, y - press.current.y) > 8) cancelHold();
+    if(!pointers.current.has(pointerId))return;
+    pointers.current.set(pointerId,{x,y});
+    if(!longPressed.current){
+      if(press.current&&Math.hypot(x-press.current.x,y-press.current.y)>8)cancelHold();
       return;
     }
-    if (!baseline.current) resetBaseline();
-    const b = baseline.current!;
-    const now = geometry([...pointers.current.values()]);
-    const turn = b.distance && now.distance
-      ? ((now.angle - b.angle) * 180 / Math.PI + 540) % 360 - 180 : 0;
-    if (Math.hypot(now.x - b.x, now.y - b.y) > 5 ||
-      Math.abs(turn) > 2 || (b.distance && now.distance && Math.abs(now.distance - b.distance) > 5))
-      movedDuringPress.current = true;
-    const result = clampTransform({
-      x: b.transform.x + (now.x - b.x) * 100 / pageWidth(),
-      y: b.transform.y + (now.y - b.y) * 100 / pageWidth(),
-      scale: b.transform.scale * (b.distance && now.distance ? now.distance / b.distance : 1),
-      rotation: b.transform.rotation + turn,
+    if(!baseline.current)resetBaseline();
+    const b=baseline.current!;
+    const now=geometry([...pointers.current.values()]);
+    const isTwoFinger=pointers.current.size>=2;
+    let mode:'move'|'zoom'|'rotate'='move';
+    if(isTwoFinger){
+      // Lock ONE action for the whole two-finger sequence. Small jitters are inert.
+      if(twoFingerAction.current==='pending'){
+        const turn=shortestTurnDegrees(b.angle,now.angle);
+        const intent=classifyTwoFingerAction(b.distance,now.distance,turn);
+        if(intent==='pending')return;
+        twoFingerAction.current=intent;
+        // Start at the current fingers' position: no sudden jump when locked.
+        baseline.current={...now,transform:{...current.current}};
+        movedDuringPress.current=true;
+        interactionRef.current?.onDrag?.(id,-1,-1);
+        return;
+      }
+      mode=twoFingerAction.current;
+    }
+    const turn=isTwoFinger?shortestTurnDegrees(b.angle,now.angle):0;
+    const translateX=isTwoFinger?0:(now.x-b.x)*100/pageWidth();
+    const translateY=isTwoFinger?0:(now.y-b.y)*100/pageWidth();
+    const scale=isTwoFinger&&b.distance>24?now.distance/b.distance:1;
+    const result=clampTransform({
+      x:mode==='move'?snapToOrigin(b.transform.x+translateX):b.transform.x,
+      y:mode==='move'?snapToOrigin(b.transform.y+translateY):b.transform.y,
+      scale:mode==='zoom'?b.transform.scale*scale:b.transform.scale,
+      rotation:mode==='rotate'?b.transform.rotation+turn:b.transform.rotation,
     });
-    current.current = result;
+    if(JSON.stringify(result)===JSON.stringify(current.current))return;
+    current.current=result;
     setLive(result);
-    interactionRef.current?.onDrag?.(id,x,y);
+    movedDuringPress.current=true;
+    // Trash activation belongs ONLY to actual one-finger movement.
+    interactionRef.current?.onDrag?.(id,mode==='move'?x:-1,mode==='move'?y:-1);
   };
   const finish = (pointerId: number, x?: number, y?: number) => {
     cancelHold();
@@ -145,7 +171,8 @@ export function useCarolinaGesture<T extends HTMLElement>(
     baseline.current = null;
     press.current = null;
     if (longPressed.current) {
-      const dropped=x!==undefined && y!==undefined &&
+      const dropped=!pinchUsed.current && movedDuringPress.current &&
+        x!==undefined && y!==undefined &&
         interactionRef.current?.onDrop?.(id,x,y) === true;
       const changed = JSON.stringify(current.current) !== JSON.stringify(saved || ZERO_TRANSFORM);
       if (!dropped && changed) {
@@ -156,7 +183,9 @@ export function useCarolinaGesture<T extends HTMLElement>(
       }
       swallowClick.current = true;
     }
-    longPressed.current = false;
+    longPressed.current=false;
+    pinchUsed.current=false;
+    twoFingerAction.current='pending';
   };
 
   // The selected element owns gestures that begin anywhere else on its page.
