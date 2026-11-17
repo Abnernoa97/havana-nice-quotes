@@ -1618,3 +1618,14 @@ p {
 }
 /* No artificial image URLs when a real photo has not yet been selected. */
 .quote-cover-empty{flex:0 0 auto;display:grid;place-items:center;color:#83988a;background:#ebf0e9}
+
+/* Prevent Android system selection/Translate handles on read-only UI, the
+   quotation designer and the customer 3D/Scroll reader. Actual form fields
+   remain editable and retain their native keyboard/caret. */
+#root,.hn-carolina-page,.hn-magazine,.client-reader-document{
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+}
+#root input,#root textarea,#root [contenteditable="true"],
+#root [contenteditable="plaintext-only"]{
+  -webkit-user-select:text;user-select:text;
+}
