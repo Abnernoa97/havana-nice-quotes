@@ -8,9 +8,6 @@ export type VideoProgress={phase:'converting'|'uploading';percent:number;origina
 type Start={id:string;uploadId:string;partSize:number};
 type Uploaded={partNumber:number;etag:string};
 const MB=1024*1024;
-export const videoSize=(bytes:number):string=>bytes>=MB*1024
- ?(bytes/(MB*1024)).toFixed(2)+' GB':(bytes/MB).toFixed(1)+' MB';
-
 async function videoFetch<T>(path:string,method:string,body?:BodyInit,
  headers?:HeadersInit,signal?:AbortSignal):Promise<T>{
  const response=await fetch(path,{method,body,headers,credentials:'same-origin',signal});

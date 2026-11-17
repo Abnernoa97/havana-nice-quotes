@@ -12,10 +12,6 @@ export type CloudPhoto = {
   url: string;
   thumbnailUrl?:string;
 };
-export const photoSize = (size: number): string =>
-  size < 1024 * 1024 ? (size / 1024).toFixed(0) + ' KB' :
-    (size / (1024 * 1024)).toFixed(1) + ' MB';
-
 export function useMediaLibrary(enabled: boolean) {
   const [photos, setPhotos] = useState<CloudPhoto[]>([]);
   const [bytesUsed, setBytesUsed] = useState(0);

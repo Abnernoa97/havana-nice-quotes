@@ -31,12 +31,16 @@ export async function createVideoPosterFromUrl(url:string):Promise<Blob|null>{
   await new Promise<void>((resolve,reject)=>{
    const ready=()=>{cleanup();resolve();};
    const error=()=>{cleanup();reject(new Error('No se pudo leer el fotograma.'));};
+   let timer:ReturnType<typeof setTimeout>|undefined;
    const cleanup=()=>{
+    if(timer)clearTimeout(timer);
     video.removeEventListener('loadeddata',ready);
     video.removeEventListener('error',error);
    };
    video.addEventListener('loadeddata',ready,{once:true});
    video.addEventListener('error',error,{once:true});
+   // A damaged/unsupported legacy video cannot freeze the whole poster queue.
+   timer=setTimeout(error,8000);
    video.load();
   });
   if(Number.isFinite(video.duration)&&video.duration>1){

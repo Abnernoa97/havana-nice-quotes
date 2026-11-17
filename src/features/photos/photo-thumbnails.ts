@@ -45,10 +45,11 @@ export async function savePhotoThumbnail(id:string,blob:Blob):Promise<boolean>{
 export function queuePhotoThumbnail(id:string,img:HTMLImageElement):void{
  if(processed.has(id))return;
  // Capture the pixels before the React element is recycled by scrolling.
- const task=thumbnailFromImage(img,img.naturalWidth,img.naturalHeight);
  processed.add(id);
  queue=queue.then(async()=>{
-  const blob=await task;
+  // Generate serially as well as uploading serially: avoid multiple canvases
+  // decoding at once on phones with many old photos.
+  const blob=await thumbnailFromImage(img,img.naturalWidth,img.naturalHeight);
   if(!blob||!(await savePhotoThumbnail(id,blob)))processed.delete(id);
  }).catch(()=>{processed.delete(id);});
 }

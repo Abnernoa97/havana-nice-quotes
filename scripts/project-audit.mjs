@@ -22,6 +22,11 @@ const required = [
   'src/features/auth/DeviceGate.tsx', 'src/features/auth/useDeviceAccess.ts',
   'src/features/auth/device-access.css', 'migrations/0002_passwordless_devices.sql',
   'src/features/photos/PhotoBank.tsx', 'src/features/photos/useMediaLibrary.ts',
+  'src/features/photos/PhotoThumbnail.tsx', 'src/features/photos/photo-thumbnails.ts',
+  'src/features/videos/MediaLibraryScreen.tsx', 'src/features/videos/MediaLibraryStats.tsx',
+  'src/features/videos/VideoBank.tsx', 'src/features/videos/VideoPoster.tsx',
+  'src/features/videos/video-posters.ts', 'src/features/videos/useVideoLibrary.ts',
+  'src/features/media/formatMediaBytes.ts', 'worker/videos.ts',
   'worker/index.ts', 'migrations/0001_quotes.sql',
   'src/features/messages/MessagesScreen.tsx',
   'src/features/client/Proposal.tsx', 'src/features/client/ClientPage.tsx',
@@ -104,6 +109,20 @@ if (fileSet.has('src/app/App.tsx')) {
   const lines = app.split('\n').length;
   check('App.tsx por debajo de 500 líneas', lines <= 500,
     'App.tsx concentra ' + lines + ' líneas: revisar separación funcional');
+}
+if (fileSet.has('src/features/videos/VideoBank.tsx') &&
+    fileSet.has('src/features/videos/MediaLibraryScreen.tsx') &&
+    fileSet.has('src/features/photos/PhotoBank.tsx')) {
+  const video = fs.readFileSync(path.join(ROOT, 'src/features/videos/VideoBank.tsx'), 'utf8');
+  const library = fs.readFileSync(path.join(ROOT, 'src/features/videos/MediaLibraryScreen.tsx'), 'utf8');
+  const photo = fs.readFileSync(path.join(ROOT, 'src/features/photos/PhotoBank.tsx'), 'utf8');
+  check('Galerías sin reproductores por tarjeta ni estadísticas duplicadas',
+    video.includes('<VideoPoster video={video}') &&
+    !video.includes('hn-video-card-details') &&
+    !video.includes('hn-video-summary') &&
+    !photo.includes('libraryDetailsOpen') &&
+    library.includes('<MediaLibraryStats'),
+    'Queda una interfaz antigua de video o estadísticas duplicadas');
 }
 if (fileSet.has('src/features/magazine/FlipMagazine.tsx')) {
   const flip = fs.readFileSync(path.join(ROOT, 'src/features/magazine/FlipMagazine.tsx'), 'utf8');

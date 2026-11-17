@@ -1,3 +1,13 @@
+# ESTADO ACTUAL · Video de portada implementado (16/11/2026)
+
+Este archivo conserva el **historial del estudio técnico**; los apartados marcados como “próxima evolución” son anteriores a la implementación y no son el plan vigente.
+
+Actualmente se puede escoger un video desde el + de Portada y reproducirlo en Diseño, Scroll y Revista 3D automáticamente, en bucle, silenciado y sin controles; el archivo conserva audio para el visor de la biblioteca. La subida web comprimida a R2 y el soporte Range ya están implementados. Las cuadrículas usan miniaturas JPEG privadas. El lector 3D pausa/reanuda video al cambiar de hoja. No se activaron proveedores de conversión de pago.
+
+**Pendiente:** comprobar el comportamiento táctil y el rendimiento en teléfonos físicos Android/iOS.
+
+---
+
 ## Fase 2 · Selección de portada desde la nube (16/11/2026)
 - El mismo + de portada abre un selector de **Fotografías** o **Videos** ya guardados en la nube; sigue aceptando fotos del teléfono.
 - El botón pasa de «Añadir archivo» a «Cambiar archivo» cuando ya existe contenido. No se agrega un segundo botón ni una opción +Video en todas las páginas.

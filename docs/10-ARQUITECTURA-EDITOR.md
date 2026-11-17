@@ -64,3 +64,18 @@ Un único motor de edición para todas las plantillas; `template-registry.ts` co
 **Cómo añadir una plantilla:** agregar su ID y nombre al registro y su hoja de estilo. Automáticamente recibirá las tres páginas, herramientas de fotos/textos, persistencia en D1, selector de imágenes R2 y lectura Scroll/3D. Para estructura exclusiva, crear un nuevo adaptador de páginas que emplee los componentes compartidos, sin duplicar el motor de edición.
 
 **Importante:** la migración de diseños viejos es *de lectura*: `designLayout ?? carolinaLayout`; la primera modificación guarda el modelo universal. El campo antiguo queda conservado como respaldo. No migrar masivamente cotizaciones D1 sin consentimiento y respaldo.
+
+## Medios: módulos vigentes
+
+- `src/features/videos/MediaLibraryScreen.tsx`: navegación entre Fotos y Videos y único engranaje superior compartido.
+- `src/features/videos/MediaLibraryStats.tsx`: contadores combinados y referencia visual de 5 GB.
+- `src/features/videos/VideoBank.tsx`, `VideoPoster.tsx`, `video-posters.ts`, `compress-video.ts` y `useVideoLibrary.ts`: galería, miniaturas, conversión y subida de videos.
+- `src/features/photos/PhotoBank.tsx`, `PhotoThumbnail.tsx`, `photo-thumbnails.ts` y `useMediaLibrary.ts`: fotografías, miniaturas y subida independientes.
+- `src/features/media/formatMediaBytes.ts`: formateador compartido de almacenamiento.
+- `src/features/editor/photos/PhotoSourcePicker.tsx`: selector de archivos de la nube que reaprovecha las miniaturas.
+- `src/features/templates/CoverMediaNode.tsx` y `src/features/magazine/FlipMagazine.tsx`: portada foto/video, Scroll y Revista 3D; video de portada en bucle, silencioso y sin controles.
+- `worker/index.ts` y `worker/videos.ts`: medios y miniaturas privados, borrado de derivados al purgar.
+
+El código antiguo de reproductores por tarjeta y estadísticas duplicadas se retiró. Las miniaturas antiguas se generan secuencialmente para evitar consumo simultáneo de varios decodificadores.
+
+**Mantener:** adaptador `carolinaLayout` para propuestas guardadas anteriormente. No migrar ni borrar datos reales sin respaldo.

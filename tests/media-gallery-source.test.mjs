@@ -68,3 +68,13 @@ test('Miniaturas privadas de foto y video no alteran archivos originales ni las 
  assert.match(photos,/private, max-age=86400/);
  assert.match(videos,/private, max-age=86400/);
 });
+
+test('La adaptación de miniaturas antiguas procesa las fotos en serie y no bloquea videos dañados',()=>{
+ const photos=src('features/photos/photo-thumbnails.ts');
+ const videos=src('features/videos/video-posters.ts');
+ assert.match(photos,/queue=queue\.then\(async\(\)=>\{/);
+ assert.match(photos,/const blob=await thumbnailFromImage\(img,img\.naturalWidth,img\.naturalHeight\)/);
+ assert.match(videos,/timer=setTimeout\(error,8000\)/);
+ assert.match(videos,/const job=posterQueue\.then\(async\(\)=>\{/);
+ assert.match(videos,/posterQueue=job\.then\(\(\)=>\{\},\(\)=>\{\}\)/);
+});
