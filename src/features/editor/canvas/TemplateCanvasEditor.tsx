@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, Trash2, Plus, Copy, ArrowLeft, ArrowRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2, Plus, Copy } from 'lucide-react';
 import { isCarolinaCopyField } from '../../templates/carolina-edit-fields';
 import TextStyleDock from '../texts/TextStyleDock';
 import PhotoLayersPanel from '../photos/PhotoLayersPanel';
@@ -15,7 +15,7 @@ import type { CarolinaTextInteraction } from '../../templates/CarolinaTextNode';
 import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle, CarolinaTransform } from '../../templates/carolina-layout';
 import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage } from '../../templates/carolina-layout';
 import { pageBackgroundMediaId } from '../../templates/page-background';
-import { insertBlankPage, duplicateBlankPage, shiftPage, removeDesignPage } from '../../templates/blank-pages';
+import { insertBlankPage, duplicateBlankPage, removeDesignPage } from '../../templates/blank-pages';
 import type { CarolinaPageId } from '../../templates/carolina-layout';
 import { normalizePriceInput, safeQuotePrice } from '../../quotes/model';
 import type { Quote } from '../../quotes/types';
@@ -64,8 +64,12 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const textInteraction: CarolinaTextInteraction = {
     editingId, transformingId,
     onTap: id => { setSelectedPhotoId(null); setTransformingId(null); setEditingId(id); setLastTextId(id); setError(''); },
-    onSelectTransform: id => { setEditingId(null); setSelectedPhotoId(null); setPhotoTool(null); setPhotoLayersOpen(false); setTransformingId(id);
-      setLastTextId(isPhotoId(id) ? null : id); setTrashHovered(false); setError(''); },
+    onSelectTransform: id => {
+      // Moving a text does not end its formatting session.
+      if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      setEditingId(null);setSelectedPhotoId(null);setPhotoTool(null);setPhotoLayersOpen(false);
+      setTransformingId(id);setLastTextId(isPhotoId(id)?null:id);setTrashHovered(false);setError('');
+    },
     onCommitText: (id, raw) => {
       const value = raw.trim().slice(0, 3000);
       if (id.startsWith('fixed:')) {
@@ -95,9 +99,10 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       }
       setEditingId(null);
     },
-    onDeselectTransform: () => {
-      setTransformingId(null);setTrashHovered(false);setLastTextId(null);
-      setSelectedPhotoId(null);setPhotoLayersOpen(false);setEditingId(null);
+    onDeselectTransform: id => {
+      // The same selected text may be tapped again; only touching elsewhere closes its tools.
+      setTransformingId(null);setTrashHovered(false);
+      if (isPhotoId(id)) {setSelectedPhotoId(null);setPhotoLayersOpen(false);}
     },
     onCommitTransform: (id: string, transform: CarolinaTransform) => {
       updateLayout({ transforms: { ...item.designLayout?.transforms, [id]: transform } });
@@ -114,6 +119,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     },
   };
   const addFreeText = () => {
+    if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    clearSelection();
     const id = crypto.randomUUID();
     if((item.designLayout?.extras?.length||0)>=MAX_DESIGN_ELEMENTS){
       setError('Límite de textos alcanzado en esta plantilla.');return;
@@ -199,10 +206,6 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     edit('designLayout',result.layout);
     setPage(result.page);clearSelection();setError('');
   };
-  const movePage=(step:-1|1)=>{
-    const next=shiftPage(item.designLayout,page,step);
-    if(next){edit('designLayout',next);clearSelection();setError('')}
-  };
   const deletePage=()=>{
     if(selectedPages.length<=1){setError('La plantilla debe tener al menos una página.');return}
     if(!window.confirm('¿Eliminar esta página y sus elementos de la plantilla? Las fotos de la nube se conservarán.'))return;
@@ -244,6 +247,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const pageBackgroundId=pageBackgroundMediaId(item.designLayout,page);
   const setPhotoOrder = (order:number[]) => updateLayout({photoOrder:order});
   const selectPhoto = (id:string) => {
+    // Exactly one active session: a different tap first dismisses text, never opens media.
+    if (lastTextId || transformingId) {clearSelection();return;}
     // Empty frames open the source picker, populated photos open the immersive editor.
     const url = id==='photo:cover' ? (item.coverVideo || item.cover) :
       id.startsWith('photo-extra:') ?
@@ -286,6 +291,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       open(Number(selectedPhotoId.slice(6)));
   };
   const addPhotoAnywhere=()=>{
+    if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    clearSelection();
     if (page===1) { addPhotoBlock(); return; }
     const existing=(item.designLayout?.extraPhotos||[]).filter(photo=>!!photo.url);
     if(existing.length>=MAX_DESIGN_ELEMENTS){
@@ -296,6 +303,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setBank(false);setError('');setTarget(`extra:${crypto.randomUUID()}`);
   };
   const addPhotoBlock = () => {
+    if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    clearSelection();
     const slot=photoSlotToAdd(photoOrder,carolinaPhotos(item));
     if(slot===null)return;
     setTransformingId(null);setSelectedPhotoId(null);
@@ -340,7 +349,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     }finally{setBusy(false);}
   };
   return (
-    <section className="hn-canvas">
+    <section className={'hn-canvas'+(lastTextId && target===null?' hn-text-focus':'')}>
       {<div className="hn-canvas-toolbar">
         <button type="button" onClick={addFreeText}>+ Texto</button>
         <button type="button" onClick={addPhotoAnywhere}
@@ -349,29 +358,28 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           aria-label="Agregar página en blanco"><Plus size={17}/> Página</button>
         {transformingId && <span>Arrastra · Amplía o gira con dos dedos</span>}
       </div>}
+      <div className="hn-canvas-stage" onClick={event=>{
+        // A tap in the whitespace surrounding the sheet accepts the current edit.
+        if(event.target===event.currentTarget && (lastTextId||transformingId||editingId)){
+          if(editingId && document.activeElement instanceof HTMLElement)document.activeElement.blur();
+          clearSelection();
+        }
+      }}>
       <div className="hn-canvas-sheet" onPointerDown={event => {
         const target=event.target;
         if (transformingId && !event.isPrimary) return;
-        if (target instanceof Element && !target.closest('[data-carolina-text], .hn-carolina-photo, .hn-carolina-cover-photo, .hn-carolina-floating-photo, [data-hn-text-trash]')) {
-          setTransformingId(null);
-          setSelectedPhotoId(null);
-          setPhotoTool(null);
-          setLastTextId(null);
-          if (editingId && document.activeElement instanceof HTMLElement) {
-            document.activeElement.blur();
-          }
-        }
+        // Dismiss on click, not pointerdown: a gesture must not lose its tools mid-drag.
+        if (!(target instanceof Element)) return;
       }} onClickCapture={event=>{
         const clicked=event.target;
         if(!(clicked instanceof Element)||clicked.closest('[data-hn-text-trash]'))return;
         const node=clicked.closest('[data-hn-photo-id], [data-carolina-text]');
         const clickedId=node?.getAttribute('data-hn-photo-id')||node?.getAttribute('data-carolina-text');
-        if(transformingId && clickedId!==transformingId){
-          clearSelection();event.stopPropagation();return;
-        }
-        if(editingId&&clickedId!==editingId){
-          if(document.activeElement instanceof HTMLElement)document.activeElement.blur();
-          setLastTextId(null);event.stopPropagation();
+        const activeId=lastTextId||transformingId||editingId;
+        if(activeId && clickedId!==activeId){
+          if(editingId && document.activeElement instanceof HTMLElement)document.activeElement.blur();
+          clearSelection();
+          event.preventDefault();event.stopPropagation();
         }
       }}>
         {page===0 && <div className="hn-canvas-cover">
@@ -406,37 +414,27 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           </button>
         )}
       </div>
-      {<div className="hn-canvas-pager">
+      </div>
+      <div className="hn-canvas-pager" role="group" aria-label="Navegación y acciones de páginas">
         <button type="button" disabled={pageIndex<=0} aria-label="Página anterior"
-          onClick={()=>changePage(-1)}>
-          <ChevronLeft size={18}/>
-        </button>
+          onClick={()=>changePage(-1)}><ChevronLeft size={18}/></button>
         <span>{pageIndex+1} / {selectedPages.length}</span>
         <button type="button" disabled={pageIndex>=selectedPages.length-1} aria-label="Página siguiente"
-          onClick={()=>changePage(1)}>
-          <ChevronRight size={18}/>
-        </button>
-      </div>}
-      <div className="hn-canvas-page-actions" role="group" aria-label="Organizar páginas">
-        <span className="hn-canvas-page-label">{pageTitle(page,pageIndex)}</span>
-        <button type="button" onClick={()=>movePage(-1)} disabled={pageIndex<=0}
-          title="Mover esta página antes" aria-label="Mover página antes"><ArrowLeft size={15}/></button>
-        <button type="button" onClick={()=>movePage(1)} disabled={pageIndex>=selectedPages.length-1}
-          title="Mover esta página después" aria-label="Mover página después"><ArrowRight size={15}/></button>
+          onClick={()=>changePage(1)}><ChevronRight size={18}/></button>
         <button type="button" onClick={duplicatePage} disabled={!isBlankPage(page)}
-          title={isBlankPage(page)?'Duplicar página en blanco':'Solo se duplican páginas propias'}
-          aria-label="Duplicar página"><Copy size={15}/></button>
+          title={isBlankPage(page)?'Duplicar página':'Solo se duplican páginas propias'}
+          aria-label="Duplicar página"><Copy size={17}/></button>
         <button type="button" onClick={deletePage} disabled={selectedPages.length<=1}
-          title="Eliminar página" aria-label="Eliminar página"><Trash2 size={15}/></button>
+          title="Eliminar página" aria-label="Eliminar página"><Trash2 size={17}/></button>
       </div>
-      {lastTextId && transformingId!==lastTextId && (
+      {lastTextId && target===null && !selectedPhotoId && (
         <TextStyleDock textId={lastTextId}
           fontId={item.designLayout?.fonts?.[lastTextId] || item.designLayout?.defaultFont}
           style={item.designLayout?.textStyles?.[lastTextId]}
           onFontChange={chooseFont} onStyleChange={changeTextStyle}
           onClose={()=>{
             if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
-            setEditingId(null); setLastTextId(null);
+            clearSelection();
           }}/>
       )}
       {selectedPhotoId && !transformingId && !editingId && target===null &&
