@@ -244,3 +244,14 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
 .hn-editorial-cover .hn-editorial-top,.hn-editorial-cover .hn-editorial-hero{z-index:16}
 .hn-editorial-terms>.hn-editorial-rule,.hn-editorial-terms>.hn-editorial-story,
 .hn-editorial-terms>.hn-editorial-signoff{position:relative;z-index:16}
+
+/* New text is centered in the page, fully legible above any photo or video.
+   Existing elements without .hn-centered-extra-text retain their old coordinates. */
+.hn-carolina-added-text.hn-centered-extra-text{
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:max-content;max-width:86%;min-width:1ch;padding:2px 4px;
+  background:transparent;border:0;border-radius:0;
+  color:#fff;font:400 clamp(22px,5.2cqw,43px)/1.14 'Playfair Display',Georgia,serif;
+  text-align:center;text-shadow:0 2px 8px #000a;
+}
+.hn-blank-page:not(:has(.hn-page-background)) .hn-carolina-added-text.hn-centered-extra-text{color:#fff;text-shadow:0 1px 6px #14271dcc}
