@@ -5,6 +5,7 @@ import { ZERO_TRANSFORM, clampTransform } from './carolina-layout';
 
 export type CarolinaGestureInteraction = {
   transformingId: string | null;
+  editingId?: string | null;
   onSelectTransform: (id: string) => void;
   onCommitTransform: (id: string, value: CarolinaTransform) => void;
   onDrag?: (id: string, x: number, y: number) => void;
@@ -40,7 +41,9 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const swallowClick = useRef(false);
   const selectedAtPress = useRef(false);
   const movedDuringPress = useRef(false);
+  const pendingPageEdit = useRef(false);
   const selected = interaction?.transformingId === id;
+  const editingHere = interaction?.editingId === id;
   const interactionRef = useRef(interaction);
   interactionRef.current = interaction;
 
@@ -144,44 +147,76 @@ export function useCarolinaGesture<T extends HTMLElement>(
     longPressed.current = false;
   };
 
+  // The selected element owns gestures that begin anywhere else on its page.
+  // A freshly typed text can enter the same gesture on the first drag, without a hold.
   useEffect(() => {
-    if (!selected || disabled || !node.current) return;
+    if ((!selected && !editingHere) || !node.current) return;
     const page = node.current.closest('.hn-carolina-page') as HTMLElement | null;
     if (!page) return;
     const outsideNode = (event: PointerEvent) =>
       !!node.current && !node.current.contains(event.target as Node);
+    const isDeleteTarget = (event: PointerEvent) =>
+      event.target instanceof Element && !!event.target.closest('[data-hn-text-trash]');
     const down = (event: PointerEvent) => {
-      if (!outsideNode(event) || !pointers.current.size) return;
-      event.preventDefault(); event.stopPropagation();
-      pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      page.setPointerCapture(event.pointerId);
-      resetBaseline();
+      if (!outsideNode(event) || isDeleteTarget(event)) return;
+      if (!pointers.current.size && interactionRef.current?.editingId===id) {
+        // A tap outside still confirms. Movement of 7px turns it into an immediate drag.
+        pendingPageEdit.current = true;
+        press.current = {x:event.clientX,y:event.clientY};
+        pointers.current.set(event.pointerId,{x:event.clientX,y:event.clientY});
+        selectedAtPress.current=false;
+        movedDuringPress.current=false;
+        return;
+      }
+      begin(event.pointerId,event.clientX,event.clientY);
+      try { page.setPointerCapture(event.pointerId); } catch { /* OS cancelled */ }
     };
     const move = (event: PointerEvent) => {
-      if (outsideNode(event)) update(event.pointerId, event.clientX, event.clientY);
+      if (!pointers.current.has(event.pointerId)) return;
+      if (pendingPageEdit.current) {
+        const start=press.current;
+        if (!start || Math.hypot(event.clientX-start.x,event.clientY-start.y)<7) return;
+        pendingPageEdit.current=false;
+        cancelHold();
+        longPressed.current=true;
+        swallowClick.current=true;
+        resetBaseline();
+        interactionRef.current?.onSelectTransform(id);
+        try {page.setPointerCapture(event.pointerId);}catch{/* OS cancelled */}
+      }
+      update(event.pointerId,event.clientX,event.clientY);
     };
     const up = (event: PointerEvent) => {
-      if (outsideNode(event)) finish(event.pointerId,event.clientX,event.clientY);
-    };
-    page.addEventListener('pointerdown', down);
-    page.addEventListener('pointermove', move);
-    page.addEventListener('pointerup', up);
-    const cancel = (event: PointerEvent) => {
-      if (outsideNode(event)) {
-        cancelHold();
+      if (!pointers.current.has(event.pointerId)) return;
+      if (pendingPageEdit.current) {
+        pendingPageEdit.current=false;
         pointers.current.delete(event.pointerId);
-        baseline.current = null;
-        longPressed.current = false;
+        press.current=null;
+        return;
       }
+      finish(event.pointerId,event.clientX,event.clientY);
     };
-    page.addEventListener('pointercancel', cancel);
+    const cancel = (event: PointerEvent) => {
+      if (!pointers.current.has(event.pointerId)) return;
+      cancelHold();
+      pendingPageEdit.current=false;
+      pointers.current.delete(event.pointerId);
+      if (pointers.current.size) {resetBaseline();return;}
+      baseline.current=null;press.current=null;longPressed.current=false;
+      current.current=saved||ZERO_TRANSFORM;
+      setLive(saved||ZERO_TRANSFORM);
+    };
+    page.addEventListener('pointerdown',down);
+    page.addEventListener('pointermove',move);
+    page.addEventListener('pointerup',up);
+    page.addEventListener('pointercancel',cancel);
     return () => {
-      page.removeEventListener('pointerdown', down);
-      page.removeEventListener('pointermove', move);
-      page.removeEventListener('pointerup', up);
-      page.removeEventListener('pointercancel', cancel);
+      page.removeEventListener('pointerdown',down);
+      page.removeEventListener('pointermove',move);
+      page.removeEventListener('pointerup',up);
+      page.removeEventListener('pointercancel',cancel);
     };
-  }, [selected, disabled]);
+  },[selected,editingHere,id]);
 
   const onPointerDown = (event: ReactPointerEvent<T>) => {
     if (disabled || !interaction || event.pointerType === 'mouse' && event.button !== 0) return;
