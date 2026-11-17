@@ -50,8 +50,8 @@ test('Todos los estilos comparten el motor universal, con páginas originales y 
  const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
  assert.match(canvas,/templateFamily\(item\.style\)==='editorial'/);
  assert.match(canvas,/edit\('designLayout',/);
- assert.match(canvas,/<EditorialCover item=\{item\} interaction=\{textInteraction\}/);
- assert.match(canvas,/<EditorialCollage item=\{item\} interaction=\{textInteraction\}/);
+ assert.match(canvas,/<EditorialCover item=\{renderItem\} interaction=\{textInteraction\}/);
+ assert.match(canvas,/<EditorialCollage item=\{renderItem\} interaction=\{textInteraction\}/);
  assert.match(canvas,/<EditorialTerms item=\{item\} interaction=\{textInteraction\}/);
  assert.match(canvas,/<PhotoEditingWorkspace photoId=\{selectedPhotoId\}/);
  assert.match(canvas,/<TextStyleDock textId=\{lastTextId\}/);
