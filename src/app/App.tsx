@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { useAppHistory } from './useAppHistory';
 import type { AppSection, EditorTab, ReadingView } from './native-navigation';
 import type { Quote, QuoteStatus } from '../features/quotes/types';
 import FlipMagazine from '../features/magazine/FlipMagazine';
 import { editorialStyles } from '../features/editor/styles/EditorialStyles';
-import { createQuoteDraft, createOwnTemplate, duplicateQuote, editSampleQuote, statusClass } from '../features/quotes/model';
+import { createQuoteDraft, createOwnTemplate, duplicateQuote, editSampleQuote, quoteDisplayName, statusClass } from '../features/quotes/model';
 import { useQuoteStore } from '../features/quotes/useQuoteStore';
 import { useDeviceAccess } from '../features/auth/useDeviceAccess';
 import DeviceGate from '../features/auth/DeviceGate';
@@ -75,6 +75,8 @@ function App() {
   const [workingQuote,setWorkingQuote]=useState<Quote|null>(null);
   const [saveDialogOpen,setSaveDialogOpen]=useState(false);
   const [saveBusy,setSaveBusy]=useState(false);
+  // Reuse this ID when a template-derived quote is retried after a sync failure.
+  const templateQuoteSave=useRef<{sourceId:string;quoteId:string}|null>(null);
   const [search, setSearch] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [clientMessage, setClientMessage] = useState('');
@@ -131,6 +133,7 @@ function App() {
   };
   const addQuote = () => {
     const id='hn-'+crypto.randomUUID();
+    templateQuoteSave.current=null;
     setWorkingQuote(createQuoteDraft(id));
     setNewMessage('');setClientMessage('');setSaveDialogOpen(false);
     routeTo({active:id,tab:'styles',section:'editor',preview:false,mobileMenu:false});
@@ -138,6 +141,7 @@ function App() {
   };
   const createTemplate = () => {
     const id='hn-'+crypto.randomUUID();
+    templateQuoteSave.current=null;
     setWorkingQuote(null);setSaveDialogOpen(false);
     setQuotes(list=>[createOwnTemplate(id),...list]);
     setNewMessage('');setClientMessage('');
@@ -149,6 +153,7 @@ function App() {
     if(!source)return;
     const id='hn-'+crypto.randomUUID();
     const clone=duplicateQuote(source,id,resetClient);
+    templateQuoteSave.current=null;
     setWorkingQuote(clone);setSaveDialogOpen(false);
     setNewMessage('');setClientMessage('');
     routeTo({active:id,tab:'details',section:'editor',preview:false,mobileMenu:false});
@@ -156,23 +161,27 @@ function App() {
   };
   const editOwnTemplate = (id:string) => {
     if(!ownTemplates.some(template=>template.id===id))return;
+    templateQuoteSave.current=null;
     setWorkingQuote(null);setSaveDialogOpen(false);
     routeTo({active:id,tab:'design',section:'editor',preview:false,mobileMenu:false});
   };
   const moveQuoteToTrash = async (id: string) => {
-    const quote = quotes.find(q => q.id === id);
-    if (!quote || !window.confirm('¿Enviar a Papelera la cotización de ' + quote.name +
-      '?\nPodrás restaurarla después.')) return;
-    if (!await flush()) { setToast('No se pudo sincronizar. Comprueba la conexión.'); return; }
+    const quote=quotes.find(q=>q.id===id);
+    if(!quote)return;
+    const label=quote.isTemplate?'plantilla «'+(quote.templateName?.trim()||'Mi plantilla')+'»':
+      'cotización «'+quoteDisplayName(quote)+'»';
+    if(!window.confirm('¿Enviar a Papelera la '+label+'?\nPodrás restaurarla después.'))return;
+    if(!await flush()){setToast('No se pudo sincronizar. Comprueba la conexión.');return;}
     try {
-      const response = await fetch('/api/quotes/' + encodeURIComponent(id), {
-        method: 'DELETE', credentials: 'same-origin',
+      const response=await fetch('/api/quotes/'+encodeURIComponent(id),{
+        method:'DELETE',credentials:'same-origin',
       });
-      if (!response.ok) throw new Error('No se pudo mover la cotización.');
+      if(!response.ok)throw new Error('No se pudo mover el elemento a Papelera.');
       await refreshQuotes();
-      setToast('Cotización enviada a Papelera.');
-    } catch (error) {
-      setToast(error instanceof Error ? error.message : 'No se pudo mover la cotización.');
+      if(active===id){setSaveDialogOpen(false);routeTo({section:'editor',tab:'styles',active:'empty'});}
+      setToast(quote.isTemplate?'Plantilla enviada a Papelera.':'Cotización enviada a Papelera.');
+    }catch(error){
+      setToast(error instanceof Error?error.message:'No se pudo enviar a Papelera.');
     }
   };
   const selectQuote = (id: string, target = 'editor') => {
@@ -188,38 +197,47 @@ function App() {
     });
   };
 
-  const save = () => {
-    if(!item)return;
-    if(item.isTemplate){
-      void flush().then(ok=>setToast(ok
-        ? 'Plantilla guardada en Mis plantillas. No se creó una cotización.'
-        : 'Plantilla pendiente de sincronizar. Comprueba la conexión.'));
-      return;
-    }
+  const save=()=>{
+    if(!item || saveBusy)return;
+    // One visible Save action, always the same two-choice dialog.
     setSaveDialogOpen(true);
   };
-  const saveNamedQuote = async (title:string,status:Extract<QuoteStatus,'Borrador'|'Listo para enviar'>) => {
-    if(!item||item.isTemplate||saveBusy)return;
+  const saveNamedQuote=async(title:string,status:Extract<QuoteStatus,'Borrador'|'Listo para enviar'>)=>{
+    if(!item||saveBusy)return;
     const cleanTitle=title.trim();
     if(!cleanTitle||cleanTitle.length>150)return;
     setSaveBusy(true);
     try {
-      const saved:Quote={...item,quoteTitle:cleanTitle,status};
-      if(workingQuote?.id===saved.id){
-        // The FIRST write to D1 happens here, never when a template is selected.
+      let saved:Quote;
+      if(item.isTemplate){
+        // Preserve the editable original template; a quotation has its own identity.
+        let ids=templateQuoteSave.current;
+        if(!ids||ids.sourceId!==item.id){
+          ids={sourceId:item.id,quoteId:'hn-'+crypto.randomUUID()};
+          templateQuoteSave.current=ids;
+        }
+        saved={...duplicateQuote(item,ids.quoteId,true),quoteTitle:cleanTitle,status};
         setQuotes(list=>[saved,...list.filter(q=>q.id!==saved.id)]);
-        setWorkingQuote(null);
       }else{
-        setQuotes(list=>list.map(q=>q.id===saved.id?saved:q));
+        saved={...item,quoteTitle:cleanTitle,status};
+        if(workingQuote?.id===saved.id){
+          // The first cloud write happens only at explicit named Save.
+          setQuotes(list=>[saved,...list.filter(q=>q.id!==saved.id)]);
+          setWorkingQuote(null);
+        }else{
+          setQuotes(list=>list.map(q=>q.id===saved.id?saved:q));
+        }
       }
       const ok=await flush();
       if(ok){
         setSaveDialogOpen(false);
+        templateQuoteSave.current=null;
+        routeTo({active:saved.id,section:'editor',tab:'design',preview:false,mobileMenu:false});
         setToast(status==='Borrador'
           ? 'Cotización guardada en Borrador.'
-          : 'Cotización guardada en Listo para enviar. Aún no se envió al cliente.');
+          : 'Cotización guardada en Listo para enviar. No se envió al cliente.');
       }else{
-        setToast('No se pudo completar la sincronización. Conservamos los cambios pendientes.');
+        setToast('Sin sincronizar. La cotización sigue pendiente; comprueba la conexión.');
       }
     }finally{setSaveBusy(false);}
   };
@@ -321,6 +339,7 @@ function App() {
       existingQuotes={clientQuotes} ownTemplates={ownTemplates}
       onCreateTemplate={createTemplate} onUseExisting={sourceId=>reuseQuote(sourceId,false)}
       onUseTemplate={sourceId=>reuseQuote(sourceId,true)} onEditOwnTemplate={editOwnTemplate}
+      onDeleteOwnTemplate={id=>void moveQuoteToTrash(id)}
       tab={tab}
       setTab={setTab}
       styleName={styleName}
@@ -453,7 +472,7 @@ function App() {
         ))}
       </div>
       {toast && <div className="toast">{toast}</div>}
-      {saveDialogOpen && item && !item.isTemplate && (
+      {saveDialogOpen && item && (
         <QuoteSaveDialog item={item} busy={saveBusy} onClose={()=>setSaveDialogOpen(false)}
           onSave={(title,status)=>{void saveNamedQuote(title,status);}}/>
       )}
