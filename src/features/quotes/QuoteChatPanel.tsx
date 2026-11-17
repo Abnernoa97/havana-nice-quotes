@@ -27,7 +27,7 @@ export default function QuoteChatPanel({quoteId,pageId,compact=false,staticPrevi
  const stream=useRef<MediaStream|null>(null);
  const chunks=useRef<Blob[]>([]);
  const stopTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
- const bottom=useRef<HTMLDivElement|null>(null);
+ const messageBox=useRef<HTMLDivElement|null>(null);
  const url=endpoint(quoteId,pageId);
  const who=client?'client':'owner';
  const translate=(owner:string,visitor:string)=>client?visitor:owner;
@@ -50,7 +50,7 @@ export default function QuoteChatPanel({quoteId,pageId,compact=false,staticPrevi
   return ()=>{mounted=false;clearInterval(refreshInterval);
    document.removeEventListener('visibilitychange',wake);};
  },[url,isTemplate,staticPreview]);
- useEffect(()=>{bottom.current?.scrollIntoView({block:'nearest',behavior:'smooth'});},[messages.length]);
+ useEffect(()=>{const el=messageBox.current;if(el)el.scrollTop=el.scrollHeight;},[messages.length]);
  useEffect(()=>()=>{if(stopTimer.current)clearTimeout(stopTimer.current);
   if(recorder.current?.state==='recording')recorder.current.stop();
   stream.current?.getTracks().forEach(t=>t.stop());
@@ -108,7 +108,7 @@ export default function QuoteChatPanel({quoteId,pageId,compact=false,staticPrevi
   onPointerDown={e=>e.stopPropagation()} onClick={e=>e.stopPropagation()}>
   <div className="hn-quote-chat-top"><span className="hn-quote-chat-dot"/>
    {translate('Conversación privada','Private conversation')}</div>
-  {!staticPreview&&<div className="hn-quote-chat-messages" role="log"
+  {!staticPreview&&<div ref={messageBox} className="hn-quote-chat-messages" role="log"
      aria-label={translate('Mensajes de la cotización','Proposal messages')}>
     {messages.length===0&&<p className="hn-quote-chat-empty">{translate(
      'Escribe un mensaje o envía una nota de voz.',
@@ -120,7 +120,7 @@ export default function QuoteChatPanel({quoteId,pageId,compact=false,staticPrevi
         :<span>{msg.text}</span>}
        <small>{fmt(msg.createdAt)}</small>
       </div>)}
-    <div ref={bottom}/>
+
   </div>}
   <div className="hn-quote-chat-compose">
    <textarea value={text} disabled={disabled} rows={1}
