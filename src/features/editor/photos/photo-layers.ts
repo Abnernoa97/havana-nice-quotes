@@ -1,6 +1,6 @@
 import type { Quote } from '../../quotes/types';
 import type { CarolinaPageId } from '../../templates/carolina-layout';
-import { carolinaPhotoOrder } from '../../templates/carolina-layout';
+import { carolinaPhotoOrder, isBlankPage } from '../../templates/carolina-layout';
 import { carolinaPhotos } from '../../templates/CarolinaTemplate';
 
 export type PhotoLayer = {id:string;url:string;label:string;behindText:boolean};
@@ -11,8 +11,10 @@ export function listPhotoLayers(item:Quote,page:CarolinaPageId):PhotoLayer[] {
     .filter(photo=>photo.page===page && !!photo.url)
     .map((photo,index)=>({
       id:'photo-extra:'+photo.id,url:photo.url,
-      label:(photo.url.startsWith('/api/videos/')?'Video ':'Foto ')+(index+1),
-      behindText:!!item.designLayout?.photoStyles?.['photo-extra:'+photo.id]?.behindText,
+      label:isBlankPage(page)&&index===0?'Fondo de página':
+        (photo.url.startsWith('/api/videos/')?'Video ':'Foto ')+(index+1),
+      behindText:isBlankPage(page)&&index===0||
+        !!item.designLayout?.photoStyles?.['photo-extra:'+photo.id]?.behindText,
     }));
   const backgroundCover=page===0 && (item.cover || item.coverVideo) &&
     item.designLayout?.photoStyles?.['photo:cover']?.behindText
