@@ -17,8 +17,6 @@ import HomeScreen from '../features/home/HomeScreen';
 import MessagesScreen from '../features/messages/MessagesScreen';
 import ClientPage from '../features/client/ClientPage';
 import QuoteEditorScreen from '../features/editor/QuoteEditorScreen';
-import type { PhotoTarget } from '../features/editor/shared/editor-types';
-import { CAROLINA_MAX_SLOTS } from '../features/templates/carolina-layout';
 import { Sidebar, Topbar } from './WorkspaceChrome';
 import { useInstallPrompt } from '../features/pwa/useInstallPrompt';
 import InstallGuide from '../features/pwa/InstallGuide';
@@ -212,29 +210,13 @@ function App() {
     setNewMessage('');
     setToast('Respuesta de prueba guardada');
   };
-  const uploadDesignPhoto = async (file: File, target: PhotoTarget): Promise<void> => {
-    const quoteId = item?.id;
-    if (!quoteId) throw new Error('Selecciona una cotización.');
+  // Uploading is separate from inserting a canvas layer: cancellation leaves the sheet unchanged.
+  const uploadDesignPhoto = async (file: File): Promise<string> => {
     const result = await uploadPhotos([file]);
     const saved = result.uploaded[0];
     if (!saved) throw new Error('No se pudo guardar la fotografía en R2.');
-    setQuotes(current => current.map(quote => {
-      if (quote.id !== quoteId) return quote;
-      if (target === 'cover') return { ...quote, cover: saved.url, coverVideo: '' };
-      if (typeof target === 'string' && target.startsWith('extra:')) {
-        const id=target.slice(6);
-        const previous=quote.designLayout?.extraPhotos || [];
-        if (!previous.some(photo=>photo.id===id)) return quote;
-        return { ...quote, designLayout: { ...quote.designLayout,
-          extraPhotos: previous.map(photo=>photo.id===id ? {...photo,url:saved.url} : photo),
-        } };
-      }
-      if (typeof target !== 'number') return quote;
-      const gallery = Array.from({ length: CAROLINA_MAX_SLOTS }, (_, i) => quote.gallery?.[i] || '');
-      gallery[target] = saved.url;
-      return { ...quote, gallery };
-    }));
-    setToast('Fotografía guardada y aplicada a su recuadro.');
+    setToast('Fotografía guardada en tu biblioteca.');
+    return saved.url;
   };
   const btnQuote = (
     <button className="btn primary" onClick={addQuote}>
