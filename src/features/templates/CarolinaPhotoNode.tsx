@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import type { CarolinaPhotoStyle, CarolinaTransform } from './carolina-layout';
 import { CAROLINA_PHOTO_DEFAULTS as D } from './carolina-layout';
@@ -41,7 +41,27 @@ export default function CarolinaPhotoNode({
   id, url, transform, photoStyle, interaction, onSelect, cover = false, position, extra = false, pageBackground = false,
 }: Props) {
   const element = useRef<HTMLButtonElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const isVideo = url.startsWith('/api/videos/');
+  useEffect(()=>{
+    const media=videoRef.current;
+    if(!isVideo||!media)return;
+    let inView=false;
+    const sync=()=>{
+      if(inView&&!document.hidden)void media.play().catch(()=>{});
+      else media.pause();
+    };
+    if(typeof IntersectionObserver==='undefined'){
+      if(!document.hidden)void media.play().catch(()=>{});
+      return ()=>media.pause();
+    }
+    const observer=new IntersectionObserver(entries=>{
+      inView=Boolean(entries[0]?.isIntersecting);sync();
+    },{threshold:.05});
+    observer.observe(media);
+    document.addEventListener('visibilitychange',sync);
+    return ()=>{observer.disconnect();document.removeEventListener('visibilitychange',sync);media.pause();};
+  },[url,isVideo]);
   const gesture = useCarolinaGesture(id, element, transform, interaction);
   const className = (extra ? 'hn-carolina-floating-photo' : cover ? 'hn-carolina-cover-photo' : 'hn-carolina-photo hn-carolina-photo-' + position) +
     (onSelect ? ' hn-carolina-editable-photo' : '') +
@@ -71,8 +91,8 @@ export default function CarolinaPhotoNode({
     <span className={'hn-carolina-crop-viewport'+(ratio!=='frame'?' is-ratio':'')}
       style={{...ratioStyle,opacity:(photoStyle?.opacity ?? D.opacity) / 100}} aria-hidden="true">
       {url && (isVideo
-        ? <video className="hn-carolina-image-fill hn-carolina-video-fill"
-            src={url} autoPlay muted loop playsInline preload="metadata"
+        ? <video ref={videoRef} className="hn-carolina-image-fill hn-carolina-video-fill"
+            src={url} autoPlay muted loop playsInline disablePictureInPicture preload="metadata"
             style={{...picture,backgroundImage:undefined,
               objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
         : <span className="hn-carolina-image-fill" style={picture}/>)}
