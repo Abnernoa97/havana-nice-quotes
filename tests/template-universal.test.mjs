@@ -52,7 +52,7 @@ test('Todos los estilos comparten el motor universal, con páginas originales y 
  assert.match(canvas,/edit\('designLayout',/);
  assert.match(canvas,/<EditorialCover item=\{renderItem\} interaction=\{textInteraction\}/);
  assert.match(canvas,/<EditorialCollage item=\{renderItem\} interaction=\{textInteraction\}/);
- assert.match(canvas,/<EditorialTerms item=\{item\} interaction=\{textInteraction\}/);
+ assert.match(canvas,/<EditorialTerms item=\{renderItem\} interaction=\{textInteraction\}/);
  assert.match(canvas,/<PhotoEditingWorkspace photoId=\{selectedPhotoId\}/);
  assert.match(canvas,/<TextStyleDock textId=\{lastTextId\}/);
  assert.match(canvas,/<PhotoLayersPanel layers=\{photoLayers\}/);
