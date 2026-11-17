@@ -287,7 +287,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     }
     // Keep the new frame in local picker state until a file is really chosen.
     setTransformingId(null);setSelectedPhotoId(null);setLastTextId(null);
-    setBank(false);setError('');setTarget('extra:'+crypto.randomUUID());
+    setBank(false);setError('');setTarget(`extra:${crypto.randomUUID()}`);
   };
   const addPhotoBlock = () => {
     const slot=photoSlotToAdd(photoOrder,carolinaPhotos(item));
