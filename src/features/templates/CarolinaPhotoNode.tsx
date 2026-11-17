@@ -42,7 +42,10 @@ export default function CarolinaPhotoNode({
 }: Props) {
   const element = useRef<HTMLButtonElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const isVideo = url.startsWith('/api/videos/');
+  const isVideo = /^\/api\/videos\/[a-f0-9-]{36}$/.test(url);
+  // Existing private R2 JPEG (~tens of KB), not a decoded video frame.
+  // Use it everywhere: designer, quote drafts, Scroll and cloned 3D pages.
+  const posterUrl=isVideo?url+'/poster':undefined;
   useEffect(()=>{
     const media=videoRef.current;
     if(!isVideo||!media)return;
@@ -52,6 +55,7 @@ export default function CarolinaPhotoNode({
       else media.pause();
     };
     if(typeof IntersectionObserver==='undefined'){
+      // Only the mounted, visible media may start; PageFlip controls its clones.
       if(!document.hidden)void media.play().catch(()=>{});
       return ()=>media.pause();
     }
@@ -92,7 +96,7 @@ export default function CarolinaPhotoNode({
       style={{...ratioStyle,opacity:(photoStyle?.opacity ?? D.opacity) / 100}} aria-hidden="true">
       {url && (isVideo
         ? <video ref={videoRef} className="hn-carolina-image-fill hn-carolina-video-fill"
-            src={url} autoPlay muted loop playsInline disablePictureInPicture preload="metadata"
+            src={url} poster={posterUrl} muted loop playsInline disablePictureInPicture preload="none"
             style={{...picture,backgroundImage:undefined,
               objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
         : <span className="hn-carolina-image-fill" style={picture}/>)}
