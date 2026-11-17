@@ -23,7 +23,7 @@ type Props = {
   openClientPreview: () => void;
   save: () => void;
   cloudPhotos: CloudPhoto[];
-  onUploadPhoto: (file: File, target: PhotoTarget) => Promise<void>;
+  onUploadPhoto: (file: File, target: PhotoTarget) => Promise<string>;
 };
 
 /** One editor: details (including investment), template, design and final review. */
