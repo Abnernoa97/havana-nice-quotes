@@ -65,7 +65,7 @@ test('Todos los estilos comparten el motor universal, con páginas originales y 
  assert.match(carolina,/export function CarolinaCover/);
  assert.match(carolina,/export function CarolinaBlankPage/);
  assert.match(doc,/<CarolinaBlankPage key=\{page\}/);
- assert.match(book,/<CarolinaBlankPage item=\{item\} page=\{selectedPage\}/);
+ assert.match(book,/<CarolinaBlankPage item=\{item\} page=\{selectedPage\} staticChat/);
  assert.doesNotMatch(scroll,/withDesignLayout/);
  assert.doesNotMatch(book,/withDesignLayout/);
  assert.match(book,/const total = selectedPages\.length/);
