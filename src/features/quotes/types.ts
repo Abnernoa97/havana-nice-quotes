@@ -4,7 +4,7 @@ import type { CarolinaLayout } from '../templates/carolina-layout';
 import type { TemplateStyle } from '../templates/template-registry';
 
 /** Datos de las cotizaciones, compartidos entre el estudio y la nube. */
-export type QuoteStatus = 'Borrador' | 'Lista para enviar' | 'Enviada' | 'En revisión' | 'Aceptada';
+export type QuoteStatus = 'Borrador' | 'Listo para enviar' | 'Enviada' | 'En revisión' | 'Aceptada';
 export type QuoteStyle = TemplateStyle;
 export type ReadingMode = 'flip' | 'scroll';
 export type QuoteMessage = { from: string; text: string; time: string };
