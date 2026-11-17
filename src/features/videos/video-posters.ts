@@ -59,13 +59,17 @@ export async function createVideoPosterFromUrl(url:string):Promise<Blob|null>{
 }
 /** Serial backfill prevents 20 old videos from decoding simultaneously on a phone. */
 let posterQueue=Promise.resolve();
+const posterPending=new Map<string,Promise<boolean>>();
 export function schedulePosterBackfill(id:string,url:string):Promise<boolean>{
+ const ongoing=posterPending.get(id);
+ if(ongoing)return ongoing;
  const job=posterQueue.then(async()=>{
   const poster=await createVideoPosterFromUrl(url);
   if(!poster)return false;
   await saveVideoPoster(id,poster);
   return true;
- });
+ }).finally(()=>posterPending.delete(id));
+ posterPending.set(id,job);
  posterQueue=job.then(()=>{},()=>{});
  return job;
 }
