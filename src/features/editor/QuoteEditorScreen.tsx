@@ -37,7 +37,7 @@ export default function QuoteEditorScreen({
       <div className="editor-head">
         <div>
           <span className="eyebrow">HAVANA NICE · COTIZACIONES</span>
-          <h1>{item.isTemplate ? (item.templateName?.trim() || 'Nueva plantilla') : (item.name.trim() || 'Nueva cotización')}</h1>
+          <h1>{item.isTemplate ? (item.templateName?.trim() || 'Nueva plantilla') : (item.quoteTitle?.trim() || item.name.trim() || 'Nueva cotización')}</h1>
         </div>
         <div className="editor-actions">
           <button type="button" className="btn primary" onClick={save}>
