@@ -43,6 +43,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [editingId, setEditingId] = useState<string | null>(null);
   // New text lives only in local React state until the user actually writes it.
   const [draftText, setDraftText] = useState<{id:string;page:CarolinaPageId}|null>(null);
+  const newlyConfirmedText=useRef<{id:string;page:CarolinaPageId;text:string;centered:true}|null>(null);
   const lastGestureMoveAt=useRef(0);
   const justMoved=useRef(false);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
@@ -91,11 +92,11 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         // Only confirmed content enters the template, Scroll and Book 3D.
         setDraftText(null);
         if (value) {
-          updateLayout({extras:[...(item.designLayout?.extras||[]),
-            {id:draftText.id,page:draftText.page,text:value,centered:true as const}]});
-          setTransformingId(id);
-          setLastTextId(id);
+          newlyConfirmedText.current={id:draftText.id,page:draftText.page,text:value,centered:true};
+          updateLayout({extras:[...(item.designLayout?.extras||[]),newlyConfirmedText.current]});
+          setTransformingId(id);setLastTextId(id);
         } else {
+          newlyConfirmedText.current=null;
           clearSelection();
         }
         setEditingId(null);
@@ -135,9 +136,13 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     },
     onCommitTransform: (id: string, transform: CarolinaTransform) => {
       // Ignore a cancelled/blank draft. A transform without text must not survive.
-      if(id.startsWith('extra:') &&
-        !(item.designLayout?.extras||[]).some(entry=>'extra:'+entry.id===id&&entry.text.trim()))return;
-      updateLayout({ transforms: { ...item.designLayout?.transforms, [id]: transform } });
+      const exists=(item.designLayout?.extras||[]).some(entry=>'extra:'+entry.id===id&&entry.text.trim());
+      const recent=newlyConfirmedText.current;
+      if(id.startsWith('extra:')&&!exists&&(!recent||'extra:'+recent.id!==id))return;
+      updateLayout({transforms:{...item.designLayout?.transforms,[id]:transform},
+        ...(!exists&&recent&&'extra:'+recent.id===id
+          ? {extras:[...(item.designLayout?.extras||[]),recent]}:{})});
+      if(recent&&'extra:'+recent.id===id)newlyConfirmedText.current=null;
       setTrashHovered(false);
     },
     onDrag: (_id,x,y) => {
@@ -159,6 +164,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       setError('Límite de textos alcanzado en esta plantilla.');return;
     }
     const id=crypto.randomUUID();
+    newlyConfirmedText.current=null;
     setDraftText({id,page}); // Do not write an empty element to D1.
     setEditingId('extra:'+id);
     setLastTextId('extra:'+id);
