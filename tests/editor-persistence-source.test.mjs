@@ -588,7 +588,9 @@ test('Editor inmersivo: giro real, scroll independiente y controles anclados',()
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
   const model=src('features/templates/carolina-layout.ts');
   const css=readFileSync(new URL('../src/features/editor/photos/photo-style-dock.css',import.meta.url),'utf8');
-  assert.match(workspace,/rotateCrop\(g\.startRotation,g\.angle,angle\(positions\[0\],positions\[1\]\)\)/);
+  assert.doesNotMatch(workspace,/rotateCrop\(/);
+  assert.match(workspace,/pinchCrop\(g\.start,g\.distance,distance\(positions\[0\],positions\[1\]\)\)/);
+  assert.match(dock,/slider\('Girar izquierda \/ derecha','cropRotation'/);
   assert.match(workspace,/positions\.length>1/);
   assert.match(workspace,/cropRotation:rotation/);
   assert.match(dock,/slider\('Girar izquierda \/ derecha','cropRotation',-180,180,'°'\)/);
