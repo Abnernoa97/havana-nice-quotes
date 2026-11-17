@@ -16,8 +16,9 @@ test('Plantilla real y cinco estilos mantienen ambos modos editor/cliente', () =
   assert.match(editor, /<QuotePublishPanel item=\{item\}/);
   assert.match(publish, /onClick=\{\(\) => edit\('readingMode', 'flip'\)\}/);
   assert.match(publish, /onClick=\{\(\) => edit\('readingMode', 'scroll'\)\}/);
-  assert.match(app, /previewMode === 'flip' \?/);
-  assert.match(app, /<FlipMagazine item=\{item\}/);
+  const review=src('features/quotes/QuoteReviewPage.tsx');
+  assert.match(app, /<QuoteReviewPage item=\{item\}/);
+  assert.match(review, /mode==='flip'\?<FlipMagazine item=\{item\}/);
 });
 
 test('La biblioteca R2 y las fotos subidas alimentan la portada', () => {
