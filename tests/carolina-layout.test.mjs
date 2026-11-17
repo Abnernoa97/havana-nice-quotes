@@ -42,7 +42,7 @@ test('Edición directa, presión larga y gesto de dos dedos mantienen un solo gu
   assert.match(node,/onPointerDown=\{gesture\.onPointerDown\} onPointerMove=\{gesture\.onPointerMove\}/);
   assert.match(node,/onBlur=\{\(\) =>/);
   assert.match(gesture,/Math\.hypot/);
-  assert.match(gesture,/page\.addEventListener\('pointerdown', down\)/);
+  assert.match(gesture,/page\.addEventListener\('pointerdown',down\)/);
   assert.match(gesture,/pointers\.current\.size/);
   assert.match(gesture,/onCommitTransform\(id, current\.current\)/);
   assert.match(canvas,/onCommitTransform: \(id: string, transform: CarolinaTransform\)/);
@@ -69,7 +69,7 @@ test('Fotografías de portada y collage comparten gestos, posiciones y escala pe
   assert.match(canvas,/onSelectCover=\{\(\)=>selectPhoto\('photo:cover'\)\}/);
   assert.match(canvas,/closest\('\[data-hn-photo-id\], \[data-carolina-text\]'\)/);
   assert.match(layout,/photo:\(\?:cover\|1\[01\]\|\[0-9\]\)/);
-  assert.match(gestures,/page\.addEventListener\('pointerdown', down\)/);
+  assert.match(gestures,/page\.addEventListener\('pointerdown',down\)/);
   for(const id of ['photo:cover','photo:0','photo:1','photo:2','photo:3','photo:4','photo:5']) {
     assert.ok(validCarolinaLayout({transforms:{[id]:{x:-15,y:7,scale:1.8,rotation:18}}}),id);
   }
