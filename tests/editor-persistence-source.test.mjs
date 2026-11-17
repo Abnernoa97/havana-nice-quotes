@@ -427,13 +427,14 @@ test('Diseño tiene banco elegante dentro del panel contextual y fuentes por tex
 });
 
 
-test('Un toque abre cinco switches contextuales para personalizar una sola letra o párrafo', () => {
+test('Un texto tiene cinco opciones pero muestra solo la herramienta elegida', () => {
   const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const dock=src('features/editor/texts/TextStyleDock.tsx');
   const bank=src('features/editor/texts/ElegantFontBank.tsx');
   const node=src('features/templates/CarolinaTextNode.tsx');
   const template=src('features/templates/CarolinaTemplate.tsx');
-  assert.match(canvas, /onTap: id => \{ setSelectedPhotoId\(null\); setTransformingId\(null\); setEditingId\(id\); setLastTextId\(id\)/);
+  assert.match(canvas, /onTap: id => \{ setActiveTextTool\(null\);setSelectedPhotoId\(null\); setTransformingId\(null\); setEditingId\(id\); setLastTextId\(id\)/);
+  assert.match(dock, /\{!tab && <div className="hn-text-dock-switches"/);
   assert.match(canvas, /<TextStyleDock textId=\{lastTextId\}/);
   assert.match(canvas, /<button type="button" onClick=\{addFreeText\}>\+ Texto<\/button>/);
   assert.doesNotMatch(canvas, /<Type size=\{16\}\/> Tipografías/);
