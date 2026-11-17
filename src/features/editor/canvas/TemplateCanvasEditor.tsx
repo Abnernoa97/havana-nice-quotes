@@ -41,6 +41,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const selectedPages=carolinaPageOrder(item.designLayout);
   const [target, setTarget] = useState<PhotoTarget | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  // New text lives only in local React state until the user actually writes it.
+  const [draftText, setDraftText] = useState<{id:string;page:CarolinaPageId}|null>(null);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [photoTool, setPhotoTool] = useState<'crop'|'vignette'|null>(null);
   const [photoAspect, setPhotoAspect] = useState(3/4);
@@ -53,7 +55,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [error, setError] = useState('');
   useEffect(() => {
     setPage(carolinaPageOrder(item.designLayout)[0]); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
-    setLastTextId(null); setSelectedPhotoId(null); setPhotoTool(null); setPhotoLayersOpen(false); setTrashHovered(false);
+    setLastTextId(null); setSelectedPhotoId(null); setPhotoTool(null); setPhotoLayersOpen(false); setTrashHovered(false); setDraftText(null);
   }, [item.id, item.style]);
   useEffect(()=>{
     if(!selectedPages.includes(page))setPage(selectedPages[0]);
@@ -61,25 +63,69 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const updateLayout = (patch: Partial<CarolinaLayout>) => {
     edit('designLayout', { ...item.designLayout, ...patch });
   };
+  // Remove legacy ghost texts AND their unused styles/transforms, rather than
+  // keeping hidden records or implementing a second rendering architecture.
+  useEffect(()=>{
+    const entries=item.designLayout?.extras;
+    if(!entries?.some(entry=>!entry.text.trim()))return;
+    const empty=new Set(entries.filter(entry=>!entry.text.trim()).map(entry=>'extra:'+entry.id));
+    const retain=(values:Record<string,unknown>|undefined)=>
+      Object.fromEntries(Object.entries(values||{}).filter(([id])=>!empty.has(id)));
+    edit('designLayout',{...item.designLayout,
+      extras:entries.filter(entry=>entry.text.trim()),
+      transforms:retain(item.designLayout?.transforms) as CarolinaLayout['transforms'],
+      fonts:retain(item.designLayout?.fonts) as CarolinaLayout['fonts'],
+      textStyles:retain(item.designLayout?.textStyles) as CarolinaLayout['textStyles'],
+    });
+  },[item.id,item.designLayout?.extras]);
   const textInteraction: CarolinaTextInteraction = {
     editingId, transformingId,
     onTap: id => { setSelectedPhotoId(null); setTransformingId(null); setEditingId(id); setLastTextId(id); setError(''); },
     onSelectTransform: id => {
-      // Moving a text does not end its formatting session.
-      if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      // Dragging the selected text from the page immediately hides the keyboard.
+      if (editingId===id && id.startsWith('extra:')) {
+        const node=document.querySelector<HTMLElement>('[data-carolina-text="'+id+'"]');
+        if (!node?.textContent?.trim()) {
+          if(document.activeElement instanceof HTMLElement)document.activeElement.blur();
+          setDraftText(null);clearSelection();return;
+        }
+      }
+      if (editingId && document.activeElement instanceof HTMLElement)document.activeElement.blur();
       setEditingId(null);setSelectedPhotoId(null);setPhotoTool(null);setPhotoLayersOpen(false);
       setTransformingId(id);setLastTextId(isPhotoId(id)?null:id);setTrashHovered(false);setError('');
     },
     onCommitText: (id, raw) => {
       const value = raw.trim().slice(0, 3000);
+      if (draftText && id==='extra:'+draftText.id) {
+        // Only confirmed content enters the template, Scroll and Book 3D.
+        setDraftText(null);
+        if (value) {
+          updateLayout({extras:[...(item.designLayout?.extras||[]),
+            {id:draftText.id,page:draftText.page,text:value}]});
+          setTransformingId(id);
+          setLastTextId(id);
+        } else {
+          clearSelection();
+        }
+        setEditingId(null);
+        return;
+      }
       if (id.startsWith('fixed:')) {
         const key = id.slice(6) as CarolinaFixedKey;
         updateLayout({ fixed: { ...item.designLayout?.fixed, [key]: value.slice(0, 1200) } });
       } else if (id.startsWith('extra:')) {
-        const extras = item.designLayout?.extras || [];
-        updateLayout({ extras: value
-          ? extras.map(e => 'extra:' + e.id === id ? { ...e, text: value } : e)
-          : extras.filter(e => 'extra:' + e.id !== id) });
+        const extras=item.designLayout?.extras||[];
+        if(value){
+          updateLayout({extras:extras.map(e=>'extra:'+e.id===id?{...e,text:value}:e)});
+        }else{
+          const clean=(values:Record<string,unknown>|undefined)=>
+            Object.fromEntries(Object.entries(values||{}).filter(([key])=>key!==id));
+          updateLayout({extras:extras.filter(e=>'extra:'+e.id!==id),
+            fonts:clean(item.designLayout?.fonts) as CarolinaLayout['fonts'],
+            textStyles:clean(item.designLayout?.textStyles) as CarolinaLayout['textStyles'],
+            transforms:clean(item.designLayout?.transforms) as CarolinaLayout['transforms']});
+          setLastTextId(null);setTransformingId(null);
+        }
       } else if (id.startsWith('field:')) {
         const field = id.slice(6).split(':')[0] as CarolinaTextField;
         if (field === 'date') {
@@ -98,6 +144,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         } else edit(field, value);
       }
       setEditingId(null);
+      if(value)setTransformingId(id);
     },
     onDeselectTransform: id => {
       // The same selected text may be tapped again; only touching elsewhere closes its tools.
@@ -105,6 +152,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       if (isPhotoId(id)) {setSelectedPhotoId(null);setPhotoLayersOpen(false);}
     },
     onCommitTransform: (id: string, transform: CarolinaTransform) => {
+      // Ignore a cancelled/blank draft. A transform without text must not survive.
+      if(id.startsWith('extra:') &&
+        !(item.designLayout?.extras||[]).some(entry=>'extra:'+entry.id===id&&entry.text.trim()))return;
       updateLayout({ transforms: { ...item.designLayout?.transforms, [id]: transform } });
       setTrashHovered(false);
     },
@@ -121,16 +171,14 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const addFreeText = () => {
     if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
     clearSelection();
-    const id = crypto.randomUUID();
     if((item.designLayout?.extras?.length||0)>=MAX_DESIGN_ELEMENTS){
       setError('Límite de textos alcanzado en esta plantilla.');return;
     }
-    updateLayout({ extras: [...(item.designLayout?.extras || []), {
-      id, page, text: '',
-    }] });
-    setTransformingId(null);
-    setEditingId('extra:' + id);
-    setLastTextId('extra:' + id);
+    const id=crypto.randomUUID();
+    setDraftText({id,page}); // Do not write an empty element to D1.
+    setEditingId('extra:'+id);
+    setLastTextId('extra:'+id);
+    setError('');
   };
   const isPhotoId = (id:string) => id.startsWith('photo:') || id.startsWith('photo-extra:');
   const overTrash = (x:number,y:number):boolean => {
@@ -191,7 +239,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const removeElement = (id:string) => isPhotoId(id) ? removePhoto(id) : removeText(id);
   const pageIndex=selectedPages.indexOf(page);
   const clearSelection=()=>{
-    setPhotoLayersOpen(false);setTransformingId(null);setEditingId(null);
+    setDraftText(null);setPhotoLayersOpen(false);setTransformingId(null);setEditingId(null);
     setLastTextId(null);setSelectedPhotoId(null);setPhotoTool(null);setTrashHovered(false);
   };
   const addPage=()=>{
@@ -348,6 +396,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       setError(cause instanceof Error?cause.message:'No se pudo guardar la fotografía.');
     }finally{setBusy(false);}
   };
+  const renderItem:Quote=draftText?{...item,designLayout:{...item.designLayout,
+    extras:[...(item.designLayout?.extras||[]),{id:draftText.id,page:draftText.page,text:''}]}}:item;
   return (
     <section className={'hn-canvas'+(lastTextId && target===null?' hn-text-focus':'')}>
       {<div className="hn-canvas-toolbar">
@@ -384,26 +434,26 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       }}>
         {page===0 && <div className="hn-canvas-cover">
           {editorial
-            ? <EditorialCover item={item} interaction={textInteraction}
+            ? <EditorialCover item={renderItem} interaction={textInteraction}
                 onSelectCover={()=>selectPhoto('photo:cover')}
                 onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
-            : <CarolinaCover item={item} interaction={textInteraction}
+            : <CarolinaCover item={renderItem} interaction={textInteraction}
                 onSelectCover={()=>selectPhoto('photo:cover')}
                 onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>}
         </div>}
         {page===1 && (editorial
-          ? <EditorialCollage item={item} interaction={textInteraction}
+          ? <EditorialCollage item={renderItem} interaction={textInteraction}
               onSelectPhoto={index=>selectPhoto('photo:'+index)}
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
-          : <CarolinaCollage item={item} interaction={textInteraction}
+          : <CarolinaCollage item={renderItem} interaction={textInteraction}
               onSelectPhoto={index=>selectPhoto('photo:'+index)}
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>)}
         {page===2 && (editorial
-          ? <EditorialTerms item={item} interaction={textInteraction}
+          ? <EditorialTerms item={renderItem} interaction={textInteraction}
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
-          : <CarolinaTerms item={item} interaction={textInteraction}
+          : <CarolinaTerms item={renderItem} interaction={textInteraction}
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>)}
-        {isBlankPage(page) && <CarolinaBlankPage item={item} page={page}
+        {isBlankPage(page) && <CarolinaBlankPage item={renderItem} page={page}
           interaction={textInteraction} onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>}
         {transformingId && (
           <button type="button" data-hn-text-trash
