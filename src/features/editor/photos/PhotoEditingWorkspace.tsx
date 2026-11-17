@@ -3,14 +3,14 @@ import type { CSSProperties, ReactNode, KeyboardEvent as ReactKeyboardEvent, Poi
 import { Check } from 'lucide-react';
 import type { CarolinaPhotoStyle } from '../../templates/carolina-layout';
 import { CAROLINA_PHOTO_DEFAULTS as D } from '../../templates/carolina-layout';
-import { panCrop, pinchCrop, handleCropZoom, rotateCrop } from '../../templates/photo-crop';
+import { panCrop, pinchCrop, handleCropZoom } from '../../templates/photo-crop';
 import type { CropValues } from '../../templates/photo-crop';
 import CarolinaPhotoNode from '../../templates/CarolinaPhotoNode';
 import PhotoStyleDock from './PhotoStyleDock';
 
 type Tool = 'crop' | 'vignette' | null;
 type Point = { x:number; y:number };
-type Gesture = {start:CropValues; startRotation:number; angle:number; x:number; y:number; distance:number; corner?:string};
+type Gesture = {start:CropValues; x:number; y:number; distance:number; corner?:string};
 type Props = {
   photoId:string;url:string;pageName:string;aspect:number;style?:CarolinaPhotoStyle;activeTool:Tool;
   isPageBackground?:boolean;layersPanel?:ReactNode;
@@ -19,7 +19,6 @@ type Props = {
 };
 const center=(pts:Point[])=>({x:pts.reduce((n,p)=>n+p.x,0)/pts.length,y:pts.reduce((n,p)=>n+p.y,0)/pts.length});
 const distance=(a:Point,b:Point)=>Math.hypot(a.x-b.x,a.y-b.y);
-const angle=(a:Point,b:Point)=>Math.atan2(b.y-a.y,b.x-a.x);
 
 /** Lightroom-style crop: drag the underlying image, pinch to zoom and pull a corner to zoom.
  * The existing collage frame never moves or resizes; all changes persist as crop properties. */
@@ -51,8 +50,7 @@ export default function PhotoEditingWorkspace({
     const current=[...points.current.values()];
     if(!current.length){gesture.current=null;return;}
     const mid=center(current);
-    gesture.current={start:crop(),startRotation:styleRef.current?.cropRotation??D.cropRotation,
-      angle:current.length>1?angle(current[0],current[1]):0,x:mid.x,y:mid.y,
+    gesture.current={start:crop(),x:mid.x,y:mid.y,
       distance:current.length>1?distance(current[0],current[1]):0,corner};
   };
   const cropPoint=(rect:DOMRect,x:number,y:number)=>{
@@ -83,12 +81,12 @@ export default function PhotoEditingWorkspace({
     if(positions.length>1) next=pinchCrop(g.start,g.distance,distance(positions[0],positions[1]));
     else if(g.corner) next=handleCropZoom(g.start,g.corner,mid.x-g.x,mid.y-g.y,rect.width,rect.height);
     else next=panCrop(g.start,mid.x-g.x,mid.y-g.y,rect.width,rect.height);
-    const rotation=positions.length>1?rotateCrop(g.startRotation,g.angle,angle(positions[0],positions[1])):g.startRotation;
+    // A pinch alters only zoom, never rotation. Rotation has its own dedicated
+    // slider/90-degree controls, so a tiny thumb twist cannot tilt the photo.
     if(next.cropX!==styleRef.current?.cropX||next.cropY!==styleRef.current?.cropY||
-      next.cropZoom!==styleRef.current?.cropZoom||rotation!==(styleRef.current?.cropRotation??D.cropRotation)){
-      const patch={...next,cropRotation:rotation};
-      styleRef.current={...styleRef.current,...patch};
-      onStyleChange(patch);
+      next.cropZoom!==styleRef.current?.cropZoom){
+      styleRef.current={...styleRef.current,...next};
+      onStyleChange(next);
     }
   };
   const finish=(event:ReactPointerEvent<HTMLDivElement>)=>{
@@ -122,7 +120,7 @@ export default function PhotoEditingWorkspace({
     <div className="hn-photo-workspace-stage">
       <div className={'hn-photo-workspace-frame'+(activeTool?' editing-effect':'')}
         style={frameStyle} role={activeTool?'group':'img'} tabIndex={activeTool?0:undefined}
-        aria-label={activeTool==='crop'?'Mueve con un dedo; pellizca y gira con dos dedos, o arrastra una esquina':
+        aria-label={activeTool==='crop'?'Mueve con un dedo; pellizca para ampliar, o usa el control de giro':
           activeTool==='vignette'?'Desliza para mover la viñeta':isVideo?'Vista previa de video':'Vista previa de fotografía'}
         onPointerDown={press} onPointerMove={drag} onPointerUp={finish} onPointerCancel={finish}
         onKeyDown={keys} onContextMenu={event=>event.preventDefault()}>
