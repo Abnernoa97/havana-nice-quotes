@@ -6,7 +6,8 @@ import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
 import { CarolinaCover, CarolinaCollage, CarolinaTerms, CarolinaBlankPage } from '../templates/CarolinaTemplate';
 import { EditorialCover, EditorialCollage, EditorialTerms } from '../templates/EditorialTemplate';
 import { templateFamily } from '../templates/template-registry';
-import { carolinaPageOrder } from '../templates/carolina-layout';
+import { carolinaPageOrder, pageKind } from '../templates/carolina-layout';
+import QuoteChatPanel from '../quotes/QuoteChatPanel';
 import './flip-magazine.css';
 
 function MagazineLeaf({ children, className = '' }: { children: ReactNode; className?: string }) {
@@ -159,6 +160,9 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
           <ArrowRight size={19} />
         </button>
       </div>
+      {pageKind(item.designLayout,selectedPages[page])==='chat'&&
+        <QuoteChatPanel key={selectedPages[page]} quoteId={item.id}
+          pageId={selectedPages[page]} compact isTemplate={item.isTemplate}/>}
       {!clientView&&<p className="hn-magazine-disclaimer">Design preview only · Delivery and acceptance are not active.</p>}
 
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
@@ -168,7 +172,7 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
             ? selectedPage===0?<CarolinaCover item={item}/>:
               selectedPage===1?<CarolinaCollage item={item}/>:
               selectedPage===2?<CarolinaTerms item={item}/>:
-              <CarolinaBlankPage item={item} page={selectedPage}/>
+              <CarolinaBlankPage item={item} page={selectedPage} staticChat/>
             : selectedPage===0?<EditorialCover item={item}/>:
               selectedPage===1?<EditorialCollage item={item}/>:
               selectedPage===2?<EditorialTerms item={item}/>:
