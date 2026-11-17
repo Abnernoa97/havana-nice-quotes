@@ -114,3 +114,15 @@
 .hn-canvas.hn-text-focus .hn-carolina-page{touch-action:pan-y}
 .hn-canvas.hn-text-focus .hn-carolina-text-node.transforming{touch-action:none}
 .hn-canvas.hn-text-focus .hn-canvas-trash{width:42px;height:42px;min-width:42px}
+
+/* Empty draft is a caret-only, ephemeral editing target, not a saved frame. */
+.hn-canvas .hn-carolina-added-text:has(.hn-carolina-text-node.empty){
+ background:transparent;box-shadow:none;border:0;outline:0;padding:0;
+}
+.hn-canvas .hn-carolina-added-text .hn-carolina-text-node.empty{
+ min-width:1ch;min-height:1em;background:transparent;box-shadow:none;border:0;outline:0;
+}
+/* An armed item (photo, video or text) can be dragged anywhere on its page.
+   Preserve the finger stream for panning/pinching instead of native scrolling. */
+.hn-canvas .hn-carolina-page.hn-layout-grid,
+.hn-canvas.hn-text-focus .hn-carolina-page{touch-action:none}
