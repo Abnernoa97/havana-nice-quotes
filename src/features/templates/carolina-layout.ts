@@ -171,7 +171,7 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
       const p=photo as Record<string,unknown>;
       if (Object.keys(p).sort().join(',')!=='id,page,url' ||
         typeof p.id!=='string' || !/^[a-f0-9-]{36}$/.test(p.id) ||
-        seen.has(p.id) || !isDesignPage(p.page) || !visiblePages.includes(p.page as number) ||
+        seen.has(p.id) || !isDesignPage(p.page) || (p.page as number)>=3 && !visiblePages.includes(p.page as number) ||
         typeof p.url!=='string' || p.url!=='' &&
         !/^\/api\/media\/[a-f0-9-]{36}$/.test(p.url)) return false;
       seen.add(p.id);
@@ -212,7 +212,7 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
       const e = raw as Record<string, unknown>;
       if (Object.keys(e).sort().join(',') !== 'id,page,text' ||
         typeof e.id !== 'string' || !/^[a-f0-9-]{36}$/.test(e.id) || ids.has(e.id) ||
-        !isDesignPage(e.page) || !visiblePages.includes(e.page as number) || typeof e.text !== 'string' ||
+        !isDesignPage(e.page) || (e.page as number)>=3 && !visiblePages.includes(e.page as number) || typeof e.text !== 'string' ||
         e.text.length > 3000) return false;
       ids.add(e.id);
     }

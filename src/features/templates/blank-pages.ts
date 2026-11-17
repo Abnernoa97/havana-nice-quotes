@@ -1,5 +1,5 @@
-import type { CarolinaLayout, CarolinaPageId } from './carolina-layout';
-import { carolinaPageOrder, isBlankPage, MAX_DESIGN_ELEMENTS, MAX_DESIGN_PAGE_ID, MAX_DESIGN_PAGES } from './carolina-layout';
+import type { CarolinaLayout, CarolinaPageId } from './carolina-layout.ts';
+import { carolinaPageOrder, isBlankPage, MAX_DESIGN_ELEMENTS, MAX_DESIGN_PAGE_ID, MAX_DESIGN_PAGES } from './carolina-layout.ts';
 
 /** A page is a stable numeric ID, never a slide index or a cloned React tree.
  * All editing, Scroll and the 3D magazine consume this same order. */
