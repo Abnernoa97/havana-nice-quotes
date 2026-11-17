@@ -132,9 +132,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       if(value)setTransformingId(id);
     },
     onDeselectTransform: id => {
-      // The same selected text may be tapped again; only touching elsewhere closes its tools.
-      setTransformingId(null);setTrashHovered(false);
-      if (isPhotoId(id)) {setSelectedPhotoId(null);setPhotoLayersOpen(false);}
+      // A confirming tap closes ALL tools for this element, not just its move state.
+      if(isPhotoId(id))setPhotoLayersOpen(false);
+      clearSelection();
     },
     onCommitTransform: (id: string, transform: CarolinaTransform) => {
       // Ignore a cancelled/blank draft. A transform without text must not survive.
