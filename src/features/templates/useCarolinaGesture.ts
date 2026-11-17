@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, RefObject } from 'react';
 import type { CarolinaTransform } from './carolina-layout';
 import { ZERO_TRANSFORM, clampTransform } from './carolina-layout';
-import { classifyTwoFingerAction, shortestTurnDegrees, snapToOrigin } from './gesture-intent';
+import { classifyTwoFingerAction, promoteZoomToRotation, shortestTurnDegrees, snapToOrigin, wrapRotation } from './gesture-intent';
 import type { TwoFingerAction } from './gesture-intent';
 
 export type CarolinaGestureInteraction = {
@@ -45,6 +45,8 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const movedDuringPress = useRef(false);
   const pendingPageEdit = useRef(false);
   const twoFingerAction=useRef<TwoFingerAction>('pending');
+  const previousAngle=useRef<number|null>(null);
+  const cumulativeTurn=useRef(0);
   const pinchUsed=useRef(false);
   const selected = interaction?.transformingId === id;
   const editingHere = interaction?.editingId === id;
@@ -71,8 +73,11 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const cancelHold = () => { if (hold.current) clearTimeout(hold.current); hold.current = null; };
   const resetBaseline = () => {
     if (!pointers.current.size) return;
-    baseline.current={...geometry([...pointers.current.values()]),transform:{...current.current}};
+    const frame=geometry([...pointers.current.values()]);
+    baseline.current={...frame,transform:{...current.current}};
     twoFingerAction.current='pending';
+    previousAngle.current=pointers.current.size>=2?frame.angle:null;
+    cumulativeTurn.current=0;
   };
   const beginEditDrag=(pointerId:number,x:number,y:number)=>{
     pendingPageEdit.current=true;
@@ -132,29 +137,35 @@ export function useCarolinaGesture<T extends HTMLElement>(
     const isTwoFinger=pointers.current.size>=2;
     let mode:'move'|'zoom'|'rotate'='move';
     if(isTwoFinger){
-      // Lock ONE action for the whole two-finger sequence. Small jitters are inert.
+      // Accumulate small angular changes so a full twist works past ±180 degrees.
+      const previous=previousAngle.current;
+      if(previous!==null)cumulativeTurn.current+=shortestTurnDegrees(previous,now.angle);
+      previousAngle.current=now.angle;
+      const turn=cumulativeTurn.current;
       if(twoFingerAction.current==='pending'){
-        const turn=shortestTurnDegrees(b.angle,now.angle);
         const intent=classifyTwoFingerAction(b.distance,now.distance,turn);
         if(intent==='pending')return;
         twoFingerAction.current=intent;
-        // Start at the current fingers' position: no sudden jump when locked.
-        baseline.current={...now,transform:{...current.current}};
         movedDuringPress.current=true;
-        interactionRef.current?.onDrag?.(id,-1,-1);
-        return;
+      }else if(twoFingerAction.current==='zoom' &&
+        promoteZoomToRotation(b.distance,now.distance,turn)){
+        // A zoom must not permanently steal a genuine rotation: switch once,
+        // keeping the current scale and applying the accumulated twist.
+        twoFingerAction.current='rotate';
       }
       mode=twoFingerAction.current;
     }
-    const turn=isTwoFinger?shortestTurnDegrees(b.angle,now.angle):0;
     const translateX=isTwoFinger?0:(now.x-b.x)*100/pageWidth();
     const translateY=isTwoFinger?0:(now.y-b.y)*100/pageWidth();
     const scale=isTwoFinger&&b.distance>24?now.distance/b.distance:1;
     const result=clampTransform({
       x:mode==='move'?snapToOrigin(b.transform.x+translateX):b.transform.x,
       y:mode==='move'?snapToOrigin(b.transform.y+translateY):b.transform.y,
-      scale:mode==='zoom'?b.transform.scale*scale:b.transform.scale,
-      rotation:mode==='rotate'?b.transform.rotation+turn:b.transform.rotation,
+      scale:mode==='zoom'?b.transform.scale*scale:
+        mode==='rotate'?current.current.scale:b.transform.scale,
+      rotation:mode==='rotate'
+        ? wrapRotation(b.transform.rotation+cumulativeTurn.current)
+        : b.transform.rotation,
     });
     if(JSON.stringify(result)===JSON.stringify(current.current))return;
     current.current=result;
@@ -186,6 +197,8 @@ export function useCarolinaGesture<T extends HTMLElement>(
     longPressed.current=false;
     pinchUsed.current=false;
     twoFingerAction.current='pending';
+    previousAngle.current=null;
+    cumulativeTurn.current=0;
   };
 
   // The selected element owns gestures that begin anywhere else on its page.
