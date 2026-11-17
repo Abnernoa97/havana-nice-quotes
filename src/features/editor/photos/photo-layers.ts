@@ -10,7 +10,8 @@ export function listPhotoLayers(item:Quote,page:CarolinaPageId):PhotoLayer[] {
   const layeredPhotos=(item.designLayout?.extraPhotos||[])
     .filter(photo=>photo.page===page && !!photo.url)
     .map((photo,index)=>({
-      id:'photo-extra:'+photo.id,url:photo.url,label:'Foto '+(index+1),
+      id:'photo-extra:'+photo.id,url:photo.url,
+      label:(photo.url.startsWith('/api/videos/')?'Video ':'Foto ')+(index+1),
       behindText:!!item.designLayout?.photoStyles?.['photo-extra:'+photo.id]?.behindText,
     }));
   const backgroundCover=page===0 && (item.cover || item.coverVideo) &&
