@@ -4,6 +4,7 @@ export type TrashKind = 'quote' | 'photo' | 'video' | 'file';
 export type TrashItem = {
   id: string;
   kind: TrashKind;
+  isTemplate?: boolean;
   label: string;
   deletedAt: number;
   url?: string;
