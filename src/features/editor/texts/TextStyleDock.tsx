@@ -49,15 +49,20 @@ export default function TextStyleDock({
         <span className="hn-text-dock-hint">Solo este elemento</span>
         <button type="button" aria-label="Cerrar edición de texto" onClick={onClose}><X size={17}/></button>
       </div>
+      <div className="hn-text-dock-switches" role="group" aria-label="Ajustes del texto">
+        {tools.map(({id,label,Icon})=>
+          <button key={id} type="button" className={tab===id?'active':''}
+            aria-pressed={tab===id} onClick={()=>toggle(id)}>
+            <Icon size={16} strokeWidth={1.8}/>
+            <span>{label}</span>
+          </button>)}
+      </div>
       {tab && (
         <div className="hn-text-dock-expanded">
           {tab==='fonts' && (
             <ElegantFontBank inline targetName="Este texto"
               activeFont={fontId} resetLabel="Usar tipografía original"
-              onChoose={font=>{
-                onFontChange(font);
-                setTab(null);
-              }}
+              onChoose={font=>onFontChange(font)}
               onClose={()=>setTab(null)}/>
           )}
           {tab==='color' && (
@@ -109,14 +114,6 @@ export default function TextStyleDock({
           )}
         </div>
       )}
-      <div className="hn-text-dock-switches" role="group" aria-label="Ajustes del texto">
-        {tools.map(({id,label,Icon})=>
-          <button key={id} type="button" className={tab===id?'active':''}
-            aria-pressed={tab===id} onClick={()=>toggle(id)}>
-            <Icon size={17} strokeWidth={1.8}/>
-            <span>{label}</span>
-          </button>)}
-      </div>
     </aside>
   );
 }
