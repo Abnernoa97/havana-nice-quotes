@@ -70,8 +70,8 @@ export default function HomeScreen({
             icon: Clock3,
           },
           {
-            num: quotes.filter(q => q.status === 'Lista para enviar').length,
-            name: 'Listas para enviar',
+            num: quotes.filter(q => q.status === 'Listo para enviar').length,
+            name: 'Listo para enviar',
             icon: Clock3,
           },
         ].map((s, i) => (
