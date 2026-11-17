@@ -167,3 +167,15 @@
  padding:7px 9px;border-radius:8px;border:1px solid #dce6db;background:#f5f8f3;
  font-size:11px;font-weight:700;color:#395a43}
 .hn-own-template .hn-own-template-use{background:#244a37;color:#fff;border-color:#244a37}
+
+/* Long-press template deletion uses the existing, recoverable quotation trash. */
+.hn-own-template{touch-action:pan-y;user-select:none;-webkit-user-select:none;position:relative}
+.hn-own-template:focus-visible{outline:2px solid #ad9364;outline-offset:2px}
+.hn-own-template.is-armed{border-color:#d9b8b8;background:#fffafa}
+.hn-own-template .hn-own-template-delete{
+  width:45px;height:45px;min-height:45px;border-radius:50%;padding:0;
+  display:inline-grid;place-items:center;flex:0 0 auto;
+  color:#b52d36;background:#fff5f5;border:2px solid #cc4349;
+  box-shadow:0 3px 14px #a5343420;cursor:pointer
+}
+.hn-own-template .hn-own-template-delete:active{background:#b52d36;color:white}
