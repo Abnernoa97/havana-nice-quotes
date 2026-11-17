@@ -8,6 +8,8 @@ export type CarolinaGestureInteraction = {
   onSelectTransform: (id: string) => void;
   onCommitTransform: (id: string, value: CarolinaTransform) => void;
   onDrag?: (id: string, x: number, y: number) => void;
+  /** A second short tap on the selected layer finishes editing without moving it. */
+  onDeselectTransform?: (id: string) => void;
   /** Return true when the gesture ended on a destructive drop zone. */
   onDrop?: (id: string, x: number, y: number) => boolean;
 };
@@ -36,6 +38,8 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const [live, setLive] = useState<CarolinaTransform>(saved || ZERO_TRANSFORM);
   const longPressed = useRef(false);
   const swallowClick = useRef(false);
+  const selectedAtPress = useRef(false);
+  const movedDuringPress = useRef(false);
   const selected = interaction?.transformingId === id;
   const interactionRef = useRef(interaction);
   interactionRef.current = interaction;
@@ -65,6 +69,10 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const pageWidth = () => node.current?.closest('.hn-carolina-page')?.getBoundingClientRect().width || 1;
 
   const begin = (pointerId: number, x: number, y: number) => {
+    if (!pointers.current.size) {
+      selectedAtPress.current = interactionRef.current?.transformingId === id;
+      movedDuringPress.current = false;
+    }
     if (!longPressed.current) swallowClick.current = false;
     pointers.current.set(pointerId, { x, y });
     // A layer chosen explicitly from the layer list is ready to drag immediately.
@@ -101,6 +109,9 @@ export function useCarolinaGesture<T extends HTMLElement>(
     const now = geometry([...pointers.current.values()]);
     const turn = b.distance && now.distance
       ? ((now.angle - b.angle) * 180 / Math.PI + 540) % 360 - 180 : 0;
+    if (Math.hypot(now.x - b.x, now.y - b.y) > 5 ||
+      Math.abs(turn) > 2 || (b.distance && now.distance && Math.abs(now.distance - b.distance) > 5))
+      movedDuringPress.current = true;
     const result = clampTransform({
       x: b.transform.x + (now.x - b.x) * 100 / pageWidth(),
       y: b.transform.y + (now.y - b.y) * 100 / pageWidth(),
@@ -121,8 +132,12 @@ export function useCarolinaGesture<T extends HTMLElement>(
     if (longPressed.current) {
       const dropped=x!==undefined && y!==undefined &&
         interactionRef.current?.onDrop?.(id,x,y) === true;
-      if (!dropped && JSON.stringify(current.current) !== JSON.stringify(saved || ZERO_TRANSFORM)) {
+      const changed = JSON.stringify(current.current) !== JSON.stringify(saved || ZERO_TRANSFORM);
+      if (!dropped && changed) {
         interactionRef.current?.onCommitTransform(id, current.current);
+      } else if (!dropped && selectedAtPress.current && !movedDuringPress.current) {
+        // This is a confirming tap, not a request to reopen the media/text editor.
+        interactionRef.current?.onDeselectTransform?.(id);
       }
       swallowClick.current = true;
     }
