@@ -29,7 +29,6 @@ export function createQuoteDraft(id: string): Quote {
   return {
     id,
     name: '',
-    quoteTitle: undefined,
     client: '',
     email: '',
     location: '',
