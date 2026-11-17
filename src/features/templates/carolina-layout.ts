@@ -79,6 +79,20 @@ export type CarolinaLayout = {
   textStyles?: Record<string, CarolinaTextStyle>;
   photoStyles?: Record<string, CarolinaPhotoStyle>;
 };
+/** Strip never-confirmed/blank added texts and their orphan geometry/formatting.
+ * Older saved layouts are cleaned in place on opening the designer. */
+export function cleanEmptyExtraTexts(layout:CarolinaLayout|undefined):CarolinaLayout|undefined {
+  if(!layout?.extras?.some(entry=>!entry.text.trim()))return layout;
+  const empty=new Set(layout.extras.filter(entry=>!entry.text.trim()).map(entry=>'extra:'+entry.id));
+  const prune=<T,>(values:Record<string,T>|undefined):Record<string,T>|undefined=>
+    values===undefined?undefined:Object.fromEntries(
+      Object.entries(values).filter(([id])=>!empty.has(id))) as Record<string,T>;
+  return {...layout,extras:layout.extras.filter(entry=>entry.text.trim()),
+    ...(layout.transforms&&{transforms:prune(layout.transforms)}),
+    ...(layout.fonts&&{fonts:prune(layout.fonts)}),
+    ...(layout.textStyles&&{textStyles:prune(layout.textStyles)})};
+}
+
 export const ZERO_TRANSFORM: CarolinaTransform = { x: 0, y: 0, scale: 1, rotation: 0 };
 
 export function fixedText(layout: CarolinaLayout | undefined, key: CarolinaFixedKey): string {
