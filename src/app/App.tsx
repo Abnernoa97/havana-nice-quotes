@@ -198,7 +198,7 @@ function App() {
     }
     setSaveDialogOpen(true);
   };
-  const saveNamedQuote = async (title:string,status:Extract<QuoteStatus,'Borrador'|'Lista para enviar'>) => {
+  const saveNamedQuote = async (title:string,status:Extract<QuoteStatus,'Borrador'|'Listo para enviar'>) => {
     if(!item||item.isTemplate||saveBusy)return;
     const cleanTitle=title.trim();
     if(!cleanTitle||cleanTitle.length>150)return;
@@ -217,7 +217,7 @@ function App() {
         setSaveDialogOpen(false);
         setToast(status==='Borrador'
           ? 'Cotización guardada en Borrador.'
-          : 'Cotización guardada en Listas para enviar. Aún no se envió al cliente.');
+          : 'Cotización guardada en Listo para enviar. Aún no se envió al cliente.');
       }else{
         setToast('No se pudo completar la sincronización. Conservamos los cambios pendientes.');
       }
