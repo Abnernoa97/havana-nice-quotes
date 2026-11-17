@@ -192,7 +192,7 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
 .hn-carolina-photo-index,.hn-carolina-empty-photo{position:relative;z-index:2}
 .hn-carolina-photo-overlay{display:contents}
 .hn-carolina-term-group{position:relative;z-index:2}
-.hn-carolina-extra-layer{z-index:3}
+.hn-carolina-extra-layer{z-index:16}
 
 /* Crop aspect is confined to the image; page and collage frames never reflow. */
 .hn-carolina-photo,.hn-carolina-cover-photo,.hn-carolina-floating-photo{container-type:size}
@@ -212,4 +212,19 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
  * Everything here is user-added: no template masthead or hidden placeholders. */
 .hn-blank-page{background:#fff;color:#243d31;isolation:isolate}
 .hn-blank-page .hn-carolina-photo-overlay{z-index:1}
-.hn-blank-page .hn-carolina-extra-layer{z-index:3}
+.hn-blank-page .hn-carolina-extra-layer{z-index:16}
+/* Backgrounds occupy the full sheet from the first selection, never a small floating square. */
+.hn-carolina-photo-overlay .hn-carolina-floating-photo.hn-page-background{
+  inset:0;top:0;left:0;width:100%;height:100%;border:0;border-radius:0;
+  background-color:transparent;
+}
+.hn-canvas .hn-carolina-photo-overlay .hn-carolina-floating-photo.hn-page-background.hn-carolina-editable-photo{
+  border:0;outline:0;
+}
+.hn-canvas .hn-carolina-photo-overlay .hn-carolina-floating-photo.hn-page-background.hn-photo-transforming{
+  outline:2px dashed #b69561;
+}
+/* Even during a media transform, user-added letters remain visually above background/video. */
+.hn-blank-page .hn-carolina-photo-overlay .hn-page-background{z-index:0!important}
+.hn-blank-page .hn-carolina-photo-overlay .hn-page-background.hn-photo-transforming{z-index:12!important}
+.hn-blank-page .hn-carolina-extra-layer{position:absolute;z-index:16;pointer-events:none}
