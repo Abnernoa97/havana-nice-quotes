@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { filterQuotes, statusClass, createQuoteDraft, editSampleQuote, safeQuotePrice, safeQuoteDeposit, normalizePriceInput, findClientActivity } from '../src/features/quotes/model.ts';
+import { filterQuotes, statusClass, quoteDisplayName, quoteDisplayStatus, QUOTE_FILTERS, createQuoteDraft, editSampleQuote, safeQuotePrice, safeQuoteDeposit, normalizePriceInput, findClientActivity } from '../src/features/quotes/model.ts';
 import { usd, money, quoteCurrency, dDate } from '../src/shared/lib/formatters.ts';
 // Synthetic test records never ship in production or contain stock photography.
 const seed = [
@@ -18,18 +18,29 @@ test('La nube empieza en cero y no importa los datos ficticios del almacenamient
   assert.doesNotMatch(store, /localStorage|hn_quotes_visual_v1|from '\.\/demo-data'/);
 });
 
-test('Búsqueda de cotizaciones por pareja, destino y estado', () => {
-  assert.equal(filterQuotes(seed, 'Todas', '').length, 3);
-  assert.equal(filterQuotes(seed, 'Enviada', '')[0].name, 'Sophie & Daniel');
-  assert.equal(filterQuotes(seed, 'Todas', 'LOS CABOS').length, 1);
-  assert.equal(filterQuotes(seed, 'Todas', 'nueva york').length, 0);
+test('Cotizaciones: cuatro filtros sin respuestas de mensajes',()=>{
+ assert.deepEqual(QUOTE_FILTERS,['Todas','Enviadas','Borrador','Listas para enviar']);
+ assert.equal(filterQuotes(seed,'Todas','').length,3);
+ assert.equal(filterQuotes(seed,'Enviadas','').length,3);
+ assert.equal(filterQuotes(seed,'Todas','LOS CABOS').length,1);
+ assert.equal(filterQuotes(seed,'Todas','nueva york').length,0);
+ const ready={...createQuoteDraft('hn4'),quoteTitle:'Boda de Ella y Él',status:'Lista para enviar'};
+ const draft={...createQuoteDraft('hn5'),name:'A & B',status:'Borrador'};
+ const template={...ready,id:'hn6',isTemplate:true};
+ assert.equal(filterQuotes([...seed,ready,draft,template],'Todas','').length,5);
+ assert.deepEqual(filterQuotes([...seed,ready,draft,template],'Listas para enviar','').map(q=>q.id),['hn4']);
+ assert.deepEqual(filterQuotes([...seed,ready,draft,template],'Borrador','').map(q=>q.id),['hn5']);
+ assert.equal(filterQuotes([ready],'Todas','ella y él').length,1);
+ assert.equal(quoteDisplayName(ready),'Boda de Ella y Él');
+ assert.equal(quoteDisplayStatus('En revisión'),'Enviada');
+ assert.equal(quoteDisplayStatus('Aceptada'),'Enviada');
 });
-
-test('Los cuatro estados conservan sus colores', () => {
-  assert.equal(statusClass('Aceptada'), 'green');
-  assert.equal(statusClass('En revisión'), 'gold');
-  assert.equal(statusClass('Enviada'), 'blue');
-  assert.equal(statusClass('Borrador'), 'gray');
+test('Estados visibles: enviado, listo, borrador; sin borrar el historial de respuestas',()=>{
+ assert.equal(statusClass('Aceptada'),'blue');
+ assert.equal(statusClass('En revisión'),'blue');
+ assert.equal(statusClass('Enviada'),'blue');
+ assert.equal(statusClass('Lista para enviar'),'gold');
+ assert.equal(statusClass('Borrador'),'gray');
 });
 
 test('USD, anticipos y fechas estadounidenses siguen siendo precisos', () => {
