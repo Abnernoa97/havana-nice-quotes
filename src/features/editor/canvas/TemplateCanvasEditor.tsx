@@ -14,7 +14,7 @@ import type { CarolinaTextField } from '../../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../../templates/CarolinaTextNode';
 import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle, CarolinaTransform } from '../../templates/carolina-layout';
-import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts,pageKind } from '../../templates/carolina-layout';
+import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts } from '../../templates/carolina-layout';
 import { pageBackgroundMediaId } from '../../templates/page-background';
 import { insertBlankPage, duplicateBlankPage, removeDesignPage } from '../../templates/blank-pages';
 import type { CarolinaPageId,PageKind } from '../../templates/carolina-layout';
