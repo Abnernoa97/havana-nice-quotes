@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
+import type { CSSProperties, ReactNode, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { Check } from 'lucide-react';
 import type { CarolinaPhotoStyle } from '../../templates/carolina-layout';
 import { CAROLINA_PHOTO_DEFAULTS as D } from '../../templates/carolina-layout';
@@ -13,6 +13,7 @@ type Point = { x:number; y:number };
 type Gesture = {start:CropValues; startRotation:number; angle:number; x:number; y:number; distance:number; corner?:string};
 type Props = {
   photoId:string;url:string;pageName:string;aspect:number;style?:CarolinaPhotoStyle;activeTool:Tool;
+  isPageBackground?:boolean;layersPanel?:ReactNode;
   onStyleChange:(patch:Partial<CarolinaPhotoStyle>)=>void;
   onReplace:()=>void;onToolChange:(tool:Tool)=>void;onClose:()=>void;
 };
@@ -23,8 +24,9 @@ const angle=(a:Point,b:Point)=>Math.atan2(b.y-a.y,b.x-a.x);
 /** Lightroom-style crop: drag the underlying image, pinch to zoom and pull a corner to zoom.
  * The existing collage frame never moves or resizes; all changes persist as crop properties. */
 export default function PhotoEditingWorkspace({
-  photoId,url,pageName,aspect,style,activeTool,onStyleChange,onReplace,onToolChange,onClose,
+  photoId,url,pageName,aspect,style,activeTool,isPageBackground=false,layersPanel,onStyleChange,onReplace,onToolChange,onClose,
 }:Props){
+  const isVideo=url.startsWith('/api/videos/');
   const points=useRef(new Map<number,Point>());
   const gesture=useRef<Gesture|null>(null);
   const styleRef=useRef(style);
@@ -109,18 +111,19 @@ export default function PhotoEditingWorkspace({
   };
   const frameStyle={'--photo-aspect':String(aspect)} as CSSProperties;
   return <section className="hn-photo-workspace" role="dialog" aria-modal="true"
-    aria-label="Editor de fotografía">
+    aria-label={isVideo?'Editor de video':'Editor de fotografía'}>
     <header className="hn-photo-workspace-header">
-      <div className="hn-photo-workspace-heading"><strong>Editar foto</strong>
-        <span>{pageName} · Solo esta imagen</span></div>
+      <div className="hn-photo-workspace-heading"><strong>{isVideo?'Editar video':'Editar foto'}</strong>
+        <span>{pageName} · {isPageBackground?'Fondo de página':isVideo?'Solo este video':'Solo esta imagen'}</span></div>
       <button type="button" className="hn-photo-workspace-close" onClick={onClose}
-        aria-label="Finalizar edición de fotografía"><Check size={16}/> Listo</button>
+        aria-label="Finalizar edición"><Check size={16}/> Listo</button>
     </header>
+    {layersPanel}
     <div className="hn-photo-workspace-stage">
       <div className={'hn-photo-workspace-frame'+(activeTool?' editing-effect':'')}
         style={frameStyle} role={activeTool?'group':'img'} tabIndex={activeTool?0:undefined}
         aria-label={activeTool==='crop'?'Mueve con un dedo; pellizca y gira con dos dedos, o arrastra una esquina':
-          activeTool==='vignette'?'Desliza para mover la viñeta':'Vista previa de fotografía'}
+          activeTool==='vignette'?'Desliza para mover la viñeta':isVideo?'Vista previa de video':'Vista previa de fotografía'}
         onPointerDown={press} onPointerMove={drag} onPointerUp={finish} onPointerCancel={finish}
         onKeyDown={keys} onContextMenu={event=>event.preventDefault()}>
         <CarolinaPhotoNode id={photoId} url={url} photoStyle={style} cover={photoId==='photo:cover'}/>
@@ -131,7 +134,8 @@ export default function PhotoEditingWorkspace({
         </div>}
       </div>
     </div>
-    <PhotoStyleDock photoId={photoId} style={style} onStyleChange={onStyleChange}
+    <PhotoStyleDock photoId={photoId} style={style} isVideo={isVideo}
+      isPageBackground={isPageBackground} onStyleChange={onStyleChange}
       onReplace={onReplace} onToolChange={onToolChange}/>
   </section>;
 }
