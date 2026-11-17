@@ -1,6 +1,8 @@
 import { validCarolinaLayout } from '../src/features/templates/carolina-layout.ts';
 import { isTemplateStyle } from '../src/features/templates/template-registry.ts';
 import { handleVideoApi, videoPrefix, videoPosterKey } from './videos.ts';
+import {syncCalendarQuote,reconcileCalendarQuotes} from './calendar-bridge.ts';
+import type {CalendarDatabase,CalendarQuote} from './calendar-bridge.ts';
 /**
  * HAVANA NICE Quotes Studio · Cloudflare Worker
  * Private D1 quotes + media index; private R2 objects in quotes-studio/.
@@ -34,6 +36,7 @@ interface R2Binding {
 }
 interface Env {
   DB: D1Binding;
+  CALENDAR_DB?: CalendarDatabase;
   MEDIA: R2Binding;
   ASSETS: { fetch(request: Request): Promise<Response> };
 }
@@ -144,7 +147,8 @@ function mediaPublic(row: MediaRow) {
     createdAt: row.created_at, url: '/api/media/' + row.id,
     thumbnailUrl: '/api/media/' + row.id + '/thumbnail' };
 }
-async function api(request: Request, env: Env): Promise<Response> {
+async function api(request: Request, env: Env,
+ ctx?:{waitUntil(work:Promise<unknown>):void}): Promise<Response> {
   const url = new URL(request.url);
   const path = url.pathname;
   const method = request.method.toUpperCase();
@@ -203,6 +207,15 @@ async function api(request: Request, env: Env): Promise<Response> {
   if (path === '/api/quotes' && method === 'GET') {
     const rows = await env.DB.prepare('SELECT id, payload, revision FROM quotes WHERE deleted_at IS NULL ORDER BY updated_at DESC, id DESC')
       .all<QuoteRow>();
+    // No new cron, queue, HTTP endpoint or browser secret: authorized reads trigger
+    // bounded, idempotent reconciliation of all Quotes after any outage.
+    if(ctx?.waitUntil && env.CALENDAR_DB){
+      ctx.waitUntil((async()=>{
+        const records=await env.DB.prepare('SELECT id,payload,revision,deleted_at FROM quotes ORDER BY updated_at DESC')
+          .all<QuoteRow>();
+        await reconcileCalendarQuotes(env.CALENDAR_DB,records.results);
+      })().catch(error=>console.warn('Calendar bridge reconciliation pending',String(error))));
+    }
     return json({ quotes: rows.results.map(row => ({ quote: JSON.parse(row.payload), revision: row.revision })) });
   }
   if (path.startsWith('/api/quotes/') && method === 'PUT') {
@@ -223,7 +236,13 @@ async function api(request: Request, env: Env): Promise<Response> {
         'UPDATE quotes SET payload = ?, revision = revision + 1, updated_at = unixepoch() WHERE id = ? AND revision = ? AND deleted_at IS NULL'
       ).bind(payload, id, expected).run();
     if (result.meta.changes) {
-      return json({ quote, revision: expected + 1 });
+      // Save Quotes first. Calendar failure never corrupts a quote; the next
+      // authenticated read retries the bridge using the D1 source revision.
+      let calendarSync='pending';
+      try{
+        calendarSync=await syncCalendarQuote(env.CALENDAR_DB,quote as CalendarQuote,expected+1);
+      }catch(error){console.warn('Calendar bridge deferred',id,String(error))}
+      return json({ quote, revision: expected + 1, calendarSync });
     }
     const current = await env.DB.prepare('SELECT id, payload, revision FROM quotes WHERE id = ?')
       .bind(id).first<QuoteRow>();
@@ -303,7 +322,14 @@ async function api(request: Request, env: Env): Promise<Response> {
     const result = await env.DB.prepare(
       'UPDATE quotes SET deleted_at = unixepoch(), revision = revision + 1, updated_at = unixepoch() WHERE id = ? AND deleted_at IS NULL'
     ).bind(id).run();
-    return result.meta.changes ? json({ trashed: true }) : bad('Cotización no encontrada.', 404);
+    if(!result.meta.changes)return bad('Cotización no encontrada.',404);
+    const stored=await env.DB.prepare('SELECT id,payload,revision,deleted_at FROM quotes WHERE id=?')
+      .bind(id).first<QuoteRow>();
+    if(stored){
+      try{await syncCalendarQuote(env.CALENDAR_DB,JSON.parse(stored.payload) as CalendarQuote,stored.revision,true)}
+      catch(error){console.warn('Calendar bridge trash pending',id,String(error))}
+    }
+    return json({trashed:true});
   }
   if (path === '/api/trash' && method === 'GET') {
     const [quotes, media] = await Promise.all([
@@ -331,7 +357,14 @@ async function api(request: Request, env: Env): Promise<Response> {
       const result = await env.DB.prepare(
         'UPDATE quotes SET deleted_at = NULL, revision = revision + 1, updated_at = unixepoch() WHERE id = ? AND deleted_at IS NOT NULL'
       ).bind(id).run();
-      return result.meta.changes ? json({ restored: true }) : bad('Cotización no encontrada.', 404);
+      if(!result.meta.changes)return bad('Cotización no encontrada.',404);
+      const stored=await env.DB.prepare('SELECT id,payload,revision,deleted_at FROM quotes WHERE id=?')
+        .bind(id).first<QuoteRow>();
+      if(stored){
+        try{await syncCalendarQuote(env.CALENDAR_DB,JSON.parse(stored.payload) as CalendarQuote,stored.revision,false)}
+        catch(error){console.warn('Calendar bridge restore pending',id,String(error))}
+      }
+      return json({restored:true});
     }
     const photo = await env.DB.prepare(
       'SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ? AND deleted_at IS NOT NULL'
@@ -348,6 +381,15 @@ async function api(request: Request, env: Env): Promise<Response> {
     const kind = parts[3], id = parts[4];
     if (kind === 'quote') {
       if (!validId(id)) return bad('Cotización no encontrada.', 404);
+      // Ensure the linked Calendar record is archived before the source is
+      // permanently removed; otherwise a failed bridge would leave an orphan.
+      const discarded=await env.DB.prepare('SELECT id,payload,revision,deleted_at FROM quotes WHERE id=? AND deleted_at IS NOT NULL')
+        .bind(id).first<QuoteRow>();
+      if(!discarded)return bad('Cotización no encontrada.',404);
+      if(env.CALENDAR_DB){
+        try{await syncCalendarQuote(env.CALENDAR_DB,JSON.parse(discarded.payload) as CalendarQuote,discarded.revision,true)}
+        catch{return bad('No se pudo sincronizar la Papelera con Calendario. Intenta de nuevo.',503)}
+      }
       const result = await env.DB.prepare(
         'DELETE FROM quotes WHERE id = ? AND deleted_at IS NOT NULL'
       ).bind(id).run();
@@ -411,9 +453,9 @@ async function api(request: Request, env: Env): Promise<Response> {
   return bad('Ruta no encontrada.', 404);
 }
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx?:{waitUntil(work:Promise<unknown>):void}): Promise<Response> {
     if (!new URL(request.url).pathname.startsWith('/api/')) return env.ASSETS.fetch(request);
-    try { return await api(request, env); }
+    try { return await api(request, env, ctx); }
     catch (error) {
       console.error('Quotes Studio API failure', error);
       return bad('No fue posible completar la operación en la nube.', 500);

@@ -49,3 +49,7 @@ Se eliminó la interfaz de reproductor por tarjeta, el panel de estadísticas du
 - `Quote.isTemplate` y `Quote.templateName` usan la **misma D1 privada**; se excluyen las plantillas de las cotizaciones, estadísticas y conversaciones, no se crea otra base de datos.
 - `src/features/templates/editorial-template.css` desarrolla cuatro composiciones **originales** con tipografía, posición de portada, collage y jerarquía de términos diferentes; nombres de publicaciones como referencias no oficiales. Editor, Scroll y 3D utilizan los mismos elementos editables.
 - **Queda abierto:** crear páginas arbitrarias fuera de las tres páginas actuales, deshacer/rehacer y QA móvil táctil. La creación de plantillas personalizadas reutiliza las hojas actuales, todavía no equivale a un lienzo multipágina ilimitado.
+
+## 17/11/2026 · Puente HAVANA CALENDARIO
+
+Worker Quotes `worker/calendar-bridge.ts` sincroniza solo cotizaciones reales con nombre y fecha válidos usando el segundo binding D1 `CALENDAR_DB` (misma cuenta, sin servicios nuevos). Se preservan IDs y ediciones de Calendario y se reintentan fallos en lecturas autorizadas de Quotes. `tests/calendar-bridge.test.mjs` contiene pruebas sin datos reales. Calendario declara el origen en su app, README y contratos. **El puente no importa borradores sin fecha, ni plantillas.**

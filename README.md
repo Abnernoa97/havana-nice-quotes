@@ -1,3 +1,16 @@
+## Puente privado · HAVANA QUOTES → HAVANA CALENDARIO
+
+**Automático y unidireccional:** al guardar una cotización con **nombre de pareja y fecha válida**, el Worker de Quotes crea/actualiza la ficha en **Cotizaciones** de `havana-nice-events.pages.dev` mediante el binding privado `CALENDAR_DB` a D1 `havana-events-sync`. No hay intervención del navegador, claves compartidas, nueva base ni Worker de integración adicional. Las plantillas (`isTemplate`) y los borradores sin fecha/nombre no se importan todavía; aparecen cuando se completan sus datos.
+
+- Mapeo: pareja `name`, fecha `date`, venue/destino `location`, monto `price`, moneda MX→MXN y USD→USD, datos de servicio (sin conversión ni declaración de pago cobrado).
+- ID estable `hnq:<quote.id>`; mismo registro actualizado por revisión `sourceQuoteRevision`, sin duplicados. Estado inicial `pending`, preservando `confirmed/done` si se confirma después en Calendario.
+- Ediciones manuales de Calendario en venue, nombre, estado, notas o monto no se pisan. El calendario concilia colas offline viejas con las revisiones más nuevas de Quotes.
+- Papelera reversible: la cotización pendiente se archiva si se borra en Quotes y se recupera al restaurar desde Quotes. Eventos ya confirmados se conservan. Los borrados permanentes iniciados desde Calendario se respetan.
+- Quotes guarda primero en su propia D1; un fallo temporal del segundo D1 no pierde la cotización. Las lecturas posteriores autenticadas de Quotes vuelven a intentar sincronizar propuestas pendientes y cambios. Calendario muestra los registros al ejecutar su sincronización normal.
+- Solo se escriben registros con prefijo `hnq:hn-` en la tabla `records` de Calendario. No se tocan eventos de Google, registros manuales, imágenes R2, historial de IA, cookies o colas del teléfono.
+
+**Código:** `worker/calendar-bridge.ts`; binding en `wrangler.jsonc`; pruebas sintéticas `tests/calendar-bridge.test.mjs`. El contrato y la nota visual del otro extremo están en el repositorio `Abnernoa97/havana-nice-events`. No ejecutar D1 manualmente para importar datos ni usar endpoints públicos.
+
 # HAVANA NICE · Quotes Studio
 
 **Estudio privado de cotizaciones con sincronización Cloudflare**. Interfaz interna en español y propuestas editoriales para parejas estadounidenses en inglés.

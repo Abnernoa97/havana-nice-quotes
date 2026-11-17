@@ -66,3 +66,7 @@ Actualmente **solo existe `main`**; la rama temporal anterior y su Preview se el
 ## Continuidad
 
 El estado de una tarea siempre distingue cuatro niveles: **código escrito → build probado → versión publicada → interfaz comprobada**. No llamar `100 %` a una etapa que solo ha compilado.
+
+## Puente a HAVANA CALENDARIO · 17/11/2026
+
+Está autorizado exclusivamente el binding privado `CALENDAR_DB` a `havana-events-sync` desde el Worker de HAVANA QUOTES. No usar fetch público, tokens ni GitHub Actions. La identidad del origen queda en `hnq:<quote.id>` y cada revisión reemplaza esa ficha, nunca un evento ajeno. Conserva promociones a Confirmado/Realizado y ediciones manuales, con retry al recuperar D1. Verificar en el build de Cloudflare que `DB`, `CALENDAR_DB` y `MEDIA` siguen correctamente vinculados y que la otra PWA mantiene su D1/R2 original.

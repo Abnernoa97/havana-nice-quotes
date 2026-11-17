@@ -1,3 +1,10 @@
+### Puente HAVANA CALENDARIO · 17/11/2026
+
+- Integración servidor-servidor desde HAVANA QUOTES al D1 existente `havana-events-sync`, por binding privado `CALENDAR_DB`.
+- Se crean o actualizan cotizaciones con fecha y nombre completos y se reconcilian cambios y papelera sin duplicados; las plantillas no aparecen como cotizaciones.
+- No se interviene en bases de datos, galería R2 o registros previos de Calendario salvo las fichas de origen `havana-quotes` con ID determinista.
+- El aviso correspondiente y conciliación de cola offline están en HAVANA CALENDARIO. Validación en D1 real pendiente hasta la primera propuesta completa; simulaciones automatizadas cubren idempotencia, estados, fechas y edición manual.
+
 # ESTADO VIGENTE · 17/11/2026
 
 El plan maestro principal es [Issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3). Las notas históricas posteriores a este encabezado pueden mencionar fases ya implementadas.

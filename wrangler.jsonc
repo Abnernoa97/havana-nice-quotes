@@ -7,13 +7,20 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": [
+      "/api/*"
+    ]
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "havana-nice-quotes-sync",
       "database_id": "4c8403ed-94f3-4989-9016-4409fabf0f47"
+    },
+    {
+      "binding": "CALENDAR_DB",
+      "database_name": "havana-events-sync",
+      "database_id": "2d17e2bb-d83b-4660-8059-a23d89fcb559"
     }
   ],
   "r2_buckets": [
