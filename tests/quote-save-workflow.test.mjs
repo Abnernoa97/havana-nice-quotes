@@ -125,3 +125,33 @@ test('Mantener pulsada una plantilla revela un bote rojo y permite restauración
  assert.match(worker,/isTemplate:q\.isTemplate===true/);
  assert.match(worker,/kind:'quote'/);
 });
+
+test('Guardar es minimalista: sin párrafos ni teclado automático, y limpia el editor solo tras éxito',()=>{
+ const app=source('src/app/App.tsx');
+ const dialog=source('src/features/editor/QuoteSaveDialog.tsx');
+ const css=source('src/features/editor/quote-save-dialog.css');
+ assert.match(dialog,/<label htmlFor="hn-quote-file-name">Nombre de la cotización<\/label>/);
+ assert.doesNotMatch(dialog,/autoFocus|hn-save-hint|hn-save-note|hn-save-template/);
+ assert.match(dialog,/Guardar como borrador/);
+ assert.match(dialog,/Guardar como listo para enviar/);
+ assert.match(css,/backdrop-filter:blur\(8px\)/);
+ assert.match(app,/if\(ok\)\{/);
+ assert.match(app,/routeTo\(\{active:'empty',section:'editor'/);
+ assert.match(app,/closedAfterSave\.current\.add\(saved\.id\)/);
+ assert.match(app,/closedAfterSave\.current\.delete\(id\)/);
+ assert.match(app,/useAppHistory\('empty'\)/);
+ assert.doesNotMatch(app,/\|\| clientQuotes\[0\] \|\| ownTemplates\[0\]/);
+ assert.match(app,/setWorkingQuote\(current=>current\?\.id===active/);
+});
+test('Google Translate y la selección solo se inhiben en zonas de lectura no editables',()=>{
+ const main=source('src/main.tsx');
+ const canvas=source('src/features/editor/canvas/template-canvas.css');
+ const global=source('src/shared/styles/index.css');
+ const text=source('src/features/templates/CarolinaTextNode.tsx');
+ assert.match(main,/addEventListener\('selectstart'/);
+ assert.match(main,/addEventListener\('contextmenu'/);
+ assert.match(main,/nativeEditable\(event\.target\)/);
+ assert.match(global,/#root input,#root textarea/);
+ assert.match(canvas,/-webkit-touch-callout:none/);
+ assert.match(text,/onContextMenu=\{event => event\.preventDefault\(\)\}/);
+});
