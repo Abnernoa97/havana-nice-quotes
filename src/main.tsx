@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './app/App';
+import PublicQuotePage from './features/client/PublicQuotePage';
 import './shared/styles/index.css';
 import './shared/styles/studio-experience.css';
 import './features/auth/device-access.css';
@@ -20,13 +21,14 @@ appRoot?.addEventListener('contextmenu',event=>{
     event.target instanceof Element && event.target.closest('.hn-carolina-text-node.editing'))
     event.preventDefault();
 },true);
+const publicMatch=window.location.pathname.match(/^\/q\/([a-f0-9]{64})\/?$/);
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {publicMatch?<PublicQuotePage token={publicMatch[1]}/>:<App/>}
   </StrictMode>
 );
 
-if ('serviceWorker' in navigator && window.location.protocol === 'https:') {
+if (!publicMatch && 'serviceWorker' in navigator && window.location.protocol === 'https:') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(error => {
       console.warn('PWA service worker registration was not available', error);
