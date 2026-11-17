@@ -466,7 +466,8 @@ test('Pulsación larga: papelera compartida para fotos y texto, sin borrar R2', 
   assert.match(gesture,/onDrop\?\.\(id,x,y\)/);
   assert.match(gesture,/if \(!dropped && changed\)/);
   assert.match(gesture,/onDeselectTransform\?\.\(id\)/);
-  assert.match(canvas,/if \(transformingId && !event\.isPrimary\) return/);
+  assert.doesNotMatch(canvas,/if \(transformingId && !event\.isPrimary\) return/);
+  assert.match(canvas,/onClickCapture=\{event=>/);
 });
 
 
