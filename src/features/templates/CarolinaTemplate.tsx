@@ -5,7 +5,8 @@ import CarolinaPhotoNode from './CarolinaPhotoNode';
 import CoverMediaNode from './CoverMediaNode';
 import CoverAddPrompt from './CoverAddPrompt';
 import type { CarolinaFixedKey } from './carolina-layout';
-import { fixedText, carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS, isBlankPage } from './carolina-layout';
+import { fixedText, carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS } from './carolina-layout';
+import { pageBackgroundMediaId } from './page-background';
 import { quoteCurrency, usd } from '../../shared/lib/formatters';
 import './carolina-template.css';
 
@@ -75,11 +76,11 @@ export function ExtraPhotos({ item, page, interaction, onSelectPhoto }: PageProp
   const photos=item.designLayout?.extraPhotos?.filter(p=>p.page===page&&!!p.url)||[];
   if (!photos.length) return null;
   return <div className="hn-carolina-photo-overlay">
-    {photos.map((photo,index)=>{
+    {photos.map(photo=>{
       const id='photo-extra:'+photo.id;
       // The first real medium on each free page is always its full-page backdrop.
       // Older saved templates get the same layout without migrating stored data.
-      const pageBackground=isBlankPage(page)&&index===0;
+      const pageBackground=photo.id===pageBackgroundMediaId(item.designLayout,page);
       return <CarolinaPhotoNode key={id} id={id} url={photo.url} extra pageBackground={pageBackground}
         transform={item.designLayout?.transforms?.[id]}
         photoStyle={item.designLayout?.photoStyles?.[id]}
