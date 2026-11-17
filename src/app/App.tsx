@@ -36,7 +36,6 @@ import {
   Share2,
   Trash2,
 } from 'lucide-react';
-
 const pages = [
   { id: 'home', label: 'Inicio', icon: LayoutDashboard },
   { id: 'quotes', label: 'Cotizaciones', icon: FileText },
@@ -84,7 +83,6 @@ function App() {
   const installationGuide = installGuide ? (
     <InstallGuide onClose={goBack} />
   ) : null;
-
   const clientQuotes = quotes.filter(quote => !quote.isTemplate);
   const ownTemplates = quotes.filter(quote => quote.isTemplate);
   const item = (workingQuote?.id===active ? workingQuote : null) || quotes.find(q => q.id === active) || clientQuotes[0] || ownTemplates[0];
@@ -196,7 +194,6 @@ function App() {
       mobileMenu: false,
     });
   };
-
   const save=()=>{
     if(!item || saveBusy)return;
     // One visible Save action, always the same two-choice dialog.
@@ -405,7 +402,6 @@ function App() {
     window.addEventListener('keydown', onEscape);
     return () => window.removeEventListener('keydown', onEscape);
   }, [installGuide, mobileMenu, preview, goBack]);
-
   if (!enabled) return (
     <DeviceGate checking={auth.status === 'checking'} error={auth.error} />
   );
