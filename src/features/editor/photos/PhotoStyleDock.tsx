@@ -10,7 +10,7 @@ type Tool = 'background'|'color'|'crop'|'opacity'|'replace'|'vignette';
 type NumberKey = Exclude<keyof CarolinaPhotoStyle,
   'behindText'|'tint'|'vignetteShape'|'vignetteColor'|'cropAspect'>;
 type Props = {
-  photoId:string; style?:CarolinaPhotoStyle;
+  photoId:string; style?:CarolinaPhotoStyle; isVideo?:boolean; isPageBackground?:boolean;
   onStyleChange:(patch:Partial<CarolinaPhotoStyle>)=>void;
   onReplace:()=>void;
   onToolChange:(value:'crop'|'vignette'|null)=>void;
@@ -93,7 +93,7 @@ function Slider({label,name,value,min,max,unit='%',onChange}:{
 
 /** One contextual dock for one image: never creates a second photo actions bar. */
 export default function PhotoStyleDock({
-  photoId,style,onStyleChange,onReplace,onToolChange,
+  photoId,style,isVideo=false,isPageBackground=false,onStyleChange,onReplace,onToolChange,
 }:Props){
   const [tab,setTab]=useState<Tool|null>(null);
   useEffect(()=>{setTab(null);onToolChange(null);},[photoId]);
@@ -107,16 +107,21 @@ export default function PhotoStyleDock({
   const slider=(label:string,key:Exclude<NumberKey,'tintAmount'>,min:number,max:number,unit='%')=>
     <Slider key={key} label={label} name={key} min={min} max={max} unit={unit}
       value={amount(key)} onChange={onStyleChange}/>;
-  return <aside className="hn-text-dock hn-photo-dock" role="group" aria-label="Editar imagen seleccionada">
+  return <aside className="hn-text-dock hn-photo-dock" role="group" aria-label={isVideo?'Editar video seleccionado':'Editar imagen seleccionada'}>
     {tab && <div className="hn-text-dock-expanded hn-photo-expanded">
       {tab==='background' && <div className="hn-photo-option">
+        {isPageBackground ? <>
+          <strong>Fondo de esta página</strong>
+          <small>{isVideo?'El video':'La fotografía'} cubre la hoja completa y permanece debajo de las letras.</small>
+        </> : <>
         <button type="button" className={style?.behindText?'chosen':''}
           aria-pressed={!!style?.behindText}
           onClick={()=>onStyleChange({behindText:!style?.behindText})}>
           {style?.behindText?<Check size={16}/>:<Layers3 size={16}/>}
           {style?.behindText?'Detrás de las letras':'Colocar detrás de las letras'}
         </button>
-        <small>La fotografía queda bajo los textos de esta hoja.</small>
+        <small>El archivo queda detrás de los demás medios; las letras siempre están arriba.</small>
+        </>}
       </div>}
       {tab==='color' && <div className="hn-photo-controls">
         {slider('Brillo','brightness',0,200)}
@@ -162,7 +167,7 @@ export default function PhotoStyleDock({
         </div>
       </div>}
       {tab==='opacity' && <div className="hn-photo-controls">
-        {slider('Opacidad de la imagen','opacity',0,100)}
+        {slider(isVideo?'Opacidad del video':'Opacidad de la imagen','opacity',0,100)}
         <div className="hn-photo-presets">
           {[0,25,50,75,100].map(value=><button type="button" key={value}
             className={amount('opacity')===value?'chosen':''}
