@@ -87,3 +87,30 @@ test('Las copias de una plantilla de páginas libres son independientes',()=>{
  quote.designLayout.pageOrder.push(5);
  assert.deepEqual(first.layout.pageOrder,[3,4]);
 });
+
+test('Videos privados convertidos son medios válidos de hojas libres',()=>{
+ const video={pageOrder:[3],extraPhotos:[{id:two,page:3,
+  url:'/api/videos/11111111-1111-1111-1111-111111111111'}]};
+ assert.equal(validCarolinaLayout(video),true);
+ assert.equal(validCarolinaLayout({...video,extraPhotos:[{...video.extraPhotos[0],
+  url:'https://example.com/external.mp4'}]}),false);
+ const duplicate=duplicateBlankPage(video,3);
+ assert.deepEqual(duplicate.layout.extraPhotos.map(p=>p.url),
+  [video.extraPhotos[0].url,video.extraPhotos[0].url]);
+});
+test('Selección de archivo es requisito para persistir un nuevo recuadro',()=>{
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const picker=src('features/editor/photos/PhotoSourcePicker.tsx');
+ const node=src('features/templates/CarolinaPhotoNode.tsx');
+ const start=canvas.split('const addPhotoAnywhere=()=>{')[1].split('const addPhotoBlock')[0];
+ const collage=canvas.split('const addPhotoBlock = () => {')[1].split('const open = ')[0];
+ assert.doesNotMatch(start,/updateLayout\(/);
+ assert.doesNotMatch(collage,/setPhotoOrder\(/);
+ assert.match(canvas,/const savedUrl=await onUploadPhoto\(file,target\)/);
+ assert.match(canvas,/onChooseVideo=\{chooseVideo\}/);
+ assert.match(picker,/canPickVideo&&kind==='videos'/);
+ assert.match(node,/<video className="hn-carolina-image-fill hn-carolina-video-fill"/);
+ const sheet=canvas.split('<div className="hn-canvas-sheet"')[1].split('<div className="hn-canvas-pager">')[0];
+ assert.match(sheet,/data-hn-text-trash/);
+ assert.doesNotMatch(sheet,/Eliminar foto · Arrastra aquí/);
+});
