@@ -7,7 +7,7 @@ type Props = {
   item: Quote;
   edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
   cloudPhotos: CloudPhoto[];
-  onUploadPhoto: (file: File, target: PhotoTarget) => Promise<void>;
+  onUploadPhoto: (file: File, target: PhotoTarget) => Promise<string>;
 };
 
 /** Render the chosen template itself, without duplicate toolbars and image grids. */
