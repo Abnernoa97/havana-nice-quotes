@@ -95,10 +95,20 @@ export default function CarolinaPhotoNode({
     <span className={'hn-carolina-crop-viewport'+(ratio!=='frame'?' is-ratio':'')}
       style={{...ratioStyle,opacity:(photoStyle?.opacity ?? D.opacity) / 100}} aria-hidden="true">
       {url && (isVideo
-        ? <video ref={videoRef} className="hn-carolina-image-fill hn-carolina-video-fill"
-            src={url} poster={posterUrl} muted loop playsInline disablePictureInPicture preload="none"
-            style={{...picture,backgroundImage:undefined,
-              objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
+        ? <>
+            {/* A tiny JPEG paints immediately even while the real stream is seeking.
+                PageFlip clones inherit this img and the video poster natively. */}
+            <img className="hn-carolina-image-fill hn-carolina-video-poster"
+              src={posterUrl} alt="" draggable={false}
+              loading={cover||pageBackground?'eager':'lazy'}
+              decoding="async" fetchPriority={cover?'high':'auto'}
+              style={{...picture,backgroundImage:undefined,
+                objectFit:'cover',objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
+            <video ref={videoRef} className="hn-carolina-image-fill hn-carolina-video-fill"
+              src={url} poster={posterUrl} muted loop playsInline disablePictureInPicture preload="none"
+              style={{...picture,backgroundImage:undefined,
+                objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
+          </>
         : <span className="hn-carolina-image-fill" style={picture}/>)}
       {url && tintOpacity>0 && <span className="hn-carolina-image-tint"
         style={{background:photoStyle?.tint || '#244a37',opacity:tintOpacity}}/>}
