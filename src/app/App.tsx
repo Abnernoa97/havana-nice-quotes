@@ -76,9 +76,7 @@ function App() {
   // Reuse this ID when a template-derived quote is retried after a sync failure.
   const templateQuoteSave=useRef<{sourceId:string;quoteId:string}|null>(null);
   const closedAfterSave=useRef(new Set<string>());
-  const [search, setSearch] = useState('');
-  const [newMessage, setNewMessage] = useState('');
-  const [clientMessage, setClientMessage] = useState('');
+  const [search, setSearch] = useState(''); const [newMessage, setNewMessage] = useState(''); const [clientMessage, setClientMessage] = useState('');
   const { standalone, installApplication } = useInstallPrompt(() => routeTo({ installGuide: true }));
   const installationGuide = installGuide ? (
     <InstallGuide onClose={goBack} />
@@ -243,6 +241,7 @@ function App() {
     setToast('Estado de demostración actualizado');
   };
   const sendClient = () => {
+    if(!item)return;
     if (!clientMessage.trim()) {
       setToast('Escribe primero tu solicitud');
       return;
@@ -255,6 +254,7 @@ function App() {
     setToast('Solicitud añadida a la bandeja de esta demo');
   };
   const sendAdmin = () => {
+    if(!item)return;
     if (!newMessage.trim()) {
       setToast('Escribe una respuesta');
       return;
