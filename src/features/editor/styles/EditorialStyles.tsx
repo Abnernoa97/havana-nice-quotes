@@ -1,4 +1,6 @@
-import { Check, ChevronRight, ChevronDown, Plus, Copy, Pencil, Layers3 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import type {PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent} from 'react';
+import { Check, ChevronRight, ChevronDown, Plus, Copy, Pencil, Layers3, Trash2 } from 'lucide-react';
 import type {Quote} from '../../quotes/types';
 import { TEMPLATE_REGISTRY, TEMPLATE_IDS } from '../../templates/template-registry';
 import './editorial-styles.css';
@@ -15,6 +17,7 @@ type Props = {
   onUseExisting: (id:string) => void;
   onUseTemplate: (id:string) => void;
   onEditOwnTemplate: (id:string) => void;
+  onDeleteOwnTemplate: (id:string) => void;
   isEditingTemplate: boolean;
   templateName: string;
   onTemplateNameChange: (name:string)=>void;
@@ -54,8 +57,46 @@ function StyleCard({s, value, onChange, photo}: {s: StyleOption; value: string; 
 }
 /** Two independent collapsible template groups. */
 export default function EditorialStyles({value,onChange,photo,ownTemplates,existingQuotes,
-  onCreateTemplate,onUseExisting,onUseTemplate,onEditOwnTemplate,
+  onCreateTemplate,onUseExisting,onUseTemplate,onEditOwnTemplate,onDeleteOwnTemplate,
   isEditingTemplate,templateName,onTemplateNameChange}: Props) {
+  const [armedTemplateId,setArmedTemplateId]=useState<string|null>(null);
+  const hold=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const start=useRef<{id:string;x:number;y:number}|null>(null);
+  const suppressClick=useRef<string|null>(null);
+  const cancelHold=()=>{
+    if(hold.current!==null)clearTimeout(hold.current);
+    hold.current=null;start.current=null;
+  };
+  useEffect(()=>()=>{if(hold.current!==null)clearTimeout(hold.current);},[]);
+  const beginHold=(id:string,event:ReactPointerEvent<HTMLDivElement>)=>{
+    if(event.target instanceof Element && event.target.closest('.hn-own-template-delete'))return;
+    cancelHold();
+    start.current={id,x:event.clientX,y:event.clientY};
+    hold.current=setTimeout(()=>{
+      hold.current=null;
+      suppressClick.current=id;
+      setArmedTemplateId(id);
+    },530);
+  };
+  const moveHold=(event:ReactPointerEvent<HTMLDivElement>)=>{
+    const p=start.current;
+    if(p&&Math.hypot(event.clientX-p.x,event.clientY-p.y)>11)cancelHold();
+  };
+  const onCardClick=(id:string,event:ReactMouseEvent<HTMLDivElement>)=>{
+    const isDelete=event.target instanceof Element &&
+      !!event.target.closest('.hn-own-template-delete');
+    if(isDelete){suppressClick.current=null;return;}
+    if(suppressClick.current===id){
+      suppressClick.current=null;
+      event.preventDefault();event.stopPropagation();
+      return;
+    }
+    if(armedTemplateId===id){
+      setArmedTemplateId(null);
+      event.preventDefault();event.stopPropagation();
+    }
+  };
+
   return (
     <div className="hn-styles-tab">
       <details className="hn-style-accordion" open>
@@ -92,16 +133,37 @@ export default function EditorialStyles({value,onChange,photo,ownTemplates,exist
           </label>}
           {!!ownTemplates.length && <div className="hn-own-templates">
             <div className="hn-own-templates-heading"><Layers3 size={17}/> Mis plantillas</div>
-            {ownTemplates.map(template=><div className="hn-own-template" key={template.id}>
+            {ownTemplates.map(template=><div
+              className={'hn-own-template'+(armedTemplateId===template.id?' is-armed':'')}
+              key={template.id} role="group" tabIndex={0}
+              aria-label={'Plantilla '+(template.templateName||'sin nombre')+'. Mantén pulsado para mostrar eliminar.'}
+              onPointerDown={event=>beginHold(template.id,event)}
+              onPointerMove={moveHold}
+              onPointerUp={cancelHold} onPointerCancel={cancelHold}
+              onContextMenu={event=>{event.preventDefault();cancelHold();setArmedTemplateId(template.id);}}
+              onClickCapture={event=>onCardClick(template.id,event)}
+              onKeyDown={event=>{
+                if(event.key==='Delete'){event.preventDefault();setArmedTemplateId(template.id);}
+                if(event.key==='Escape')setArmedTemplateId(null);
+              }}>
               <div className="hn-own-template-label">
                 <strong>{template.templateName||'Plantilla sin nombre'}</strong>
                 <small>{TEMPLATE_REGISTRY[template.style||'libre']?.name||'Diseño propio'}</small>
               </div>
-              <button type="button" onClick={()=>onEditOwnTemplate(template.id)}
-                title="Editar plantilla"><Pencil size={16}/> Editar</button>
-              <button type="button" className="hn-own-template-use" onClick={()=>onUseTemplate(template.id)}>
-                <Copy size={16}/> Usar
-              </button>
+              {armedTemplateId===template.id
+                ? <button type="button" className="hn-own-template-delete"
+                    aria-label={'Eliminar plantilla '+(template.templateName||'sin nombre')}
+                    title="Enviar plantilla a Papelera"
+                    onClick={()=>{setArmedTemplateId(null);onDeleteOwnTemplate(template.id);}}>
+                    <Trash2 size={20}/>
+                  </button>
+                : <>
+                  <button type="button" onClick={()=>onEditOwnTemplate(template.id)}
+                    title="Editar plantilla"><Pencil size={16}/> Editar</button>
+                  <button type="button" className="hn-own-template-use" onClick={()=>onUseTemplate(template.id)}>
+                    <Copy size={16}/> Usar
+                  </button>
+                </>}
             </div>)}
           </div>}
         </div>
