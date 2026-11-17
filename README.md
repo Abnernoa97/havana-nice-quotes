@@ -28,6 +28,17 @@
 - **Aún NO disponible:** envío real a clientes, acceso público por propuesta, notificación de lectura, firma, mensajería externa o permisos individuales. La vista cliente sigue siendo previa interna.
 - **No hay borrados automáticos de los antiguos datos locales**; la aplicación nueva simplemente no los utiliza. No borrar información de otros proyectos.
 
+## Flujo vigente de plantillas y cotizaciones · noviembre 2026
+
+- **Mis plantillas:** guardan el diseño reutilizable como registro privado `isTemplate: true`. El botón **Guardar plantilla** sincroniza exclusivamente ese registro; no crea una cotización ni figura en los filtros de Cotizaciones o en Calendario.
+- **Nueva cotización / Usar plantilla / Utilizar cotización existente:** crea una propuesta de trabajo **solo en la memoria del editor**. Ninguna nueva cotización entra a D1 al seleccionar la plantilla ni por auto-guardado durante ese trabajo. Se debe abrir **Guardar**, escribir el título propio del documento (`quoteTitle`) y elegir:
+  - **Guardar como borrador** → estado `Borrador`.
+  - **Guardar y enviar** → estado `Lista para enviar`, **sin comunicación real al cliente**. El envío real llegará en una fase posterior.
+- **Cotizaciones:** filtros *Todas, Enviadas, Borrador, Listas para enviar*. Los estados históricos `En revisión` y `Aceptada` se conservan en los datos para no perder información; ambos aparecen bajo *Enviadas* hasta completar el futuro flujo de Mensajes.
+- El título elegido se usa en el editor y lista de cotizaciones. `name` sigue siendo el nombre de la pareja visible en la propuesta y utilizado por el puente con HAVANA CALENDARIO. No se sobreescribe uno con el otro.
+- **Solo tras guardar explícitamente** una cotización nueva, su ID se añade al store sincronizado y entonces puede importarse al Calendario si tiene nombre de pareja y fecha válida. Los registros ya guardados siguen disfrutando del auto-guardado, control de revisiones y sincronización multi-dispositivo.
+- **Pendiente:** envío real, exportación/archivo compartible, confirmaciones de lectura, gestión de `En revisión`/`Aceptada` dentro de Mensajes, nueva estética de Revista 3D basada en HAVANA v2. No alterar el motor PageFlip durante este cambio.
+
 ## Editor visual Carolina · 16/11/2026
 
 - Tres páginas reales: **Portada, Collage y Propuesta**, compartidas entre diseñador y vista cliente. El motor PageFlip 3D no se modifica.
