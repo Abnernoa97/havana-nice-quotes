@@ -102,8 +102,9 @@ test('Enlaces vencidos o desactivados no exponen ni la cotización ni su imagen'
 });
 test('Los enlaces públicos no pueden abrir el API privada ni registrar dispositivos',()=>{
  const main=read('worker/index.ts'),shared=read('worker/quote-sharing.ts'),entry=read('src/main.tsx');
- assert.ok(main.indexOf('publicSharing(request, env)')<main.indexOf('if (!await authorized(request, env))'));
- assert.ok(main.indexOf('ownerSharing(request, env)')>main.indexOf('if (!await authorized(request, env))'));
+ const gateway=main.split('// The only unauthenticated API')[1];
+ assert.ok(gateway.indexOf('publicSharing(request, env)')<gateway.indexOf('if (!await authorized(request, env))'));
+ assert.ok(gateway.indexOf('ownerSharing(request, env)')>gateway.indexOf('if (!await authorized(request, env))'));
  assert.match(shared,/if\(!mediaReferences\(read\.q\)\.has\(realRef\)\)return noAccess\(\)/);
  assert.match(entry,/<PublicQuotePage token=\{publicMatch\[1\]\}/);
  assert.match(read('index.html'),/meta name="referrer" content="no-referrer"/);
