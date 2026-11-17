@@ -40,7 +40,11 @@ test('Foto y video de portada comparten edición, efectos y reproducción con pa
  assert.match(cover,/url=\{item\.coverVideo\|\|item\.cover\}/);
  assert.match(cover,/photoStyle=\{item\.designLayout\?\.photoStyles\?\.\['photo:cover'\]\}/);
  assert.match(cover,/interaction=\{interaction\} onSelect=\{onSelect\}/);
- assert.match(shared,/src=\{url\} autoPlay muted loop playsInline disablePictureInPicture/);
+ assert.match(shared,/src=\{url\} poster=\{posterSrc\} muted loop playsInline disablePictureInPicture preload="none"/);
+ assert.match(shared,/src=\{posterSrc\} alt="" draggable=\{false\}/);
+ assert.match(shared,/fetchPriority=\{cover\?'high':'auto'\}/);
+ assert.match(shared,/onError=\{recoverMissingPoster\}/);
+ assert.doesNotMatch(shared,/src=\{url\} autoPlay/);
  assert.match(shared,/IntersectionObserver/);
  assert.match(shared,/media\.pause\(\)/);
  assert.match(shared,/photoStyle\?\.opacity/);
