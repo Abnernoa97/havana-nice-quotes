@@ -30,10 +30,11 @@
 
 ## Flujo vigente de plantillas y cotizaciones · noviembre 2026
 
-- **Mis plantillas:** guardan el diseño reutilizable como registro privado `isTemplate: true`. El botón **Guardar plantilla** sincroniza exclusivamente ese registro; no crea una cotización ni figura en los filtros de Cotizaciones o en Calendario.
+- **Mis plantillas:** guardan el diseño reutilizable como registro privado `isTemplate: true`. Sus cambios se sincronizan automáticamente en D1, sin aparecer en Cotizaciones ni en Calendario. Desde la tarjeta de una plantilla, una pulsación larga revela el icono rojo de Papelera; la confirmación envía únicamente esa plantilla a la Papelera recuperable.
 - **Nueva cotización / Usar plantilla / Utilizar cotización existente:** crea una propuesta de trabajo **solo en la memoria del editor**. Ninguna nueva cotización entra a D1 al seleccionar la plantilla ni por auto-guardado durante ese trabajo. Se debe abrir **Guardar**, escribir el título propio del documento (`quoteTitle`) y elegir:
   - **Guardar como borrador** → estado `Borrador`.
-  - **Guardar y enviar** → estado `Listo para enviar`, **sin comunicación real al cliente**. El envío real llegará en una fase posterior.
+  - **Guardar como listo para enviar** → estado `Listo para enviar`, **sin comunicación real al cliente**. El envío real llegará en una fase posterior.
+- **Único botón «Guardar»:** siempre abre un cuadro centrado con fondo desenfocado, nombre del documento y **solo dos acciones**: Borrador o Listo para enviar. Si se está editando una plantilla, se crea una cotización independiente y la plantilla original continúa intacta. Sin tercera opción «Guardar plantilla».
 - **Cotizaciones:** filtros *Todas, Enviadas, Borrador, Listo para enviar*. Los estados históricos `En revisión` y `Aceptada` se conservan en los datos para no perder información; ambos aparecen bajo *Enviadas* hasta completar el futuro flujo de Mensajes.
 - El título elegido se usa en el editor y lista de cotizaciones. `name` sigue siendo el nombre de la pareja visible en la propuesta y utilizado por el puente con HAVANA CALENDARIO. No se sobreescribe uno con el otro.
 - **Solo tras guardar explícitamente** una cotización nueva, su ID se añade al store sincronizado y entonces puede importarse al Calendario si tiene nombre de pareja y fecha válida. Los registros ya guardados siguen disfrutando del auto-guardado, control de revisiones y sincronización multi-dispositivo.
