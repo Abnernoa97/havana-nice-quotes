@@ -17,7 +17,8 @@ export default function PhotoLayersPanel({layers,open,onToggle,onEdit,onMove,onD
     {open && <div id="hn-photo-layers-list" className="hn-canvas-layers-list"
       role="group" aria-label="Recuperar, editar, mover o borrar fotografías superpuestas">
       {layers.map(layer=><div className="hn-canvas-layer" key={layer.id}>
-        <img src={layer.url} alt="" loading="lazy"/>
+        <img src={layer.url.startsWith('/api/videos/')?layer.url+'/poster':layer.url}
+          alt="" loading="lazy"/>
         <span className="hn-canvas-layer-name">{layer.label}{layer.behindText && <small> · Fondo</small>}</span>
         <button type="button" onClick={()=>onEdit(layer.id)} aria-label={'Editar '+layer.label}>Editar</button>
         <button type="button" onClick={()=>onMove(layer.id)} aria-label={'Mover '+layer.label}>
