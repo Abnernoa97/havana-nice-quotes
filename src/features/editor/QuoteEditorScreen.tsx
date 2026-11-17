@@ -16,6 +16,7 @@ type Props = {
   onUseExisting: (id:string) => void;
   onUseTemplate: (id:string) => void;
   onEditOwnTemplate: (id:string) => void;
+  onDeleteOwnTemplate: (id:string) => void;
   tab: string;
   setTab: Dispatch<SetStateAction<string>>;
   styleName: string;
@@ -29,7 +30,7 @@ type Props = {
 /** One editor: details (including investment), template, design and final review. */
 export default function QuoteEditorScreen({
   item, existingQuotes, ownTemplates, onCreateTemplate, onUseExisting,
-  onUseTemplate, onEditOwnTemplate, tab, setTab, styleName, edit, openClientPreview, save,
+  onUseTemplate, onEditOwnTemplate, onDeleteOwnTemplate, tab, setTab, styleName, edit, openClientPreview, save,
   cloudPhotos, onUploadPhoto,
 }: Props) {
   return (
@@ -41,7 +42,7 @@ export default function QuoteEditorScreen({
         </div>
         <div className="editor-actions">
           <button type="button" className="btn primary" onClick={save}>
-            <Save size={16}/> {item.isTemplate ? 'Guardar plantilla' : 'Guardar'}
+            <Save size={16}/> Guardar
           </button>
         </div>
       </div>
@@ -72,6 +73,7 @@ export default function QuoteEditorScreen({
               ownTemplates={ownTemplates} existingQuotes={existingQuotes}
               onCreateTemplate={onCreateTemplate} onUseExisting={onUseExisting}
               onUseTemplate={onUseTemplate} onEditOwnTemplate={onEditOwnTemplate}
+              onDeleteOwnTemplate={onDeleteOwnTemplate}
               isEditingTemplate={Boolean(item.isTemplate)}
               templateName={item.templateName||''}
               onTemplateNameChange={name=>edit('templateName',name)}/>
