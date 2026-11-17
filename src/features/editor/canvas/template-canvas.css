@@ -151,3 +151,23 @@
 .hn-canvas .hn-blank-page .hn-carolina-added-text.hn-centered-extra-text{
   color:#fff;background:transparent;text-shadow:0 2px 8px #000b;
 }
+
+
+/* Page type selector opens immediately beneath + Página without a new screen. */
+.hn-canvas-toolbar .hn-page-kind-wrap{position:relative;flex:0 1 130px;min-width:0}
+.hn-canvas-toolbar .hn-page-kind-wrap>.hn-canvas-add-page{
+ width:100%;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;
+ background:#234b37;color:#fff;border-color:#234b37;
+}
+.hn-page-kind-menu{position:absolute;z-index:150;right:0;top:calc(100% + 7px);
+ display:grid;gap:3px;width:min(80vw,255px);max-width:300px;padding:8px;
+ border:1px solid #d9e3d9;border-radius:15px;background:#fffefa;
+ box-shadow:0 16px 34px #1a35263e}
+.hn-canvas-toolbar .hn-page-kind-menu button{width:100%;min-width:0;min-height:47px;
+ display:flex;align-items:center;gap:10px;padding:9px 11px;text-align:left;
+ border:0;border-radius:9px;background:transparent;color:#244a37;cursor:pointer;
+ font:600 13px/1.25 system-ui,sans-serif}
+.hn-canvas-toolbar .hn-page-kind-menu button:hover:not(:disabled){background:#edf3ed}
+.hn-canvas-toolbar .hn-page-kind-menu button:disabled{color:#9ba99e;cursor:default}
+.hn-canvas-toolbar .hn-page-kind-menu button small{margin-left:auto;font-size:9px;color:#a2ada3}
+@media(max-width:530px){.hn-canvas-toolbar .hn-page-kind-wrap{flex:1 1 28%}}
