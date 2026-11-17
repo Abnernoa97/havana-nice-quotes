@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { useAppHistory } from './useAppHistory';
 import type { AppSection, EditorTab, ReadingView } from './native-navigation';
 import type { Quote, QuoteStatus } from '../features/quotes/types';
-import FlipMagazine from '../features/magazine/FlipMagazine';
+import QuoteReviewPage from '../features/quotes/QuoteReviewPage';
 import { editorialStyles } from '../features/editor/styles/EditorialStyles';
 import { createQuoteDraft, createOwnTemplate, duplicateQuote, editSampleQuote, quoteDisplayName, statusClass } from '../features/quotes/model';
 import { useQuoteStore } from '../features/quotes/useQuoteStore';
@@ -25,13 +25,11 @@ import QuotesScreen from '../features/quotes/QuotesScreen';
 import {
   LayoutDashboard,
   FileText,
-  BookOpen,
   Palette,
   MessageCircle,
   Images,
   Plus,
   X,
-  ChevronLeft,
   Copy,
   Share2,
   Trash2,
@@ -178,6 +176,9 @@ function App() {
   };
   const selectQuote = (id: string, target = 'editor') => {
     closedAfterSave.current.delete(id);
+    const selected=quotes.find(q=>q.id===id);
+    const ready=Boolean(selected&&!selected.isTemplate&&
+      ['Listo para enviar','Enviada','En revisión','Aceptada'].includes(selected.status));
     if (id !== active) {
       setNewMessage('');
       setClientMessage('');
@@ -185,7 +186,8 @@ function App() {
     routeTo({
       active: id,
       section: (pages.some(page => page.id === target) ? target : 'editor') as AppSection,
-      preview: false,
+      preview: ready,
+      previewMode:selected?.readingMode==='scroll'?'scroll':'flip',
       mobileMenu: false,
     });
   };
@@ -409,26 +411,15 @@ function App() {
   if (syncStatus === 'loading') return (
     <div className="hn-cloud-loading" role="status">Conectando tus cotizaciones con Cloudflare...</div>
   );
-  if (preview && item)
-    return (
-      <>
-        <header className="hn-demo-switch">
-          <button type="button" className="hn-demo-back" onClick={goBack}>
-            <ChevronLeft size={18} /> Volver al diseñador
-          </button>
-          <div className="hn-demo-switcher" role="group" aria-label="Modo de lectura de la cotización">
-            <button type="button" className={previewMode === 'flip' ? 'active' : ''} onClick={() => setPreviewMode('flip')}>
-              <BookOpen size={15} /> Revista 3D
-            </button>
-            <button type="button" className={previewMode === 'scroll' ? 'active' : ''} onClick={() => setPreviewMode('scroll')}>
-              <FileText size={15} /> Scroll
-            </button>
-          </div>
-        </header>
-        {previewMode === 'flip' ? <div className={'hn-style-' + styleName}><FlipMagazine item={item} /></div> : clientPage}
-        {toast && <div className="toast">{toast}</div>}
-      </>
-    );
+  if(preview && item)return <QuoteReviewPage item={item} styleName={styleName}
+    mode={previewMode} onMode={mode=>setPreviewMode(mode)} onBack={goBack}
+    draftScroll={clientPage}
+    onReadjust={()=>routeTo({active:item.id,section:'editor',tab:'design',preview:false,mobileMenu:false})}
+    onMarkedSent={async()=>{
+      setQuotes(list=>list.map(q=>q.id===item.id?{...q,status:'Enviada'}:q));
+      const ok=await flush();if(ok)setToast('Cotización marcada como enviada.');
+      return ok;
+    }} toast={toast}/>;
   return (
     <div className="app-shell">
       {sidebar}
