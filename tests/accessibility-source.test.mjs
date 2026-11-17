@@ -47,7 +47,7 @@ test('La selección inicial utiliza la primera cotización y no un ID fijo', () 
 test('Todos los accesos al historial nativo comparten el mismo navegador y diálogo', () => {
   const app = source('app/App.tsx');
   assert.match(app, /<InstallGuide onClose=\{goBack\}/);
-  assert.match(app, /onClick=\{goBack\}/);
+  assert.match(app, /onBack=\{goBack\}/);
   assert.match(app, /const setTab: Dispatch<SetStateAction<string>>/);
   assert.match(app, /routeTo\(\{ mobileMenu: true \}\)/);
   assert.match(app, /routeTo\(\{ previewMode: next as ReadingView \}, 'replace'\)/);
