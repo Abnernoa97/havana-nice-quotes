@@ -145,3 +145,9 @@
 /* The active page owns drag gestures even when a keyboard is open. */
 .hn-canvas.hn-text-focus .hn-canvas-sheet,
 .hn-canvas.hn-text-focus .hn-carolina-page{touch-action:none;overscroll-behavior:contain}
+
+/* The centered white default always wins over the old blank-page dark placeholder
+   color; per-element user-picked text colors still win through inline styles. */
+.hn-canvas .hn-blank-page .hn-carolina-added-text.hn-centered-extra-text{
+  color:#fff;background:transparent;text-shadow:0 2px 8px #000b;
+}
