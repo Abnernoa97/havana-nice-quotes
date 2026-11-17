@@ -388,31 +388,53 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       setError(cause instanceof Error?cause.message:'No se pudo guardar la fotografía.');
     }finally{setBusy(false);}
   };
-  // Confirm an active gesture from anywhere in the app, including outside the page.
-  // Consume the first tap: confirming cannot also open another tool or navigate.
+  // A page transform is confirmed by a short tap anywhere on the app.
+  // Swiping to scroll or using a second finger must never confirm by accident.
+  const blockClickUntil=useRef(0);
+  useEffect(()=>{
+    const onClick=(event:MouseEvent)=>{
+      if(Date.now()>blockClickUntil.current)return;
+      blockClickUntil.current=0;
+      event.preventDefault();event.stopPropagation();
+    };
+    document.addEventListener('click',onClick,true);
+    return ()=>document.removeEventListener('click',onClick,true);
+  },[]);
   useEffect(()=>{
     if(!transformingId&&!activeTextTool)return;
-    let consumedAt=0;
+    let candidate:{id:number;x:number;y:number}|null=null;
     const down=(event:PointerEvent)=>{
-      if(!(event.target instanceof Element))return;
-      const element=event.target;
-      if(element.closest('.hn-text-dock,.hn-photo-workspace,[data-hn-text-trash]'))return;
-      if(!activeTextTool&&element.closest('.hn-canvas-sheet'))return;
+      if(!(event.target instanceof Element)||event.button!==0)return;
+      const el=event.target;
+      if(el.closest('.hn-text-dock,.hn-photo-workspace,[data-hn-text-trash]'))return;
+      if(!activeTextTool&&el.closest('.hn-canvas-sheet'))return;
+      if(candidate){candidate=null;return;} // multiple fingers are not a confirming tap
+      candidate={id:event.pointerId,x:event.clientX,y:event.clientY};
+      if(activeTextTool){event.preventDefault();event.stopPropagation();}
+    };
+    const move=(event:PointerEvent)=>{
+      if(candidate?.id===event.pointerId&&
+        Math.hypot(event.clientX-candidate.x,event.clientY-candidate.y)>9)candidate=null;
+    };
+    const up=(event:PointerEvent)=>{
+      if(candidate?.id!==event.pointerId)return;
+      const original=candidate;candidate=null;
+      if(Math.hypot(event.clientX-original.x,event.clientY-original.y)>9)return;
       if(editingId&&document.activeElement instanceof HTMLElement)document.activeElement.blur();
+      blockClickUntil.current=Date.now()+650;
       clearSelection();
-      consumedAt=Date.now();
       event.preventDefault();event.stopPropagation();
     };
-    const click=(event:MouseEvent)=>{
-      if(!consumedAt||Date.now()-consumedAt>850)return;
-      consumedAt=0;
-      event.preventDefault();event.stopPropagation();
-    };
+    const cancel=()=>{candidate=null;};
     document.addEventListener('pointerdown',down,true);
-    document.addEventListener('click',click,true);
+    document.addEventListener('pointermove',move,true);
+    document.addEventListener('pointerup',up,true);
+    document.addEventListener('pointercancel',cancel,true);
     return ()=>{
       document.removeEventListener('pointerdown',down,true);
-      document.removeEventListener('click',click,true);
+      document.removeEventListener('pointermove',move,true);
+      document.removeEventListener('pointerup',up,true);
+      document.removeEventListener('pointercancel',cancel,true);
     };
   },[transformingId,activeTextTool,editingId]);
   const renderItem:Quote=draftText?{...item,designLayout:{...item.designLayout,
