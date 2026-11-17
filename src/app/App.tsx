@@ -49,7 +49,7 @@ function App() {
   const enabled = auth.status === 'authorized';
   const { quotes, setQuotes, syncStatus, flush, refresh: refreshQuotes } = useQuoteStore(enabled);
   const { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, trashing, trashPhotos, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
-  const { view, routeTo, goBack } = useAppHistory(quotes[0]?.id || 'empty');
+  const { view, routeTo, goBack } = useAppHistory('empty');
   const { section, active, tab, mobileMenu, preview, previewMode, installGuide, photoViewerId, photoSelecting } = view;
   const trash = useTrash(enabled && section === 'trash');
   const setTab: Dispatch<SetStateAction<string>> = change => {
@@ -85,13 +85,8 @@ function App() {
   ) : null;
   const clientQuotes = quotes.filter(quote => !quote.isTemplate);
   const ownTemplates = quotes.filter(quote => quote.isTemplate);
-  const item = (workingQuote?.id===active ? workingQuote : null) || quotes.find(q => q.id === active) || clientQuotes[0] || ownTemplates[0];
+  const item = (workingQuote?.id===active ? workingQuote : null) || quotes.find(q => q.id === active);
   const styleName = item?.style && editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
-  useEffect(() => {
-    if (enabled && syncStatus !== 'loading' && quotes.length && workingQuote?.id!==active && !quotes.some(q => q.id === active)) {
-      routeTo({ active: quotes[0].id }, 'replace');
-    }
-  }, [enabled, syncStatus, quotes, active, routeTo, workingQuote?.id]);
   useEffect(() => {
     if (toast) {
       const t = setTimeout(() => setToast(''), 3600);
@@ -220,7 +215,7 @@ function App() {
         if(workingQuote?.id===saved.id){
           // The first cloud write happens only at explicit named Save.
           setQuotes(list=>[saved,...list.filter(q=>q.id!==saved.id)]);
-          setWorkingQuote(null);
+          // Keep the unsaved workspace mounted until Cloudflare confirms success.
         }else{
           setQuotes(list=>list.map(q=>q.id===saved.id?saved:q));
         }
@@ -229,7 +224,9 @@ function App() {
       if(ok){
         setSaveDialogOpen(false);
         templateQuoteSave.current=null;
-        routeTo({active:saved.id,section:'editor',tab:'design',preview:false,mobileMenu:false});
+        setWorkingQuote(null);
+        // Do not reopen the latest quotation or the template after a successful save.
+        routeTo({active:'empty',section:'editor',tab:'styles',preview:false,mobileMenu:false},'replace');
         setToast(status==='Borrador'
           ? 'Cotización guardada en Borrador.'
           : 'Cotización guardada en Listo para enviar. No se envió al cliente.');
@@ -348,9 +345,10 @@ function App() {
     />
   ) : (
     <div className="page hn-cloud-empty">
-      <h1>Tus cotizaciones empiezan aquí.</h1>
-      <p>Todavía no hay propuestas guardadas en la nube.</p>
+      <h1>Diseñador</h1>
+      <p>Elige cómo empezar tu próxima propuesta.</p>
       <button className="btn primary" onClick={addQuote}><Plus size={17}/> Nueva cotización</button>
+      <button className="btn" onClick={createTemplate}><Plus size={17}/> Crear plantilla</button>
     </div>
   );
   const messagesView = item ? (
