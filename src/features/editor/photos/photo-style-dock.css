@@ -103,3 +103,11 @@
 .hn-photo-workspace .hn-photo-switches{touch-action:pan-x}
 .hn-photo-crop-turn{display:flex;gap:6px}
 .hn-photo-crop-turn button{flex:1;border:1px solid #d6e2d6;border-radius:8px;background:#fff;color:#315741;min-height:31px;font-size:11px;font-weight:700}
+
+/* Layer management is contextual: it appears inside the photo/video editor only. */
+.hn-photo-workspace>.hn-canvas-layers{
+ width:100%;max-height:26dvh;overflow-y:auto;flex:0 0 auto;
+ margin:0;padding:5px 12px;background:#fafcf9;border-bottom:1px solid #e1e8e0;
+}
+.hn-photo-workspace .hn-canvas-layers-trigger{min-height:32px}
+.hn-photo-workspace .hn-canvas-layers-list{max-height:21dvh;overflow:auto}
