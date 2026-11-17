@@ -13,7 +13,7 @@ test('Un pellizco pequeño amplía sin girar; cambios mínimos no hacen nada',()
 });
 test('Rotar requiere una torsión deliberada, no ruido de dedos',()=>{
  assert.equal(classifyTwoFingerAction(170,171,10),'pending');
- assert.equal(classifyTwoFingerAction(170,171,22),'pending');
+ assert.equal(classifyTwoFingerAction(170,171,22),'rotate');
  assert.equal(classifyTwoFingerAction(170,171,24),'rotate');
  assert.equal(classifyTwoFingerAction(170,168,-28),'rotate');
  assert.equal(classifyTwoFingerAction(170,182,40),'rotate');
@@ -31,7 +31,7 @@ test('Una sola acción por secuencia: un dedo mueve, dos amplían o giran',()=>{
  assert.match(gesture,/classifyTwoFingerAction\(b\.distance,now\.distance,turn\)/);
  assert.match(gesture,/mode==='move'\?snapToOrigin/);
  assert.match(gesture,/mode==='zoom'\?b\.transform\.scale\*scale/);
- assert.match(gesture,/mode==='rotate'\?b\.transform\.rotation\+turn/);
+ assert.match(gesture,/wrapRotation\(b\.transform\.rotation\+cumulativeTurn\.current\)/);
  assert.match(gesture,/!pinchUsed\.current && movedDuringPress\.current/);
  assert.match(gesture,/cumulativeTurn\.current\+=shortestTurnDegrees\(previous,now\.angle\)/);
  assert.match(gesture,/promoteZoomToRotation\(b\.distance,now\.distance,turn\)/);
