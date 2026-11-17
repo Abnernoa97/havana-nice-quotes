@@ -560,7 +560,7 @@ test('Panel único de imágenes: un toque edita y una presión larga mueve o eli
   assert.match(dock,/onReplace\(\)/);
   assert.match(dock,/onToolChange\(next==='crop'\|\|next==='vignette'/);
   assert.match(workspace,/onStyleChange\(\{vignetteX:Math\.round/);
-  assert.match(workspace,/onStyleChange\(patch\)/);
+  assert.match(workspace,/onStyleChange\(next\)/);
   assert.match(gesture,/LONG_PRESS_MS = 550/);
   assert.doesNotMatch(photo,/effectMoved\.current|imageEdit/);
   assert.match(template,/photoStyle=\{item\.designLayout\?\.photoStyles\?\.\[id\]\}/);
@@ -592,7 +592,7 @@ test('Editor inmersivo: giro real, scroll independiente y controles anclados',()
   assert.match(workspace,/pinchCrop\(g\.start,g\.distance,distance\(positions\[0\],positions\[1\]\)\)/);
   assert.match(dock,/slider\('Girar izquierda \/ derecha','cropRotation'/);
   assert.match(workspace,/positions\.length>1/);
-  assert.match(workspace,/cropRotation:rotation/);
+  assert.doesNotMatch(workspace,/cropRotation:rotation/);
   assert.match(dock,/slider\('Girar izquierda \/ derecha','cropRotation',-180,180,'°'\)/);
   assert.match(photo,/rotate\(' \+ \(photoStyle\?\.cropRotation/);
   assert.match(model,/cropRotation:\[-180,180\]/);
