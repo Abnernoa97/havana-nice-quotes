@@ -221,3 +221,33 @@ test('Movimiento inmediato desde la hoja: texto activo, fotos y videos comparten
  assert.match(canvas,/if\(Date\.now\(\)-lastGestureMoveAt\.current<180\)/);
  assert.match(css,/\.hn-canvas\.hn-text-focus \.hn-carolina-page\{touch-action:none\}/);
 });
+
+test('Texto nuevo: centrado blanco Playfair y sin recolocar textos históricos',()=>{
+ const centered={pageOrder:[3],extras:[{id:two,page:3,text:'Havana Nights',centered:true}]};
+ assert.equal(validCarolinaLayout(centered),true);
+ assert.equal(validCarolinaLayout({pageOrder:[3],extras:[{id:two,page:3,text:'Havana Nights',centered:false}]}),false);
+ const old={pageOrder:[3],extras:[{id:one,page:3,text:'Novia y Novio'}]};
+ assert.equal(validCarolinaLayout(old),true);
+ const duplicate=duplicateBlankPage(centered,3);
+ assert.equal(duplicate.layout.extras[1].centered,true);
+ const node=src('features/templates/CarolinaTemplate.tsx');
+ const css=src('features/templates/carolina-template.css');
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ assert.match(node,/hn-centered-extra-text/);
+ assert.match(node,/extra\.centered\?'playfair-display'/);
+ assert.match(css,/\.hn-carolina-added-text\.hn-centered-extra-text/);
+ assert.match(css,/top:50%;left:50%;transform:translate\(-50%,-50%\)/);
+ assert.match(css,/color:#fff/);
+ assert.match(canvas,/setDraftText\(\{id,page\}\)/);
+ assert.match(canvas,/newlyConfirmedText\.current/);
+});
+test('Texto tecleado se mueve arrastrando el mismo texto o el fondo y cierra teclado',()=>{
+ const gesture=src('features/templates/useCarolinaGesture.ts');
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ assert.match(gesture,/beginEditDrag\(event\.pointerId,event\.clientX,event\.clientY\)/);
+ assert.match(gesture,/if\(disabled && editingHere\)/);
+ assert.match(gesture,/interactionRef\.current\?\.onSelectTransform\(id\)/);
+ assert.match(gesture,/page\.setPointerCapture\(event\.pointerId\)/);
+ assert.match(canvas,/if \(editingId && document\.activeElement instanceof HTMLElement\)document\.activeElement\.blur\(\)/);
+ assert.match(canvas,/newlyConfirmedText\.current/);
+});
