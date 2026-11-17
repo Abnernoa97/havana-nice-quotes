@@ -28,7 +28,7 @@ type Props = {
   item: Quote;
   edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
   photos: CloudPhoto[];
-  onUploadPhoto: (file: File, target: PhotoTarget) => Promise<void>;
+  onUploadPhoto: (file: File, target: PhotoTarget) => Promise<string>;
 };
 const pages = ['Portada', 'Collage', 'Propuesta'] as const;
 const pageTitle=(page:number,index:number)=>isBlankPage(page)?'Página '+(index+1):pages[page]||'Página '+(index+1);
@@ -243,7 +243,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       id.startsWith('photo-extra:') ?
         item.designLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===id)?.url :
         carolinaPhotos(item)[Number(id.slice(6))];
-    if (!url) {
+    if (!url || url.startsWith('/api/videos/')) {
       if (id==='photo:cover') open('cover');
       else if (id.startsWith('photo-extra:')) open(`extra:${id.slice('photo-extra:'.length)}`);
       else open(Number(id.slice(6)));
@@ -281,52 +281,57 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   };
   const addPhotoAnywhere=()=>{
     if (page===1) { addPhotoBlock(); return; }
-    const extras=item.designLayout?.extraPhotos||[];
-    if (extras.length>=MAX_DESIGN_ELEMENTS) { setError('Máximo de fotografías añadidas alcanzado.'); return; }
-    const id=crypto.randomUUID();
-    updateLayout({extraPhotos:[...extras,{id,page,url:''}]});
-    setTransformingId(null);setSelectedPhotoId(null);setLastTextId(null);setBank(false);setTarget(`extra:${id}`);
+    const existing=(item.designLayout?.extraPhotos||[]).filter(photo=>!!photo.url);
+    if(existing.length>=MAX_DESIGN_ELEMENTS){
+      setError('Máximo de fotografías y videos añadidos alcanzado.');return;
+    }
+    // Keep the new frame in local picker state until a file is really chosen.
+    setTransformingId(null);setSelectedPhotoId(null);setLastTextId(null);
+    setBank(false);setError('');setTarget('extra:'+crypto.randomUUID());
   };
   const addPhotoBlock = () => {
-    const slot = photoSlotToAdd(photoOrder, carolinaPhotos(item));
-    if (slot === null) return;
-    setPhotoOrder([...photoOrder, slot]);
+    const slot=photoSlotToAdd(photoOrder,carolinaPhotos(item));
+    if(slot===null)return;
     setTransformingId(null);setSelectedPhotoId(null);
-    setTarget(slot);
-    setBank(false);
+    setTarget(slot);setBank(false);setError('');
   };
   const open = (slot: PhotoTarget) => { setSelectedPhotoId(null); setPhotoTool(null); setTarget(slot); setBank(false); setError(''); };
   const close = () => { if (!busy) { setTarget(null); setBank(false); setError(''); } };
-  const choose = (url: string) => {
-    if (target === null) return;
-    if (target==='cover') { edit('cover',url); edit('coverVideo',''); }
-    else if (typeof target==='string' && target.startsWith('extra:')) {
+  const applyMedia=(url:string,video:boolean)=>{
+    if(target===null)return;
+    if(video&&(typeof target==='number'||!url.startsWith('/api/videos/')))return;
+    if(target==='cover'){
+      edit('cover',video?'':url);
+      edit('coverVideo',video?url:'');
+    }else if(typeof target==='string'&&target.startsWith('extra:')){
       const photoId=target.slice(6);
-      updateLayout({extraPhotos:(item.designLayout?.extraPhotos||[]).map(photo=>
-        photo.id===photoId ? {...photo,url} : photo)});
-    } else if (typeof target==='number') {
+      const previous=(item.designLayout?.extraPhotos||[]).filter(photo=>!!photo.url);
+      if(url){
+        const found=previous.some(photo=>photo.id===photoId);
+        updateLayout({extraPhotos:found
+          ? previous.map(photo=>photo.id===photoId?{...photo,url}:photo)
+          : [...previous,{id:photoId,page,url}]});
+      }else if(previous.some(photo=>photo.id===photoId)){
+        removePhoto('photo-extra:'+photoId);
+      }
+    }else if(typeof target==='number'){
       const gallery=carolinaPhotos(item);
-      gallery[target]=url;
-      edit('gallery',gallery);
+      gallery[target]=url;edit('gallery',gallery);
+      if(url&&!photoOrder.includes(target))setPhotoOrder([...photoOrder,target]);
     }
-    close();
+    setTarget(null);setBank(false);setError('');
   };
-  const chooseVideo = (url:string) => {
-    if (target!=='cover'||!/^\/api\/videos\/[a-f0-9-]{36}$/.test(url)) return;
-    edit('coverVideo',url);
-    edit('cover','');
-    close();
-  };
-  const selectPhone = async (file?: File) => {
-    if (!file || target === null) return;
+  const choose=(url:string)=>applyMedia(url,false);
+  const chooseVideo=(url:string)=>applyMedia(url,true);
+  const selectPhone=async(file?:File)=>{
+    if(!file||target===null)return;
     setBusy(true);
-    try {
-      await onUploadPhoto(file, target);
-      setTarget(null);
-      setBank(false);
-      setError('');
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'No se pudo guardar la fotografía.'); }
-    finally { setBusy(false); }
+    try{
+      const savedUrl=await onUploadPhoto(file,target);
+      applyMedia(savedUrl,false);
+    }catch(cause){
+      setError(cause instanceof Error?cause.message:'No se pudo guardar la fotografía.');
+    }finally{setBusy(false);}
   };
   return (
     <section className="hn-canvas">
@@ -344,7 +349,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       <div className="hn-canvas-sheet" onPointerDown={event => {
         const target=event.target;
         if (transformingId && !event.isPrimary) return;
-        if (target instanceof Element && !target.closest('[data-carolina-text], .hn-carolina-photo, .hn-carolina-cover-photo, .hn-carolina-floating-photo')) {
+        if (target instanceof Element && !target.closest('[data-carolina-text], .hn-carolina-photo, .hn-carolina-cover-photo, .hn-carolina-floating-photo, [data-hn-text-trash]')) {
           setTransformingId(null);
           setSelectedPhotoId(null);
           setPhotoTool(null);
@@ -377,6 +382,14 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>)}
         {isBlankPage(page) && <CarolinaBlankPage item={item} page={page}
           interaction={textInteraction} onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>}
+        {transformingId && (
+          <button type="button" data-hn-text-trash
+            className={'hn-canvas-trash'+(trashHovered?' hot':'')}
+            aria-label={isPhotoId(transformingId)?'Eliminar foto o video seleccionado':'Eliminar texto seleccionado'}
+            title="Arrastra aquí para eliminar" onClick={()=>removeElement(transformingId)}>
+            <Trash2 size={25}/>
+          </button>
+        )}
       </div>
       {<div className="hn-canvas-pager">
         <button type="button" disabled={pageIndex<=0} aria-label="Página anterior"
@@ -425,15 +438,6 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
             onClose={()=>{setSelectedPhotoId(null);setPhotoTool(null);}}/>,
           document.body
         )}
-      {transformingId && (
-        <button type="button" data-hn-text-trash
-          className={'hn-canvas-trash' + (trashHovered ? ' hot' : '')}
-          aria-label={isPhotoId(transformingId)?'Eliminar fotografía seleccionada':'Eliminar texto seleccionado'}
-          onClick={()=>removeElement(transformingId)}>
-          <Trash2 size={23}/>
-          <span>{trashHovered ? 'Soltar para borrar' : isPhotoId(transformingId) ? 'Eliminar foto · Arrastra aquí' : 'Eliminar texto · Arrastra aquí'}</span>
-        </button>
-      )}
       {error && !target && <p className="hn-canvas-error" role="alert">{error}</p>}
       {target !== null && createPortal(
         <PhotoSourcePicker target={target} item={item} photos={photos}
