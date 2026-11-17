@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Trash2, Plus, Copy } from 'lucide-react';
 import { isCarolinaCopyField } from '../../templates/carolina-edit-fields';
@@ -13,7 +13,7 @@ import type { CarolinaTextField } from '../../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../../templates/CarolinaTextNode';
 import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle, CarolinaTransform } from '../../templates/carolina-layout';
-import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage } from '../../templates/carolina-layout';
+import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts } from '../../templates/carolina-layout';
 import { pageBackgroundMediaId } from '../../templates/page-background';
 import { insertBlankPage, duplicateBlankPage, removeDesignPage } from '../../templates/blank-pages';
 import type { CarolinaPageId } from '../../templates/carolina-layout';
@@ -43,6 +43,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [editingId, setEditingId] = useState<string | null>(null);
   // New text lives only in local React state until the user actually writes it.
   const [draftText, setDraftText] = useState<{id:string;page:CarolinaPageId}|null>(null);
+  const lastGestureMoveAt=useRef(0);
+  const justMoved=useRef(false);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
   const [photoTool, setPhotoTool] = useState<'crop'|'vignette'|null>(null);
   const [photoAspect, setPhotoAspect] = useState(3/4);
@@ -63,20 +65,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const updateLayout = (patch: Partial<CarolinaLayout>) => {
     edit('designLayout', { ...item.designLayout, ...patch });
   };
-  // Remove legacy ghost texts AND their unused styles/transforms, rather than
-  // keeping hidden records or implementing a second rendering architecture.
   useEffect(()=>{
-    const entries=item.designLayout?.extras;
-    if(!entries?.some(entry=>!entry.text.trim()))return;
-    const empty=new Set(entries.filter(entry=>!entry.text.trim()).map(entry=>'extra:'+entry.id));
-    const retain=(values:Record<string,unknown>|undefined)=>
-      Object.fromEntries(Object.entries(values||{}).filter(([id])=>!empty.has(id)));
-    edit('designLayout',{...item.designLayout,
-      extras:entries.filter(entry=>entry.text.trim()),
-      transforms:retain(item.designLayout?.transforms) as CarolinaLayout['transforms'],
-      fonts:retain(item.designLayout?.fonts) as CarolinaLayout['fonts'],
-      textStyles:retain(item.designLayout?.textStyles) as CarolinaLayout['textStyles'],
-    });
+    const cleaned=cleanEmptyExtraTexts(item.designLayout);
+    if(cleaned && cleaned!==item.designLayout)edit('designLayout',cleaned);
   },[item.id,item.designLayout?.extras]);
   const textInteraction: CarolinaTextInteraction = {
     editingId, transformingId,
@@ -114,18 +105,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         const key = id.slice(6) as CarolinaFixedKey;
         updateLayout({ fixed: { ...item.designLayout?.fixed, [key]: value.slice(0, 1200) } });
       } else if (id.startsWith('extra:')) {
+        if(!value) {removeText(id);return;}
         const extras=item.designLayout?.extras||[];
-        if(value){
-          updateLayout({extras:extras.map(e=>'extra:'+e.id===id?{...e,text:value}:e)});
-        }else{
-          const clean=(values:Record<string,unknown>|undefined)=>
-            Object.fromEntries(Object.entries(values||{}).filter(([key])=>key!==id));
-          updateLayout({extras:extras.filter(e=>'extra:'+e.id!==id),
-            fonts:clean(item.designLayout?.fonts) as CarolinaLayout['fonts'],
-            textStyles:clean(item.designLayout?.textStyles) as CarolinaLayout['textStyles'],
-            transforms:clean(item.designLayout?.transforms) as CarolinaLayout['transforms']});
-          setLastTextId(null);setTransformingId(null);
-        }
+        updateLayout({extras:extras.map(e=>'extra:'+e.id===id?{...e,text:value}:e)});
       } else if (id.startsWith('field:')) {
         const field = id.slice(6).split(':')[0] as CarolinaTextField;
         if (field === 'date') {
@@ -159,11 +141,13 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       setTrashHovered(false);
     },
     onDrag: (_id,x,y) => {
+      justMoved.current=true;lastGestureMoveAt.current=Date.now();
       setTrashHovered(overTrash(x,y));
     },
     onDrop: (id,x,y) => {
       const hit=overTrash(x,y);
-      setTrashHovered(false);
+      if(justMoved.current)lastGestureMoveAt.current=Date.now();
+      justMoved.current=false;setTrashHovered(false);
       if (hit) removeElement(id);
       return hit;
     },
@@ -421,6 +405,11 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         // Dismiss on click, not pointerdown: a gesture must not lose its tools mid-drag.
         if (!(target instanceof Element)) return;
       }} onClickCapture={event=>{
+        // Pointer capture can produce a synthetic click after a drag. Never let it
+        // silently close the toolbar: only a separate, intentional tap does that.
+        if(Date.now()-lastGestureMoveAt.current<180){
+          event.preventDefault();event.stopPropagation();return;
+        }
         const clicked=event.target;
         if(!(clicked instanceof Element)||clicked.closest('[data-hn-text-trash]'))return;
         const node=clicked.closest('[data-hn-photo-id], [data-carolina-text]');
