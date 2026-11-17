@@ -72,7 +72,7 @@ export function ExtraTexts({ item, page, interaction }: PageProps & { page: numb
 export function ExtraPhotos({ item, page, interaction, onSelectPhoto }: PageProps & {
   page: number; onSelectPhoto?: (id:string)=>void;
 }) {
-  const photos=item.designLayout?.extraPhotos?.filter(p=>p.page===page)||[];
+  const photos=item.designLayout?.extraPhotos?.filter(p=>p.page===page&&!!p.url)||[];
   if (!photos.length) return null;
   return <div className="hn-carolina-photo-overlay">
     {photos.map(photo=>{
