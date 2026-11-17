@@ -1,6 +1,7 @@
 import { validCarolinaLayout } from '../src/features/templates/carolina-layout.ts';
 import { isTemplateStyle } from '../src/features/templates/template-registry.ts';
 import { handleVideoApi, videoPrefix, videoPosterKey } from './videos.ts';
+import { ownerSharing, publicSharing } from './quote-sharing.ts';
 import {syncCalendarQuote,reconcileCalendarQuotes} from './calendar-bridge.ts';
 import type {CalendarDatabase,CalendarQuote} from './calendar-bridge.ts';
 /**
@@ -192,7 +193,13 @@ async function api(request: Request, env: Env,
       'Set-Cookie': COOKIE + '=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0',
     });
   }
+  // The only unauthenticated API is a scoped read-only client proposal.
+  // Its random token never grants access to the editor or the media library.
+  if (path.startsWith('/api/shared/'))
+    return await publicSharing(request, env) || bad('Ruta no encontrada.',404);
   if (!await authorized(request, env)) return unauthorized();
+  if (path.startsWith('/api/share-links'))
+    return await ownerSharing(request, env) || bad('Ruta no encontrada.',404);
   if (path === '/api/device/invite' && method === 'POST') {
     const code = randomToken();
     await env.DB.prepare(
