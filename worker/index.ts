@@ -63,7 +63,7 @@ const REQUIRED_FIELDS = [
   'id', 'name', 'client', 'email', 'location', 'date',
   'cover', 'font', 'color', 'note', 'package', 'desc',
 ];
-const VALID_STATES = new Set(['Borrador', 'Enviada', 'En revisión', 'Aceptada']);
+const VALID_STATES = new Set(['Borrador', 'Lista para enviar', 'Enviada', 'En revisión', 'Aceptada']);
 const validId = (s: string) => /^hn-[a-f0-9-]{20,64}$/.test(s);
 const bytesToHex = (bytes: Uint8Array): string =>
   Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
@@ -119,6 +119,8 @@ function validQuote(input: unknown, id: string): input is Record<string, unknown
   const q = input as Record<string, unknown>;
   return q.id === id && validId(id) &&
     REQUIRED_FIELDS.every(field => typeof q[field] === 'string') &&
+    (q.quoteTitle === undefined || typeof q.quoteTitle === 'string' &&
+      q.quoteTitle.trim().length > 0 && q.quoteTitle.length <= 150) &&
     typeof q.price === 'number' && Number.isFinite(q.price) && q.price >= 0 &&
     typeof q.deposit === 'number' && Number.isFinite(q.deposit) && q.deposit >= 0 && q.deposit <= 100 &&
     (q.currency === undefined || q.currency === 'USD' || q.currency === 'MX') &&
