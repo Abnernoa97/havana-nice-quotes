@@ -464,7 +464,8 @@ test('Pulsación larga: papelera compartida para fotos y texto, sin borrar R2', 
   assert.match(canvas,/setTrashHovered\(overTrash\(x,y\)\)/);
   assert.match(canvas,/delete transforms\[id\]; delete fonts\[id\]; delete textStyles\[id\]/);
   assert.match(gesture,/onDrop\?\.\(id,x,y\)/);
-  assert.match(gesture,/if \(!dropped && JSON\.stringify\(current\.current\)/);
+  assert.match(gesture,/if \(!dropped && changed\)/);
+  assert.match(gesture,/onDeselectTransform\?\.\(id\)/);
   assert.match(canvas,/if \(transformingId && !event\.isPrimary\) return/);
 });
 
@@ -605,7 +606,7 @@ test('Fotos en fondo se recuperan por capas aunque el texto o una foto las cubra
   const layerPanel=src('features/editor/photos/PhotoLayersPanel.tsx');
   assert.match(editor,/const photoLayers=listPhotoLayers\(item,page\)/);
   assert.match(layerModel,/return \[\.\.\.backgroundCover,\.\.\.backgroundCollage,\.\.\.layeredPhotos\]/);
-  assert.match(layerPanel,/Capas de fotos/);
+  assert.match(layerPanel,/> Capas <strong>/);
   assert.match(editor,/onEdit=\{selectPhoto\} onMove=\{movePhotoLayer\} onDelete=\{removePhoto\}/);
   assert.match(layerPanel,/onClick=\{\(\)=>onEdit\(layer\.id\)\}/);
   assert.match(layerPanel,/onClick=\{\(\)=>onMove\(layer\.id\)\}/);
