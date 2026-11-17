@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createOwnTemplate,duplicateQuote} from '../src/features/quotes/model.ts';
-import {validCarolinaLayout,carolinaPageOrder,MAX_DESIGN_PAGES} from '../src/features/templates/carolina-layout.ts';
+import {validCarolinaLayout,carolinaPageOrder,MAX_DESIGN_PAGES,cleanEmptyExtraTexts} from '../src/features/templates/carolina-layout.ts';
 import {insertBlankPage,duplicateBlankPage,shiftPage,removeDesignPage} from '../src/features/templates/blank-pages.ts';
 import {pageBackgroundMediaId} from '../src/features/templates/page-background.ts';
 const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
@@ -172,4 +172,52 @@ test('Tocar la hoja cierra la transformación y Capas aparece solo al editar',()
  assert.match(canvas,/clearSelection\(\);\s*event\.preventDefault\(\);event\.stopPropagation\(\)/);
  assert.match(canvas,/layersPanel=\{<PhotoLayersPanel/);
  assert.match(workspace,/\{layersPanel\}/);
+});
+
+test('Solo se guardan textos no vacíos; limpieza elimina textos fantasma y sus estilos',()=>{
+ const kept='extra:'+one,ghost='extra:'+two;
+ const original={pageOrder:[3],extras:[
+  {id:one,page:3,text:'Novia & Novio'},
+  {id:two,page:3,text:'  \n  '}],
+  fonts:{[kept]:'cinzel',[ghost]:'cinzel'},
+  textStyles:{[ghost]:{color:'#FFFFFF'},[kept]:{color:'#FFFFFF'}},
+  transforms:{[ghost]:{x:15,y:20,scale:1,rotation:0},
+    [kept]:{x:0,y:0,scale:1,rotation:0}}};
+ const cleaned=cleanEmptyExtraTexts(original);
+ assert.equal(cleaned.extras.length,1);
+ assert.equal(cleaned.extras[0].text,'Novia & Novio');
+ assert.equal(cleaned.fonts[ghost],undefined);
+ assert.equal(cleaned.textStyles[ghost],undefined);
+ assert.equal(cleaned.transforms[ghost],undefined);
+ assert.equal(cleaned.fonts[kept],'cinzel');
+ assert.equal(validCarolinaLayout(cleaned),true);
+ assert.equal(original.extras.length,2);
+ assert.equal(cleanEmptyExtraTexts(cleaned),cleaned);
+});
+test('Crear texto no persiste cuadros vacíos ni genera cajas invisibles en Scroll o Libro 3D',()=>{
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const page=src('features/templates/CarolinaTemplate.tsx');
+ const node=src('features/templates/CarolinaTextNode.tsx');
+ const gesture=src('features/templates/useCarolinaGesture.ts');
+ const start=canvas.split('const addFreeText = () => {')[1].split('  const isPhotoId')[0];
+ assert.match(start,/setDraftText\(\{id,page\}\)/);
+ assert.doesNotMatch(start,/updateLayout\(/);
+ assert.match(canvas,/if \(draftText && id==='extra:'\+draftText\.id\)/);
+ assert.match(canvas,/if \(value\) \{/);
+ assert.match(canvas,/cleanEmptyExtraTexts\(item\.designLayout\)/);
+ assert.match(page,/Boolean\(e\.text\.trim\(\)\)/);
+ assert.match(node,/interaction && !extra \? '✎' : ''/);
+ assert.match(gesture,/pendingPageEdit\.current/);
+});
+test('Movimiento inmediato desde la hoja: texto activo, fotos y videos comparten un solo gesto',()=>{
+ const hook=src('features/templates/useCarolinaGesture.ts');
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const css=src('features/editor/canvas/template-canvas.css');
+ assert.match(hook,/page\.addEventListener\('pointerdown',down\)/);
+ assert.match(hook,/page\.setPointerCapture\(event\.pointerId\)/);
+ assert.match(hook,/interactionRef\.current\?\.onSelectTransform\(id\)/);
+ assert.match(hook,/Math\.hypot\(event\.clientX-start\.x,event\.clientY-start\.y\)<7/);
+ assert.match(hook,/finish\(event\.pointerId,event\.clientX,event\.clientY\)/);
+ assert.match(canvas,/if\(Date\.now\(\)-lastGestureMoveAt\.current<180\)/);
+ assert.match(css,/\.hn-canvas\.hn-text-focus \.hn-carolina-page\{touch-action:none\}/);
 });
