@@ -1,4 +1,6 @@
-import { Check, Images, Smartphone, X, Clapperboard, Play } from 'lucide-react';
+import { Check, Images, Smartphone, X, Clapperboard } from 'lucide-react';
+import PhotoThumbnail from '../../photos/PhotoThumbnail';
+import VideoPoster from '../../videos/VideoPoster';
 import { useState } from 'react';
 import { useCloudVideoOptions } from '../../videos/useCloudVideoOptions';
 import type { Quote } from '../../quotes/types';
@@ -50,7 +52,7 @@ export default function PhotoSourcePicker({
         {(!cover||kind==='photos')&&<div className="hn-canvas-bank">
           {photos.map(photo=><button type="button" key={photo.id} disabled={busy}
             aria-label={'Elegir '+photo.name} onClick={()=>onChoose(photo.url)}>
-            <img src={photo.url} alt="" loading="lazy"/>
+            <PhotoThumbnail photo={photo}/>
             {(cover?item.cover===photo.url&&!item.coverVideo:
               typeof target==='string'?item.carolinaLayout?.extraPhotos?.some(extra=>
                 extra.id===target.slice(6)&&extra.url===photo.url):
@@ -63,11 +65,9 @@ export default function PhotoSourcePicker({
              className="hn-canvas-cloud-video" disabled={busy}
              aria-label={'Elegir video '+video.name} onClick={()=>onChooseVideo?.(video.url)}>
             <div className="hn-canvas-cloud-video-preview">
-              <video src={video.url} muted playsInline preload="metadata" aria-hidden="true"/>
-              <Play size={20} aria-hidden="true"/>
+              <VideoPoster video={video}/>
               {item.coverVideo===video.url&&<Check size={16} className="hn-cover-selected"/>}
             </div>
-            <span title={video.name}>{video.name}</span>
           </button>)}
           {cloudVideos.loading&&<p>Cargando videos…</p>}
           {cloudVideos.error&&<p role="alert">{cloudVideos.error}</p>}

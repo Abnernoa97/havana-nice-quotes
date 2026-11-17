@@ -22,11 +22,12 @@ test('Galería de videos independiente y reproducción con audio, sin tocar el d
  const app=src('app/App.tsx');
  const photos=src('features/photos/PhotoBank.tsx');
  assert.match(screen,/<PhotoBank \{\.\.\.photoProps\}/);
- assert.match(screen,/<VideoBank enabled=\{enabled\}/);
+ assert.match(screen,/<VideoBank library=\{videos\}/);
  assert.match(app,/<MediaLibraryScreen enabled=\{enabled\}/);
- assert.match(bank,/preload="metadata" controls playsInline/);
- assert.match(bank,/El video está vacío|Cuando subas tu primer video/);
- assert.match(bank,/Compresión local automática/);
+ assert.match(bank,/<VideoPoster video=\{video\}/);
+ assert.match(bank,/src=\{active\.url\} playsInline controls autoPlay preload="metadata"/);
+ assert.match(bank,/Tu biblioteca está lista para recibir videos/);
+ assert.doesNotMatch(bank,/hn-video-summary|hn-video-note|hn-video-card-details/);
  assert.doesNotMatch(photos,/compressVideoForWeb|VideoBank/);
 });
 test('Papelera mueve los dos iconos de lote a la cabecera, no debajo de las tarjetas',()=>{

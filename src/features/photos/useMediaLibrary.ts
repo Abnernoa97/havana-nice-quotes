@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { processPhotoBatch } from './photo-batch';
 import type { UploadBatchResult } from './photo-batch';
+import {thumbnailFromFile,savePhotoThumbnail} from './photo-thumbnails';
 
 export type CloudPhoto = {
   id: string;
@@ -9,6 +10,7 @@ export type CloudPhoto = {
   size: number;
   createdAt: number;
   url: string;
+  thumbnailUrl?:string;
 };
 export const photoSize = (size: number): string =>
   size < 1024 * 1024 ? (size / 1024).toFixed(0) + ' KB' :
@@ -45,8 +47,16 @@ export function useMediaLibrary(enabled: boolean) {
       return;
     }
     void refreshPhotos();
-    const interval = setInterval(() => { void refreshPhotos(); }, 20000);
-    return () => clearInterval(interval);
+    // Avoid repeated full-index queries while designing or with the app backgrounded.
+    const onVisible=()=>{if(document.visibilityState==='visible')void refreshPhotos();};
+    document.addEventListener('visibilitychange',onVisible);
+    const interval=setInterval(()=>{
+      if(document.visibilityState==='visible')void refreshPhotos();
+    },120000);
+    return ()=>{
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange',onVisible);
+    };
   }, [enabled, refreshPhotos]);
 
   const uploadPhotos = useCallback(async (files: File[]): Promise<UploadBatchResult<CloudPhoto>> => {
@@ -79,6 +89,9 @@ export function useMediaLibrary(enabled: boolean) {
         if (!response.ok || !data.photo) {
           throw new Error(data.error || 'No se pudo subir la fotografía.');
         }
+        // One small, private JPEG per photo. Failure never rolls back the original.
+        const thumb=await thumbnailFromFile(file).catch(()=>null);
+        if(thumb)await savePhotoThumbnail(data.photo.id,thumb).catch(()=>{});
         return data.photo;
       }, (done, total) => setUploadProgress({ done, total }));
       // One refresh after the whole batch, not ten requests for the gallery.

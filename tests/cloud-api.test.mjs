@@ -812,3 +812,75 @@ test('Eliminar video de galería limpia la portada que lo usaba, pero no borra R
  assert.equal((await records.json()).quotes.find(row=>row.quote.id===quote.id).quote.coverVideo,'');
  assert.equal(env.objects.size,1);
 });
+
+test('Las miniaturas de fotos se almacenan aparte y se sirven privadas, sin afectar el original',async()=>{
+ const env=environment(),cookie=await authorizeDevice(env);
+ const jpg=new Uint8Array([0xff,0xd8,0xff,0xe0,0x00,0xd9]);
+ const upload=await worker.fetch(request('/api/media',{
+  method:'POST',headers:{Cookie:cookie,Origin:origin,'Content-Type':'image/jpeg','X-File-Name':'foto.jpg'},
+  body:jpg,
+ }),env);
+ assert.equal(upload.status,201);
+ const photo=(await upload.json()).photo;
+ assert.equal(photo.thumbnailUrl,'/api/media/'+photo.id+'/thumbnail');
+ assert.equal((await worker.fetch(request(photo.thumbnailUrl),env)).status,401);
+ assert.equal((await worker.fetch(request(photo.thumbnailUrl,{headers:{Cookie:cookie}}),env)).status,404);
+ const invalid=await worker.fetch(request(photo.thumbnailUrl,{
+  method:'PUT',headers:{Cookie:cookie,Origin:origin,'Content-Type':'text/plain'},body:'x',
+ }),env);
+ assert.equal(invalid.status,400);
+ const result=await worker.fetch(request(photo.thumbnailUrl,{
+  method:'PUT',headers:{Cookie:cookie,Origin:origin,'Content-Type':'image/jpeg'},body:jpg,
+ }),env);
+ assert.equal(result.status,200);
+ const preview=await worker.fetch(request(photo.thumbnailUrl,{headers:{Cookie:cookie}}),env);
+ assert.equal(preview.status,200);
+ assert.equal(preview.headers.get('content-type'),'image/jpeg');
+ assert.deepEqual([...new Uint8Array(await preview.arrayBuffer())],[...jpg]);
+ const original=await worker.fetch(request(photo.url,{headers:{Cookie:cookie}}),env);
+ assert.equal(original.status,200);
+ assert.deepEqual([...new Uint8Array(await original.arrayBuffer())],[...jpg]);
+ assert.equal(env.objects.size,2);
+ await worker.fetch(request(photo.url,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
+ assert.equal((await worker.fetch(request(photo.thumbnailUrl,{headers:{Cookie:cookie}}),env)).status,404);
+ await worker.fetch(request('/api/trash/photo/'+photo.id,{
+  method:'DELETE',headers:{Cookie:cookie,Origin:origin},
+ }),env);
+ assert.equal(env.objects.size,0);
+});
+
+test('Miniatura de video: pequeño JPEG autenticado, audio/video intacto y purga completa',async()=>{
+ const env=environment(),cookie=await authorizeDevice(env);
+ const videoBytes=new Uint8Array([4,3,2,1]);
+ const init=await worker.fetch(jsonRequest('/api/videos/init','POST',{
+  name:'video-web.mp4',mime:'video/mp4',size:videoBytes.length,
+ },cookie),env);
+ assert.equal(init.status,201);
+ const {id,uploadId}=await init.json();
+ const uploadPart=await worker.fetch(request('/api/videos/'+id+'/part?uploadId='+uploadId+'&part=1',{
+  method:'PUT',headers:{Cookie:cookie,Origin:origin},body:videoBytes,
+ }),env);
+ assert.equal(uploadPart.status,200);
+ const part=await uploadPart.json();
+ const finish=await worker.fetch(jsonRequest('/api/videos/'+id+'/complete','POST',{
+  uploadId,name:'video-web.mp4',mime:'video/mp4',size:videoBytes.length,parts:[part],
+ },cookie),env);
+ assert.equal(finish.status,201);
+ const video=(await finish.json()).video;
+ assert.equal(video.posterUrl,'/api/videos/'+id+'/poster');
+ assert.equal((await worker.fetch(request(video.posterUrl,{headers:{Cookie:cookie}}),env)).status,404);
+ const jpg=new Uint8Array([0xff,0xd8,0xff,0xe0,0x11,0xd9]);
+ const saved=await worker.fetch(request(video.posterUrl,{
+  method:'PUT',headers:{Cookie:cookie,Origin:origin,'Content-Type':'image/jpeg'},body:jpg,
+ }),env);
+ assert.equal(saved.status,200);
+ assert.equal((await worker.fetch(request(video.posterUrl),env)).status,401);
+ assert.equal((await worker.fetch(request(video.posterUrl,{headers:{Cookie:cookie}}),env)).status,200);
+ const original=await worker.fetch(request(video.url,{headers:{Cookie:cookie,Range:'bytes=0-1'}}),env);
+ assert.equal(original.status,206);
+ assert.deepEqual([...new Uint8Array(await original.arrayBuffer())],[4,3]);
+ assert.equal(env.objects.size,2);
+ await worker.fetch(request(video.url,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
+ await worker.fetch(request('/api/trash/video/'+id,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
+ assert.equal(env.objects.size,0);
+});

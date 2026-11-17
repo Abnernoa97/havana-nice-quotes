@@ -27,12 +27,11 @@
 .hn-canvas-cloud-video{min-width:0;text-align:left;padding:0;overflow:hidden;border:1px solid #dce7dc;
  border-radius:9px;background:#f4f7f2;color:#264838;cursor:pointer}
 .hn-canvas-cloud-video-preview{position:relative;height:94px;background:#102d22}
-.hn-canvas-cloud-video-preview video{width:100%;height:100%;display:block;object-fit:cover;pointer-events:none}
-.hn-canvas-cloud-video-preview>svg:not(.hn-cover-selected){position:absolute;top:50%;left:50%;
- transform:translate(-50%,-50%);color:#fff;background:#234636ba;border-radius:50%;
- box-sizing:content-box;padding:10px}
 .hn-canvas-cloud-video-preview .hn-cover-selected{position:absolute;right:5px;top:5px;
  background:#234636;color:#fff;border-radius:50%}
-.hn-canvas-cloud-video>span{display:block;padding:7px 8px;font-size:11px;font-weight:600;
- white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hn-canvas-picker>.hn-canvas-remove{display:block;width:100%;margin-top:10px}
+
+/* Cloud picker also uses only small posters; never mount one video decoder per option. */
+.hn-canvas-cloud-video-preview .hn-video-poster{position:absolute;inset:0}
+.hn-canvas-cloud-video-preview .hn-video-poster img{display:block;width:100%;height:100%;
+ object-fit:cover}

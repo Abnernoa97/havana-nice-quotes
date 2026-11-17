@@ -1,8 +1,9 @@
 import { useCallback,useEffect,useRef,useState } from 'react';
 import { compressVideoForWeb } from './compress-video';
 import type { WebVideo } from './compress-video';
+import {saveVideoPoster} from './video-posters';
 
-export type CloudVideo={id:string;name:string;mime:string;size:number;createdAt:number;url:string};
+export type CloudVideo={id:string;name:string;mime:string;size:number;createdAt:number;url:string;posterUrl:string};
 export type VideoProgress={phase:'converting'|'uploading';percent:number;originalBytes:number;convertedBytes?:number};
 type Start={id:string;uploadId:string;partSize:number};
 type Uploaded={partNumber:number;etag:string};
@@ -76,6 +77,9 @@ export function useVideoLibrary(enabled:boolean){
     JSON.stringify({uploadId:session.uploadId,parts,name:converted.file.name,
       mime:converted.file.type,size:converted.file.size}),{'Content-Type':'application/json'},abort.signal);
    completed=true;
+   // Poster is a small R2 JPEG, not a video decode on every gallery visit.
+   // A failed poster upload never discards a successfully saved video.
+   if(converted.poster)await saveVideoPoster(session.id,converted.poster).catch(()=>{});
    setLastSaved({originalBytes:source.size,convertedBytes:converted.file.size});
    await refresh();
    return converted;

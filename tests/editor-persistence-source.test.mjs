@@ -87,10 +87,11 @@ test('La biblioteca de Quotes Studio solo muestra fotos cargadas en su propia ap
   const styles = readFileSync(new URL('../src/shared/styles/index.css', import.meta.url), 'utf8');
   const worker = readFileSync(new URL('../worker/index.ts', import.meta.url), 'utf8');
   assert.match(app, /cloudPhotos=\{photos\}/);
-  assert.match(bank, /photos\.map\(photo =>/);
+  assert.match(bank, /photos\.map\(\(photo,index\) =>/);
   assert.match(bank, /type="file"/);
   assert.match(bank, /multiple hidden disabled=\{uploading \|\| trashing\}/);
-  assert.match(bank, /Actualizar biblioteca/);
+  const shared = src('features/videos/MediaLibraryStats.tsx');
+  assert.match(shared, /Actualizar/);
   assert.match(bank, /Una biblioteca lista para tus fotografías/);
   assert.match(css, /grid-template-columns: repeat\(2, minmax\(0,1fr\)\)/);
   for (const file of [app, media, bank, worker, css]) {
@@ -124,7 +125,7 @@ test('La galería presenta fotos solas; pulsación prolongada selecciona y el vi
   const gallery = src('features/photos/PhotoBank.tsx');
   const nav = src('app/native-navigation.ts');
   const css = readFileSync(new URL('../src/features/photos/photo-bank.css', import.meta.url), 'utf8');
-  assert.match(gallery, /photos\.map\(photo =>/);
+  assert.match(gallery, /photos\.map\(\(photo,index\) =>/);
   assert.match(gallery, /onPointerDown=\{event => beginHold\(event, photo\.id\)\}/);
   assert.match(gallery, /onContextMenu=\{event => longPressContext\(event, photo\.id\)\}/);
   assert.match(gallery, /window\.confirm/);

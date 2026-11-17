@@ -4,6 +4,9 @@
  * Uses the existing D1 media table and the existing private R2 bucket.
  */
 const PREFIX='quotes-studio/videos/';
+const POSTER_PREFIX='quotes-studio/video-posters/';
+export const videoPosterKey=(id:string)=>POSTER_PREFIX+id+'.jpg';
+const MAX_POSTER_BYTES=256*1024;
 export const VIDEO_PART_SIZE=6*1024*1024; // R2 multipart: >=5 MiB except last
 export const MAX_WEB_VIDEO_BYTES=512*1024*1024;
 type VideoMime='video/mp4'|'video/webm';
@@ -31,6 +34,7 @@ interface VideoR2{
    body:ReadableStream;size:number;
  }|null>;
  delete(key:string):Promise<void>;
+ put(key:string,body:ArrayBuffer,options:{httpMetadata:{contentType:string};customMetadata:Record<string,string>}):Promise<unknown>;
 }
 export interface VideoStore{
  DB:{prepare(sql:string):DbStatement};
@@ -49,6 +53,7 @@ function safeName(value:unknown):string{
 const publicVideo=(row:VideoRow)=>({
  id:row.id,name:row.filename,mime:row.mime,size:row.size,
  createdAt:row.created_at,url:'/api/videos/'+row.id,
+ posterUrl:'/api/videos/'+row.id+'/poster',
 });
 async function jsonBody(request:Request):Promise<Record<string,unknown>|null>{
  const text=await request.text();
@@ -103,7 +108,7 @@ export async function handleVideoApi(request:Request,store:VideoStore):Promise<R
   });
   return respond({id,uploadId:upload.uploadId,partSize:VIDEO_PART_SIZE},201);
  }
- const match=/^\/api\/videos\/([a-f0-9-]{36})(?:\/(part|complete|abort))?$/.exec(path);
+ const match=/^\/api\/videos\/([a-f0-9-]{36})(?:\/(part|complete|abort|poster))?$/.exec(path);
  if(!match||!validId(match[1]))return err('Ruta de video no encontrada.',404);
  const id=match[1],action=match[2];
  if(action==='part'&&method==='PUT'){
@@ -145,6 +150,36 @@ export async function handleVideoApi(request:Request,store:VideoStore):Promise<R
   if(!validUploadId(uploadId))return err('Subida inválida.');
   await store.MEDIA.resumeMultipartUpload(key(id),uploadId).abort();
   return respond({aborted:true});
+ }
+ if(action==='poster'&&(method==='PUT'||method==='GET'||method==='HEAD')){
+  // A poster can only exist for an active video; no public R2 URLs.
+  const active=await store.DB.prepare(
+    'SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ? AND deleted_at IS NULL'
+  ).bind(id).first<VideoRow>();
+  if(!active||active.object_key!==key(id))return err('Video no encontrado.',404);
+  const poster=videoPosterKey(id);
+  if(method==='PUT'){
+   if((request.headers.get('content-type')||'').split(';')[0]!=='image/jpeg')
+     return err('La miniatura debe ser JPEG.');
+   if(Number(request.headers.get('content-length')||0)>MAX_POSTER_BYTES)
+     return err('Miniatura demasiado grande.',413);
+   const bytes=await request.arrayBuffer();
+   const view=new Uint8Array(bytes);
+   if(!view.length||view.length>MAX_POSTER_BYTES||
+     view[0]!==0xff||view[1]!==0xd8||view[2]!==0xff)
+     return err('Miniatura JPEG inválida.',400);
+   await store.MEDIA.put(poster,bytes,{
+    httpMetadata:{contentType:'image/jpeg'},
+    customMetadata:{module:'havana-nice-quotes',kind:'video-poster'},
+   });
+   return respond({posterUrl:'/api/videos/'+id+'/poster'});
+  }
+  const object=await store.MEDIA.get(poster);
+  if(!object)return err('Miniatura pendiente.',404);
+  return new Response(method==='HEAD'?null:object.body,{headers:{
+   'Content-Type':'image/jpeg','Content-Length':String(object.size),
+   'Cache-Control':'private, max-age=86400','X-Content-Type-Options':'nosniff',
+  }});
  }
  if(action)return err('Método no permitido.',405);
  const row=await store.DB.prepare(

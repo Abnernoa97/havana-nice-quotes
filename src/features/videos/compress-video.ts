@@ -6,7 +6,8 @@
  * Requires a foreground mobile browser with canvas.captureStream, MediaRecorder,
  * playable source codec and AudioContext. If any stage fails, DO NOT upload raw.
  */
-export type WebVideo={file:File;originalBytes:number;convertedBytes:number;duration:number};
+import {posterFromCanvas} from './video-posters';
+export type WebVideo={file:File;originalBytes:number;convertedBytes:number;duration:number;poster:Blob|null};
 const VIDEO_EDGE=1280;
 const FRAME_RATE=24;
 const VIDEO_BITRATE=2_200_000;
@@ -105,9 +106,13 @@ export async function compressVideoForWeb(source:File,
    };
    signal?.addEventListener('abort',abort,{once:true});
   });
+  let posterTask:Promise<Blob|null>|undefined;
   const paint=()=>{
    if(!video.paused&&!video.ended&&video.readyState>=2){
-    try{ctx.drawImage(video,0,0,canvas.width,canvas.height);}catch{/* wait for first frame */}
+    try{
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      if(video.currentTime>=.5&&!posterTask)posterTask=posterFromCanvas(canvas);
+    }catch{/* wait for first frame */}
    }
    if(video.duration>0)onProgress(Math.min(99,Math.round(video.currentTime/video.duration*100)));
    if(!video.ended&&recorder?.state!=='inactive'&&!stopped(signal))
@@ -128,10 +133,11 @@ export async function compressVideoForWeb(source:File,
   const blob=await finished;
   if(stopped(signal))throw new Error('Conversión cancelada.');
   if(blob.size===0)throw new Error('No se pudo generar el video web.');
+  const poster=await (posterTask ?? posterFromCanvas(canvas)).catch(()=>null);
   const name=source.name.replace(/\.[^/.]+$/,'').slice(0,100)+'-web.'+format.extension;
   onProgress(100);
   return {file:new File([blob],name,{type:format.outputMime}),
-   originalBytes:source.size,convertedBytes:blob.size,duration:video.duration};
+   originalBytes:source.size,convertedBytes:blob.size,duration:video.duration,poster};
  }finally{
   cancelAnimationFrame(frame);
   video.pause();

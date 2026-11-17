@@ -33,22 +33,25 @@ test('Papelera: Marcar todo, selección individual y acordeón plegable, purga c
  assert.match(trash,/window\.confirm\('¿Eliminar definitivamente '/);
  assert.match(trash,/setWorking\(true\)/);
 });
-test('Fotos: engranaje junto al título y estadísticas bajo acordeón',()=>{
- const photos=src('features/photos/PhotoBank.tsx');
- const css=src('features/photos/photo-bank.css');
- assert.ok(photos.indexOf('<h1>Banco de fotografías</h1>')<
-    photos.indexOf('aria-label="Información de la biblioteca"'));
- assert.match(photos,/aria-expanded=\{libraryDetailsOpen\}/);
- assert.match(photos,/\{libraryDetailsOpen && <section/);
- assert.match(photos,/const libraryReferenceBytes = 5 \* 1024 \* 1024 \* 1024/);
- assert.match(photos,/bytesUsed \/ libraryReferenceBytes/);
- assert.match(photos,/role="progressbar"/);
- assert.match(photos,/photoSize\(bytesUsed\)\} de 5 GB/);
- assert.match(photos,/<ImageIcon size=\{21\}\/>/);
- assert.match(photos,/<CloudUpload size=\{21\}\/>/);
- assert.match(css,/\.hn-photo-bank-heading\{display:flex/);
- assert.doesNotMatch(photos,/hn-photo-bank-meta/);
+test('Fotos y Videos comparten engranaje superior fijo con métricas combinadas',()=>{
+ const screen=src('features/videos/MediaLibraryScreen.tsx');
+ const stats=src('features/videos/MediaLibraryStats.tsx');
+ const css=src('features/videos/media-library-screen.css');
+ const photo=src('features/photos/PhotoBank.tsx');
+ const video=src('features/videos/VideoBank.tsx');
+ assert.match(screen,/hn-media-library-toolbar/);
+ assert.match(screen,/aria-expanded=\{showStats\}/);
+ assert.match(screen,/photoCount=\{photoProps\.photos\.length\}/);
+ assert.match(screen,/videoCount=\{videos\.videos\.length\}/);
+ assert.match(stats,/formatMediaBytes\(total\)/);
+ assert.match(stats,/formatMediaBytes\(videoBytes\)/);
+ assert.match(stats,/formatMediaBytes\(photoBytes\)/);
+ assert.match(stats,/role="progressbar"/);
+ assert.match(css,/position:sticky/);
+ assert.doesNotMatch(photo,/libraryDetailsOpen/);
+ assert.doesNotMatch(video,/hn-video-summary/);
 });
+
 test('Añadir fotografía es botón real tanto en Carolina como en todas las editoriales',()=>{
  const carolina=src('features/templates/CarolinaTemplate.tsx');
  const editorial=src('features/templates/EditorialTemplate.tsx');

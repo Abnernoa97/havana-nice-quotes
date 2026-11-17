@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, MouseEvent, PointerEvent, TouchEvent } from 'react';
-import { CloudUpload, ImagePlus, ImageIcon, CheckCircle2, RefreshCcw, X, ChevronLeft, ChevronRight, Trash2, Check, Settings2, ChevronDown } from 'lucide-react';
+import { ImagePlus, ImageIcon, CheckCircle2, X, ChevronLeft, ChevronRight, Trash2, Check } from 'lucide-react';
 import type { CloudPhoto } from './useMediaLibrary';
-import { photoSize } from './useMediaLibrary';
+import PhotoThumbnail from './PhotoThumbnail';
 import { MAX_PHOTOS_PER_UPLOAD } from './photo-batch';
 import type { UploadBatchResult } from './photo-batch';
 
@@ -33,15 +33,11 @@ type Props = {
 
 /** Pure-image gallery; one tap opens full screen, a long press enables deletion. */
 export default function PhotoBank({
-  photos, bytesUsed, uploading, uploadProgress, trashing, error, uploadPhotos, trashPhotos,
-  refreshPhotos, refreshQuotes, viewerId, selectionMode, openViewer, changeViewer,
+  photos, uploading, uploadProgress, trashing, error, uploadPhotos, trashPhotos,
+  refreshQuotes, viewerId, selectionMode, openViewer, changeViewer,
   closeViewer, startSelection, exitSelection,
 }: Props) {
   const [message, setMessage] = useState('');
-  const [libraryDetailsOpen, setLibraryDetailsOpen] = useState(false);
-  // The 5 GB bar is a user-facing reference, not a server-enforced R2 quota.
-  const libraryReferenceBytes = 5 * 1024 * 1024 * 1024;
-  const libraryUsage = Math.max(0, Math.min(100, bytesUsed / libraryReferenceBytes * 100));
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const holdStart = useRef<{ x: number; y: number } | null>(null);
@@ -187,44 +183,10 @@ export default function PhotoBank({
       <div className="intro-line hn-photo-bank-intro">
         <div className="hn-photo-bank-intro-content">
           <span className="eyebrow">HAVANA NICE · CLOUD LIBRARY</span>
-          <div className="hn-photo-bank-heading">
-            <h1>Banco de fotografías</h1>
-            <button type="button" className="hn-photo-library-settings"
-              aria-label="Información de la biblioteca"
-              aria-expanded={libraryDetailsOpen} aria-controls="hn-photo-library-stats"
-              onClick={()=>setLibraryDetailsOpen(open=>!open)}>
-              <Settings2 size={19}/><ChevronDown size={13} className={libraryDetailsOpen?'expanded':''}/>
-            </button>
-          </div>
-          <p>Tu material original, en un mismo lugar y disponible desde cualquier dispositivo.</p>
+          <h1>Banco de fotografías</h1>
+          <p className="hn-media-intro-text">Tu material original, en un mismo lugar y disponible desde cualquier dispositivo.</p>
         </div>
       </div>
-      {libraryDetailsOpen && <section className="hn-photo-library-stats"
-        id="hn-photo-library-stats" aria-label="Información de la biblioteca">
-        <div className="hn-photo-library-metric">
-          <CloudUpload size={21}/>
-          <strong>{photos.length}</strong>
-          <span>Fotografías en Quotes Studio</span>
-        </div>
-        <div className="hn-photo-library-metric hn-photo-library-storage">
-          <ImageIcon size={21}/>
-          <strong>{photoSize(bytesUsed)}</strong>
-          <div className="hn-photo-library-storage-info">
-            <span>Almacenamiento de esta biblioteca</span>
-            <div className="hn-photo-library-progress" role="progressbar"
-              aria-label="Uso de biblioteca con referencia de cinco gigabytes"
-              aria-valuemin={0} aria-valuemax={libraryReferenceBytes}
-              aria-valuenow={Math.min(bytesUsed,libraryReferenceBytes)}>
-              <span style={{width:libraryUsage+'%'}}/>
-            </div>
-            <small>{photoSize(bytesUsed)} de 5 GB</small>
-          </div>
-        </div>
-        <button className="hn-photo-library-refresh" type="button"
-          onClick={()=>void refreshPhotos()} disabled={trashing}>
-          <RefreshCcw size={16}/> Actualizar biblioteca
-        </button>
-      </section>}
       <div className="hn-photo-upload-row">
         <label className={'btn primary hn-photo-upload' + (uploading ? ' busy' : '')}>
           <ImagePlus size={17}/>
@@ -252,7 +214,7 @@ export default function PhotoBank({
 
       {photos.length ? (
         <div className="hn-photo-bank-grid" aria-label="Galería de fotos. Toca para ampliar o mantén pulsada una foto para seleccionar.">
-          {photos.map(photo => (
+          {photos.map((photo,index) => (
             <button key={photo.id} type="button"
               className={'hn-photo-bank-item' + (selected.has(photo.id) && selectionMode ? ' is-selected' : '')}
               aria-label={(selectionMode ? 'Seleccionar ' : 'Ampliar ') + photo.name}
@@ -262,7 +224,7 @@ export default function PhotoBank({
               onPointerCancel={clearHold} onPointerLeave={clearHold}
               onContextMenu={event => longPressContext(event, photo.id)}
               onClick={() => photoTap(photo.id)}>
-              <img src={photo.url} alt="" loading="lazy" draggable={false}/>
+              <PhotoThumbnail photo={photo} priority={index<4}/>
               {selected.has(photo.id) && selectionMode && (
                 <span className="hn-photo-check" aria-hidden="true"><Check size={17}/></span>
               )}

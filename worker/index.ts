@@ -1,6 +1,6 @@
 import { validCarolinaLayout } from '../src/features/templates/carolina-layout.ts';
 import { isTemplateStyle } from '../src/features/templates/template-registry.ts';
-import { handleVideoApi, videoPrefix } from './videos.ts';
+import { handleVideoApi, videoPrefix, videoPosterKey } from './videos.ts';
 /**
  * HAVANA NICE Quotes Studio · Cloudflare Worker
  * Private D1 quotes + media index; private R2 objects in quotes-studio/.
@@ -41,6 +41,9 @@ interface SessionRow extends D1Row { token_hash: string; expires_at: number; rev
 interface QuoteRow extends D1Row { id: string; payload: string; revision: number; deleted_at?: number | null }
 interface MediaRow extends D1Row { id: string; filename: string; mime: string; size: number; created_at: number; object_key: string; deleted_at?: number | null }
 const PHOTOS_PREFIX = 'quotes-studio/photos/';
+const PHOTO_THUMBS_PREFIX = 'quotes-studio/photo-thumbnails/';
+const photoThumbKey = (id: string) => PHOTO_THUMBS_PREFIX + id + '.jpg';
+const MAX_THUMB = 256 * 1024;
 const MAX_IMAGE = 12 * 1024 * 1024;
 const COOKIE = 'hn_quotes_device';
 const SESSION_LIFETIME = 365 * 24 * 60 * 60;
@@ -136,7 +139,8 @@ function validQuote(input: unknown, id: string): input is Record<string, unknown
 }
 function mediaPublic(row: MediaRow) {
   return { id: row.id, name: row.filename, mime: row.mime, size: row.size,
-    createdAt: row.created_at, url: '/api/media/' + row.id };
+    createdAt: row.created_at, url: '/api/media/' + row.id,
+    thumbnailUrl: '/api/media/' + row.id + '/thumbnail' };
 }
 async function api(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
@@ -233,6 +237,37 @@ async function api(request: Request, env: Env): Promise<Response> {
         .reduce((sum, r) => sum + r.size, 0),
     });
   }
+  if (/^\/api\/media\/[a-f0-9-]{36}\/thumbnail$/.test(path) && ['GET','HEAD','PUT'].includes(method)) {
+    const id = path.split('/')[3];
+    const row = await env.DB.prepare(
+      'SELECT id, object_key, filename, mime, size, created_at FROM media WHERE id = ? AND deleted_at IS NULL'
+    ).bind(id).first<MediaRow>();
+    if (!row || !row.object_key.startsWith(PHOTOS_PREFIX)) return bad('Fotografía no encontrada.',404);
+    const thumbKey = photoThumbKey(id);
+    if (method === 'PUT') {
+      if ((request.headers.get('content-type') || '').split(';')[0] !== 'image/jpeg')
+        return bad('La miniatura debe ser JPEG.');
+      if (Number(request.headers.get('content-length') || 0) > MAX_THUMB)
+        return bad('Miniatura demasiado grande.',413);
+      const bytes = await request.arrayBuffer();
+      const image = new Uint8Array(bytes);
+      if (!image.length || image.length > MAX_THUMB || image[0] !== 0xff ||
+          image[1] !== 0xd8 || image[2] !== 0xff)
+        return bad('Miniatura JPEG inválida.');
+      await env.MEDIA.put(thumbKey,bytes,{
+        httpMetadata:{contentType:'image/jpeg'},
+        customMetadata:{module:'havana-nice-quotes',kind:'photo-thumbnail'},
+      });
+      return json({thumbnailUrl:'/api/media/'+id+'/thumbnail'});
+    }
+    const thumb = await env.MEDIA.get(thumbKey);
+    if (!thumb) return bad('Miniatura pendiente.',404);
+    return new Response(method==='HEAD'?null:thumb.body,{headers:{
+      'Content-Type':'image/jpeg','Content-Length':String(thumb.size),
+      'Cache-Control':'private, max-age=86400',
+      'X-Content-Type-Options':'nosniff',
+    }});
+  }
   if (path === '/api/media' && method === 'POST') {
     const mime = (request.headers.get('content-type') || '').split(';')[0].toLowerCase();
     const ext = VALID_MIMES[mime];
@@ -321,6 +356,9 @@ async function api(request: Request, env: Env): Promise<Response> {
     ).bind(id).first<MediaRow>();
     if (!photo || !photo.object_key.startsWith(kind==='video'?videoPrefix:PHOTOS_PREFIX)) return bad('Archivo no encontrado.', 404);
     await env.MEDIA.delete(photo.object_key);
+    // A permanent deletion also removes its generated tiny poster.
+    if(kind==='video')await env.MEDIA.delete(videoPosterKey(id));
+    if(kind==='photo')await env.MEDIA.delete(photoThumbKey(id));
     await env.DB.prepare(
       'DELETE FROM media WHERE id = ? AND deleted_at IS NOT NULL AND object_key = ?'
     ).bind(id, photo.object_key).run();
