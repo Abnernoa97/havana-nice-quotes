@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, Trash2, Plus, Copy } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2, Plus, Copy, MessageCircle, FileText, MapPin, Images } from 'lucide-react';
 import { isCarolinaCopyField } from '../../templates/carolina-edit-fields';
 import TextStyleDock from '../texts/TextStyleDock';
 import type { TextToolTab } from '../texts/TextStyleDock';
@@ -14,10 +14,10 @@ import type { CarolinaTextField } from '../../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../../templates/CarolinaTextNode';
 import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle, CarolinaTransform } from '../../templates/carolina-layout';
-import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts } from '../../templates/carolina-layout';
+import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts,pageKind } from '../../templates/carolina-layout';
 import { pageBackgroundMediaId } from '../../templates/page-background';
 import { insertBlankPage, duplicateBlankPage, removeDesignPage } from '../../templates/blank-pages';
-import type { CarolinaPageId } from '../../templates/carolina-layout';
+import type { CarolinaPageId,PageKind } from '../../templates/carolina-layout';
 import { normalizePriceInput, safeQuotePrice } from '../../quotes/model';
 import type { Quote } from '../../quotes/types';
 import type { CloudPhoto } from '../../photos/useMediaLibrary';
@@ -53,6 +53,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [photoLayersOpen, setPhotoLayersOpen] = useState(false);
   const [lastTextId, setLastTextId] = useState<string | null>(null);
   const [activeTextTool,setActiveTextTool]=useState<TextToolTab|null>(null);
+  const [showPageMenu,setShowPageMenu]=useState(false);
   const [trashHovered, setTrashHovered] = useState(false);
   const [transformingId, setTransformingId] = useState<string | null>(null);
   const [bank, setBank] = useState(false);
@@ -234,8 +235,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setDraftText(null);setPhotoLayersOpen(false);setTransformingId(null);setEditingId(null);
     setLastTextId(null);setActiveTextTool(null);setSelectedPhotoId(null);setPhotoTool(null);setTrashHovered(false);
   };
-  const addPage=()=>{
-    const result=insertBlankPage(item.designLayout,page);
+  const addPage=(kind?:PageKind)=>{
+    const result=insertBlankPage(item.designLayout,page,kind);
+    setShowPageMenu(false);
     if(!result){setError('Máximo de páginas alcanzado.');return}
     edit('designLayout',result.layout);
     setPage(result.page);clearSelection();setError('');
@@ -254,7 +256,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     edit('designLayout',next.layout);setPage(next.page);clearSelection();setError('');
   };
   const changePage = (direction: -1 | 1) => {
-    setPhotoLayersOpen(false);
+    setShowPageMenu(false);setPhotoLayersOpen(false);
     setPage(current => {
       const index = selectedPages.indexOf(current);
       const next = Math.max(0, Math.min(selectedPages.length - 1, index + direction));
@@ -450,8 +452,25 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         <button type="button" onClick={addFreeText}>+ Texto</button>
         <button type="button" onClick={addPhotoAnywhere}
           disabled={page===1&&photoOrder.length>=CAROLINA_MAX_SLOTS}>+ Foto</button>
-        <button type="button" onClick={addPage} className="hn-canvas-add-page"
-          aria-label="Agregar página en blanco"><Plus size={17}/> Página</button>
+        <div className="hn-page-kind-wrap">
+          <button type="button" onClick={()=>{clearSelection();setShowPageMenu(v=>!v);}}
+            className="hn-canvas-add-page" aria-expanded={showPageMenu}
+            aria-controls="hn-page-kind-menu"
+            aria-label="Elegir tipo de página"><Plus size={17}/> Página</button>
+          {showPageMenu&&<div className="hn-page-kind-menu" id="hn-page-kind-menu"
+            role="group" aria-label="Tipos de página">
+            <button type="button" onClick={()=>addPage()}>
+              <FileText size={18}/> Página en blanco</button>
+            <button type="button" onClick={()=>addPage('chat')}>
+              <MessageCircle size={18}/> Página chat</button>
+            <button type="button" disabled title="Próximamente">
+              <FileText size={18}/> Información <small>Próximamente</small></button>
+            <button type="button" disabled title="Próximamente">
+              <MapPin size={18}/> Localización <small>Próximamente</small></button>
+            <button type="button" disabled title="Próximamente">
+              <Images size={18}/> Álbum <small>Próximamente</small></button>
+          </div>}
+        </div>
         {transformingId && <span>Un dedo: mover · Dos dedos: ampliar · Giro deliberado</span>}
       </div>}
       <div className="hn-canvas-stage" onClick={event=>{
