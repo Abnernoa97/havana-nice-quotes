@@ -109,7 +109,7 @@ export default function TrashScreen({
       </div>
       <div className="hn-trash-content">
         <strong>{item.label}</strong>
-        <small>{item.kind==='photo'?'Fotografía':item.kind==='video'?'Video':item.kind==='quote'?'Cotización':'Archivo'}
+        <small>{item.kind==='photo'?'Fotografía':item.kind==='video'?'Video':item.kind==='quote'?(item.isTemplate?'Plantilla':'Cotización'):'Archivo'}
           {' · '}{new Date(item.deletedAt*1000).toLocaleDateString('es-MX')}</small>
       </div>
       <div className="hn-trash-actions">
@@ -126,7 +126,7 @@ export default function TrashScreen({
       <div>
         <span className="eyebrow">HAVANA NICE · WORKSPACE</span>
         <h1>Papelera</h1>
-        <p>Recupera tus cotizaciones y fotografías, o elimínalas para siempre.</p>
+        <p>Recupera tus plantillas, cotizaciones y fotografías, o elimínalas para siempre.</p>
       </div>
     </div>
     <div className="hn-trash-toolbar">
