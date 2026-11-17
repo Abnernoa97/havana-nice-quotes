@@ -11,7 +11,7 @@ type Props = {
   photoStyle?: CarolinaPhotoStyle;
   interaction?: CarolinaGestureInteraction;
   onSelect?: () => void;
-  cover?: boolean; position?: number; extra?: boolean;
+  cover?: boolean; position?: number; extra?: boolean; pageBackground?: boolean;
 };
 
 function vignette(style: CarolinaPhotoStyle | undefined): CSSProperties | undefined {
@@ -38,17 +38,18 @@ function vignette(style: CarolinaPhotoStyle | undefined): CSSProperties | undefi
 /** The image is a clipped visual layer; transforms move its frame, crop controls move its content.
  * This single rendering is shared by the designer, Scroll and the 3D book. */
 export default function CarolinaPhotoNode({
-  id, url, transform, photoStyle, interaction, onSelect, cover = false, position, extra = false,
+  id, url, transform, photoStyle, interaction, onSelect, cover = false, position, extra = false, pageBackground = false,
 }: Props) {
   const element = useRef<HTMLButtonElement>(null);
   const isVideo = url.startsWith('/api/videos/');
   const gesture = useCarolinaGesture(id, element, transform, interaction);
   const className = (extra ? 'hn-carolina-floating-photo' : cover ? 'hn-carolina-cover-photo' : 'hn-carolina-photo hn-carolina-photo-' + position) +
     (onSelect ? ' hn-carolina-editable-photo' : '') +
-    (gesture.selected ? ' hn-photo-transforming' : '');
+    (gesture.selected ? ' hn-photo-transforming' : '') +
+    (pageBackground ? ' hn-page-background' : '');
   const mainStyle: CSSProperties = {
     transform: gesture.transform,
-    ...(extra ? {zIndex: photoStyle?.behindText ? 1 : 4} : {}),
+    ...(extra ? {zIndex: pageBackground ? 0 : photoStyle?.behindText ? 1 : 4} : {}),
   };
   const ratio = photoStyle?.cropAspect || 'frame';
   const ratioStyle = ratio !== 'frame' ? {'--crop-ratio': String(CROP_ASPECT_RATIOS[ratio])} as CSSProperties : undefined;
