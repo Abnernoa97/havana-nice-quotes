@@ -125,3 +125,23 @@
    Preserve the finger stream for panning/pinching instead of native scrolling. */
 .hn-canvas .hn-carolina-page.hn-layout-grid,
 .hn-canvas.hn-text-focus .hn-carolina-page{touch-action:none}
+
+/* Text input stays on the same visible page, never in a tiny bottom-left hotspot. */
+.hn-canvas .hn-centered-extra-text .hn-carolina-text-node.editing{
+  min-width:1.5ch;min-height:1.1em;outline:1px dashed #ead3a0;
+  outline-offset:5px;background:transparent;border:0;border-radius:0;
+  color:inherit;text-shadow:inherit;
+}
+.hn-canvas .hn-centered-extra-text .hn-carolina-text-node.empty{
+  min-width:1.5ch;min-height:1.2em;color:#fff;
+}
+.hn-canvas .hn-carolina-page,.hn-canvas .hn-carolina-text-node,
+.hn-canvas .hn-carolina-photo-overlay{
+  -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
+}
+.hn-canvas .hn-carolina-text-node.editing{
+  -webkit-touch-callout:none;
+}
+/* The active page owns drag gestures even when a keyboard is open. */
+.hn-canvas.hn-text-focus .hn-canvas-sheet,
+.hn-canvas.hn-text-focus .hn-carolina-page{touch-action:none;overscroll-behavior:contain}
