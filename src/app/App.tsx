@@ -76,6 +76,7 @@ function App() {
   const [saveBusy,setSaveBusy]=useState(false);
   // Reuse this ID when a template-derived quote is retried after a sync failure.
   const templateQuoteSave=useRef<{sourceId:string;quoteId:string}|null>(null);
+  const closedAfterSave=useRef(new Set<string>());
   const [search, setSearch] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [clientMessage, setClientMessage] = useState('');
@@ -85,7 +86,8 @@ function App() {
   ) : null;
   const clientQuotes = quotes.filter(quote => !quote.isTemplate);
   const ownTemplates = quotes.filter(quote => quote.isTemplate);
-  const item = (workingQuote?.id===active ? workingQuote : null) || quotes.find(q => q.id === active);
+  const item = closedAfterSave.current.has(active) ? undefined :
+    ((workingQuote?.id===active ? workingQuote : null) || quotes.find(q => q.id === active));
   const styleName = item?.style && editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
   useEffect(() => {
     if (toast) {
@@ -126,7 +128,7 @@ function App() {
   };
   const addQuote = () => {
     const id='hn-'+crypto.randomUUID();
-    templateQuoteSave.current=null;
+    templateQuoteSave.current=null;closedAfterSave.current.delete(id);
     setWorkingQuote(createQuoteDraft(id));
     setNewMessage('');setClientMessage('');setSaveDialogOpen(false);
     routeTo({active:id,tab:'styles',section:'editor',preview:false,mobileMenu:false});
@@ -134,7 +136,7 @@ function App() {
   };
   const createTemplate = () => {
     const id='hn-'+crypto.randomUUID();
-    templateQuoteSave.current=null;
+    templateQuoteSave.current=null;closedAfterSave.current.delete(id);
     setWorkingQuote(null);setSaveDialogOpen(false);
     setQuotes(list=>[createOwnTemplate(id),...list]);
     setNewMessage('');setClientMessage('');
@@ -146,7 +148,7 @@ function App() {
     if(!source)return;
     const id='hn-'+crypto.randomUUID();
     const clone=duplicateQuote(source,id,resetClient);
-    templateQuoteSave.current=null;
+    templateQuoteSave.current=null;closedAfterSave.current.delete(id);
     setWorkingQuote(clone);setSaveDialogOpen(false);
     setNewMessage('');setClientMessage('');
     routeTo({active:id,tab:'details',section:'editor',preview:false,mobileMenu:false});
@@ -154,7 +156,7 @@ function App() {
   };
   const editOwnTemplate = (id:string) => {
     if(!ownTemplates.some(template=>template.id===id))return;
-    templateQuoteSave.current=null;
+    templateQuoteSave.current=null;closedAfterSave.current.delete(id);
     setWorkingQuote(null);setSaveDialogOpen(false);
     routeTo({active:id,tab:'design',section:'editor',preview:false,mobileMenu:false});
   };
@@ -178,6 +180,7 @@ function App() {
     }
   };
   const selectQuote = (id: string, target = 'editor') => {
+    closedAfterSave.current.delete(id);
     if (id !== active) {
       setNewMessage('');
       setClientMessage('');
@@ -224,6 +227,7 @@ function App() {
       if(ok){
         setSaveDialogOpen(false);
         templateQuoteSave.current=null;
+        closedAfterSave.current.add(item.id);closedAfterSave.current.add(saved.id);
         setWorkingQuote(null);
         // Do not reopen the latest quotation or the template after a successful save.
         routeTo({active:'empty',section:'editor',tab:'styles',preview:false,mobileMenu:false},'replace');
