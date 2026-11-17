@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createOwnTemplate,duplicateQuote} from '../src/features/quotes/model.ts';
 import {validCarolinaLayout,carolinaPageOrder,MAX_DESIGN_PAGES} from '../src/features/templates/carolina-layout.ts';
 import {insertBlankPage,duplicateBlankPage,shiftPage,removeDesignPage} from '../src/features/templates/blank-pages.ts';
+import {pageBackgroundMediaId} from '../src/features/templates/page-background.ts';
 const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
 const one='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',two='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 test('Crear plantilla desde cero abre una sola hoja blanca persistente',()=>{
@@ -113,4 +114,62 @@ test('Selección de archivo es requisito para persistir un nuevo recuadro',()=>{
  const sheet=canvas.split('<div className="hn-canvas-sheet"')[1].split('<div className="hn-canvas-pager">')[0];
  assert.match(sheet,/data-hn-text-trash/);
  assert.doesNotMatch(sheet,/Eliminar foto · Arrastra aquí/);
+});
+
+test('El primer archivo confirmado es fondo de la hoja libre y cada página es independiente',()=>{
+ const media='/api/videos/11111111-1111-1111-1111-111111111111';
+ const layout={pageOrder:[3,4],extraPhotos:[
+  {id:one,page:3,url:''},
+  {id:two,page:3,url:media},
+  {id:'cccccccc-cccc-cccc-cccc-cccccccccccc',page:4,url:'/api/media/11111111-1111-1111-1111-111111111111'}]};
+ assert.equal(validCarolinaLayout(layout),true);
+ assert.equal(pageBackgroundMediaId(layout,3),two);
+ assert.equal(pageBackgroundMediaId(layout,4),'cccccccc-cccc-cccc-cccc-cccccccccccc');
+ assert.equal(pageBackgroundMediaId(layout,0),undefined);
+ assert.equal(pageBackgroundMediaId({...layout,extraPhotos:[]},3),undefined);
+ assert.equal(pageBackgroundMediaId(removeDesignPage(layout,4).layout,3),two);
+});
+test('Un solo motor pinta el fondo completo y el texto encima en Diseño, Scroll y 3D',()=>{
+ const page=src('features/templates/CarolinaTemplate.tsx');
+ const media=src('features/templates/CarolinaPhotoNode.tsx');
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const css=src('features/templates/carolina-template.css');
+ const styles=src('features/editor/canvas/template-canvas.css');
+ assert.match(page,/pageBackgroundMediaId\(item\.designLayout,page\)/);
+ assert.match(page,/pageBackground=\{pageBackground\}/);
+ assert.match(media,/hn-page-background/);
+ assert.match(css,/\.hn-carolina-photo-overlay \.hn-carolina-floating-photo\.hn-page-background/);
+ assert.match(styles,/\.hn-canvas \.hn-carolina-extra-layer\{z-index:16\}/);
+ assert.match(page,/<ExtraTexts item=\{item\} page=\{page\}/);
+ assert.match(canvas,/isPageBackground=\{selectedPhotoId==='photo-extra:'\+pageBackgroundId\}/);
+});
+test('Video se edita como foto con opacidad, colores, recorte y viñeta',()=>{
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const workspace=src('features/editor/photos/PhotoEditingWorkspace.tsx');
+ const dock=src('features/editor/photos/PhotoStyleDock.tsx');
+ const media=src('features/templates/CarolinaPhotoNode.tsx');
+ const cover=src('features/templates/CoverMediaNode.tsx');
+ assert.match(canvas,/const url = id==='photo:cover' \? \(item\.coverVideo \|\| item\.cover\)/);
+ assert.match(canvas,/if \(!url\) \{/);
+ assert.match(workspace,/const isVideo=url\.startsWith\('\/api\/videos\/'\)/);
+ assert.match(workspace,/isVideo=\{isVideo\}/);
+ assert.match(dock,/isVideo\?'Opacidad del video':'Opacidad de la imagen'/);
+ assert.match(dock,/label:'Colorizar'/);
+ assert.match(dock,/label:'Viñeta'/);
+ assert.match(dock,/label:'Recortar'/);
+ assert.match(media,/hn-carolina-video-fill/);
+ assert.match(media,/opacity:\(photoStyle\?\.opacity \?\? D\.opacity\) \/ 100/);
+ assert.match(cover,/item\.coverVideo\|\|item\.cover/);
+});
+test('Tocar la hoja cierra la transformación y Capas aparece solo al editar',()=>{
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const gesture=src('features/templates/useCarolinaGesture.ts');
+ const workspace=src('features/editor/photos/PhotoEditingWorkspace.tsx');
+ assert.match(gesture,/selectedAtPress\.current/);
+ assert.match(gesture,/onDeselectTransform\?\.\(id\)/);
+ assert.match(canvas,/onDeselectTransform: \(\) =>/);
+ assert.match(canvas,/onClickCapture=\{event=>/);
+ assert.match(canvas,/clearSelection\(\);event\.stopPropagation\(\);return/);
+ assert.match(canvas,/layersPanel=\{<PhotoLayersPanel/);
+ assert.match(workspace,/\{layersPanel\}/);
 });
