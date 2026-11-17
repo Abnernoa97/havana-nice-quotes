@@ -3,7 +3,7 @@ import { Search, ArrowUpRight, Image as ImageIcon, Trash2 } from 'lucide-react';
 import './quotes-trash.css';
 import { money, dDate } from '../../shared/lib/formatters';
 import type { Quote } from './types';
-import { filterQuotes } from './model';
+import { filterQuotes, QUOTE_FILTERS, quoteDisplayName, quoteDisplayStatus } from './model';
 
 type Props = {
   quotes: Quote[];
@@ -47,7 +47,7 @@ export default function QuotesScreen({
           <div className="search-box">
             <Search size={17} />
             <input
-              placeholder="Buscar por pareja o destino..."
+              placeholder="Buscar por nombre, pareja o destino..."
               aria-label="Buscar cotizaciones"
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -55,7 +55,7 @@ export default function QuotesScreen({
           </div>
         </div>
         <div className="filters">
-          {['Todas', 'Borrador', 'Enviada', 'En revisión', 'Aceptada'].map(
+          {QUOTE_FILTERS.map(
             s => (
               <button
                 className={filter === s ? 'filter active' : 'filter'}
@@ -68,7 +68,7 @@ export default function QuotesScreen({
           )}
         </div>
         <div className="table-header">
-          <span>PAREJA / DESTINO</span>
+          <span>COTIZACIÓN / DESTINO</span>
           <span>FECHA</span>
           <span>INVERSIÓN</span>
           <span>ESTADO</span>
@@ -80,19 +80,19 @@ export default function QuotesScreen({
               <div className="table-couple">
                 {q.cover ? <img src={q.cover} alt="" /> : <span className="quote-cover-empty" aria-hidden="true"><ImageIcon size={19}/></span>}
                 <div>
-                  <strong>{q.name}</strong>
-                  <small>{q.location}</small>
+                  <strong>{quoteDisplayName(q)}</strong>
+                  <small>{q.name && q.quoteTitle ? q.name+' · ' : ''}{q.location}</small>
                 </div>
               </div>
               <span className="table-date">{dDate(q.date)}</span>
               <span className="table-price">{money(q.price, q.currency)}</span>
               <span>
-                <i className={'pill ' + statusClass(q.status)}>{q.status}</i>
+                <i className={'pill ' + statusClass(q.status)}>{quoteDisplayStatus(q.status)}</i>
               </span>
               <ArrowUpRight size={17} />
             </button>
             <button type="button" className="hn-quote-trash-action"
-              aria-label={'Enviar a papelera la cotización ' + q.name}
+              aria-label={'Enviar a papelera la cotización ' + quoteDisplayName(q)}
               title="Enviar a papelera" onClick={() => moveToTrash(q.id)}>
               <Trash2 size={17}/>
             </button>
