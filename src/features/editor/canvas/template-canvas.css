@@ -84,13 +84,6 @@
 .hn-canvas-toolbar .hn-canvas-add-page{
  display:inline-flex;align-items:center;justify-content:center;gap:5px;
  background:#234b37;color:white;border-color:#234b37}
-.hn-canvas-page-actions{display:flex;align-items:center;justify-content:center;gap:6px;
- width:min(100%,620px);margin:0 auto 16px;flex-wrap:wrap}
-.hn-canvas-page-actions .hn-canvas-page-label{font-size:11px;color:#55745e;
- font-weight:700;margin-right:8px;max-width:140px;overflow-wrap:anywhere}
-.hn-canvas-page-actions button{border:1px solid #d8e3d7;border-radius:8px;background:#fff;
- color:#345940;min-width:39px;min-height:38px;display:grid;place-items:center;cursor:pointer}
-.hn-canvas-page-actions button:disabled{opacity:.33;cursor:default}
 .hn-canvas .hn-blank-page{aspect-ratio:612/792;background:#fff}
 @media(max-width:530px){.hn-canvas-toolbar>button{flex:1 1 28%;min-width:0}}
 
@@ -100,3 +93,24 @@
 .hn-canvas .hn-blank-page .hn-carolina-extra-layer{z-index:16}
 .hn-canvas .hn-blank-page .hn-carolina-added-text{background:transparent;color:#fff;text-shadow:0 1px 7px #0008}
 .hn-canvas .hn-blank-page:not(:has(.hn-page-background)) .hn-carolina-added-text{color:#243d31;text-shadow:none}
+
+/* A single real sheet remains mounted during editing: controls stay BELOW it.
+   Container units fit the page above the tools on narrow phones and large screens. */
+.hn-canvas-stage{width:min(100%,620px);margin:0 auto;min-width:0}
+.hn-canvas-pager{gap:9px;flex-wrap:nowrap}
+.hn-canvas-pager button{flex:0 0 39px}
+.hn-canvas-pager span{min-width:53px;text-align:center;font-variant-numeric:tabular-nums}
+.hn-canvas.hn-text-focus{position:fixed;inset:0;z-index:850;padding:6px 8px max(5px,env(safe-area-inset-bottom));margin:0;
+  display:flex;flex-direction:column;overflow:hidden;isolation:isolate;background:#f5f7f3}
+.hn-canvas.hn-text-focus .hn-canvas-toolbar{flex:0 0 auto;margin:0 auto 6px}
+.hn-canvas.hn-text-focus .hn-canvas-toolbar button{min-height:35px}
+.hn-canvas.hn-text-focus .hn-canvas-toolbar>span{display:none}
+.hn-canvas.hn-text-focus .hn-canvas-stage{flex:1 1 0;min-height:0;width:100%;max-width:none;
+  display:flex;justify-content:center;align-items:center;overflow:auto;container-type:size;
+  padding:5px 0;box-sizing:border-box;overscroll-behavior:contain}
+.hn-canvas.hn-text-focus .hn-canvas-sheet{width:min(98cqw,calc(98cqh * 612 / 792));
+  max-width:none;flex:0 0 auto;margin:auto;box-shadow:0 4px 20px #142c222c}
+.hn-canvas.hn-text-focus .hn-canvas-pager{display:none}
+.hn-canvas.hn-text-focus .hn-carolina-page{touch-action:pan-y}
+.hn-canvas.hn-text-focus .hn-carolina-text-node.transforming{touch-action:none}
+.hn-canvas.hn-text-focus .hn-canvas-trash{width:42px;height:42px;min-width:42px}
