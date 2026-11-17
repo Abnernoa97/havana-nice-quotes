@@ -160,7 +160,7 @@ export default function PhotoStyleDock({
           <button type="button" onClick={()=>onStyleChange({cropRotation:Math.min(180,(style?.cropRotation??0)+90)})}>90° ↷</button>
         </div>
         <div className="hn-photo-crop-footer">
-          <small>Mueve con un dedo · Pellizca y gira con dos · Ajusta desde las esquinas</small>
+          <small>Mueve con un dedo · Pellizca para ampliar · Usa Girar para rotar</small>
           <button className="hn-photo-reset" type="button" onClick={()=>onStyleChange({
             cropZoom:100,cropX:50,cropY:50,cropRotation:0,cropAspect:'frame'
           })}>Restablecer</button>
