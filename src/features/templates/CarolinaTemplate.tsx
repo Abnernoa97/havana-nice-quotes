@@ -59,10 +59,10 @@ export function ExtraTexts({ item, page, interaction }: PageProps & { page: numb
     <div className="hn-carolina-extra-layer">
       {entries.map(extra => {
         const id = 'extra:' + extra.id;
-        return <div className="hn-carolina-added-text" key={extra.id}>
+        return <div className={'hn-carolina-added-text'+(extra.centered?' hn-centered-extra-text':'')} key={extra.id}>
           <CarolinaTextNode id={id} text={extra.text} extra
             transform={item.designLayout?.transforms?.[id]}
-            fontId={item.designLayout?.fonts?.[id] || item.designLayout?.defaultFont}
+            fontId={item.designLayout?.fonts?.[id] || (extra.centered?'playfair-display':item.designLayout?.defaultFont)}
             textStyle={item.designLayout?.textStyles?.[id]}
             interaction={interaction}/>
         </div>;
