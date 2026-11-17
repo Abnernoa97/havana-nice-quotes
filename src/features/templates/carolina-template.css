@@ -237,3 +237,10 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
  color:#243d31;
 }
 .hn-carolina-extra-layer{z-index:16}
+
+/* Text wins over additional photo/video overlays on all preset pages as well. */
+.hn-carolina-cover-brand,.hn-carolina-cover-personal,.hn-carolina-term-group{z-index:16}
+.hn-canvas .hn-carolina-cover-brand,.hn-canvas .hn-carolina-cover-personal{z-index:16}
+.hn-editorial-cover .hn-editorial-top,.hn-editorial-cover .hn-editorial-hero{z-index:16}
+.hn-editorial-terms>.hn-editorial-rule,.hn-editorial-terms>.hn-editorial-story,
+.hn-editorial-terms>.hn-editorial-signoff{position:relative;z-index:16}
