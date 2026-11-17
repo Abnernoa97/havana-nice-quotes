@@ -5,7 +5,6 @@ import { PageFlip } from 'page-flip';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
 import { CarolinaCover, CarolinaCollage, CarolinaTerms } from '../templates/CarolinaTemplate';
 import { EditorialCover, EditorialCollage, EditorialTerms } from '../templates/EditorialTemplate';
-import { withDesignLayout } from '../templates/design-layout';
 import { templateFamily } from '../templates/template-registry';
 import { carolinaPageOrder } from '../templates/carolina-layout';
 import './flip-magazine.css';
@@ -20,15 +19,14 @@ function MagazineLeaf({ children, className = '' }: { children: ReactNode; class
  * The source leaves are kept outside the flip container so a React
  * StrictMode remount always gets fresh page nodes.
  */
-export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
-  const item=withDesignLayout(rawItem);
+export default function FlipMagazine({ item }: { item: Quote }) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const sourceRef = useRef<HTMLDivElement | null>(null);
   const flipRef = useRef<PageFlip | null>(null);
   const [page, setPage] = useState(0);
   const [orientation, setOrientation] = useState('portrait');
   const [failure, setFailure] = useState(false);
-  const selectedPages = carolinaPageOrder(item.carolinaLayout);
+  const selectedPages = carolinaPageOrder(item.designLayout);
   const total = selectedPages.length;
 
   useEffect(() => {
@@ -121,7 +119,7 @@ export default function FlipMagazine({ item:rawItem }: { item: Quote }) {
       mount.replaceChildren();
     };
   }, [item.id, item.cover, item.coverVideo, item.name, item.note, item.package, item.price, item.location, item.deposit, item.desc, item.date, item.currency, item.style,
-    JSON.stringify(item.gallery), JSON.stringify(item.carolinaCopy), JSON.stringify(item.carolinaLayout)]);
+    JSON.stringify(item.gallery), JSON.stringify(item.carolinaCopy), JSON.stringify(item.designLayout)]);
 
   const changePage = (direction: 'next' | 'prev') => {
     const flip = flipRef.current;

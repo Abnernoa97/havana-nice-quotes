@@ -47,7 +47,7 @@ test('Edición directa, presión larga y gesto de dos dedos mantienen un solo gu
   assert.match(gesture,/onCommitTransform\(id, current\.current\)/);
   assert.match(canvas,/onCommitTransform: \(id: string, transform: CarolinaTransform\)/);
   assert.match(canvas,/setTransformingId\(null\)/);
-  assert.match(worker,/validCarolinaLayout\(q\.carolinaLayout\)/);
+  assert.match(worker,/validCarolinaLayout\(q\.designLayout\)/);
 });
 
 
@@ -65,7 +65,7 @@ test('Fotografías de portada y collage comparten gestos, posiciones y escala pe
   const cover=readFileSync(new URL('../src/features/templates/CoverMediaNode.tsx',import.meta.url),'utf8');
   assert.match(cover,/id="photo:cover"/);
   assert.equal((template.match(/id=\{'photo:' \+ slot\}/g)||[]).length,2);
-  assert.match(cover,/transform=\{item\.carolinaLayout\?\.transforms\?\.\['photo:cover'\]\}/);
+  assert.match(cover,/transform=\{item\.designLayout\?\.transforms\?\.\['photo:cover'\]\}/);
   assert.match(canvas,/onSelectCover=\{\(\)=>selectPhoto\('photo:cover'\)\}/);
   assert.match(canvas,/\.hn-carolina-photo, \.hn-carolina-cover-photo/);
   assert.match(layout,/photo:\(\?:cover\|1\[01\]\|\[0-9\]\)/);
@@ -108,7 +108,7 @@ test('El diseñador usa una sola barra de fotos sin acciones antiguas ni duplica
   assert.match(canvas,/const replacePhoto = \(\) =>/);
   assert.doesNotMatch(canvas,/hn-canvas-photo-actions|reorderPhotoBlock|duplicatePhotoBlock|clearPhotoBlock/);
   assert.doesNotMatch(css,/hn-canvas-photo-actions/);
-  assert.match(template,/carolinaPhotoOrder\(item\.carolinaLayout\)/);
+  assert.match(template,/carolinaPhotoOrder\(item\.designLayout\)/);
   assert.match(worker,/q\.gallery\.length <= 12/);
 });
 

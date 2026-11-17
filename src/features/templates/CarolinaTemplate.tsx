@@ -37,21 +37,21 @@ type FieldNodeProps = PageProps & { field: string; value: string; instance?: 'co
 function FieldNode({ item, field, value, interaction, instance }: FieldNodeProps) {
   const id = 'field:' + field + (instance ? ':' + instance : '');
   return <CarolinaTextNode id={id} text={value}
-    transform={item.carolinaLayout?.transforms?.[id]}
-    fontId={item.carolinaLayout?.fonts?.[id] || item.carolinaLayout?.defaultFont}
-    textStyle={item.carolinaLayout?.textStyles?.[id]}
+    transform={item.designLayout?.transforms?.[id]}
+    fontId={item.designLayout?.fonts?.[id] || item.designLayout?.defaultFont}
+    textStyle={item.designLayout?.textStyles?.[id]}
     interaction={interaction}/>;
 }
 function FixedNode({ item, field, interaction }: PageProps & { field: CarolinaFixedKey }) {
   const id = 'fixed:' + field;
-  return <CarolinaTextNode id={id} text={fixedText(item.carolinaLayout, field)}
-    transform={item.carolinaLayout?.transforms?.[id]}
-    fontId={item.carolinaLayout?.fonts?.[id] || item.carolinaLayout?.defaultFont}
-    textStyle={item.carolinaLayout?.textStyles?.[id]}
+  return <CarolinaTextNode id={id} text={fixedText(item.designLayout, field)}
+    transform={item.designLayout?.transforms?.[id]}
+    fontId={item.designLayout?.fonts?.[id] || item.designLayout?.defaultFont}
+    textStyle={item.designLayout?.textStyles?.[id]}
     interaction={interaction}/>;
 }
 export function ExtraTexts({ item, page, interaction }: PageProps & { page: number }) {
-  const entries = item.carolinaLayout?.extras?.filter(e => e.page === page) || [];
+  const entries = item.designLayout?.extras?.filter(e => e.page === page) || [];
   if (!entries.length) return null;
   return (
     <div className="hn-carolina-extra-layer">
@@ -59,9 +59,9 @@ export function ExtraTexts({ item, page, interaction }: PageProps & { page: numb
         const id = 'extra:' + extra.id;
         return <div className="hn-carolina-added-text" key={extra.id}>
           <CarolinaTextNode id={id} text={extra.text} extra
-            transform={item.carolinaLayout?.transforms?.[id]}
-            fontId={item.carolinaLayout?.fonts?.[id] || item.carolinaLayout?.defaultFont}
-            textStyle={item.carolinaLayout?.textStyles?.[id]}
+            transform={item.designLayout?.transforms?.[id]}
+            fontId={item.designLayout?.fonts?.[id] || item.designLayout?.defaultFont}
+            textStyle={item.designLayout?.textStyles?.[id]}
             interaction={interaction}/>
         </div>;
       })}
@@ -72,14 +72,14 @@ export function ExtraTexts({ item, page, interaction }: PageProps & { page: numb
 export function ExtraPhotos({ item, page, interaction, onSelectPhoto }: PageProps & {
   page: number; onSelectPhoto?: (id:string)=>void;
 }) {
-  const photos=item.carolinaLayout?.extraPhotos?.filter(p=>p.page===page)||[];
+  const photos=item.designLayout?.extraPhotos?.filter(p=>p.page===page)||[];
   if (!photos.length) return null;
   return <div className="hn-carolina-photo-overlay">
     {photos.map(photo=>{
       const id='photo-extra:'+photo.id;
       return <CarolinaPhotoNode key={id} id={id} url={photo.url} extra
-        transform={item.carolinaLayout?.transforms?.[id]}
-        photoStyle={item.carolinaLayout?.photoStyles?.[id]}
+        transform={item.designLayout?.transforms?.[id]}
+        photoStyle={item.designLayout?.photoStyles?.[id]}
         interaction={interaction}
         onSelect={onSelectPhoto ? ()=>onSelectPhoto(photo.id) : undefined}/>;
     })}
@@ -120,7 +120,7 @@ export function CarolinaCollage({ item, onSelectPhoto, interaction, onSelectExtr
   onSelectExtraPhoto?: (id:string)=>void;
 }) {
   const images = carolinaPhotos(item);
-  const order = carolinaPhotoOrder(item.carolinaLayout);
+  const order = carolinaPhotoOrder(item.designLayout);
   const leftCount = order.length === CAROLINA_SLOTS ? 2 : Math.ceil(order.length / 2);
   const left = order.slice(0, leftCount);
   const right = order.slice(leftCount);
@@ -131,15 +131,15 @@ export function CarolinaCollage({ item, onSelectPhoto, interaction, onSelectExtr
       <div className="hn-carolina-photo-column left">
         {left.map((slot, i) => <CarolinaPhotoNode key={slot} id={'photo:' + slot}
           url={images[slot]} position={i + 1}
-          transform={item.carolinaLayout?.transforms?.['photo:' + slot]}
-          photoStyle={item.carolinaLayout?.photoStyles?.['photo:' + slot]}
+          transform={item.designLayout?.transforms?.['photo:' + slot]}
+          photoStyle={item.designLayout?.photoStyles?.['photo:' + slot]}
           interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(slot) : undefined}/>)}
       </div>
       <div className="hn-carolina-photo-column right">
         {right.map((slot, i) => <CarolinaPhotoNode key={slot} id={'photo:' + slot}
           url={images[slot]} position={leftCount + i + 1}
-          transform={item.carolinaLayout?.transforms?.['photo:' + slot]}
-          photoStyle={item.carolinaLayout?.photoStyles?.['photo:' + slot]}
+          transform={item.designLayout?.transforms?.['photo:' + slot]}
+          photoStyle={item.designLayout?.photoStyles?.['photo:' + slot]}
           interaction={interaction} onSelect={onSelectPhoto ? () => onSelectPhoto(slot) : undefined}/>)}
       </div>
       <ExtraPhotos item={item} page={1} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
@@ -206,7 +206,7 @@ export function CarolinaTerms({ item, interaction, onSelectExtraPhoto }: PagePro
 export default function CarolinaDocument({ item }: { item: Quote }) {
   return (
     <div className="hn-carolina-document">
-      {carolinaPageOrder(item.carolinaLayout).map(page=>{
+      {carolinaPageOrder(item.designLayout).map(page=>{
         if (page===0) return <CarolinaCover key="cover" item={item}/>;
         if (page===1) return <CarolinaCollage key="collage" item={item}/>;
         return <CarolinaTerms key="terms" item={item}/>;

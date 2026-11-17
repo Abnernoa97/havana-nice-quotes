@@ -542,7 +542,7 @@ test('Cotización Carolina guarda 6 fotos privadas y su texto editable en D1 sin
   assert.equal(over.status,400);
   const expanded=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
     {quote:{...quote,gallery:[...gallery,...Array(6).fill('')],
-      carolinaLayout:{photoOrder:[0,1,2,3,4,5,6,7,8,9,10,11]}},expectedRevision:1},cookie),env);
+      designLayout:{photoOrder:[0,1,2,3,4,5,6,7,8,9,10,11]}},expectedRevision:1},cookie),env);
   assert.equal(expanded.status,200);
   const external=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
     {quote:{...quote,gallery:['https://stock.example/photo.jpg']},expectedRevision:2},cookie),env);
@@ -558,7 +558,7 @@ test('Carolina conserva títulos, textos adicionales y geometría entre disposit
     id, name:'Couple',client:'',email:'',location:'Mexico',date:'2027-10-11',
     price:25000,deposit:40,status:'Borrador',cover:'',font:'editorial',color:'#18342f',
     note:'',package:'',desc:'',style:'carolina',readingMode:'flip',
-    carolinaLayout:{
+    designLayout:{
       fixed:{experience:'Our Wedding Experience',brand:'HAVANA NICE',investment:''},
       pageOrder:[0,2],
       extraPhotos:[{id:'99999999-9999-9999-9999-999999999999',page:2,url:'/api/media/11111111-1111-1111-1111-111111111111'}],
@@ -582,9 +582,9 @@ test('Carolina conserva títulos, textos adicionales y geometría entre disposit
   assert.equal(created.status,200);
   const received=await worker.fetch(request('/api/quotes',{headers:{Cookie:cookie}}),env);
   assert.deepEqual((await received.json()).quotes[0].quote,quote);
-  const modified={...quote,carolinaLayout:{
-    ...quote.carolinaLayout,
-    transforms:{...quote.carolinaLayout.transforms,'field:name':{x:-10,y:3,scale:2,rotation:90}},
+  const modified={...quote,designLayout:{
+    ...quote.designLayout,
+    transforms:{...quote.designLayout.transforms,'field:name':{x:-10,y:3,scale:2,rotation:90}},
   }};
   assert.equal((await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
     {quote:modified,expectedRevision:1},cookie),env)).status,200);
@@ -626,18 +626,17 @@ test('API bloquea layouts con tamaños infinitos, campos no admitidos o extras c
   ];
   for (const layout of bad) {
     const response=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
-      {quote:{...quote,carolinaLayout:layout},expectedRevision:0},cookie),env);
+      {quote:{...quote,designLayout:layout},expectedRevision:0},cookie),env);
     assert.equal(response.status,400,'Invalid design layout must be rejected');
   }
 });
 
-test('Las seis plantillas guardan el mismo modelo universal D1 sin perder el respaldo Carolina',async()=>{
+test('Las seis plantillas guardan solamente designLayout en D1',async()=>{
   const env=environment(),cookie=await authorizeDevice(env);
   const styles=['carolina','libre','vogue','lane','junebug','nyt'];
   for(let i=0;i<styles.length;i++){
     const digit=String(i+1);
     const id='hn-'+digit.repeat(8)+'-'+digit.repeat(4)+'-'+digit.repeat(4)+'-'+digit.repeat(4)+'-'+digit.repeat(12);
-    const previous={fixed:{brand:'HAVANA NICE'},photoStyles:{'photo:cover':{opacity:80}}};
     const universal={
       fixed:{brand:'Our Celebration'},
       photoStyles:{'photo:cover':{cropRotation:45,brightness:110,opacity:75}},
@@ -649,7 +648,7 @@ test('Las seis plantillas guardan el mismo modelo universal D1 sin perder el res
       date:'2028-05-15',price:150000,deposit:40,status:'Borrador',
       cover:'',font:'editorial',color:'#18342f',note:'',package:'Live Music',
       desc:'',style:styles[i],readingMode:'flip',
-      carolinaLayout:previous,designLayout:universal};
+      designLayout:universal};
     const saved=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
       {quote,expectedRevision:0},cookie),env);
     assert.equal(saved.status,200,'D1 universal para '+styles[i]);

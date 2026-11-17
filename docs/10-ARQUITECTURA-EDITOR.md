@@ -59,11 +59,11 @@ src/features/editor/
 
 ## Universalización · 16/11/2026
 
-Un único motor de edición para todas las plantillas; `template-registry.ts` contiene todas las opciones oficiales. `design-layout.ts` define `designLayout` y su lectura de compatibilidad con `carolinaLayout` sin modificar ni eliminar cotizaciones antiguas. Las páginas editoriales, de Carolina, Scroll y 3D utilizan los mismos IDs y nodos editables de fotografía, texto, tipografía, viñeta, recorte, capas y gestos.
+Un único motor de edición para todas las plantillas; `template-registry.ts` contiene todas las opciones oficiales. El modelo `Quote` guarda exclusivamente `designLayout`, cuyo esquema de posiciones, fuentes y efectos se define en `carolina-layout.ts` (motor activo, también usado por la plantilla Carolina). Las páginas editoriales, de Carolina, Scroll y 3D utilizan los mismos IDs y nodos editables de fotografía, texto, tipografía, viñeta, recorte, capas y gestos.
 
 **Cómo añadir una plantilla:** agregar su ID y nombre al registro y su hoja de estilo. Automáticamente recibirá las tres páginas, herramientas de fotos/textos, persistencia en D1, selector de imágenes R2 y lectura Scroll/3D. Para estructura exclusiva, crear un nuevo adaptador de páginas que emplee los componentes compartidos, sin duplicar el motor de edición.
 
-**Importante:** la migración de diseños viejos es *de lectura*: `designLayout ?? carolinaLayout`; la primera modificación guarda el modelo universal. El campo antiguo queda conservado como respaldo. No migrar masivamente cotizaciones D1 sin consentimiento y respaldo.
+**Sin lectura heredada:** se eliminó por completo el adaptador `design-layout.ts` y el campo `carolinaLayout` del código. No hay mezcla de modelos ni fallbacks. Los borradores antiguos que dependían del formato anterior pueden perder sus ediciones; la base D1 y los archivos R2 no se han borrado.
 
 ## Medios: módulos vigentes
 
@@ -78,4 +78,4 @@ Un único motor de edición para todas las plantillas; `template-registry.ts` co
 
 El código antiguo de reproductores por tarjeta y estadísticas duplicadas se retiró. Las miniaturas antiguas se generan secuencialmente para evitar consumo simultáneo de varios decodificadores.
 
-**Mantener:** adaptador `carolinaLayout` para propuestas guardadas anteriormente. No migrar ni borrar datos reales sin respaldo.
+**Modelo único:** `designLayout` es la única fuente de verdad. `carolina-layout.ts` contiene funciones y validaciones vigentes de las plantillas, no un segundo campo de almacenamiento. No reintroducir adaptadores antiguos.

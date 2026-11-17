@@ -18,7 +18,6 @@ import type { CarolinaPageId } from '../../templates/carolina-layout';
 import { normalizePriceInput, safeQuotePrice } from '../../quotes/model';
 import type { Quote } from '../../quotes/types';
 import type { CloudPhoto } from '../../photos/useMediaLibrary';
-import { withDesignLayout } from '../../templates/design-layout';
 import { templateFamily } from '../../templates/template-registry';
 import { EditorialCover, EditorialCollage, EditorialTerms } from '../../templates/EditorialTemplate';
 import { CarolinaCover, CarolinaCollage, CarolinaTerms, carolinaPhotos } from '../../templates/CarolinaTemplate';
@@ -33,8 +32,7 @@ type Props = {
 const pages = ['Portada', 'Collage', 'Propuesta'] as const;
 
 /** A real preview becomes the editor: 3 Canva pages, 7 independently selectable photo regions. */
-export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUploadPhoto }: Props) {
-  const item=withDesignLayout(rawItem);
+export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto }: Props) {
   const editorial=templateFamily(item.style)==='editorial';
   const [page, setPage] = useState<CarolinaPageId>(0);
   const [target, setTarget] = useState<PhotoTarget | null>(null);
@@ -50,11 +48,11 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   useEffect(() => {
-    setPage(carolinaPageOrder(item.carolinaLayout)[0]); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
+    setPage(carolinaPageOrder(item.designLayout)[0]); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
     setLastTextId(null); setSelectedPhotoId(null); setPhotoTool(null); setPhotoLayersOpen(false); setTrashHovered(false);
   }, [item.id, item.style]);
   const updateLayout = (patch: Partial<CarolinaLayout>) => {
-    edit('designLayout', { ...item.carolinaLayout, ...patch });
+    edit('designLayout', { ...item.designLayout, ...patch });
   };
   const textInteraction: CarolinaTextInteraction = {
     editingId, transformingId,
@@ -65,9 +63,9 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
       const value = raw.trim().slice(0, 3000);
       if (id.startsWith('fixed:')) {
         const key = id.slice(6) as CarolinaFixedKey;
-        updateLayout({ fixed: { ...item.carolinaLayout?.fixed, [key]: value.slice(0, 1200) } });
+        updateLayout({ fixed: { ...item.designLayout?.fixed, [key]: value.slice(0, 1200) } });
       } else if (id.startsWith('extra:')) {
-        const extras = item.carolinaLayout?.extras || [];
+        const extras = item.designLayout?.extras || [];
         updateLayout({ extras: value
           ? extras.map(e => 'extra:' + e.id === id ? { ...e, text: value } : e)
           : extras.filter(e => 'extra:' + e.id !== id) });
@@ -91,7 +89,7 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
       setEditingId(null);
     },
     onCommitTransform: (id: string, transform: CarolinaTransform) => {
-      updateLayout({ transforms: { ...item.carolinaLayout?.transforms, [id]: transform } });
+      updateLayout({ transforms: { ...item.designLayout?.transforms, [id]: transform } });
       setTrashHovered(false);
     },
     onDrag: (_id,x,y) => {
@@ -106,7 +104,7 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
   };
   const addFreeText = () => {
     const id = crypto.randomUUID();
-    updateLayout({ extras: [...(item.carolinaLayout?.extras || []), {
+    updateLayout({ extras: [...(item.designLayout?.extras || []), {
       id, page: page as 0 | 1 | 2, text: '',
     }] });
     setTransformingId(null);
@@ -122,16 +120,16 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
   };
   const removeText = (id:string) => {
     if (!/^(fixed:[a-zA-Z]+|field:[a-z]+(?::cover)?|extra:[a-f0-9-]{36})$/.test(id)) return;
-    const transforms={...item.carolinaLayout?.transforms};
-    const fonts={...item.carolinaLayout?.fonts};
-    const textStyles={...item.carolinaLayout?.textStyles};
+    const transforms={...item.designLayout?.transforms};
+    const fonts={...item.designLayout?.fonts};
+    const textStyles={...item.designLayout?.textStyles};
     delete transforms[id]; delete fonts[id]; delete textStyles[id];
     const clean={transforms,fonts,textStyles};
     if (id.startsWith('fixed:')) {
       const key=id.slice(6) as CarolinaFixedKey;
-      updateLayout({...clean,fixed:{...item.carolinaLayout?.fixed,[key]:''}});
+      updateLayout({...clean,fixed:{...item.designLayout?.fixed,[key]:''}});
     } else if (id.startsWith('extra:')) {
-      updateLayout({...clean,extras:(item.carolinaLayout?.extras||[])
+      updateLayout({...clean,extras:(item.designLayout?.extras||[])
         .filter(extra=>'extra:'+extra.id!==id)});
     } else {
       const field=id.slice(6).split(':')[0] as CarolinaTextField;
@@ -146,8 +144,8 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
   };
   /** Only remove image references from the current quote; never delete its R2 media. */
   const removePhoto = (id:string) => {
-    const transforms={...item.carolinaLayout?.transforms};
-    const photoStyles={...item.carolinaLayout?.photoStyles};
+    const transforms={...item.designLayout?.transforms};
+    const photoStyles={...item.designLayout?.photoStyles};
     delete transforms[id]; delete photoStyles[id];
     if (id==='photo:cover') {
       edit('cover','');
@@ -155,7 +153,7 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
       updateLayout({transforms,photoStyles});
     } else if (id.startsWith('photo-extra:')) {
       const photoId=id.slice('photo-extra:'.length);
-      updateLayout({transforms,photoStyles,extraPhotos:(item.carolinaLayout?.extraPhotos||[])
+      updateLayout({transforms,photoStyles,extraPhotos:(item.designLayout?.extraPhotos||[])
         .filter(photo=>photo.id!==photoId)});
     } else {
       const match=/^photo:(1[01]|[0-9])$/.exec(id);
@@ -170,7 +168,7 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
     setTransformingId(null);setSelectedPhotoId(null);setLastTextId(null);setPhotoLayersOpen(false);setTrashHovered(false);setError('');
   };
   const removeElement = (id:string) => isPhotoId(id) ? removePhoto(id) : removeText(id);
-  const selectedPages=carolinaPageOrder(item.carolinaLayout);
+  const selectedPages=carolinaPageOrder(item.designLayout);
   const pageIndex=selectedPages.indexOf(page);
   const changePage = (direction: -1 | 1) => {
     setPhotoLayersOpen(false);
@@ -183,14 +181,14 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
   };
   const chooseFont = (font:ElegantFontId|null) => {
     if (!lastTextId) return;
-    const fonts={...item.carolinaLayout?.fonts};
+    const fonts={...item.designLayout?.fonts};
     if (font) fonts[lastTextId]=font;
     else delete fonts[lastTextId];
     updateLayout({fonts});
   };
   const changeTextStyle = (key:keyof CarolinaTextStyle,value:string|number|undefined) => {
     if (!lastTextId) return;
-    const textStyles={...item.carolinaLayout?.textStyles};
+    const textStyles={...item.designLayout?.textStyles};
     const next:CarolinaTextStyle={...textStyles[lastTextId]};
     if (value===undefined) delete next[key];
     else if (key==='color' && typeof value==='string') next.color=value;
@@ -201,14 +199,14 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
     else delete textStyles[lastTextId];
     updateLayout({textStyles});
   };
-  const photoOrder = carolinaPhotoOrder(item.carolinaLayout);
+  const photoOrder = carolinaPhotoOrder(item.designLayout);
   const photoLayers=listPhotoLayers(item,page);
   const setPhotoOrder = (order:number[]) => updateLayout({photoOrder:order});
   const selectPhoto = (id:string) => {
     // Empty frames open the source picker, populated photos open the immersive editor.
     const url = id==='photo:cover' ? (item.coverVideo ? '' : item.cover) :
       id.startsWith('photo-extra:') ?
-        item.carolinaLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===id)?.url :
+        item.designLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===id)?.url :
         carolinaPhotos(item)[Number(id.slice(6))];
     if (!url) {
       if (id==='photo:cover') open('cover');
@@ -234,7 +232,7 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
   };
   const updatePhotoStyle = (patch: Partial<CarolinaPhotoStyle>) => {
     if (!selectedPhotoId) return;
-    const styles = { ...item.carolinaLayout?.photoStyles };
+    const styles = { ...item.designLayout?.photoStyles };
     styles[selectedPhotoId] = { ...styles[selectedPhotoId], ...patch };
     updateLayout({ photoStyles: styles });
   };
@@ -248,7 +246,7 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
   };
   const addPhotoAnywhere=()=>{
     if (page===1) { addPhotoBlock(); return; }
-    const extras=item.carolinaLayout?.extraPhotos||[];
+    const extras=item.designLayout?.extraPhotos||[];
     if (extras.length>=24) { setError('Máximo 24 fotografías añadidas.'); return; }
     const id=crypto.randomUUID();
     updateLayout({extraPhotos:[...extras,{id,page,url:''}]});
@@ -269,7 +267,7 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
     if (target==='cover') { edit('cover',url); edit('coverVideo',''); }
     else if (typeof target==='string' && target.startsWith('extra:')) {
       const photoId=target.slice(6);
-      updateLayout({extraPhotos:(item.carolinaLayout?.extraPhotos||[]).map(photo=>
+      updateLayout({extraPhotos:(item.designLayout?.extraPhotos||[]).map(photo=>
         photo.id===photoId ? {...photo,url} : photo)});
     } else if (typeof target==='number') {
       const gallery=carolinaPhotos(item);
@@ -354,8 +352,8 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
       </div>}
       {lastTextId && transformingId!==lastTextId && (
         <TextStyleDock textId={lastTextId}
-          fontId={item.carolinaLayout?.fonts?.[lastTextId] || item.carolinaLayout?.defaultFont}
-          style={item.carolinaLayout?.textStyles?.[lastTextId]}
+          fontId={item.designLayout?.fonts?.[lastTextId] || item.designLayout?.defaultFont}
+          style={item.designLayout?.textStyles?.[lastTextId]}
           onFontChange={chooseFont} onStyleChange={changeTextStyle}
           onClose={()=>{
             if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
@@ -368,9 +366,9 @@ export default function TemplateCanvasEditor({ item:rawItem, edit, photos, onUpl
             aspect={photoAspect} pageName={pages[page]} activeTool={photoTool}
             url={selectedPhotoId==='photo:cover' ? item.cover :
               selectedPhotoId.startsWith('photo-extra:') ?
-                item.carolinaLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===selectedPhotoId)?.url || '' :
+                item.designLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===selectedPhotoId)?.url || '' :
                 carolinaPhotos(item)[Number(selectedPhotoId.slice(6))] || ''}
-            style={item.carolinaLayout?.photoStyles?.[selectedPhotoId]}
+            style={item.designLayout?.photoStyles?.[selectedPhotoId]}
             onStyleChange={updatePhotoStyle} onReplace={replacePhoto}
             onToolChange={setPhotoTool}
             onClose={()=>{setSelectedPhotoId(null);setPhotoTool(null);}}/>,

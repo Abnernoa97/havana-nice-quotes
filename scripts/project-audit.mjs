@@ -184,6 +184,15 @@ check('Un solo formateador internacional de importes', fmtCopies.length === 1 &&
   fmtCopies[0] === 'src/shared/lib/formatters.ts',
   'Intl.NumberFormat aparece en: ' + fmtCopies.join(', '));
 
+// A single persisted design model: the former compatibility adapter is deleted.
+const forbiddenLayoutRefs=all.filter(p=>/^(src|worker)\//.test(p) && /\.tsx?$/.test(p))
+  .filter(p=>/\b(carolinaLayout|withDesignLayout|getDesignLayout)\b/.test(
+    fs.readFileSync(path.join(ROOT,p),'utf8')));
+check('Un solo modelo designLayout, sin adaptador ni fallback antiguo',
+  !fileSet.has('src/features/templates/design-layout.ts') &&
+  forbiddenLayoutRefs.length===0,
+  'Referencias heredadas: '+forbiddenLayoutRefs.join(', '));
+
 const currentEditorPaths=[
   'src/features/editor/canvas/TemplateCanvasEditor.tsx',
   'src/features/editor/canvas/template-canvas.css',

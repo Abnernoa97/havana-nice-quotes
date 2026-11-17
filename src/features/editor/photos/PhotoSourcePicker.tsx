@@ -54,7 +54,7 @@ export default function PhotoSourcePicker({
             aria-label={'Elegir '+photo.name} onClick={()=>onChoose(photo.url)}>
             <PhotoThumbnail photo={photo}/>
             {(cover?item.cover===photo.url&&!item.coverVideo:
-              typeof target==='string'?item.carolinaLayout?.extraPhotos?.some(extra=>
+              typeof target==='string'?item.designLayout?.extraPhotos?.some(extra=>
                 extra.id===target.slice(6)&&extra.url===photo.url):
               (item.gallery||[])[target as number]===photo.url)&&<Check size={16}/>}
           </button>)}

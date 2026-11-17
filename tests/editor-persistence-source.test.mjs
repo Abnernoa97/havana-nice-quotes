@@ -192,7 +192,7 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.match(template, /export function CarolinaCover/);
   assert.match(template, /export function CarolinaCollage/);
   assert.match(template, /export function CarolinaTerms/);
-  assert.match(template, /carolinaPageOrder\(item\.carolinaLayout\)\.map\(page=>/);
+  assert.match(template, /carolinaPageOrder\(item\.designLayout\)\.map\(page=>/);
   assert.match(template, /<CarolinaCover key="cover" item=\{item\}\/>/);
   assert.match(template, /<CarolinaCollage key="collage" item=\{item\}\/>/);
   assert.match(template, /<CarolinaTerms key="terms" item=\{item\}\/>/);
@@ -339,7 +339,7 @@ test('Carolina: todos los textos variables se editan tocando la página y llegan
   assert.match(template, /export function CarolinaTerms\(\{ item, interaction, onSelectExtraPhoto \}/);
   assert.match(template, /<CarolinaTextNode id=\{id\} text=\{value\}/);
   assert.match(model, /carolinaCopy\?: Partial<CarolinaCopy>/);
-  assert.match(model, /carolinaLayout\?: CarolinaLayout/);
+  assert.match(model, /designLayout\?: CarolinaLayout/);
   assert.match(layout, /export function validCarolinaLayout/);
   assert.match(node, /contentEditable=\{editing \? 'plaintext-only' : undefined\}/);
   assert.match(node, /onBlur=\{\(\) =>/);
@@ -371,15 +371,15 @@ test('Fotos editables en el diseño real y visor: los 7 recuadros usan un solo g
   const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
   assert.match(image,/useCarolinaGesture\(id, element, transform, interaction\)/);
   const cover=src('features/templates/CoverMediaNode.tsx');
-  assert.match(cover,/item\.carolinaLayout\?\.transforms\?\.\['photo:cover'\]/);
-  assert.equal((template.match(/item\.carolinaLayout\?\.transforms\?\.\['photo:' \+ slot\]/g)||[]).length,2);
+  assert.match(cover,/item\.designLayout\?\.transforms\?\.\['photo:cover'\]/);
+  assert.equal((template.match(/item\.designLayout\?\.transforms\?\.\['photo:' \+ slot\]/g)||[]).length,2);
   assert.match(template,/<CoverMediaNode item=\{item\} interaction=\{interaction\}/);
   assert.doesNotMatch(template,/function PhotoCell\(/);
   assert.match(gesture,/const LONG_PRESS_MS = 550/);
   assert.match(gesture,/onCommitTransform\(id, current\.current\)/);
   assert.match(reader,/<CarolinaDocument item=\{item\}\/>/);
   assert.match(magazine,/<CarolinaCover item=\{item\}\/>/);
-  assert.match(worker,/validCarolinaLayout\(q\.carolinaLayout\)/);
+  assert.match(worker,/validCarolinaLayout\(q\.designLayout\)/);
 });
 
 
@@ -420,10 +420,10 @@ test('Diseño tiene banco elegante dentro del panel contextual y fuentes por tex
   assert.doesNotMatch(canvas, /defaultFont:font \|\| undefined/);
   assert.doesNotMatch(canvas, /Abrir banco de tipografías/);
   assert.match(dock, /Tipografía/);
-  assert.match(template,/fontId=\{item\.carolinaLayout\?\.fonts\?\.\[id\] \|\| item\.carolinaLayout\?\.defaultFont\}/);
+  assert.match(template,/fontId=\{item\.designLayout\?\.fonts\?\.\[id\] \|\| item\.designLayout\?\.defaultFont\}/);
   assert.match(node,/fontFamily:elegantFontFamily\(fontId\)/);
-  assert.match(worker,/validCarolinaLayout\(q\.carolinaLayout\)/);
-  assert.match(magazine,/JSON\.stringify\(item\.carolinaLayout\)/);
+  assert.match(worker,/validCarolinaLayout\(q\.designLayout\)/);
+  assert.match(magazine,/JSON\.stringify\(item\.designLayout\)/);
 });
 
 
@@ -448,7 +448,7 @@ test('Un toque abre cinco switches contextuales para personalizar una sola letra
   assert.match(bank, /inline=false/);
   assert.match(node, /textStyle\?\.stretchX/);
   assert.match(node, /fontSize:textStyle.size \+ '%'/);
-  assert.match(template, /textStyle=\{item\.carolinaLayout\?\.textStyles\?\.\[id\]\}/);
+  assert.match(template, /textStyle=\{item\.designLayout\?\.textStyles\?\.\[id\]\}/);
 });
 
 test('Pulsación larga: papelera compartida para fotos y texto, sin borrar R2', () => {
@@ -474,12 +474,12 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   const document=src('features/templates/CarolinaTemplate.tsx');
   const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
   const layout=src('features/templates/carolina-layout.ts');
-  assert.match(flip,/const selectedPages = carolinaPageOrder\(item\.carolinaLayout\)/);
+  assert.match(flip,/const selectedPages = carolinaPageOrder\(item\.designLayout\)/);
   assert.match(flip,/const total = selectedPages\.length/);
   assert.match(flip,/if \(pages\.length === 1\)/);
   assert.match(flip,/selectedPages\.map\(selectedPage=>/);
   assert.doesNotMatch(flip,/<CarolinaBlankReverse\/>/);
-  assert.match(document,/carolinaPageOrder\(item\.carolinaLayout\)\.map\(page=>/);
+  assert.match(document,/carolinaPageOrder\(item\.designLayout\)\.map\(page=>/);
   assert.doesNotMatch(canvas,/pageManager|setPageOrder|togglePage|shiftPage|Hojas \{/);
   assert.doesNotMatch(canvas,/hn-canvas-pages|Páginas seleccionadas para la revista/);
   assert.match(canvas,/className="hn-canvas-pager"/);
@@ -555,7 +555,7 @@ test('Panel único de imágenes: un toque edita y una presión larga mueve o eli
   assert.match(workspace,/onStyleChange\(patch\)/);
   assert.match(gesture,/LONG_PRESS_MS = 550/);
   assert.doesNotMatch(photo,/effectMoved\.current|imageEdit/);
-  assert.match(template,/photoStyle=\{item\.carolinaLayout\?\.photoStyles\?\.\[id\]\}/);
+  assert.match(template,/photoStyle=\{item\.designLayout\?\.photoStyles\?\.\[id\]\}/);
   assert.match(magazine,/<CarolinaCollage item=\{item\}/);
 });
 

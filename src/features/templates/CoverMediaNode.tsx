@@ -47,7 +47,7 @@ export default function CoverMediaNode({item,interaction,onSelect}:Props){
     </div>;
   }
   return <CarolinaPhotoNode cover id="photo:cover" url={item.cover}
-    transform={item.carolinaLayout?.transforms?.['photo:cover']}
-    photoStyle={item.carolinaLayout?.photoStyles?.['photo:cover']}
+    transform={item.designLayout?.transforms?.['photo:cover']}
+    photoStyle={item.designLayout?.photoStyles?.['photo:cover']}
     interaction={interaction} onSelect={onSelect}/>;
 }

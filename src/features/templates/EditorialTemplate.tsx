@@ -15,15 +15,15 @@ function Node({item,id,value,interaction}:{
  item:Quote;id:string;value:string;interaction?:CarolinaTextInteraction;
 }){
  return <CarolinaTextNode id={id} text={value} interaction={interaction}
-  transform={item.carolinaLayout?.transforms?.[id]}
-  fontId={item.carolinaLayout?.fonts?.[id]||item.carolinaLayout?.defaultFont}
-  textStyle={item.carolinaLayout?.textStyles?.[id]}/>;
+  transform={item.designLayout?.transforms?.[id]}
+  fontId={item.designLayout?.fonts?.[id]||item.designLayout?.defaultFont}
+  textStyle={item.designLayout?.textStyles?.[id]}/>;
 }
 function Fixed({item,name,interaction}:{
  item:Quote;name:CarolinaFixedKey;interaction?:CarolinaTextInteraction;
 }){
  return <Node item={item} id={'fixed:'+name}
-  value={fixedText(item.carolinaLayout,name)} interaction={interaction}/>;
+  value={fixedText(item.designLayout,name)} interaction={interaction}/>;
 }
 const skin=(item:Quote)=>'hn-style-'+(item.style||'libre');
 
@@ -102,7 +102,7 @@ export function EditorialTerms({item,interaction,onSelectExtraPhoto}:Props){
 /** The same three page components are used in the designer, client Scroll and PageFlip. */
 export default function EditorialDocument({item}:{item:Quote}){
  return <div className={'hn-editorial-document '+skin(item)}>
-  {carolinaPageOrder(item.carolinaLayout).map(page=>
+  {carolinaPageOrder(item.designLayout).map(page=>
     page===0?<EditorialCover key={page} item={item}/>:
     page===1?<EditorialCollage key={page} item={item}/>:
     <EditorialTerms key={page} item={item}/>)}

@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {TEMPLATE_IDS,isTemplateStyle,templateFamily} from '../src/features/templates/template-registry.ts';
-import {getDesignLayout,withDesignLayout} from '../src/features/templates/design-layout.ts';
 import {validCarolinaLayout} from '../src/features/templates/carolina-layout.ts';
 const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
 const mockQuote=(changes={})=>({
@@ -24,19 +23,23 @@ test('Todos los estilos registrados comparten editor; la lista única admite fut
  assert.match(cards,/TEMPLATE_IDS\.map/);
  assert.match(api,/isTemplateStyle\(q\.style\)/);
 });
-test('Datos Carolina antiguos se preservan y primer cambio no los sobreescribe',()=>{
- const old={fixed:{brand:'MY BRAND'},textStyles:{'field:name':{color:'#FFFFFF'}},
-   photoStyles:{'photo:cover':{cropRotation:20,opacity:35}},pageOrder:[2,0]};
- assert.equal(validCarolinaLayout(old),true);
- const legacy=mockQuote({carolinaLayout:old});
- assert.equal(getDesignLayout(legacy),old);
- assert.equal(withDesignLayout(legacy),legacy);
- const universal={...old,textStyles:{...old.textStyles,'field:name':{color:'#BDA577'}}};
- const edited={...legacy,designLayout:universal};
- assert.equal(getDesignLayout(edited),universal);
- assert.equal(edited.carolinaLayout,old);
- assert.equal(withDesignLayout(edited).carolinaLayout,universal);
- assert.deepEqual(getDesignLayout(edited).pageOrder,[2,0]);
+test('Un único modelo universal; el diseño anterior no se lee ni mezcla',()=>{
+ const layout={fixed:{brand:'MY BRAND'},textStyles:{'field:name':{color:'#FFFFFF'}},
+  photoStyles:{'photo:cover':{cropRotation:20,opacity:35}},pageOrder:[2,0]};
+ assert.equal(validCarolinaLayout(layout),true);
+ const draft=mockQuote({designLayout:layout});
+ assert.deepEqual(draft.designLayout,layout);
+ const types=src('features/quotes/types.ts');
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const proposal=src('features/client/Proposal.tsx');
+ const magazine=src('features/magazine/FlipMagazine.tsx');
+ assert.match(types,/designLayout\?: CarolinaLayout/);
+ for(const file of [types,canvas,proposal,magazine]){
+  assert.doesNotMatch(file,/carolinaLayout|withDesignLayout|getDesignLayout/);
+ }
+ assert.match(canvas,/const item=.*|export default function TemplateCanvasEditor\(\{ item, edit, photos, onUploadPhoto \}/);
+ assert.match(proposal,/export default function Proposal\(\{item,styleName,embedded=false\}/);
+ assert.match(magazine,/export default function FlipMagazine\(\{ item \}/);
 });
 test('Todos los estilos comparten tres páginas reales, controles y componentes',()=>{
  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
@@ -60,8 +63,8 @@ test('Todos los estilos comparten tres páginas reales, controles y componentes'
  assert.match(doc,/ExtraTexts/);
  assert.match(doc,/carolinaPageOrder\(item\.carolinaLayout\)/);
  assert.match(old,/export function CarolinaCover/);
- assert.match(scroll,/withDesignLayout\(raw\)/);
- assert.match(book,/withDesignLayout\(rawItem\)/);
+ assert.doesNotMatch(scroll,/withDesignLayout/);
+ assert.doesNotMatch(book,/withDesignLayout/);
  assert.match(book,/const total = selectedPages\.length/);
  assert.match(book,/<EditorialCover item=\{item\}/);
  assert.match(book,/<EditorialCollage item=\{item\}/);

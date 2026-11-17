@@ -18,7 +18,7 @@
 ## Editor visual Carolina · 16/11/2026
 
 - Tres páginas reales: **Portada, Collage y Propuesta**, compartidas entre diseñador y vista cliente. El motor PageFlip 3D no se modifica.
-- Textos: toque para escribir sobre la página y guardar al tocar fuera; pulsación larga para mover, giro y escala con dos dedos y cuadrícula temporal. Títulos originales y textos añadidos se guardan por cotización en `carolinaLayout`, sin alterar la plantilla fuente.
+- Textos: toque para escribir sobre la página y guardar al tocar fuera; pulsación larga para mover, giro y escala con dos dedos y cuadrícula temporal. Títulos originales y textos añadidos se guardan por cotización en el único campo `designLayout`, sin alterar la plantilla fuente.
 - Fotos: un toque abre el editor de imagen (color, recorte, giro, opacidad y viñeta); pulsación larga mueve el marco y muestra la papelera. Reemplazar conserva los ajustes y Capas recupera fotos bajo textos. Se reutiliza el **mismo módulo de gestos** que en los textos.
 - El collage de Carolina mantiene **seis bloques por defecto**, organizados como en el diseño original. En Diseño pueden añadirse hasta **12** recuadros; borrar la foto de un recuadro no reorganiza las demás. El antiguo panel de duplicación/reordenamiento ya no existe. Los recuadros ocultos no borran las fotografías de la biblioteca.
 - Los cambios se guardan en D1 y se leen en Scroll/3D. **Pendiente:** QA táctil Samsung real, páginas variables y sincronización con Havana Calendario. Envíos reales no disponibles.

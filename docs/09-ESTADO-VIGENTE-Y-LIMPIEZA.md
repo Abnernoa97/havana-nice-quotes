@@ -38,4 +38,4 @@ La estructura vigente de Fotos, Textos, Lienzo y módulos compartidos está en [
 
 ## Compatibilidad y limpieza · noviembre 2026
 
-Se eliminó la interfaz de reproductor por tarjeta, el panel de estadísticas duplicado en Fotos y los formateadores de tamaño no utilizados. Se mantiene deliberadamente `carolinaLayout` como adaptador de lectura para cotizaciones antiguas; `designLayout` es la estructura preferente para nuevos cambios. La compatibilidad no equivale a código basura.
+Se eliminó la interfaz de reproductor por tarjeta, el panel de estadísticas duplicado en Fotos y los formateadores de tamaño no utilizados. **Eliminados completamente el campo y el adaptador de lectura heredado `carolinaLayout`: toda edición y render usan únicamente `designLayout`.** Las cotizaciones de prueba que dependían del campo antiguo pueden perder su distribución; no se eliminaron registros ni medios del servidor.

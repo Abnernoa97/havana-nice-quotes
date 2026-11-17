@@ -19,12 +19,11 @@ export type Quote = {
   deposit: number;
   currency?: QuoteCurrency;
   status: QuoteStatus;
-  cover: string; // Existing photographic cover, always preserved for legacy quotes
+  cover: string; // Photo cover or empty when using a video
   coverVideo?: string; // Optional authenticated /api/videos/{id} web cover
   gallery?: string[];
   carolinaCopy?: Partial<CarolinaCopy>;
-  carolinaLayout?: CarolinaLayout; // Legacy data retained for all existing quotations
-  designLayout?: CarolinaLayout; // Canonical editor layout for every template
+  designLayout?: CarolinaLayout; // Sole persisted layout for every template
   font: string;
   color: string;
   note: string;
