@@ -41,7 +41,7 @@ test('Un único modelo universal; el diseño anterior no se lee ni mezcla',()=>{
  assert.match(proposal,/export default function Proposal\(\{item,styleName,embedded=false\}/);
  assert.match(magazine,/export default function FlipMagazine\(\{ item \}/);
 });
-test('Todos los estilos comparten tres páginas reales, controles y componentes',()=>{
+test('Todos los estilos comparten el motor universal, con páginas originales y hojas libres',()=>{
  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
  const doc=src('features/templates/EditorialTemplate.tsx');
  const carolina=src('features/templates/CarolinaTemplate.tsx');
@@ -63,6 +63,9 @@ test('Todos los estilos comparten tres páginas reales, controles y componentes'
  assert.match(doc,/ExtraTexts/);
  assert.match(doc,/carolinaPageOrder\(item\.designLayout\)/);
  assert.match(carolina,/export function CarolinaCover/);
+ assert.match(carolina,/export function CarolinaBlankPage/);
+ assert.match(doc,/<CarolinaBlankPage key=\{page\}/);
+ assert.match(book,/<CarolinaBlankPage item=\{item\} page=\{selectedPage\}/);
  assert.doesNotMatch(scroll,/withDesignLayout/);
  assert.doesNotMatch(book,/withDesignLayout/);
  assert.match(book,/const total = selectedPages\.length/);

@@ -206,3 +206,9 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
 .hn-canvas .hn-carolina-floating-photo.hn-photo-transforming,
 .hn-canvas .hn-carolina-photo.hn-photo-transforming,
 .hn-canvas .hn-carolina-cover-photo.hn-photo-transforming{z-index:12!important;pointer-events:auto}
+
+/* One universal white sheet shared by Design, Scroll and 3D.
+ * Everything here is user-added: no template masthead or hidden placeholders. */
+.hn-blank-page{background:#fff;color:#243d31;isolation:isolate}
+.hn-blank-page .hn-carolina-photo-overlay{z-index:1}
+.hn-blank-page .hn-carolina-extra-layer{z-index:3}

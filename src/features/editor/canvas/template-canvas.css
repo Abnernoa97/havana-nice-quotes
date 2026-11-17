@@ -75,3 +75,17 @@
 .hn-canvas .hn-carolina-page{touch-action:pan-y}
 .hn-canvas .hn-carolina-text-node.transforming,
 .hn-canvas .hn-carolina-editable-photo.hn-photo-transforming{touch-action:none}
+
+/* The same editor controls work on original pages and new blank sheets. */
+.hn-canvas-toolbar .hn-canvas-add-page{
+ display:inline-flex;align-items:center;justify-content:center;gap:5px;
+ background:#234b37;color:white;border-color:#234b37}
+.hn-canvas-page-actions{display:flex;align-items:center;justify-content:center;gap:6px;
+ width:min(100%,620px);margin:0 auto 16px;flex-wrap:wrap}
+.hn-canvas-page-actions .hn-canvas-page-label{font-size:11px;color:#55745e;
+ font-weight:700;margin-right:8px;max-width:140px;overflow-wrap:anywhere}
+.hn-canvas-page-actions button{border:1px solid #d8e3d7;border-radius:8px;background:#fff;
+ color:#345940;min-width:39px;min-height:38px;display:grid;place-items:center;cursor:pointer}
+.hn-canvas-page-actions button:disabled{opacity:.33;cursor:default}
+.hn-canvas .hn-blank-page{aspect-ratio:612/792;background:#fff}
+@media(max-width:530px){.hn-canvas-toolbar>button{flex:1 1 28%;min-width:0}}

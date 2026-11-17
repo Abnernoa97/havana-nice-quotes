@@ -53,3 +53,7 @@ Se eliminó la interfaz de reproductor por tarjeta, el panel de estadísticas du
 ## 17/11/2026 · Puente HAVANA CALENDARIO
 
 Worker Quotes `worker/calendar-bridge.ts` sincroniza solo cotizaciones reales con nombre y fecha válidos usando el segundo binding D1 `CALENDAR_DB` (misma cuenta, sin servicios nuevos). Se preservan IDs y ediciones de Calendario y se reintentan fallos en lecturas autorizadas de Quotes. `tests/calendar-bridge.test.mjs` contiene pruebas sin datos reales. Calendario declara el origen en su app, README y contratos. **El puente no importa borradores sin fecha, ni plantillas.**
+
+## Páginas libres · 17/11/2026
+
+Se añadió la página blanca inicial a plantillas propias, el botón **+ Página** en Diseño y acciones para mover, duplicar las hojas propias o eliminar un folio. La navegación del editor, el orden de Scroll, la revista 3D y la validación del Worker leen `designLayout.pageOrder`. No se han creado tablas D1, nuevas ramas o editores paralelos. Probar directamente en Android antes de dar por validada la interacción táctil.

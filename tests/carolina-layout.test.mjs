@@ -194,7 +194,10 @@ test('Tres hojas reales por defecto; la selección conserva solo las solicitadas
   assert.equal(validCarolinaLayout({pageOrder:[2,0]}),true);
   assert.equal(validCarolinaLayout({pageOrder:[]}),false);
   assert.equal(validCarolinaLayout({pageOrder:[0,0]}),false);
-  assert.equal(validCarolinaLayout({pageOrder:[0,3]}),false);
+  assert.equal(validCarolinaLayout({pageOrder:[0,3]}),true);
+  assert.equal(validCarolinaLayout({pageOrder:[3]}),true);
+  assert.equal(validCarolinaLayout({pageOrder:[0,1025]}),false);
+  assert.equal(validCarolinaLayout({pageOrder:Array.from({length:33},(_,i)=>i+3)}),false);
   assert.equal(validCarolinaLayout({pageOrder:[0,1,2,0]}),false);
 });
 

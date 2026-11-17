@@ -1,3 +1,14 @@
+### Páginas propias desde cero · 17/11/2026
+
+- **Implementado:** «Crear plantilla» abre una única hoja totalmente blanca, sin textos ni recuadros originales. No se toca el banco R2.
+- En Diseño se puede **añadir una página en blanco después de la actual**, añadir texto y fotos reales, duplicar páginas propias, cambiar su orden o eliminar páginas con confirmación (excepto la última).
+- La hoja no es una imagen ni un borrador de diseño: está registrada en el único modelo `designLayout.pageOrder`, con IDs estables a partir de 3, hasta 32 páginas por documento y límites controlados de contenido para móviles.
+- Cada nueva página utiliza `CarolinaBlankPage` como render compartido entre diseñador, Scroll y revista 3D; ni el texto ni las fotos se duplican en otro motor.
+- `src/features/templates/blank-pages.ts` concentra las operaciones puras de agregar, mover, duplicar y eliminar; limpia transforms/fuentes/estilos de capas eliminadas y conserva las fotos originales de R2.
+- **Sigue pendiente:** deshacer/rehacer, historial, QA real de gesto táctil y cualquier extensión a documentos superiores a 32 folios.
+
+---
+
 ### Puente HAVANA CALENDARIO · 17/11/2026
 
 - Integración servidor-servidor desde HAVANA QUOTES al D1 existente `havana-events-sync`, por binding privado `CALENDAR_DB`.

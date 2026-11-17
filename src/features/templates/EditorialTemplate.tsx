@@ -5,7 +5,7 @@ import CoverMediaNode from './CoverMediaNode';
 import CoverAddPrompt from './CoverAddPrompt';
 import { carolinaPageOrder, fixedText } from './carolina-layout';
 import type { CarolinaFixedKey } from './carolina-layout';
-import { CarolinaCollage, ExtraPhotos, ExtraTexts, carolinaDate } from './CarolinaTemplate';
+import { CarolinaCollage, CarolinaBlankPage, ExtraPhotos, ExtraTexts, carolinaDate } from './CarolinaTemplate';
 import { money } from '../../shared/lib/formatters';
 import './editorial-template.css';
 
@@ -105,6 +105,7 @@ export default function EditorialDocument({item}:{item:Quote}){
   {carolinaPageOrder(item.designLayout).map(page=>
     page===0?<EditorialCover key={page} item={item}/>:
     page===1?<EditorialCollage key={page} item={item}/>:
-    <EditorialTerms key={page} item={item}/>)}
+    page===2?<EditorialTerms key={page} item={item}/>:
+    <CarolinaBlankPage key={page} item={item} page={page}/>)}
  </div>;
 }

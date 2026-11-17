@@ -53,7 +53,7 @@ src/features/editor/
 1. Cada función tiene **un solo módulo propietario**. No crear copias `v2`, `old` o parches CSS para ocultar componentes viejos.
 2. Mover archivos significa eliminar los anteriores del árbol Git, actualizar imports y pruebas de regresión.
 3. No cambiar esquemas D1/R2 ni eliminar medios del banco al borrar referencias del diseño.
-4. Mantener las tres páginas, scroll, revista 3D, guardado y controles aprobados.
+4. Mantener las páginas originales existentes y añadir folios en blanco sobre el mismo motor; Scroll, revista 3D y guardado comparten el orden.
 5. Validar con auditoría, tests, TypeScript, build Cloudflare y deployment. El comportamiento táctil en Android requiere prueba física adicional.
 6. No habilitar GitHub Actions ni proveedores nuevos para este mantenimiento.
 
@@ -79,3 +79,11 @@ Un único motor de edición para todas las plantillas; `template-registry.ts` co
 El código antiguo de reproductores por tarjeta y estadísticas duplicadas se retiró. Las miniaturas antiguas se generan secuencialmente para evitar consumo simultáneo de varios decodificadores.
 
 **Modelo único:** `designLayout` es la única fuente de verdad. `carolina-layout.ts` contiene funciones y validaciones vigentes de las plantillas, no un segundo campo de almacenamiento. No reintroducir adaptadores antiguos.
+
+## Páginas en blanco desde cero · 17/11/2026
+
+- `carolina-layout.ts`: `pageOrder` es una lista ordenada de identificadores estables. 0/1/2 siguen siendo Portada/Collage/Propuesta; los números >=3 son páginas limpias. Máximo 32 páginas por documento para preservar rendimiento.
+- `blank-pages.ts`: funciones puras `insertBlankPage`, `shiftPage`, `duplicateBlankPage` y `removeDesignPage`, con copia profunda de estilos y limpieza de elementos eliminados.
+- `CarolinaBlankPage` en `CarolinaTemplate.tsx`: hoja blanca que solo contiene `ExtraPhotos` y `ExtraTexts`. `EditorialDocument`, `CarolinaDocument`, `TemplateCanvasEditor` y `FlipMagazine` llaman a ese componente exacto.
+- `createOwnTemplate` sin fuente crea `designLayout: {pageOrder:[3]}`. Las cotizaciones y plantillas existentes con páginas 0–2 siguen sin cambios.
+- Los medios subidos a R2 no se borran al eliminar elementos o folios de una propuesta. Se conserva el código activo de las tres páginas originales, sin otro modelo heredado.

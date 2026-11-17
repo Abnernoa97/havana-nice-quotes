@@ -618,7 +618,7 @@ test('API bloquea layouts con tamaños infinitos, campos no admitidos o extras c
     {textStyles:{'field:name':{fontFamily:'untrusted'}}},
     {pageOrder:[]},
     {pageOrder:[0,0]},
-    {pageOrder:[9]},
+    {pageOrder:[1025]},
     {extraPhotos:[{id:'11111111-1111-1111-1111-111111111111',page:2,url:'https://outside.example/img.jpg'}]},
     {extraPhotos:[{id:'11111111-1111-1111-1111-111111111111',page:5,url:''}]},
     {transforms:{'photo-extra:invalid':{x:0,y:0,scale:1,rotation:0}}},
@@ -898,5 +898,30 @@ test('D1 guarda plantillas editables y rechaza títulos demasiado largos',async(
  assert.deepEqual((await load.json()).quotes[0].quote,quote);
  const invalid=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
   {quote:{...quote,templateName:'x'.repeat(101)},expectedRevision:1},cookie),env);
+ assert.equal(invalid.status,400);
+});
+
+test('D1 guarda una plantilla desde cero con páginas nuevas y nodos libres',async()=>{
+ const env=environment(),cookie=await authorizeDevice(env);
+ const id='hn-33333333-3333-4333-8333-333333333333';
+ const quote={id,name:'',client:'',email:'',location:'',date:'',price:0,deposit:0,
+  status:'Borrador',cover:'',font:'editorial',color:'#18342f',note:'',package:'',desc:'',
+  style:'libre',readingMode:'flip',isTemplate:true,templateName:'Diseño desde cero',
+  designLayout:{pageOrder:[3,4],
+   extras:[{id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',page:3,text:'Private welcome'}],
+   extraPhotos:[{id:'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',page:4,url:''}],
+   photoStyles:{'photo-extra:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb':{opacity:65}}
+  }};
+ const saved=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+  {quote,expectedRevision:0},cookie),env);
+ assert.equal(saved.status,200);
+ const loaded=await worker.fetch(request('/api/quotes',{headers:{Cookie:cookie}}),env);
+ const result=(await loaded.json()).quotes[0];
+ assert.equal(result.quote.isTemplate,true);
+ assert.deepEqual(result.quote.designLayout.pageOrder,[3,4]);
+ assert.deepEqual(result.quote.designLayout.extraPhotos,quote.designLayout.extraPhotos);
+ const invalid=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+  {quote:{...quote,designLayout:{pageOrder:[3],extraPhotos:quote.designLayout.extraPhotos}},
+   expectedRevision:1},cookie),env);
  assert.equal(invalid.status,400);
 });

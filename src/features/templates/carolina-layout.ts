@@ -27,7 +27,13 @@ export const CAROLINA_DEFAULT_SLOTS = 6;
 export const CAROLINA_MAX_SLOTS = 12;
 export const CAROLINA_DEFAULT_ORDER = Array.from({ length: CAROLINA_DEFAULT_SLOTS }, (_, i) => i);
 export const CAROLINA_PAGE_TITLES = ['Portada', 'Collage', 'Propuesta'] as const;
-export type CarolinaPageId = 0 | 1 | 2;
+/** Pages 0–2 are existing compositions. IDs >=3 are truly empty editable sheets. */
+export type CarolinaPageId = number;
+export const MAX_DESIGN_PAGES = 32;
+export const MAX_DESIGN_PAGE_ID = 1024;
+export const MAX_DESIGN_ELEMENTS = 120;
+export const isBlankPage = (page: number):boolean => Number.isInteger(page) && page >= 3 && page <= MAX_DESIGN_PAGE_ID;
+export const isDesignPage = (page: unknown):page is number => typeof page === 'number' && Number.isInteger(page) && page >= 0 && page <= MAX_DESIGN_PAGE_ID;
 export const CAROLINA_DEFAULT_PAGES: CarolinaPageId[] = [0,1,2];
 export function carolinaPageOrder(layout: CarolinaLayout | undefined): CarolinaPageId[] {
   return [...(layout?.pageOrder || CAROLINA_DEFAULT_PAGES)];
@@ -97,14 +103,14 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   if (layout.fonts !== undefined) {
     if (!layout.fonts || typeof layout.fonts !== 'object' || Array.isArray(layout.fonts)) return false;
     const entries=Object.entries(layout.fonts);
-    if (entries.length > 100 || entries.some(([id,font]) =>
+    if (entries.length > 300 || entries.some(([id,font]) =>
       !/^(fixed:[a-zA-Z]+|field:[a-z]+(?::cover)?|extra:[a-f0-9-]{36})$/.test(id) ||
       !isElegantFontId(font))) return false;
   }
   if (layout.textStyles !== undefined) {
     if (!layout.textStyles || typeof layout.textStyles !== 'object' || Array.isArray(layout.textStyles)) return false;
     const entries=Object.entries(layout.textStyles);
-    if (entries.length>100 || entries.some(([id,raw])=>{
+    if (entries.length>300 || entries.some(([id,raw])=>{
       if (!/^(fixed:[a-zA-Z]+|field:[a-z]+(?::cover)?|extra:[a-f0-9-]{36})$/.test(id) ||
         !raw || typeof raw!=='object' || Array.isArray(raw)) return true;
       const style=raw as Record<string,unknown>;
@@ -120,7 +126,7 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   if (layout.photoStyles !== undefined) {
     if (!layout.photoStyles || typeof layout.photoStyles !== 'object' || Array.isArray(layout.photoStyles)) return false;
     const entries = Object.entries(layout.photoStyles);
-    if (entries.length > 40) return false;
+    if (entries.length > 150) return false;
     const numeric: Record<string,[number,number]> = {
       brightness:[0,200], contrast:[0,200], saturate:[0,200],
       hue:[-180,180], grayscale:[0,100], sepia:[0,100],
@@ -151,19 +157,21 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     }
   }
   if (layout.pageOrder !== undefined) {
-    if (!Array.isArray(layout.pageOrder) || !layout.pageOrder.length || layout.pageOrder.length>3 ||
+    if (!Array.isArray(layout.pageOrder) || !layout.pageOrder.length ||
+      layout.pageOrder.length>MAX_DESIGN_PAGES ||
       new Set(layout.pageOrder).size!==layout.pageOrder.length ||
-      layout.pageOrder.some((page:unknown)=>page!==0&&page!==1&&page!==2)) return false;
+      layout.pageOrder.some((page:unknown)=>!isDesignPage(page))) return false;
   }
+  const visiblePages=layout.pageOrder===undefined ? CAROLINA_DEFAULT_PAGES : layout.pageOrder as number[];
   if (layout.extraPhotos !== undefined) {
-    if (!Array.isArray(layout.extraPhotos) || layout.extraPhotos.length>24) return false;
+    if (!Array.isArray(layout.extraPhotos) || layout.extraPhotos.length>MAX_DESIGN_ELEMENTS) return false;
     const seen=new Set<string>();
     for (const photo of layout.extraPhotos) {
       if (!photo || typeof photo!=='object' || Array.isArray(photo)) return false;
       const p=photo as Record<string,unknown>;
       if (Object.keys(p).sort().join(',')!=='id,page,url' ||
         typeof p.id!=='string' || !/^[a-f0-9-]{36}$/.test(p.id) ||
-        seen.has(p.id) || (p.page!==0&&p.page!==1&&p.page!==2) ||
+        seen.has(p.id) || !isDesignPage(p.page) || !visiblePages.includes(p.page as number) ||
         typeof p.url!=='string' || p.url!=='' &&
         !/^\/api\/media\/[a-f0-9-]{36}$/.test(p.url)) return false;
       seen.add(p.id);
@@ -184,7 +192,7 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   }
   if (layout.transforms !== undefined) {
     if (!layout.transforms || typeof layout.transforms !== 'object' || Array.isArray(layout.transforms)) return false;
-    if (Object.entries(layout.transforms).length > 100) return false;
+    if (Object.entries(layout.transforms).length > 300) return false;
     for (const [id, raw] of Object.entries(layout.transforms)) {
       if (!/^(fixed:[a-zA-Z]+|field:[a-z]+(?::cover)?|extra:[a-f0-9-]{36}|photo:(?:cover|1[01]|[0-9])|photo-extra:[a-f0-9-]{36})$/.test(id) ||
         !raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
@@ -197,14 +205,14 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
     }
   }
   if (layout.extras !== undefined) {
-    if (!Array.isArray(layout.extras) || layout.extras.length > 25) return false;
+    if (!Array.isArray(layout.extras) || layout.extras.length > MAX_DESIGN_ELEMENTS) return false;
     const ids = new Set<string>();
     for (const raw of layout.extras) {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
       const e = raw as Record<string, unknown>;
       if (Object.keys(e).sort().join(',') !== 'id,page,text' ||
         typeof e.id !== 'string' || !/^[a-f0-9-]{36}$/.test(e.id) || ids.has(e.id) ||
-        ![0, 1, 2].includes(e.page as number) || typeof e.text !== 'string' ||
+        !isDesignPage(e.page) || !visiblePages.includes(e.page as number) || typeof e.text !== 'string' ||
         e.text.length > 3000) return false;
       ids.add(e.id);
     }

@@ -3,7 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import type { Quote } from '../quotes/types';
 import { PageFlip } from 'page-flip';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
-import { CarolinaCover, CarolinaCollage, CarolinaTerms } from '../templates/CarolinaTemplate';
+import { CarolinaCover, CarolinaCollage, CarolinaTerms, CarolinaBlankPage } from '../templates/CarolinaTemplate';
 import { EditorialCover, EditorialCollage, EditorialTerms } from '../templates/EditorialTemplate';
 import { templateFamily } from '../templates/template-registry';
 import { carolinaPageOrder } from '../templates/carolina-layout';
@@ -166,9 +166,13 @@ export default function FlipMagazine({ item }: { item: Quote }) {
           className={templateFamily(item.style)==='carolina'?'hn-carolina-leaf':'hn-editorial-leaf'}>
           {templateFamily(item.style)==='carolina'
             ? selectedPage===0?<CarolinaCover item={item}/>:
-              selectedPage===1?<CarolinaCollage item={item}/>:<CarolinaTerms item={item}/>
+              selectedPage===1?<CarolinaCollage item={item}/>:
+              selectedPage===2?<CarolinaTerms item={item}/>:
+              <CarolinaBlankPage item={item} page={selectedPage}/>
             : selectedPage===0?<EditorialCover item={item}/>:
-              selectedPage===1?<EditorialCollage item={item}/>:<EditorialTerms item={item}/>}
+              selectedPage===1?<EditorialCollage item={item}/>:
+              selectedPage===2?<EditorialTerms item={item}/>:
+              <CarolinaBlankPage item={item} page={selectedPage}/>}
         </MagazineLeaf>)}
       </div>
     </section>

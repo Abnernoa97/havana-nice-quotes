@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2, Plus, Copy, ArrowLeft, ArrowRight } from 'lucide-react';
 import { isCarolinaCopyField } from '../../templates/carolina-edit-fields';
 import TextStyleDock from '../texts/TextStyleDock';
 import PhotoLayersPanel from '../photos/PhotoLayersPanel';
@@ -13,14 +13,15 @@ import type { CarolinaTextField } from '../../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../../templates/CarolinaTextNode';
 import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle, CarolinaTransform } from '../../templates/carolina-layout';
-import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS } from '../../templates/carolina-layout';
+import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage } from '../../templates/carolina-layout';
+import { insertBlankPage, duplicateBlankPage, shiftPage, removeDesignPage } from '../../templates/blank-pages';
 import type { CarolinaPageId } from '../../templates/carolina-layout';
 import { normalizePriceInput, safeQuotePrice } from '../../quotes/model';
 import type { Quote } from '../../quotes/types';
 import type { CloudPhoto } from '../../photos/useMediaLibrary';
 import { templateFamily } from '../../templates/template-registry';
 import { EditorialCover, EditorialCollage, EditorialTerms } from '../../templates/EditorialTemplate';
-import { CarolinaCover, CarolinaCollage, CarolinaTerms, carolinaPhotos } from '../../templates/CarolinaTemplate';
+import { CarolinaCover, CarolinaCollage, CarolinaTerms, CarolinaBlankPage, carolinaPhotos } from '../../templates/CarolinaTemplate';
 import './template-canvas.css';
 
 type Props = {
@@ -30,11 +31,13 @@ type Props = {
   onUploadPhoto: (file: File, target: PhotoTarget) => Promise<void>;
 };
 const pages = ['Portada', 'Collage', 'Propuesta'] as const;
+const pageTitle=(page:number,index:number)=>isBlankPage(page)?'Página '+(index+1):pages[page]||'Página '+(index+1);
 
-/** A real preview becomes the editor: 3 Canva pages, 7 independently selectable photo regions. */
+/** The same real sheet is edited and displayed in Scroll and the 3D magazine. */
 export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto }: Props) {
   const editorial=templateFamily(item.style)==='editorial';
-  const [page, setPage] = useState<CarolinaPageId>(0);
+  const [page, setPage] = useState<CarolinaPageId>(()=>carolinaPageOrder(item.designLayout)[0]);
+  const selectedPages=carolinaPageOrder(item.designLayout);
   const [target, setTarget] = useState<PhotoTarget | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
@@ -51,6 +54,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setPage(carolinaPageOrder(item.designLayout)[0]); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
     setLastTextId(null); setSelectedPhotoId(null); setPhotoTool(null); setPhotoLayersOpen(false); setTrashHovered(false);
   }, [item.id, item.style]);
+  useEffect(()=>{
+    if(!selectedPages.includes(page))setPage(selectedPages[0]);
+  },[page,JSON.stringify(selectedPages)]);
   const updateLayout = (patch: Partial<CarolinaLayout>) => {
     edit('designLayout', { ...item.designLayout, ...patch });
   };
@@ -104,8 +110,11 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   };
   const addFreeText = () => {
     const id = crypto.randomUUID();
+    if((item.designLayout?.extras?.length||0)>=MAX_DESIGN_ELEMENTS){
+      setError('Límite de textos alcanzado en esta plantilla.');return;
+    }
     updateLayout({ extras: [...(item.designLayout?.extras || []), {
-      id, page: page as 0 | 1 | 2, text: '',
+      id, page, text: '',
     }] });
     setTransformingId(null);
     setEditingId('extra:' + id);
@@ -168,8 +177,34 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setTransformingId(null);setSelectedPhotoId(null);setLastTextId(null);setPhotoLayersOpen(false);setTrashHovered(false);setError('');
   };
   const removeElement = (id:string) => isPhotoId(id) ? removePhoto(id) : removeText(id);
-  const selectedPages=carolinaPageOrder(item.designLayout);
   const pageIndex=selectedPages.indexOf(page);
+  const clearSelection=()=>{
+    setPhotoLayersOpen(false);setTransformingId(null);setEditingId(null);
+    setLastTextId(null);setSelectedPhotoId(null);setPhotoTool(null);setTrashHovered(false);
+  };
+  const addPage=()=>{
+    const result=insertBlankPage(item.designLayout,page);
+    if(!result){setError('Máximo de páginas alcanzado.');return}
+    edit('designLayout',result.layout);
+    setPage(result.page);clearSelection();setError('');
+  };
+  const duplicatePage=()=>{
+    const result=duplicateBlankPage(item.designLayout,page);
+    if(!result){setError('Solo puedes duplicar páginas en blanco o has alcanzado el límite de elementos.');return}
+    edit('designLayout',result.layout);
+    setPage(result.page);clearSelection();setError('');
+  };
+  const movePage=(step:-1|1)=>{
+    const next=shiftPage(item.designLayout,page,step);
+    if(next){edit('designLayout',next);clearSelection();setError('')}
+  };
+  const deletePage=()=>{
+    if(selectedPages.length<=1){setError('La plantilla debe tener al menos una página.');return}
+    if(!window.confirm('¿Eliminar esta página y sus elementos de la plantilla? Las fotos de la nube se conservarán.'))return;
+    const next=removeDesignPage(item.designLayout,page);
+    if(!next)return;
+    edit('designLayout',next.layout);setPage(next.page);clearSelection();setError('');
+  };
   const changePage = (direction: -1 | 1) => {
     setPhotoLayersOpen(false);
     setPage(current => {
@@ -247,7 +282,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const addPhotoAnywhere=()=>{
     if (page===1) { addPhotoBlock(); return; }
     const extras=item.designLayout?.extraPhotos||[];
-    if (extras.length>=24) { setError('Máximo 24 fotografías añadidas.'); return; }
+    if (extras.length>=MAX_DESIGN_ELEMENTS) { setError('Máximo de fotografías añadidas alcanzado.'); return; }
     const id=crypto.randomUUID();
     updateLayout({extraPhotos:[...extras,{id,page,url:''}]});
     setTransformingId(null);setSelectedPhotoId(null);setLastTextId(null);setBank(false);setTarget(`extra:${id}`);
@@ -299,6 +334,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         <button type="button" onClick={addFreeText}>+ Texto</button>
         <button type="button" onClick={addPhotoAnywhere}
           disabled={page===1&&photoOrder.length>=CAROLINA_MAX_SLOTS}>+ Foto</button>
+        <button type="button" onClick={addPage} className="hn-canvas-add-page"
+          aria-label="Agregar página en blanco"><Plus size={17}/> Página</button>
         {transformingId && <span>Arrastra · Amplía o gira con dos dedos</span>}
       </div>}
       {<PhotoLayersPanel layers={photoLayers} open={photoLayersOpen}
@@ -338,6 +375,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
           : <CarolinaTerms item={item} interaction={textInteraction}
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>)}
+        {isBlankPage(page) && <CarolinaBlankPage item={item} page={page}
+          interaction={textInteraction} onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>}
       </div>
       {<div className="hn-canvas-pager">
         <button type="button" disabled={pageIndex<=0} aria-label="Página anterior"
@@ -350,6 +389,18 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           <ChevronRight size={18}/>
         </button>
       </div>}
+      <div className="hn-canvas-page-actions" role="group" aria-label="Organizar páginas">
+        <span className="hn-canvas-page-label">{pageTitle(page,pageIndex)}</span>
+        <button type="button" onClick={()=>movePage(-1)} disabled={pageIndex<=0}
+          title="Mover esta página antes" aria-label="Mover página antes"><ArrowLeft size={15}/></button>
+        <button type="button" onClick={()=>movePage(1)} disabled={pageIndex>=selectedPages.length-1}
+          title="Mover esta página después" aria-label="Mover página después"><ArrowRight size={15}/></button>
+        <button type="button" onClick={duplicatePage} disabled={!isBlankPage(page)}
+          title={isBlankPage(page)?'Duplicar página en blanco':'Solo se duplican páginas propias'}
+          aria-label="Duplicar página"><Copy size={15}/></button>
+        <button type="button" onClick={deletePage} disabled={selectedPages.length<=1}
+          title="Eliminar página" aria-label="Eliminar página"><Trash2 size={15}/></button>
+      </div>
       {lastTextId && transformingId!==lastTextId && (
         <TextStyleDock textId={lastTextId}
           fontId={item.designLayout?.fonts?.[lastTextId] || item.designLayout?.defaultFont}
@@ -363,7 +414,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       {selectedPhotoId && !transformingId && !editingId && target===null &&
         createPortal(
           <PhotoEditingWorkspace photoId={selectedPhotoId}
-            aspect={photoAspect} pageName={pages[page]} activeTool={photoTool}
+            aspect={photoAspect} pageName={pageTitle(page,pageIndex)} activeTool={photoTool}
             url={selectedPhotoId==='photo:cover' ? item.cover :
               selectedPhotoId.startsWith('photo-extra:') ?
                 item.designLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===selectedPhotoId)?.url || '' :

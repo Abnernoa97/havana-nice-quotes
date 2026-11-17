@@ -203,13 +203,25 @@ export function CarolinaTerms({ item, interaction, onSelectExtraPhoto }: PagePro
     </div>
   );
 }
+/** Real blank canvas: no inherited text, title, masthead or collage. */
+export function CarolinaBlankPage({item,page,interaction,onSelectExtraPhoto}:PageProps & {
+ page:number;onSelectExtraPhoto?:(id:string)=>void;
+}) {
+ return <div className={'hn-carolina-page hn-blank-page' +
+    (interaction?.transformingId?' hn-layout-grid':'')}
+    aria-label={'Página en blanco '+page}>
+   <ExtraPhotos item={item} page={page} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
+   <ExtraTexts item={item} page={page} interaction={interaction}/>
+ </div>;
+}
 export default function CarolinaDocument({ item }: { item: Quote }) {
   return (
     <div className="hn-carolina-document">
       {carolinaPageOrder(item.designLayout).map(page=>{
         if (page===0) return <CarolinaCover key="cover" item={item}/>;
         if (page===1) return <CarolinaCollage key="collage" item={item}/>;
-        return <CarolinaTerms key="terms" item={item}/>;
+        if(page===2)return <CarolinaTerms key="terms" item={item}/>;
+        return <CarolinaBlankPage key={page} item={item} page={page}/>;
       })}
     </div>
   );
