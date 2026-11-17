@@ -40,7 +40,7 @@
 .hn-canvas .hn-carolina-text-node:hover:not(.editing){outline:1px dashed #ad915f}
 .hn-canvas .hn-carolina-text-node.editing{min-width:1.5em;outline:1px solid #ad915f;outline-offset:2px;background:#fff9;border-radius:3px;user-select:text;-webkit-user-select:text;touch-action:auto;cursor:text}
 .hn-canvas .hn-carolina-cover-brand,.hn-canvas .hn-carolina-cover-personal{z-index:3}
-.hn-canvas .hn-carolina-extra-layer{z-index:3}
+.hn-canvas .hn-carolina-extra-layer{z-index:16}
 .hn-canvas .hn-carolina-page.hn-layout-grid::before{z-index:4}
 
 .hn-canvas .hn-carolina-page.hn-layout-grid { touch-action:pan-y; }
@@ -93,3 +93,10 @@
 .hn-canvas-page-actions button:disabled{opacity:.33;cursor:default}
 .hn-canvas .hn-blank-page{aspect-ratio:612/792;background:#fff}
 @media(max-width:530px){.hn-canvas-toolbar>button{flex:1 1 28%;min-width:0}}
+
+/* Page background media is flush edge-to-edge, with text always in a higher layer. */
+.hn-canvas .hn-blank-page .hn-carolina-photo-overlay .hn-page-background{z-index:0!important}
+.hn-canvas .hn-blank-page .hn-carolina-photo-overlay .hn-page-background.hn-photo-transforming{z-index:12!important}
+.hn-canvas .hn-blank-page .hn-carolina-extra-layer{z-index:16}
+.hn-canvas .hn-blank-page .hn-carolina-added-text{background:transparent;color:#fff;text-shadow:0 1px 7px #0008}
+.hn-canvas .hn-blank-page:not(:has(.hn-page-background)) .hn-carolina-added-text{color:#243d31;text-shadow:none}
