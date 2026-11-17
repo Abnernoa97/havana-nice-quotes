@@ -1,32 +1,35 @@
 import type { Quote } from './types';
 
-/** Filtra cotizaciones por pareja, destino y estado. */
+/** Templates and unsaved work never appear as quotations. Legacy response
+ * states are still retrievable under Sent without deleting their history. */
+export const QUOTE_FILTERS=['Todas','Enviadas','Borrador','Listas para enviar'] as const;
+export function quoteDisplayStatus(status:Quote['status']):string {
+ return status==='En revisión'||status==='Aceptada'?'Enviada':status;
+}
 export function filterQuotes(quotes: Quote[], filter: string, search: string): Quote[] {
-  return quotes.filter(
-    q =>
-      (filter === 'Todas' || q.status === filter) &&
-      [q.name, q.location]
-        .join(' ')
-        .toLowerCase()
-        .includes(search.toLowerCase())
-  );
+ const query=search.trim().toLocaleLowerCase('es');
+ return quotes.filter(q=>{
+  if(q.isTemplate)return false;
+  const state=quoteDisplayStatus(q.status);
+  const matches=filter==='Todas'||
+    (filter==='Enviadas'&&state==='Enviada')||
+    (filter==='Listas para enviar'&&state==='Lista para enviar')||
+    state===filter;
+  return matches&&[q.quoteTitle,q.name,q.location].join(' ').toLocaleLowerCase('es').includes(query);
+ });
 }
-
-export function statusClass(s: string): string {
-  return s === 'Aceptada'
-    ? 'green'
-    : s === 'En revisión'
-      ? 'gold'
-      : s === 'Enviada'
-        ? 'blue'
-        : 'gray';
+export function statusClass(s:string):string {
+ return s==='Lista para enviar'?'gold':
+   ['Enviada','En revisión','Aceptada'].includes(s)?'blue':'gray';
 }
+export const quoteDisplayName=(q:Quote):string=>q.quoteTitle?.trim()||q.name.trim()||'Cotización sin nombre';
 
 /** A new quotation has no imported test photos or predefined covers. */
 export function createQuoteDraft(id: string): Quote {
   return {
     id,
     name: '',
+    quoteTitle: undefined,
     client: '',
     email: '',
     location: '',
@@ -84,7 +87,7 @@ export function findClientActivity(quotes: Quote[]): { quote: Quote; message: No
 /** Deep copy: changing a reused quotation must not mutate its source layout. */
 export function duplicateQuote(source:Quote,id:string,resetClient=false):Quote{
  const copy=JSON.parse(JSON.stringify(source)) as Quote;
- const next:Quote={...copy,id,status:'Borrador',messages:[]};
+ const next:Quote={...copy,id,status:'Borrador',messages:[],quoteTitle:undefined};
  delete next.isTemplate;
  delete next.templateName;
  if(resetClient){
