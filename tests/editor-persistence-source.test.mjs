@@ -303,7 +303,7 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
   assert.match(canvas, /const pages = \['Portada', 'Collage', 'Propuesta'\]/);
   assert.match(canvas, /<CarolinaCover item=\{renderItem\} interaction=\{textInteraction\}[\s\S]*?onSelectCover=/);
   assert.match(canvas, /<CarolinaCollage item=\{renderItem\} interaction=\{textInteraction\}/);
-  assert.match(canvas, /<CarolinaTerms item=\{item\} interaction=\{textInteraction\}\s+onSelectExtraPhoto=/);
+  assert.match(canvas, /<CarolinaTerms item=\{renderItem\} interaction=\{textInteraction\}\s+onSelectExtraPhoto=/);
   const picker=src('features/editor/photos/PhotoSourcePicker.tsx');
   assert.match(canvas, /<PhotoSourcePicker target=\{target\}/);
   assert.match(picker, /Mi teléfono/);
