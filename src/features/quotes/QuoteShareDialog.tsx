@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {Copy,Link2,RotateCcw,Send,Trash2,X} from 'lucide-react';
+import {Copy,Link2,Send,Trash2,X} from 'lucide-react';
 import './quote-share.css';
 type ShareLink={url:string;expiresAt:number|null;createdAt?:number};
 type Props={quoteId:string;quoteLabel:string;onClose:()=>void;onMarkedSent:()=>Promise<boolean>};
