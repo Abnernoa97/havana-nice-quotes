@@ -3,7 +3,7 @@ import {FileText,Send, X} from 'lucide-react';
 import type {Quote} from '../quotes/types';
 import './quote-save-dialog.css';
 
-type SaveState='Borrador'|'Lista para enviar';
+type SaveState='Borrador'|'Listo para enviar';
 type Props={
  item:Quote;
  busy:boolean;
@@ -41,8 +41,8 @@ export default function QuoteSaveDialog({item,busy,onClose,onSave}:Props){
     <button type="button" disabled={busy} className="hn-save-draft" onClick={()=>save('Borrador')}>
      <FileText size={20}/><span><strong>Guardar como borrador</strong><small>Para continuar editándola después</small></span>
     </button>
-    <button type="button" disabled={busy} className="hn-save-ready" onClick={()=>save('Lista para enviar')}>
-     <Send size={20}/><span><strong>Guardar y enviar</strong><small>Dejar en Listas para enviar</small></span>
+    <button type="button" disabled={busy} className="hn-save-ready" onClick={()=>save('Listo para enviar')}>
+     <Send size={20}/><span><strong>Guardar y enviar</strong><small>Dejar en Listo para enviar</small></span>
     </button>
    </div>
    <p className="hn-save-note">«Guardar y enviar» prepara la cotización para el envío. No la envía al cliente automáticamente.</p>
