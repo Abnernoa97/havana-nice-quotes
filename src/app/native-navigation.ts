@@ -22,12 +22,12 @@ export type BrowserHistoryPort = {
   back(): void;
 };
 const sections: AppSection[] = ['home', 'quotes', 'editor', 'messages', 'photos', 'trash'];
-const tabs: EditorTab[] = ['details', 'styles', 'design', 'publish'];
+const tabs: EditorTab[] = ['styles', 'details', 'design', 'publish'];
 const modes: ReadingView[] = ['flip', 'scroll'];
 
 export function initialView(active: string): AppView {
   return {
-    section: 'home', active, tab: 'details', preview: false,
+    section: 'home', active, tab: 'styles', preview: false,
     previewMode: 'flip', mobileMenu: false,
     installGuide: false,
     photoViewerId: null,

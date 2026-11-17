@@ -1,3 +1,20 @@
+# ESTADO VIGENTE · 17/11/2026
+
+El plan maestro principal es [Issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3). Las notas históricas posteriores a este encabezado pueden mencionar fases ya implementadas.
+
+**Completado en código:** D1 y R2 privados; cotizaciones con sincronización, biblioteca de fotos/videos y miniaturas; diseñador universal de foto/texto/capas; portada video, Scroll y Revista 3D; un solo `designLayout`; selector de anticipo 20–100 en flujo; pasos Estilos → Datos → Diseño → Publicar; cuatro composiciones editoriales propias (Vogue, Lane, Junebug, NYT como referencias de estilo); plantillas personales guardadas como registros D1 y clonación de cotizaciones existentes sin modificar la fuente.
+
+**Pendiente todavía en el Plan Maestro:**
+1. Gestor de **páginas nuevas arbitrarias**: crear, duplicar, reordenar y eliminar folios más allá de las tres hojas originales; el soporte actual cambia el orden/visibilidad de esas hojas y añade fotos y textos libres en ellas.
+2. Deshacer, rehacer, versiones e historial de edición persistente.
+3. QA táctil real Samsung/iPhone, scroll, recorte, controles, PageFlip, horizontal/vertical, tablet y accesibilidad; las pruebas automáticas no lo sustituyen.
+4. Sincronización servidor-servidor opcional con HAVANA CALENDARIO, pendiente en [Issue #3](https://github.com/Abnernoa97/havana-nice-quotes/issues/3); no se ha tocado la otra app ni sus datos.
+5. Enlaces seguros por propuesta, entrega, recepción, mensajes de cliente reales, firma/aceptación y permisos para uso comercial; siguen fuera del prototipo.
+
+**Plantillas propias · primera versión:** crean una cotización marcada internamente `isTemplate`, con nombre `templateName`; usa el mismo diseñador y se sincroniza en la misma D1, sin abrir tablas ni Workers adicionales. Se puede editar y clonar como nueva cotización. Las plantillas personales heredan todavía las tres hojas estructurales; las páginas verdaderamente libres quedan pendientes del futuro motor de documento.
+
+---
+
 ## Plantillas reales (etapa activa)
 
 Incorporada primera cotización real Canva **Carolina**: portada, collage editable y página de experiencia/producción. Siguiente etapa: comparar visualmente con el PDF en Android, afinar tipografía y espaciados, y repetir con los siguientes PDF.

@@ -64,9 +64,11 @@
 .hn-pricing input.hn-price-input {
   font-variant-numeric: tabular-nums;
 }
-.hn-deposit-row { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:26px 0 18px; }
+.hn-deposit-row { display:flex; align-items:flex-start; flex-wrap:wrap; justify-content:space-between; gap:12px; margin:26px 0 18px; }
 .hn-deposit-label { font-weight:600; font-size:13px; color:#365744; }
-.hn-deposit-picker { flex:0 0 auto; min-width:133px; position:relative; }
+.hn-deposit-picker { flex:0 0 auto; min-width:133px; position:static; }
+.hn-deposit-picker[open] { flex:1 0 100%; width:100%; min-width:0; }
+.hn-deposit-picker[open] summary { margin-left:auto; max-width:190px; }
 .hn-deposit-picker summary {
   display:flex; align-items:center; justify-content:space-between; list-style:none;
   min-height:45px; padding:4px; border:1px solid #d8e4d8; border-radius:12px;
@@ -82,8 +84,8 @@
 .hn-deposit-picker summary>svg { color:#56745c; margin-right:7px; transition:transform .2s ease; }
 .hn-deposit-picker[open] summary>svg { transform:rotate(180deg); }
 .hn-deposit-options {
-  position:absolute; top:calc(100% + 6px); right:0; z-index:6; width:252px;
-  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; padding:10px;
+  position:static; width:100%; margin-top:9px;
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; padding:10px;
   background:#fff; border:1px solid #dce6db; border-radius:13px; box-shadow:0 12px 26px #193b2821;
 }
 .hn-deposit-options button { min-height:41px; cursor:pointer; border:1px solid #e0e8de;
@@ -91,8 +93,12 @@
   font-weight:700; font-variant-numeric:tabular-nums; }
 .hn-deposit-options button.selected { color:#fff; background:#244a37; border-color:#244a37; }
 .hn-deposit-options button:hover:not(.selected){background:#eaf1e8}
-@media(max-width:400px){.hn-deposit-options{width:231px}}
+@media(max-width:400px){.hn-deposit-options{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (prefers-reduced-motion: reduce) {
   .hn-currency-switch::before, .hn-currency-switch button,
   .hn-deposit-picker summary>svg { transition: none; }
 }
+
+/* All nine values expand inside document flow, never beneath the fixed app navigation. */
+.hn-deposit-picker[open] .hn-deposit-options{scroll-margin-bottom:100px}
+.hn-pricing{padding-bottom:36px}

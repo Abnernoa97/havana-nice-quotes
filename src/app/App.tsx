@@ -5,7 +5,7 @@ import type { AppSection, EditorTab, ReadingView } from './native-navigation';
 import type { Quote } from '../features/quotes/types';
 import FlipMagazine from '../features/magazine/FlipMagazine';
 import { editorialStyles } from '../features/editor/styles/EditorialStyles';
-import { createQuoteDraft, editSampleQuote, statusClass } from '../features/quotes/model';
+import { createQuoteDraft, createOwnTemplate, duplicateQuote, editSampleQuote, statusClass } from '../features/quotes/model';
 import { useQuoteStore } from '../features/quotes/useQuoteStore';
 import { useDeviceAccess } from '../features/auth/useDeviceAccess';
 import DeviceGate from '../features/auth/DeviceGate';
@@ -79,7 +79,9 @@ function App() {
     <InstallGuide onClose={goBack} />
   ) : null;
 
-  const item = quotes.find(q => q.id === active) || quotes[0];
+  const clientQuotes = quotes.filter(quote => !quote.isTemplate);
+  const ownTemplates = quotes.filter(quote => quote.isTemplate);
+  const item = quotes.find(q => q.id === active) || clientQuotes[0] || ownTemplates[0];
   const styleName = item?.style && editorialStyles.some(s => s.id === item.style) ? item.style : 'libre';
   useEffect(() => {
     if (enabled && syncStatus !== 'loading' && quotes.length && !quotes.some(q => q.id === active)) {
@@ -124,8 +126,29 @@ function App() {
     setQuotes(list => [q, ...list]);
     setNewMessage('');
     setClientMessage('');
-    routeTo({ active: id, tab: 'details', section: 'editor', preview: false, mobileMenu: false });
+    routeTo({ active: id, tab: 'styles', section: 'editor', preview: false, mobileMenu: false });
     setToast('Cotización creada. Guardando en Cloudflare...');
+  };
+  const createTemplate = () => {
+    const id='hn-'+crypto.randomUUID();
+    setQuotes(list=>[createOwnTemplate(id),...list]);
+    setNewMessage('');setClientMessage('');
+    routeTo({active:id,tab:'design',section:'editor',preview:false,mobileMenu:false});
+    setToast('Plantilla creada. Personalízala y pulsa Guardar.');
+  };
+  const reuseQuote = (sourceId:string,resetClient=false) => {
+    const source=quotes.find(quote=>quote.id===sourceId);
+    if(!source)return;
+    const id='hn-'+crypto.randomUUID();
+    const clone=duplicateQuote(source,id,resetClient);
+    setQuotes(list=>[clone,...list]);
+    setNewMessage('');setClientMessage('');
+    routeTo({active:id,tab:'details',section:'editor',preview:false,mobileMenu:false});
+    setToast('Copia independiente creada. Puedes cambiar sus datos y el diseño.');
+  };
+  const editOwnTemplate = (id:string) => {
+    if(!ownTemplates.some(template=>template.id===id))return;
+    routeTo({active:id,tab:'design',section:'editor',preview:false,mobileMenu:false});
   };
   const moveQuoteToTrash = async (id: string) => {
     const quote = quotes.find(q => q.id === id);
@@ -241,7 +264,7 @@ function App() {
       .catch(() => undefined);
   };
   const sidebar = (
-    <Sidebar pages={pages} quotes={quotes} navigate={navigate} section={section}
+    <Sidebar pages={pages} quotes={clientQuotes} navigate={navigate} section={section}
       onInvite={() => void invitePhone()} />
   );
   const topbar = (
@@ -249,7 +272,7 @@ function App() {
   );
   const home = (
     <HomeScreen
-      quotes={quotes}
+      quotes={clientQuotes}
       addQuote={addQuote}
       navigate={navigate}
       selectQuote={selectQuote}
@@ -258,7 +281,7 @@ function App() {
   );
   const quotesView = (
     <QuotesScreen
-      quotes={quotes}
+      quotes={clientQuotes}
       btnQuote={btnQuote}
       search={search}
       setSearch={setSearch}
@@ -272,6 +295,9 @@ function App() {
   const editor = item ? (
     <QuoteEditorScreen
       item={item}
+      existingQuotes={clientQuotes} ownTemplates={ownTemplates}
+      onCreateTemplate={createTemplate} onUseExisting={sourceId=>reuseQuote(sourceId,false)}
+      onUseTemplate={sourceId=>reuseQuote(sourceId,true)} onEditOwnTemplate={editOwnTemplate}
       tab={tab}
       setTab={setTab}
       styleName={styleName}
@@ -290,7 +316,7 @@ function App() {
   );
   const messagesView = item ? (
     <MessagesScreen
-      quotes={quotes}
+      quotes={clientQuotes}
       item={item}
       active={active}
       setActive={activateQuote}

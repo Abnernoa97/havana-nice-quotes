@@ -32,4 +32,6 @@ export type Quote = {
   messages?: QuoteMessage[];
   style?: QuoteStyle;
   readingMode?: ReadingMode;
+  isTemplate?: boolean; // Reusable custom editorial layout, stored as a normal private D1 record
+  templateName?: string; // Editable title for templates, separate from the couple's name
 };

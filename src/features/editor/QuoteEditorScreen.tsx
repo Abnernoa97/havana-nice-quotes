@@ -10,6 +10,12 @@ import QuotePublishPanel from './QuotePublishPanel';
 
 type Props = {
   item: Quote;
+  existingQuotes: Quote[];
+  ownTemplates: Quote[];
+  onCreateTemplate: () => void;
+  onUseExisting: (id:string) => void;
+  onUseTemplate: (id:string) => void;
+  onEditOwnTemplate: (id:string) => void;
   tab: string;
   setTab: Dispatch<SetStateAction<string>>;
   styleName: string;
@@ -22,7 +28,8 @@ type Props = {
 
 /** One editor: details (including investment), template, design and final review. */
 export default function QuoteEditorScreen({
-  item, tab, setTab, styleName, edit, openClientPreview, save,
+  item, existingQuotes, ownTemplates, onCreateTemplate, onUseExisting,
+  onUseTemplate, onEditOwnTemplate, tab, setTab, styleName, edit, openClientPreview, save,
   cloudPhotos, onUploadPhoto,
 }: Props) {
   return (
@@ -30,7 +37,7 @@ export default function QuoteEditorScreen({
       <div className="editor-head">
         <div>
           <span className="eyebrow">HAVANA NICE · COTIZACIONES</span>
-          <h1>{item.name.trim() || 'Nueva cotización'}</h1>
+          <h1>{item.isTemplate ? (item.templateName?.trim() || 'Nueva plantilla') : (item.name.trim() || 'Nueva cotización')}</h1>
         </div>
         <div className="editor-actions">
           <button type="button" className="btn primary" onClick={save}>
@@ -41,13 +48,13 @@ export default function QuoteEditorScreen({
       <div className="editor-workspace">
         <div className="edit-panel">
           <div className="edit-tabs hn-four-tabs" role="tablist" aria-label="Secciones del diseñador">
-            <button type="button" role="tab" aria-selected={tab === 'details'}
-              className={tab === 'details' ? 'active' : ''} onClick={() => setTab('details')}>
-              <PenLine size={16}/> Datos
-            </button>
             <button type="button" role="tab" aria-selected={tab === 'styles'}
               className={tab === 'styles' ? 'active' : ''} onClick={() => setTab('styles')}>
               <BookOpen size={16}/> Estilos
+            </button>
+            <button type="button" role="tab" aria-selected={tab === 'details'}
+              className={tab === 'details' ? 'active' : ''} onClick={() => setTab('details')}>
+              <PenLine size={16}/> Datos
             </button>
             <button type="button" role="tab" aria-selected={tab === 'design'}
               className={tab === 'design' ? 'active' : ''} onClick={() => setTab('design')}>
@@ -61,7 +68,13 @@ export default function QuoteEditorScreen({
           {tab === 'details' && <QuoteDetailsPanel item={item} edit={edit} />}
           {tab === 'styles' && (
             <EditorialStyles value={styleName}
-              onChange={style => edit('style', style)} photo={item.cover}/>
+              onChange={style => edit('style', style)} photo={item.cover}
+              ownTemplates={ownTemplates} existingQuotes={existingQuotes}
+              onCreateTemplate={onCreateTemplate} onUseExisting={onUseExisting}
+              onUseTemplate={onUseTemplate} onEditOwnTemplate={onEditOwnTemplate}
+              isEditingTemplate={Boolean(item.isTemplate)}
+              templateName={item.templateName||''}
+              onTemplateNameChange={name=>edit('templateName',name)}/>
           )}
           {tab === 'design' && (
             <QuoteDesignPanel item={item} edit={edit}

@@ -39,3 +39,13 @@ La estructura vigente de Fotos, Textos, Lienzo y módulos compartidos está en [
 ## Compatibilidad y limpieza · noviembre 2026
 
 Se eliminó la interfaz de reproductor por tarjeta, el panel de estadísticas duplicado en Fotos y los formateadores de tamaño no utilizados. **Eliminados completamente el campo y el adaptador de lectura heredado `carolinaLayout`: toda edición y render usan únicamente `designLayout`.** Las cotizaciones de prueba que dependían del campo antiguo pueden perder su distribución; no se eliminaron registros ni medios del servidor.
+
+## 17/11/2026 · Estilos, plantillas y reutilización
+
+- La pestaña inicial es **Estilos**, seguida de Datos, Diseño y Publicar.
+- El anticipo despliega sus nueve opciones dentro del flujo de la página; no queda cortado por `overflow:hidden` de la tarjeta ni por la navegación inferior.
+- `src/features/editor/styles/EditorialStyles.tsx`: originales y referencias editoriales con botón «Crear plantilla», selector «Utilizar cotización existente» y apartado «Mis plantillas».
+- `src/features/quotes/model.ts`: duplicación profunda con UUID nuevo, dejando la cotización original intacta. Para utilizar plantilla propia se limpian datos personales e importes y se conserva el diseño.
+- `Quote.isTemplate` y `Quote.templateName` usan la **misma D1 privada**; se excluyen las plantillas de las cotizaciones, estadísticas y conversaciones, no se crea otra base de datos.
+- `src/features/templates/editorial-template.css` desarrolla cuatro composiciones **originales** con tipografía, posición de portada, collage y jerarquía de términos diferentes; nombres de publicaciones como referencias no oficiales. Editor, Scroll y 3D utilizan los mismos elementos editables.
+- **Queda abierto:** crear páginas arbitrarias fuera de las tres páginas actuales, deshacer/rehacer y QA móvil táctil. La creación de plantillas personalizadas reutiliza las hojas actuales, todavía no equivale a un lienzo multipágina ilimitado.

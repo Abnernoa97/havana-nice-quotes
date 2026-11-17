@@ -80,3 +80,22 @@ export function findClientActivity(quotes: Quote[]): { quote: Quote; message: No
   }
   return null;
 }
+
+/** Deep copy: changing a reused quotation must not mutate its source layout. */
+export function duplicateQuote(source:Quote,id:string,resetClient=false):Quote{
+ const copy=JSON.parse(JSON.stringify(source)) as Quote;
+ const next:Quote={...copy,id,status:'Borrador',messages:[]};
+ delete next.isTemplate;
+ delete next.templateName;
+ if(resetClient){
+  next.name='';next.client='';next.email='';next.location='';next.date='';
+  next.price=0;next.deposit=0;
+ }
+ return next;
+}
+/** A template uses the same editor and D1 validation: no second editing engine. */
+export function createOwnTemplate(id:string,source?:Quote):Quote{
+ const foundation=source?duplicateQuote(source,id,true):createQuoteDraft(id);
+ return {...foundation,style:source?.style||'libre',
+  isTemplate:true,templateName:source?.templateName?.trim()||'Mi nueva plantilla'};
+}

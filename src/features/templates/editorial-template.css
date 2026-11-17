@@ -40,3 +40,105 @@
 .hn-magazine .hn-editorial-collage .hn-carolina-collage{height:100%;aspect-ratio:auto}
 .hn-magazine .hn-editorial-page{height:100%;aspect-ratio:auto}
 @media(max-width:650px){.hn-editorial-document{gap:10px}.hn-editorial-terms{gap:3%}}
+
+/* Four ORIGINAL editorial compositions inspired by broad magazine genres.
+   These are Havana Nice layouts, not copies of Vogue/Lane/Junebug/NYT.
+   The same shared text and photo nodes remain editable across all three views. */
+
+/* Fashion editorial: dramatic full-bleed photo, oversized centered headline,
+   high-contrast captioning and restrained monochrome gallery. */
+.hn-style-vogue.hn-editorial-cover .hn-editorial-top{
+ top:3.2%;left:4%;right:4%;justify-content:center;flex-direction:column;
+ border-bottom:2px solid #fff;padding-bottom:2%;font-family:'Bodoni Moda',Georgia,serif;
+ font-size:clamp(15px,4cqw,30px);text-align:center;gap:1cqw}
+.hn-style-vogue.hn-editorial-cover .hn-editorial-top small{letter-spacing:.25em}
+.hn-style-vogue.hn-editorial-cover .hn-editorial-hero{
+ top:22%;bottom:12%;left:4%;right:4%;align-items:center;text-align:center;justify-content:center;gap:3cqw}
+.hn-style-vogue.hn-editorial-cover .hn-editorial-hero h1{
+ font-size:clamp(44px,12cqw,91px);line-height:.85;letter-spacing:-.09em}
+.hn-style-vogue.hn-editorial-cover .hn-editorial-hero p{font-family:'Bodoni Moda',Georgia,serif}
+.hn-style-vogue.hn-editorial-collage .hn-carolina-collage{
+ padding:3%;gap:1.4%;background:#111}
+.hn-style-vogue.hn-editorial-collage .hn-carolina-photo-column{gap:1.4%}
+.hn-style-vogue.hn-editorial-collage .hn-carolina-photo-column.left>:first-child{flex:2}
+.hn-style-vogue.hn-editorial-collage .hn-carolina-photo-column.left>:last-child{flex:.75}
+.hn-style-vogue.hn-editorial-collage .hn-carolina-image-fill{filter:grayscale(1)}
+.hn-style-vogue.hn-editorial-terms .hn-editorial-story{gap:3%;justify-content:center}
+.hn-style-vogue.hn-editorial-terms .hn-editorial-story h2{
+ font-size:clamp(29px,8cqw,60px);letter-spacing:-.08em}
+
+/* Modern architecture: airy asymmetric typography, neutral photo grid and
+   quiet left-aligned detail column, distinct from the fashion composition. */
+.hn-style-lane.hn-editorial-cover{background:#c9c4b7;color:#fdfaf3}
+.hn-style-lane.hn-editorial-cover .hn-editorial-top{
+ top:5%;left:7%;right:7%;border:0;align-items:flex-start}
+.hn-style-lane.hn-editorial-cover .hn-editorial-top small{max-width:35%;text-align:right}
+.hn-style-lane.hn-editorial-cover .hn-editorial-photo-shade{
+ background:linear-gradient(90deg,#1f241eaa 0%,#1f241e55 47%,transparent 100%)}
+.hn-style-lane.hn-editorial-cover .hn-editorial-hero{
+ top:29%;bottom:14%;left:8%;right:36%;justify-content:center;text-align:left;
+ align-items:flex-start;text-shadow:0 1px 6px #15231a64}
+.hn-style-lane.hn-editorial-cover .hn-editorial-hero h1{
+ font-size:clamp(29px,8cqw,60px);line-height:1.05}
+.hn-style-lane.hn-editorial-cover .hn-editorial-hero small{letter-spacing:.04em}
+.hn-style-lane.hn-editorial-collage .hn-carolina-collage{
+ padding:6%;gap:4%;background:#eee9df;grid-template-columns:1.25fr .75fr}
+.hn-style-lane.hn-editorial-collage .hn-carolina-photo-column{gap:3%}
+.hn-style-lane.hn-editorial-collage .hn-carolina-photo-column.left>:first-child{flex:1.8}
+.hn-style-lane.hn-editorial-terms{padding:11% 9%;gap:6%}
+.hn-style-lane.hn-editorial-terms .hn-editorial-rule{text-align:left;border-bottom:1px solid}
+.hn-style-lane.hn-editorial-terms .hn-editorial-story h2{font-size:clamp(33px,7.5cqw,60px)}
+
+/* Wedding journal: warmer, more informal bottom-left title, soft photo
+   gutters and a visually separated letter-like terms page. */
+.hn-style-junebug.hn-editorial-cover .hn-editorial-photo-shade{
+ background:linear-gradient(180deg,#38231945,transparent 34%,#41241bd9)}
+.hn-style-junebug.hn-editorial-cover .hn-editorial-top{
+ top:7%;left:9%;right:9%;border-bottom:0;align-items:flex-end}
+.hn-style-junebug.hn-editorial-cover .hn-editorial-hero{
+ top:37%;bottom:8%;left:9%;right:12%;justify-content:flex-end;align-items:flex-start;text-align:left}
+.hn-style-junebug.hn-editorial-cover .hn-editorial-hero h1{
+ font-size:clamp(37px,9.5cqw,78px);line-height:.96}
+.hn-style-junebug.hn-editorial-cover .hn-editorial-hero p{font-family:'Fraunces',Georgia,serif}
+.hn-style-junebug.hn-editorial-collage .hn-carolina-collage{
+ padding:5%;gap:2.3%;background:#fff3ea;grid-template-columns:.85fr 1.15fr}
+.hn-style-junebug.hn-editorial-collage .hn-carolina-photo-column{gap:2.3%}
+.hn-style-junebug.hn-editorial-collage .hn-carolina-photo-column.right>:first-child{flex:1.7}
+.hn-style-junebug.hn-editorial-collage .hn-carolina-photo{border-radius:2.3cqw}
+.hn-style-junebug.hn-editorial-terms{background:#fff4e9;padding:9% 9% 8%}
+.hn-style-junebug.hn-editorial-terms .hn-editorial-rule{
+ text-align:left;border:0;font-family:'Fraunces',Georgia,serif}
+.hn-style-junebug.hn-editorial-terms .hn-editorial-story{gap:4%}
+
+/* Newspaper editorial: cream page, ink-black serif headlines, double rules,
+   black-and-white photos and tighter information hierarchy. */
+.hn-style-nyt.hn-editorial-cover{background:#f8f7f2;color:#17231c}
+.hn-style-nyt.hn-editorial-cover .hn-editorial-photo-shade{
+ background:linear-gradient(180deg,#f7f6f0e8 0%,#f7f6f09e 29%,transparent 64%,#131813bf 100%)}
+.hn-style-nyt.hn-editorial-cover .hn-editorial-top{
+ top:4%;left:6%;right:6%;padding-bottom:2%;
+ border-top:3px double #1c251e;border-bottom:3px double #1c251e;
+ padding-top:2%;justify-content:center;flex-direction:column;gap:2cqw;
+ text-align:center;font-family:Georgia,serif;font-weight:700}
+.hn-style-nyt.hn-editorial-cover .hn-editorial-top small{color:#222;text-align:center}
+.hn-style-nyt.hn-editorial-cover .hn-editorial-hero{
+ top:22%;bottom:6%;left:7%;right:7%;justify-content:space-between;
+ align-items:center;text-align:center;gap:2cqw;color:#121912;text-shadow:none}
+.hn-style-nyt.hn-editorial-cover .hn-editorial-hero h1{
+ font:700 clamp(34px,8.5cqw,68px)/.98 Georgia,serif;letter-spacing:-.065em}
+.hn-style-nyt.hn-editorial-cover .hn-editorial-hero p{
+ color:#fff;text-shadow:0 2px 5px #000a}
+.hn-style-nyt.hn-editorial-cover .hn-editorial-hero small{
+ color:white;text-shadow:0 2px 5px #000c}
+.hn-style-nyt.hn-editorial-collage .hn-carolina-collage{
+ padding:4%;gap:1.3%;background:#f5f3ea;grid-template-columns:1fr 1fr}
+.hn-style-nyt.hn-editorial-collage .hn-carolina-photo-column{gap:1.3%}
+.hn-style-nyt.hn-editorial-collage .hn-carolina-image-fill{filter:grayscale(1)}
+.hn-style-nyt.hn-editorial-terms .hn-editorial-rule{
+ border-top:4px double currentColor;border-bottom:4px double currentColor;
+ text-align:center;padding:2% 0;font:700 clamp(13px,3.4cqw,25px) Georgia,serif}
+.hn-style-nyt.hn-editorial-terms .hn-editorial-story{gap:1.8%}
+.hn-style-nyt.hn-editorial-terms .hn-editorial-story h2{
+ font:700 clamp(27px,7cqw,55px)/1 Georgia,serif;letter-spacing:-.05em}
+.hn-style-nyt.hn-editorial-terms .hn-editorial-finance{
+ border-top:3px double currentColor;padding-top:3%}

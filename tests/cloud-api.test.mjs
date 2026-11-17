@@ -883,3 +883,20 @@ test('Miniatura de video: pequeño JPEG autenticado, audio/video intacto y purga
  await worker.fetch(request('/api/trash/video/'+id,{method:'DELETE',headers:{Cookie:cookie,Origin:origin}}),env);
  assert.equal(env.objects.size,0);
 });
+
+test('D1 guarda plantillas editables y rechaza títulos demasiado largos',async()=>{
+ const env=environment(),cookie=await authorizeDevice(env);
+ const id='hn-21212121-1212-3434-5656-787878787878';
+ const quote={id,name:'',client:'',email:'',location:'',date:'',price:0,deposit:0,
+  status:'Borrador',cover:'',font:'editorial',color:'#18342f',note:'',package:'',desc:'',
+  style:'libre',readingMode:'flip',isTemplate:true,templateName:'Mi diseño propio',
+  designLayout:{pageOrder:[0,2],fixed:{brand:'HAVANA NICE'}}};
+ const saved=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+  {quote,expectedRevision:0},cookie),env);
+ assert.equal(saved.status,200);
+ const load=await worker.fetch(request('/api/quotes',{headers:{Cookie:cookie}}),env);
+ assert.deepEqual((await load.json()).quotes[0].quote,quote);
+ const invalid=await worker.fetch(jsonRequest('/api/quotes/'+id,'PUT',
+  {quote:{...quote,templateName:'x'.repeat(101)},expectedRevision:1},cookie),env);
+ assert.equal(invalid.status,400);
+});

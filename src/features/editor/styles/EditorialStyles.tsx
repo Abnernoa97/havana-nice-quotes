@@ -1,4 +1,5 @@
-import { Check, ChevronRight, ChevronDown } from 'lucide-react';
+import { Check, ChevronRight, ChevronDown, Plus, Copy, Pencil, Layers3 } from 'lucide-react';
+import type {Quote} from '../../quotes/types';
 import { TEMPLATE_REGISTRY, TEMPLATE_IDS } from '../../templates/template-registry';
 import './editorial-styles.css';
 
@@ -8,6 +9,15 @@ type Props = {
   value: string;
   onChange: (style: string) => void;
   photo: string;
+  ownTemplates: Quote[];
+  existingQuotes: Quote[];
+  onCreateTemplate: () => void;
+  onUseExisting: (id:string) => void;
+  onUseTemplate: (id:string) => void;
+  onEditOwnTemplate: (id:string) => void;
+  isEditingTemplate: boolean;
+  templateName: string;
+  onTemplateNameChange: (name:string)=>void;
 };
 
 type StyleOption = (typeof editorialStyles)[number];
@@ -43,7 +53,9 @@ function StyleCard({s, value, onChange, photo}: {s: StyleOption; value: string; 
   );
 }
 /** Two independent collapsible template groups. */
-export default function EditorialStyles({value, onChange, photo}: Props) {
+export default function EditorialStyles({value,onChange,photo,ownTemplates,existingQuotes,
+  onCreateTemplate,onUseExisting,onUseTemplate,onEditOwnTemplate,
+  isEditingTemplate,templateName,onTemplateNameChange}: Props) {
   return (
     <div className="hn-styles-tab">
       <details className="hn-style-accordion" open>
@@ -54,6 +66,44 @@ export default function EditorialStyles({value, onChange, photo}: Props) {
               <StyleCard key={s.id} s={s} value={value} onChange={onChange} photo={photo}/>
             ))}
           </div>
+          <div className="hn-template-actions">
+            <button type="button" className="hn-create-template" onClick={onCreateTemplate}>
+              <Plus size={18}/> Crear plantilla
+            </button>
+            <details className="hn-reuse-quotes">
+              <summary><Copy size={17}/> Utilizar cotización existente <ChevronDown size={16}/></summary>
+              <div className="hn-reuse-list" role="group" aria-label="Cotizaciones para copiar">
+                {existingQuotes.length ? existingQuotes.map(quote=>(
+                  <button type="button" key={quote.id} onClick={()=>onUseExisting(quote.id)}>
+                    <strong>{quote.name?.trim()||'Cotización sin nombre'}</strong>
+                    <small>{quote.location||'Sin destino'}</small>
+                    <Copy size={16}/>
+                  </button>
+                )):<p>Todavía no hay cotizaciones para reutilizar.</p>}
+              </div>
+            </details>
+          </div>
+          {isEditingTemplate && <label className="hn-template-name">
+            Nombre de esta plantilla
+            <input type="text" maxLength={100} value={templateName}
+              onChange={event=>onTemplateNameChange(event.target.value)}
+              placeholder="Mi plantilla personalizada"/>
+            <small>Personaliza sus páginas en Diseño. Se guardará como plantilla reutilizable.</small>
+          </label>}
+          {!!ownTemplates.length && <div className="hn-own-templates">
+            <div className="hn-own-templates-heading"><Layers3 size={17}/> Mis plantillas</div>
+            {ownTemplates.map(template=><div className="hn-own-template" key={template.id}>
+              <div className="hn-own-template-label">
+                <strong>{template.templateName||'Plantilla sin nombre'}</strong>
+                <small>{TEMPLATE_REGISTRY[template.style||'libre']?.name||'Diseño propio'}</small>
+              </div>
+              <button type="button" onClick={()=>onEditOwnTemplate(template.id)}
+                title="Editar plantilla"><Pencil size={16}/> Editar</button>
+              <button type="button" className="hn-own-template-use" onClick={()=>onUseTemplate(template.id)}>
+                <Copy size={16}/> Usar
+              </button>
+            </div>)}
+          </div>}
         </div>
       </details>
       <details className="hn-style-accordion">
