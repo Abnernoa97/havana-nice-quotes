@@ -4,13 +4,14 @@ import type { CarolinaLayout } from '../templates/carolina-layout';
 import type { TemplateStyle } from '../templates/template-registry';
 
 /** Datos de las cotizaciones, compartidos entre el estudio y la nube. */
-export type QuoteStatus = 'Borrador' | 'Enviada' | 'En revisión' | 'Aceptada';
+export type QuoteStatus = 'Borrador' | 'Lista para enviar' | 'Enviada' | 'En revisión' | 'Aceptada';
 export type QuoteStyle = TemplateStyle;
 export type ReadingMode = 'flip' | 'scroll';
 export type QuoteMessage = { from: string; text: string; time: string };
 export type Quote = {
   id: string;
-  name: string;
+  name: string; // Couple name, displayed inside the proposal and calendar.
+  quoteTitle?: string; // Owner-chosen file/list name; independent of the couple name.
   client: string;
   email: string;
   location: string;
