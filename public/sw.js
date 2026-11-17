@@ -13,6 +13,8 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  // Client links are private: never cache a quote URL or its personalized HTML.
+  if (url.pathname.startsWith('/q/') || url.pathname.startsWith('/api/shared/')) return;
   if (req.mode === 'navigate') {
     event.respondWith(fetch(req).then(response => {
       if (response.ok) {
