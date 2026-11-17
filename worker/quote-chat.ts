@@ -8,7 +8,6 @@ type MessageRow=Row & {
  kind:'text'|'audio';text:string;audio_key:string|null;mime:string|null;created_at:number;
 };
 const quoteRE=/^hn-[a-f0-9-]{20,64}$/;
-const idRE=/^[a-f0-9-]{36}$/;
 const LIMIT=6*1024*1024;
 const MIME=new Set(['audio/webm','audio/mp4','audio/ogg','audio/mpeg','audio/wav']);
 const reply=(data:unknown,status=200)=>new Response(JSON.stringify(data),{
@@ -75,7 +74,7 @@ export async function quoteChatApi(request:Request,store:Store,publicMode:boolea
   const media=await store.MEDIA.get(key);
   if(!media)return fail('Audio unavailable.',404);
   return new Response(method==='HEAD'?null:media.body,{status:200,headers:{
-   'Content-Type':String(row.mime),'Content-Length':String(media.size),
+   'Content-Type':String(row?.mime||'audio/webm'),'Content-Length':String(media.size),
    'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer','X-Content-Type':'nosniff'
   }});
  }
