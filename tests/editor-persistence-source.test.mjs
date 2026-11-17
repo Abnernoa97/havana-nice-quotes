@@ -485,7 +485,7 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   assert.doesNotMatch(flip,/<CarolinaBlankReverse\/>/);
   assert.match(document,/carolinaPageOrder\(item\.designLayout\)\.map\(page=>/);
   assert.match(canvas,/const duplicatePage=\(\)=>/);
-  assert.match(canvas,/const addPage=\(\)=>/);
+  assert.match(canvas,/const addPage=\(kind\?:PageKind\)=>/);
   assert.match(canvas,/const deletePage=\(\)=>/);
   assert.doesNotMatch(canvas,/hn-canvas-page-actions/);
   assert.match(canvas,/aria-label="Duplicar página"/);
