@@ -39,7 +39,7 @@ test('Un único modelo universal; el diseño anterior no se lee ni mezcla',()=>{
  }
  assert.match(canvas,/export default function TemplateCanvasEditor\(\{ item, edit, photos, onUploadPhoto \}/);
  assert.match(proposal,/export default function Proposal\(\{item,styleName,embedded=false\}/);
- assert.match(magazine,/export default function FlipMagazine\(\{ item \}/);
+ assert.match(magazine,/export default function FlipMagazine\(\{ item, clientView=false \}/);
 });
 test('Todos los estilos comparten el motor universal, con páginas originales y hojas libres',()=>{
  const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
