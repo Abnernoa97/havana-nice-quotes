@@ -45,7 +45,7 @@ test('Guardar exige nombre y diferencia borrador de lista para enviar sin enviar
  assert.match(modal,/Guardar como listo para enviar/);
  assert.match(modal,/save\('Borrador'\)/);
  assert.match(modal,/save\('Listo para enviar'\)/);
- assert.match(modal,/no envía nada automáticamente al cliente/);
+ assert.doesNotMatch(modal,/hn-save-hint|hn-save-note|autoFocus/);
  assert.match(app,/if\(!cleanTitle\|\|cleanTitle\.length>150\)return/);
  assert.match(api,/q\.quoteTitle === undefined/);
  assert.match(api,/Listo para enviar/);
@@ -99,7 +99,8 @@ test('Guardar cotización desde plantilla no sustituye ni altera el diseño orig
  assert.match(app,/duplicateQuote\(item,ids\.quoteId,true\)/);
  assert.match(app,/templateQuoteSave\.current=ids/);
  assert.match(app,/setQuotes\(list=>\[saved,\.\.\.list\.filter\(q=>q\.id!==saved\.id\)\]\)/);
- assert.match(app,/routeTo\(\{active:saved\.id,section:'editor'/);
+ assert.match(app,/routeTo\(\{active:'empty',section:'editor'/);
+ assert.match(app,/closedAfterSave\.current\.add\(item\.id\)/);
  assert.match(model,/delete next\.isTemplate/);
  assert.match(model,/delete next\.templateName/);
 });
