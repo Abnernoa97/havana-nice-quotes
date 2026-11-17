@@ -11,11 +11,11 @@ export default function PhotoLayersPanel({layers,open,onToggle,onEdit,onMove,onD
   return <div className="hn-canvas-layers">
     <button type="button" className="hn-canvas-layers-trigger"
       aria-expanded={open} aria-controls="hn-photo-layers-list" onClick={onToggle}>
-      <Layers3 size={16}/> Capas de fotos <strong>{layers.length}</strong>
+      <Layers3 size={16}/> Capas <strong>{layers.length}</strong>
       <ChevronDown size={15} className={open?'open':''}/>
     </button>
     {open && <div id="hn-photo-layers-list" className="hn-canvas-layers-list"
-      role="group" aria-label="Recuperar, editar, mover o borrar fotografías superpuestas">
+      role="group" aria-label="Editar y organizar fotografías y videos superpuestos">
       {layers.map(layer=><div className="hn-canvas-layer" key={layer.id}>
         <img src={layer.url.startsWith('/api/videos/')?layer.url+'/poster':layer.url}
           alt="" loading="lazy"/>
