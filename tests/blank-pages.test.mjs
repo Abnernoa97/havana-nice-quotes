@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createOwnTemplate,duplicateQuote} from '../src/features/quotes/model.ts';
-import {validCarolinaLayout,carolinaPageOrder,MAX_DESIGN_PAGES,cleanEmptyExtraTexts} from '../src/features/templates/carolina-layout.ts';
+import {validCarolinaLayout,carolinaPageOrder,MAX_DESIGN_PAGES,cleanEmptyExtraTexts,pageKind} from '../src/features/templates/carolina-layout.ts';
 import {insertBlankPage,duplicateBlankPage,shiftPage,removeDesignPage} from '../src/features/templates/blank-pages.ts';
 import {pageBackgroundMediaId} from '../src/features/templates/page-background.ts';
 const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
@@ -71,13 +71,13 @@ test('Scroll y revista 3D pintan hojas blancas con los mismos nodos',()=>{
  const carolina=src('features/templates/CarolinaTemplate.tsx');
  const editorial=src('features/templates/EditorialTemplate.tsx');
  const flip=src('features/magazine/FlipMagazine.tsx');
- assert.match(canvas,/onClick=\{addPage\}/);
+ assert.match(canvas,/onClick=\{\(\)=>addPage\('chat'\)\}/);
  assert.match(canvas,/isBlankPage\(page\) && <CarolinaBlankPage/);
  assert.match(carolina,/export function CarolinaBlankPage/);
  assert.match(carolina,/<ExtraPhotos item=\{item\} page=\{page\}/);
  assert.match(carolina,/<ExtraTexts item=\{item\} page=\{page\}/);
  assert.match(editorial,/<CarolinaBlankPage key=\{page\}/);
- assert.match(flip,/<CarolinaBlankPage item=\{item\} page=\{selectedPage\}/);
+ assert.match(flip,/<CarolinaBlankPage item=\{item\} page=\{selectedPage\} staticChat/);
 });
 test('Las copias de una plantilla de páginas libres son independientes',()=>{
  const tpl=createOwnTemplate('hn-a');
@@ -250,4 +250,40 @@ test('Texto tecleado se mueve arrastrando el mismo texto o el fondo y cierra tec
  assert.match(gesture,/page\.setPointerCapture\(event\.pointerId\)/);
  assert.match(canvas,/if \(editingId && document\.activeElement instanceof HTMLElement\)document\.activeElement\.blur\(\)/);
  assert.match(canvas,/newlyConfirmedText\.current/);
+});
+
+test('El selector crea hojas blancas o chat sin alterar otras páginas',()=>{
+ const start={pageOrder:[3]};
+ const chat=insertBlankPage(start,3,'chat');
+ assert.equal(chat.page,4);
+ assert.equal(pageKind(chat.layout,4),'chat');
+ assert.equal(pageKind(chat.layout,3),'blank');
+ assert.equal(validCarolinaLayout(chat.layout),true);
+ const duplicate=duplicateBlankPage(chat.layout,4);
+ assert.equal(pageKind(duplicate.layout,duplicate.page),'chat');
+ const removed=removeDesignPage(duplicate.layout,duplicate.page);
+ assert.equal(pageKind(removed.layout,duplicate.page),'blank');
+ assert.equal(validCarolinaLayout(removed.layout),true);
+ assert.equal(validCarolinaLayout({pageOrder:[3],pageKinds:{'3':'chat'}}),true);
+ assert.equal(validCarolinaLayout({pageOrder:[3],pageKinds:{'2':'chat'}}),false);
+ assert.equal(validCarolinaLayout({pageOrder:[3],pageKinds:{'4':'chat'}}),false);
+ assert.equal(validCarolinaLayout({pageOrder:[3],pageKinds:{'3':'album'}}),false);
+});
+test('El chat comparte la hoja blanca en Diseñador y Scroll; en 3D usa panel externo real',()=>{
+ const editor=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const page=src('features/templates/CarolinaTemplate.tsx');
+ const magazine=src('features/magazine/FlipMagazine.tsx');
+ const client=src('features/client/PublicQuotePage.tsx');
+ const panel=src('features/quotes/QuoteChatPanel.tsx');
+ assert.match(editor,/Página en blanco/);
+ assert.match(editor,/Página chat/);
+ assert.match(editor,/onClick=\{\(\)=>addPage\('chat'\)\}/);
+ assert.match(page,/pageKind\(item\.designLayout,page\)==='chat'/);
+ assert.match(page,/<QuoteChatPanel quoteId=\{item\.id\}/);
+ assert.match(magazine,/staticChat/);
+ assert.match(magazine,/compact isTemplate=\{item\.isTemplate\}/);
+ assert.match(client,/<FlipMagazine item=\{item\} clientView\/>/);
+ assert.match(panel,/<textarea/);
+ assert.match(panel,/<Mic/);
+ assert.doesNotMatch(panel,/type="file"|accept="image|accept="video/);
 });
