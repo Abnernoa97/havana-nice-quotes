@@ -67,12 +67,17 @@ export const CAROLINA_PHOTO_DEFAULTS = {
 
 export type CarolinaExtra = { id: string; page: CarolinaPageId; text: string; centered?: true };
 export type CarolinaExtraPhoto = { id: string; page: CarolinaPageId; url: string };
+export type PageKind='chat';
+/** Absent means the existing blank sheet; chat is an additive page type. */
+export const pageKind=(layout:CarolinaLayout|undefined,page:number):PageKind|'blank'=>
+  layout?.pageKinds?.[String(page)]==='chat'?'chat':'blank';
 export type CarolinaLayout = {
   fixed?: Partial<Record<CarolinaFixedKey, string>>;
   transforms?: Record<string, CarolinaTransform>;
   extras?: CarolinaExtra[];
   photoOrder?: number[];
   pageOrder?: CarolinaPageId[];
+  pageKinds?: Record<string,PageKind>;
   extraPhotos?: CarolinaExtraPhoto[];
   defaultFont?: ElegantFontId;
   fonts?: Record<string, ElegantFontId>;
@@ -112,7 +117,7 @@ export function clampTransform(value: CarolinaTransform): CarolinaTransform {
 export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const layout = value as Record<string, unknown>;
-  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder', 'pageOrder', 'extraPhotos', 'defaultFont', 'fonts', 'textStyles', 'photoStyles'].includes(k))) return false;
+  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder', 'pageOrder', 'extraPhotos', 'pageKinds', 'defaultFont', 'fonts', 'textStyles', 'photoStyles'].includes(k))) return false;
   if (layout.defaultFont !== undefined && !isElegantFontId(layout.defaultFont)) return false;
   if (layout.fonts !== undefined) {
     if (!layout.fonts || typeof layout.fonts !== 'object' || Array.isArray(layout.fonts)) return false;
@@ -177,6 +182,11 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
       layout.pageOrder.some((page:unknown)=>!isDesignPage(page))) return false;
   }
   const visiblePages=layout.pageOrder===undefined ? CAROLINA_DEFAULT_PAGES : layout.pageOrder as number[];
+  if(layout.pageKinds!==undefined){
+    if(!layout.pageKinds||typeof layout.pageKinds!=='object'||Array.isArray(layout.pageKinds)||
+      Object.entries(layout.pageKinds).some(([k,v])=>!/^\d{1,4}$/.test(k)||
+        !isBlankPage(Number(k))||!visiblePages.includes(Number(k))||v!=='chat'))return false;
+  }
   if (layout.extraPhotos !== undefined) {
     if (!Array.isArray(layout.extraPhotos) || layout.extraPhotos.length>MAX_DESIGN_ELEMENTS) return false;
     const seen=new Set<string>();
