@@ -7,6 +7,8 @@ import CoverAddPrompt from './CoverAddPrompt';
 import type { CarolinaFixedKey } from './carolina-layout';
 import { fixedText, carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS } from './carolina-layout';
 import { pageBackgroundMediaId } from './page-background';
+import { pageKind } from './carolina-layout';
+import QuoteChatPanel from '../quotes/QuoteChatPanel';
 import { quoteCurrency, usd } from '../../shared/lib/formatters';
 import './carolina-template.css';
 
@@ -209,14 +211,16 @@ export function CarolinaTerms({ item, interaction, onSelectExtraPhoto }: PagePro
   );
 }
 /** Real blank canvas: no inherited text, title, masthead or collage. */
-export function CarolinaBlankPage({item,page,interaction,onSelectExtraPhoto}:PageProps & {
- page:number;onSelectExtraPhoto?:(id:string)=>void;
+export function CarolinaBlankPage({item,page,interaction,onSelectExtraPhoto,staticChat=false}:PageProps & {
+ page:number;onSelectExtraPhoto?:(id:string)=>void;staticChat?:boolean;
 }) {
  return <div className={'hn-carolina-page hn-blank-page' +
     (interaction?.transformingId?' hn-layout-grid':'')}
-    aria-label={'Página en blanco '+page}>
+    aria-label={(pageKind(item.designLayout,page)==='chat'?'Página chat ':'Página en blanco ')+page}>
    <ExtraPhotos item={item} page={page} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
    <ExtraTexts item={item} page={page} interaction={interaction}/>
+   {pageKind(item.designLayout,page)==='chat'&&
+     <QuoteChatPanel quoteId={item.id} pageId={page} staticPreview={staticChat} isTemplate={item.isTemplate}/>}
  </div>;
 }
 export default function CarolinaDocument({ item }: { item: Quote }) {
