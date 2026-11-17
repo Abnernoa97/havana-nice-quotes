@@ -64,11 +64,12 @@ export default function CarolinaPhotoNode({
       'hue-rotate(' + (photoStyle?.hue ?? D.hue) + 'deg) ' +
       'grayscale(' + (photoStyle?.grayscale ?? D.grayscale) + '%) ' +
       'sepia(' + (photoStyle?.sepia ?? D.sepia) + '%)',
-    opacity: (photoStyle?.opacity ?? D.opacity) / 100,
+
   };
   const tintOpacity = (photoStyle?.tintAmount ?? D.tintAmount) / 100;
   const content = <>
-    <span className={'hn-carolina-crop-viewport'+(ratio!=='frame'?' is-ratio':'')} style={ratioStyle} aria-hidden="true">
+    <span className={'hn-carolina-crop-viewport'+(ratio!=='frame'?' is-ratio':'')}
+      style={{...ratioStyle,opacity:(photoStyle?.opacity ?? D.opacity) / 100}} aria-hidden="true">
       {url && (isVideo
         ? <video className="hn-carolina-image-fill hn-carolina-video-fill"
             src={url} autoPlay muted loop playsInline preload="metadata"
