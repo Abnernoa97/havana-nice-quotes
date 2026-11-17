@@ -50,3 +50,11 @@
 .hn-canvas.hn-text-focus .hn-font-inline .hn-font-option{min-height:64px;padding:6px}
 .hn-canvas.hn-text-focus .hn-font-inline .hn-font-example{min-height:29px;font-size:18px}
 .hn-canvas.hn-text-focus .hn-font-inline .hn-font-bank-footer{padding:3px 8px}
+
+/* Exactly one text tool is visible at a time; its back arrow restores the rail. */
+.hn-text-dock-title .hn-text-dock-close{margin-left:auto}
+.hn-text-dock-title>button:first-child:not(.hn-text-dock-close){margin-left:0}
+.hn-text-dock-expanded{border-top:0}
+.hn-text-dock:has(.hn-text-dock-expanded) .hn-text-dock-title{
+  border-bottom:1px solid #e0e8dd;padding-bottom:11px
+}
