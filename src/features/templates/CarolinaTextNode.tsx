@@ -56,7 +56,6 @@ export default function CarolinaTextNode({ id, text, transform, interaction, ext
       onPointerDown={gesture.onPointerDown} onPointerMove={gesture.onPointerMove}
       onPointerUp={gesture.onPointerUp} onPointerCancel={gesture.onPointerCancel}
       onContextMenu={event => event.preventDefault()}
-      onSelectStart={event => { if (!editing) event.preventDefault(); }}
       onClick={() => {
         if (!interaction || editing || gesture.suppressTap()) return;
         interaction.onTap(id);
