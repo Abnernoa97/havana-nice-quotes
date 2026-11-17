@@ -92,7 +92,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         setDraftText(null);
         if (value) {
           updateLayout({extras:[...(item.designLayout?.extras||[]),
-            {id:draftText.id,page:draftText.page,text:value}]});
+            {id:draftText.id,page:draftText.page,text:value,centered:true as const}]});
           setTransformingId(id);
           setLastTextId(id);
         } else {
@@ -381,7 +381,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     }finally{setBusy(false);}
   };
   const renderItem:Quote=draftText?{...item,designLayout:{...item.designLayout,
-    extras:[...(item.designLayout?.extras||[]),{id:draftText.id,page:draftText.page,text:''}]}}:item;
+    extras:[...(item.designLayout?.extras||[]),{id:draftText.id,page:draftText.page,text:'',centered:true as const}]}}:item;
   return (
     <section className={'hn-canvas'+(lastTextId && target===null?' hn-text-focus':'')}>
       {<div className="hn-canvas-toolbar">
