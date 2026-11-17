@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import type { CarolinaPhotoStyle, CarolinaTransform } from './carolina-layout';
 import { CAROLINA_PHOTO_DEFAULTS as D } from './carolina-layout';
 import { CROP_ASPECT_RATIOS } from './photo-crop';
 import { useCarolinaGesture } from './useCarolinaGesture';
+import { schedulePosterBackfill } from '../videos/video-posters';
 import type { CarolinaGestureInteraction } from './useCarolinaGesture';
 
 type Props = {
@@ -42,10 +43,24 @@ export default function CarolinaPhotoNode({
 }: Props) {
   const element = useRef<HTMLButtonElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const posterAttempt=useRef('');
+  const [posterRevision,setPosterRevision]=useState(0);
   const isVideo = /^\/api\/videos\/[a-f0-9-]{36}$/.test(url);
   // Existing private R2 JPEG (~tens of KB), not a decoded video frame.
   // Use it everywhere: designer, quote drafts, Scroll and cloned 3D pages.
   const posterUrl=isVideo?url+'/poster':undefined;
+  const posterSrc=posterUrl+(posterRevision?'?generated='+posterRevision:'');
+  useEffect(()=>{posterAttempt.current='';setPosterRevision(0);},[url]);
+  const recoverMissingPoster=()=>{
+    // Existing R2 videos without a poster are repaired only on an authorized
+    // editable page. The customer reader never uploads or decodes videos.
+    if(!isVideo || !interaction || posterAttempt.current===url)return;
+    posterAttempt.current=url;
+    const id=url.slice('/api/videos/'.length);
+    void schedulePosterBackfill(id,url).then(saved=>{
+      if(saved)setPosterRevision(n=>n+1);
+    }).catch(()=>{/* The video remains playable; never block the page. */});
+  };
   useEffect(()=>{
     const media=videoRef.current;
     if(!isVideo||!media)return;
@@ -74,6 +89,7 @@ export default function CarolinaPhotoNode({
   const mainStyle: CSSProperties = {
     transform: gesture.transform,
     ...(extra ? {zIndex: pageBackground ? 0 : photoStyle?.behindText ? 1 : 4} : {}),
+    ...(isVideo?{backgroundColor:'#1b3026'}:{}),
   };
   const ratio = photoStyle?.cropAspect || 'frame';
   const ratioStyle = ratio !== 'frame' ? {'--crop-ratio': String(CROP_ASPECT_RATIOS[ratio])} as CSSProperties : undefined;
@@ -99,13 +115,14 @@ export default function CarolinaPhotoNode({
             {/* A tiny JPEG paints immediately even while the real stream is seeking.
                 PageFlip clones inherit this img and the video poster natively. */}
             <img className="hn-carolina-image-fill hn-carolina-video-poster"
-              src={posterUrl} alt="" draggable={false}
+              src={posterSrc} alt="" draggable={false}
+              onError={recoverMissingPoster}
               loading={cover||pageBackground?'eager':'lazy'}
               decoding="async" fetchPriority={cover?'high':'auto'}
               style={{...picture,backgroundImage:undefined,
                 objectFit:'cover',objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
             <video ref={videoRef} className="hn-carolina-image-fill hn-carolina-video-fill"
-              src={url} poster={posterUrl} muted loop playsInline disablePictureInPicture preload="none"
+              src={url} poster={posterSrc} muted loop playsInline disablePictureInPicture preload="none"
               style={{...picture,backgroundImage:undefined,
                 objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
           </>
