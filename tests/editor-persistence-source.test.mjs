@@ -199,7 +199,7 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.match(proposal, /templateFamily\(styleName\)==='carolina'/);
   const canvas = src('features/editor/canvas/TemplateCanvasEditor.tsx');
   assert.match(design, /<TemplateCanvasEditor item=\{item\}/);
-  assert.match(canvas, /<CarolinaCollage item=\{item\} interaction=\{textInteraction\}/);
+  assert.match(canvas, /<CarolinaCollage item=\{renderItem\} interaction=\{textInteraction\}/);
   assert.match(canvas, /edit\('gallery',\s*gallery\)/);
   assert.doesNotMatch(details, /carolinaCopy|hn-carolina-copy-editor/);
   assert.match(magazine, /templateFamily\(item\.style\)==='carolina'/);
@@ -301,8 +301,8 @@ test('Diseño muestra las páginas reales y permite fotos nativas/R2 por recuadr
   const app = src('app/App.tsx');
   const stylesheet = readFileSync(new URL('../src/shared/styles/index.css', import.meta.url),'utf8');
   assert.match(canvas, /const pages = \['Portada', 'Collage', 'Propuesta'\]/);
-  assert.match(canvas, /<CarolinaCover item=\{item\} interaction=\{textInteraction\}[\s\S]*?onSelectCover=/);
-  assert.match(canvas, /<CarolinaCollage item=\{item\} interaction=\{textInteraction\}/);
+  assert.match(canvas, /<CarolinaCover item=\{renderItem\} interaction=\{textInteraction\}[\s\S]*?onSelectCover=/);
+  assert.match(canvas, /<CarolinaCollage item=\{renderItem\} interaction=\{textInteraction\}/);
   assert.match(canvas, /<CarolinaTerms item=\{item\} interaction=\{textInteraction\}\s+onSelectExtraPhoto=/);
   const picker=src('features/editor/photos/PhotoSourcePicker.tsx');
   assert.match(canvas, /<PhotoSourcePicker target=\{target\}/);
