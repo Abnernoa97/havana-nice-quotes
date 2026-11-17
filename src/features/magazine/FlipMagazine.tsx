@@ -19,7 +19,7 @@ function MagazineLeaf({ children, className = '' }: { children: ReactNode; class
  * The source leaves are kept outside the flip container so a React
  * StrictMode remount always gets fresh page nodes.
  */
-export default function FlipMagazine({ item }: { item: Quote }) {
+export default function FlipMagazine({ item, clientView=false }: { item: Quote; clientView?:boolean }) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const sourceRef = useRef<HTMLDivElement | null>(null);
   const flipRef = useRef<PageFlip | null>(null);
@@ -159,7 +159,7 @@ export default function FlipMagazine({ item }: { item: Quote }) {
           <ArrowRight size={19} />
         </button>
       </div>
-      <p className="hn-magazine-disclaimer">Design preview only · Delivery and acceptance are not active.</p>
+      {!clientView&&<p className="hn-magazine-disclaimer">Design preview only · Delivery and acceptance are not active.</p>}
 
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
         {selectedPages.map(selectedPage=><MagazineLeaf key={selectedPage}
