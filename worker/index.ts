@@ -341,9 +341,12 @@ async function api(request: Request, env: Env,
         .all<MediaRow>(),
     ]);
     return json({ items: [
-      ...quotes.results.map(row => ({ id: row.id, kind: 'quote',
-        label: (JSON.parse(row.payload) as Record<string, unknown>).name || 'Cotización',
-        deletedAt: row.deleted_at })),
+      ...quotes.results.map(row => {
+        const q=JSON.parse(row.payload) as Record<string, unknown>;
+        return {id:row.id,kind:'quote',
+          label:(q.isTemplate? q.templateName:q.quoteTitle||q.name)||'Cotización',
+          isTemplate:q.isTemplate===true,deletedAt:row.deleted_at};
+      }),
       ...media.results.filter(row => row.object_key.startsWith(PHOTOS_PREFIX))
         .map(row => ({ id: row.id, kind: 'photo', label: row.filename,
           deletedAt: row.deleted_at, url: '/api/trash/photo/' + row.id })),
