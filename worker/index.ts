@@ -63,7 +63,7 @@ const REQUIRED_FIELDS = [
   'id', 'name', 'client', 'email', 'location', 'date',
   'cover', 'font', 'color', 'note', 'package', 'desc',
 ];
-const VALID_STATES = new Set(['Borrador', 'Lista para enviar', 'Enviada', 'En revisión', 'Aceptada']);
+const VALID_STATES = new Set(['Borrador', 'Listo para enviar', 'Enviada', 'En revisión', 'Aceptada']);
 const validId = (s: string) => /^hn-[a-f0-9-]{20,64}$/.test(s);
 const bytesToHex = (bytes: Uint8Array): string =>
   Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
