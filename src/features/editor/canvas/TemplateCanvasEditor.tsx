@@ -94,6 +94,10 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       }
       setEditingId(null);
     },
+    onDeselectTransform: () => {
+      setTransformingId(null);setTrashHovered(false);setLastTextId(null);
+      setSelectedPhotoId(null);setPhotoLayersOpen(false);setEditingId(null);
+    },
     onCommitTransform: (id: string, transform: CarolinaTransform) => {
       updateLayout({ transforms: { ...item.designLayout?.transforms, [id]: transform } });
       setTrashHovered(false);
@@ -236,14 +240,17 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   };
   const photoOrder = carolinaPhotoOrder(item.designLayout);
   const photoLayers=listPhotoLayers(item,page);
+  const pageBackgroundId=isBlankPage(page)
+    ? item.designLayout?.extraPhotos?.find(photo=>photo.page===page&&!!photo.url)?.id
+    : undefined;
   const setPhotoOrder = (order:number[]) => updateLayout({photoOrder:order});
   const selectPhoto = (id:string) => {
     // Empty frames open the source picker, populated photos open the immersive editor.
-    const url = id==='photo:cover' ? (item.coverVideo ? '' : item.cover) :
+    const url = id==='photo:cover' ? (item.coverVideo || item.cover) :
       id.startsWith('photo-extra:') ?
         item.designLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===id)?.url :
         carolinaPhotos(item)[Number(id.slice(6))];
-    if (!url || url.startsWith('/api/videos/')) {
+    if (!url) {
       if (id==='photo:cover') open('cover');
       else if (id.startsWith('photo-extra:')) open(`extra:${id.slice('photo-extra:'.length)}`);
       else open(Number(id.slice(6)));
@@ -343,9 +350,6 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           aria-label="Agregar página en blanco"><Plus size={17}/> Página</button>
         {transformingId && <span>Arrastra · Amplía o gira con dos dedos</span>}
       </div>}
-      {<PhotoLayersPanel layers={photoLayers} open={photoLayersOpen}
-        onToggle={()=>setPhotoLayersOpen(open=>!open)}
-        onEdit={selectPhoto} onMove={movePhotoLayer} onDelete={removePhoto}/>}
       <div className="hn-canvas-sheet" onPointerDown={event => {
         const target=event.target;
         if (transformingId && !event.isPrimary) return;
@@ -357,6 +361,18 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           if (editingId && document.activeElement instanceof HTMLElement) {
             document.activeElement.blur();
           }
+        }
+      }} onClickCapture={event=>{
+        const clicked=event.target;
+        if(!(clicked instanceof Element)||clicked.closest('[data-hn-text-trash]'))return;
+        const node=clicked.closest('[data-hn-photo-id], [data-carolina-text]');
+        const clickedId=node?.getAttribute('data-hn-photo-id')||node?.getAttribute('data-carolina-text');
+        if(transformingId && clickedId!==transformingId){
+          clearSelection();event.stopPropagation();return;
+        }
+        if(editingId&&clickedId!==editingId){
+          if(document.activeElement instanceof HTMLElement)document.activeElement.blur();
+          setLastTextId(null);event.stopPropagation();
         }
       }}>
         {page===0 && <div className="hn-canvas-cover">
@@ -428,14 +444,18 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         createPortal(
           <PhotoEditingWorkspace photoId={selectedPhotoId}
             aspect={photoAspect} pageName={pageTitle(page,pageIndex)} activeTool={photoTool}
-            url={selectedPhotoId==='photo:cover' ? item.cover :
+            url={selectedPhotoId==='photo:cover' ? (item.coverVideo || item.cover) :
               selectedPhotoId.startsWith('photo-extra:') ?
                 item.designLayout?.extraPhotos?.find(p=>'photo-extra:'+p.id===selectedPhotoId)?.url || '' :
                 carolinaPhotos(item)[Number(selectedPhotoId.slice(6))] || ''}
             style={item.designLayout?.photoStyles?.[selectedPhotoId]}
+            isPageBackground={selectedPhotoId==='photo-extra:'+pageBackgroundId}
+            layersPanel={<PhotoLayersPanel layers={photoLayers} open={photoLayersOpen}
+              onToggle={()=>setPhotoLayersOpen(value=>!value)}
+              onEdit={selectPhoto} onMove={movePhotoLayer} onDelete={removePhoto}/>}
             onStyleChange={updatePhotoStyle} onReplace={replacePhoto}
             onToolChange={setPhotoTool}
-            onClose={()=>{setSelectedPhotoId(null);setPhotoTool(null);}}/>,
+            onClose={()=>{setSelectedPhotoId(null);setPhotoTool(null);setPhotoLayersOpen(false);}}/>,
           document.body
         )}
       {error && !target && <p className="hn-canvas-error" role="alert">{error}</p>}
