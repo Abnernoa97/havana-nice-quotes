@@ -1,21 +1,10 @@
 import {handleVideoApi} from './videos.ts';
+import type {VideoStore} from './videos.ts';
 
 /** A random, unguessable bearer link can read ONE saved quote and ONLY its media.
  * Owner endpoints are called after the normal device authorization in index.ts. */
 interface D1Row{[key:string]:unknown}
-interface DbStatement{
- bind(...v:(string|number)[]):DbStatement;
- first<T extends D1Row>():Promise<T|null>;
- run():Promise<{meta:{changes:number}}>;
-}
-interface ShareStore{
- DB:{prepare(sql:string):DbStatement};
- MEDIA:{
-  get(key:string,opts?:{range:{offset:number;length:number}}):Promise<{
-   body:ReadableStream;size:number;
-  }|null>;
- };
-}
+type ShareStore=VideoStore;
 type LinkRow=D1Row & {token:string;quote_id:string;created_at:number;expires_at:number|null;revoked_at:number|null};
 type QuoteRow=D1Row & {id:string;payload:string;revision:number};
 type MediaRow=D1Row & {object_key:string;mime:string;size:number};
