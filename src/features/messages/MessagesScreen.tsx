@@ -62,7 +62,7 @@ export default function MessagesScreen({
     if(!mounted)return;
     setMessages(data.messages||[]);
     setThreadError('');
-    const cursor=data.messages?.at(-1)?.cursor;
+    const cursor=data.messages?.length?data.messages[data.messages.length-1].cursor:undefined;
     if(cursor!==undefined){
      const ack=await fetch(base+'/read',{
       method:'POST',credentials:'same-origin',
