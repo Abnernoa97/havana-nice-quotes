@@ -9,6 +9,7 @@ type SidebarProps = {
   navigate: (section: string) => void;
   section: string;
   onInvite: () => void;
+  unreadCount: number;
 };
 type TopbarProps = {
   section: string;
@@ -27,7 +28,7 @@ function Logo() {
   );
 }
 
-export function Sidebar({ pages, quotes, navigate, section, onInvite }: SidebarProps) {
+export function Sidebar({ pages, quotes, navigate, section, onInvite, unreadCount }: SidebarProps) {
   return (
     <aside className="sidebar">
       <Logo />
@@ -42,10 +43,10 @@ export function Sidebar({ pages, quotes, navigate, section, onInvite }: SidebarP
           >
             <p.icon size={18} />
             <span>{p.label}</span>
-            {p.id === 'messages' &&
-              quotes.some(q => q.messages?.some(m => m.from === 'client')) && (
-                <i className="navdot" />
-              )}
+            {p.id === 'messages' && unreadCount>0 && (
+              <span className="hn-nav-unread" aria-label={unreadCount+' mensajes nuevos'}>
+                {unreadCount>99?'99+':unreadCount}</span>
+            )}
           </button>
         ))}
       </nav>
