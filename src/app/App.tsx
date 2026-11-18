@@ -66,6 +66,7 @@ function App() {
     else if (!next && mobileMenu) goBack();
   };
   const [toast, setToast] = useState('');
+  const [messageTarget,setMessageTarget]=useState<string|null>(null);
   const [inviteUrl, setInviteUrl] = useState(''); const [inviteBusy, setInviteBusy] = useState(false);
   const [filter, setFilter] = useState('Todas');
   // New quotations are private editor work until an explicit named Save.
@@ -92,6 +93,31 @@ function App() {
       return () => clearTimeout(t);
     }
   }, [toast]);
+  useEffect(()=>{
+    const openInbox=(quoteId:string)=>{
+      if(!/^hn-[a-f0-9-]{20,64}$/.test(quoteId))return;
+      setMessageTarget(quoteId);
+      routeTo({section:'messages',active:quoteId,preview:false,mobileMenu:false});
+    };
+    const incoming=(event:MessageEvent)=>{
+      if(event.data?.type==='hn-quotes-open-messages'&&typeof event.data.quoteId==='string')
+        openInbox(event.data.quoteId);
+    };
+    const fromHash=()=>{
+      const match=window.location.hash.match(/^#inbox=(hn-[a-f0-9-]{20,64})$/);
+      if(match){
+        openInbox(match[1]);
+        window.history.replaceState(window.history.state,'',window.location.pathname+window.location.search);
+      }
+    };
+    navigator.serviceWorker?.addEventListener('message',incoming);
+    window.addEventListener('hashchange',fromHash);
+    fromHash();
+    return ()=>{
+      navigator.serviceWorker?.removeEventListener('message',incoming);
+      window.removeEventListener('hashchange',fromHash);
+    };
+  },[routeTo]);
   const edit = (key: keyof Quote, value: Quote[keyof Quote]) => {
     if(workingQuote?.id===active){
       setWorkingQuote(current=>current?.id===active?{...current,[key]:value}:current);
@@ -107,6 +133,7 @@ function App() {
     });
   };
   const navigate = (x: string) => {
+    if(x==='messages')setMessageTarget(null);
     const target = (pages.some(page => page.id === x) ? x : 'home') as AppSection;
     const next = { section: target, preview: false, mobileMenu: false, installGuide: false,
       photoViewerId: null, photoSelecting: false };
@@ -342,7 +369,7 @@ function App() {
       unreadTotal={inbox.unreadTotal} loading={inbox.loading} error={inbox.error}
       permission={inbox.permission} askNotifications={inbox.askNotifications}
       refresh={inbox.refresh} openQuote={id=>selectQuote(id)}
-      initialQuoteId={section==='messages'&&inbox.conversations.some(c=>c.quoteId===active)?active:undefined}/>
+      initialQuoteId={messageTarget||undefined}/>
   );
   const clientPage = item ? (
     <ClientPage
