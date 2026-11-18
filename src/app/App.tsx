@@ -23,6 +23,7 @@ import { Sidebar, Topbar } from './WorkspaceChrome';
 import { useInstallPrompt } from '../features/pwa/useInstallPrompt';
 import InstallGuide from '../features/pwa/InstallGuide';
 import QuotesScreen from '../features/quotes/QuotesScreen';
+import {useShareAnalytics} from '../features/quotes/useShareAnalytics';
 import {
   LayoutDashboard,
   FileText,
@@ -52,6 +53,7 @@ function App() {
   const { view, routeTo, goBack } = useAppHistory('empty');
   const { section, active, tab, mobileMenu, preview, previewMode, installGuide, photoViewerId, photoSelecting } = view;
   const trash = useTrash(enabled && section === 'trash');
+  const shareCounts=useShareAnalytics(enabled&&section==='quotes');
   const setTab: Dispatch<SetStateAction<string>> = change => {
     const next = typeof change === 'function' ? change(tab) : change;
     if (['details', 'styles', 'design', 'publish'].includes(next)) routeTo({ tab: next as EditorTab });
@@ -333,7 +335,7 @@ function App() {
   );
   const quotesView = (
     <QuotesScreen
-      quotes={clientQuotes}
+      quotes={clientQuotes} shareCounts={shareCounts}
       btnQuote={btnQuote}
       search={search}
       setSearch={setSearch}
@@ -421,11 +423,8 @@ function App() {
     mode={previewMode} onMode={mode=>setPreviewMode(mode)} onBack={goBack}
     draftScroll={clientPage}
     onReadjust={()=>routeTo({active:item.id,section:'editor',tab:'design',preview:false,mobileMenu:false})}
-    onMarkedSent={async()=>{
-      setQuotes(list=>list.map(q=>q.id===item.id?{...q,status:'Enviada'}:q));
-      const ok=await flush();if(ok)setToast('Cotización marcada como enviada.');
-      return ok;
-    }} toast={toast}/>;
+    onMarkedSent={async()=>{await refreshQuotes();
+      setToast('Enviada · Compartir registrado.');return true;}} toast={toast}/>;
   return (
     <div className="app-shell">
       {sidebar}
