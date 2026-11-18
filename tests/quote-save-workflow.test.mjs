@@ -49,7 +49,7 @@ test('Guardar exige nombre y diferencia borrador de lista para enviar sin enviar
  assert.match(app,/if\(!cleanTitle\|\|cleanTitle\.length>150\)return/);
  assert.match(api,/q\.quoteTitle === undefined/);
  assert.match(api,/Listo para enviar/);
- assert.deepEqual(QUOTE_FILTERS,['Todas','Enviadas','Borrador','Listo para enviar']);
+ assert.deepEqual(QUOTE_FILTERS,['Todas','Borrador','Listo para enviar','Enviadas']);
  assert.doesNotMatch(app,/window\.location\.href=['"]mailto:/);
 });
 
