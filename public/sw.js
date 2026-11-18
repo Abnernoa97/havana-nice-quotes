@@ -1,5 +1,5 @@
 /* Minimal app shell, no quote data or personal content is cached by this worker. */
-const CACHE = 'hn-quotes-app-shell-v1';
+const CACHE = 'hn-quotes-app-shell-v2';
 const SHELL = ['/', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -36,4 +36,25 @@ self.addEventListener('fetch', event => {
       })
     );
   }
+});
+
+/** Notification clicks focus the private studio and select the correct quote.
+ * No data or message text is cached in the service worker. */
+self.addEventListener('notificationclick',event=>{
+  event.notification.close();
+  const quoteId=event.notification.data?.quoteId;
+  if(typeof quoteId!=='string'||!/^hn-[a-f0-9-]{20,64}$/.test(quoteId))return;
+  event.waitUntil((async()=>{
+    const tabs=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    const existing=tabs.find(client=>{
+      const uri=new URL(client.url);
+      return uri.origin===self.location.origin&&!uri.pathname.startsWith('/q/');
+    });
+    if(existing){
+      await existing.focus();
+      existing.postMessage({type:'hn-quotes-open-messages',quoteId});
+    }else{
+      await self.clients.openWindow('/#inbox='+quoteId);
+    }
+  })());
 });
