@@ -37,7 +37,7 @@ export default function VoiceNotePlayer({url,mime,label='Voice note',owner=false
   ?'Audio pendiente de conversión para iPhone.'
   :'Este audio todavía no es compatible con tu dispositivo.';
  return <div className="hn-voice-note" onClick={e=>e.stopPropagation()}>
-  <audio ref={ref} src={version?url+'?v='+version:url} preload="metadata"
+  <audio ref={ref} src={url+(url?'?format='+encodeURIComponent(mime||'auto')+'&v='+version:'')} preload="metadata"
     onLoadedMetadata={e=>setDuration(e.currentTarget.duration||0)}
     onTimeUpdate={e=>setCurrent(e.currentTarget.currentTime)}
     onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)}
