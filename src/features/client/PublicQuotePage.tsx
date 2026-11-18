@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import type {Quote,ReadingMode} from '../quotes/types';
 import Proposal from './Proposal';
 import FlipMagazine from '../magazine/FlipMagazine';
@@ -12,6 +12,8 @@ export default function PublicQuotePage({token}:Props){
  const [userChoseMode,setUserChoseMode]=useState(false);
  const [error,setError]=useState('');
  const [initialLoading,setInitialLoading]=useState(true);
+ const visited=useRef(false);
+ const visitId=useRef(crypto.randomUUID());
  useEffect(()=>{
   let alive=true;
   const read=async()=>{
@@ -36,6 +38,22 @@ export default function PublicQuotePage({token}:Props){
   document.addEventListener('visibilitychange',visible);
   return ()=>{alive=false;clearInterval(interval);document.removeEventListener('visibilitychange',visible);};
  },[token,userChoseMode]);
+ useEffect(()=>{
+  if(!payload?.quote?.id||visited.current)return;
+  visited.current=true;
+  // Random browser identity, not phone number, email, IP or personal tracking.
+  let visitorId=crypto.randomUUID();
+  try{
+   const old=window.localStorage.getItem('hn-quotes-visitor-v1');
+   if(old&&/^[a-f0-9-]{36}$/.test(old))visitorId=old;
+   else window.localStorage.setItem('hn-quotes-visitor-v1',visitorId);
+  }catch{/* Private browsing: count visit without persistent device identity. */}
+  void fetch('/api/shared/'+token+'/visit',{
+   method:'POST',credentials:'omit',cache:'no-store',keepalive:true,
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({visitorId,visitId:visitId.current})
+  }).catch(()=>{});
+ },[payload?.quote?.id,token]);
  useEffect(()=>{
   document.title=payload?.quote?.name
    ?'HAVANA NICE · '+payload.quote.name:'HAVANA NICE · Private proposal';
