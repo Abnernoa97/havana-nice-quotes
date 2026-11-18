@@ -2,6 +2,7 @@ import { validCarolinaLayout } from '../src/features/templates/carolina-layout.t
 import { isTemplateStyle } from '../src/features/templates/template-registry.ts';
 import { handleVideoApi, videoPrefix, videoPosterKey } from './videos.ts';
 import { ownerSharing, publicSharing } from './quote-sharing.ts';
+import { ownerShareAnalytics, publicShareVisit } from './share-analytics.ts';
 import { quoteChatApi } from './quote-chat.ts';
 import { ownerInboxApi } from './quote-inbox.ts';
 import {syncCalendarQuote,reconcileCalendarQuotes} from './calendar-bridge.ts';
@@ -198,10 +199,14 @@ async function api(request: Request, env: Env,
   // The only unauthenticated API is a scoped read-only client proposal.
   // Its random token never grants access to the editor or the media library.
   if(path.startsWith('/api/shared/')){
+    const visit=await publicShareVisit(request,env);
+    if(visit)return visit;
     const chat=await quoteChatApi(request,env,true);
     return chat||await publicSharing(request,env)||bad('Ruta no encontrada.',404);
   }
   if (!await authorized(request, env)) return unauthorized();
+  if(path.startsWith('/api/share-analytics'))
+    return await ownerShareAnalytics(request,env)||bad('Ruta no encontrada.',404);
   if(path.startsWith('/api/quote-inbox'))
     return await ownerInboxApi(request,env)||bad('Ruta no encontrada.',404);
   if(path.startsWith('/api/quote-chat/'))
