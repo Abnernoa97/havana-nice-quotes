@@ -6,8 +6,8 @@ type Props={quoteId:string;quoteLabel:string;onClose:()=>void;onMarkedSent:()=>P
 const DAY_OPTIONS=[{value:1,label:'24 horas'},{value:7,label:'7 días'},
  {value:30,label:'30 días'},{value:90,label:'90 días'},{value:0,label:'Sin vencimiento'}];
 
-/** Only the owner can create or revoke links. "Compartir" opens WhatsApp
- * but never claims delivery until the owner explicitly marks it as sent. */
+/** One share handoff is counted after a real owner action. WhatsApp delivery
+ * is external and not verifiable, so the event only proves share initiation. */
 export default function QuoteShareDialog({quoteId,quoteLabel,onClose,onMarkedSent}:Props){
  const [link,setLink]=useState<ShareLink|null>(null);
  const [days,setDays]=useState(30);
@@ -41,10 +41,28 @@ export default function QuoteShareDialog({quoteId,quoteLabel,onClose,onMarkedSen
   }catch(cause){setError(cause instanceof Error?cause.message:'Error de enlace.');}
   finally{setBusy(false);}
  };
+ const handoff=async(channel:'copy'|'whatsapp'|'manual')=>{
+  if(!link||sentBusy)return;
+  setSentBusy(true);setError('');
+  try{
+   const token=new URL(link.url).pathname.split('/').pop();
+   const response=await fetch('/api/share-analytics/'+token+'/handoff',{
+    method:'POST',credentials:'same-origin',keepalive:true,
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({channel,requestId:crypto.randomUUID()})
+   });
+   if(!response.ok)throw Error('No se pudo registrar el envío.');
+   if(await onMarkedSent())onClose();
+   else setError('Enlace compartido, pero no se pudo actualizar la lista. Reabre Cotizaciones.');
+  }catch(cause){setError(cause instanceof Error?cause.message:'Error al registrar el envío.');}
+  finally{setSentBusy(false);}
+ };
  const copy=async()=>{
   if(!link)return;
-  try{await navigator.clipboard.writeText(link.url);setError('Enlace copiado.');}
-  catch{setError('Mantén pulsado el enlace para copiarlo.');}
+  try{
+   await navigator.clipboard.writeText(link.url);
+   void handoff('copy');
+  }catch{setError('Mantén pulsado el enlace para copiarlo.');}
  };
  const revoke=async()=>{
   if(!link||busy)return;
@@ -61,15 +79,9 @@ export default function QuoteShareDialog({quoteId,quoteLabel,onClose,onMarkedSen
  const whatsapp=()=>{
   if(!link)return;
   const msg='Hi! Here’s your HAVANA NICE proposal: '+link.url;
-  // WhatsApp opens from a real user gesture; no automatic external messages.
+  // Open from the actual user gesture; background-safe registration is async.
+  void handoff('whatsapp');
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener,noreferrer');
- };
- const markedSent=async()=>{
-  setSentBusy(true);
-  try{if(await onMarkedSent())onClose();
-   else setError('La cotización no pudo sincronizarse. Comprueba tu conexión.');}
-  catch{setError('No se pudo actualizar el estado.');}
-  finally{setSentBusy(false);}
  };
  const expires=link?.expiresAt
   ?new Date(link.expiresAt*1000).toLocaleDateString('es-MX',{year:'numeric',month:'short',day:'numeric'})
@@ -100,12 +112,12 @@ export default function QuoteShareDialog({quoteId,quoteLabel,onClose,onMarkedSen
     <button type="button" className="hn-share-revoke" disabled={busy}
       onClick={()=>void revoke()}><Trash2 size={15}/> Desactivar enlace</button>
     <button type="button" className="hn-share-mark-sent" disabled={sentBusy}
-      onClick={()=>void markedSent()}>{sentBusy?'Guardando…':'Ya lo envié · Marcar como enviada'}</button>
+      onClick={()=>void handoff('manual')}>{sentBusy?'Registrando…':'Ya lo envié por otro medio'}</button>
    </>:<button className="btn primary hn-share-generate" type="button"
       disabled={busy} onClick={()=>void create()}>
       <Link2 size={17}/>{busy?'Generando…':'Generar enlace privado'}
     </button>}
-   {link&&<p className="hn-share-caption">Los cambios guardados en la cotización se reflejan en el mismo enlace.</p>}
+   {link&&<p className="hn-share-caption">El enlace sigue sincronizado. Al compartirlo, la cotización pasa a Enviadas.</p>}
    {error&&<p role="status" className="hn-share-error">{error}</p>}
   </section>
  </div>;
