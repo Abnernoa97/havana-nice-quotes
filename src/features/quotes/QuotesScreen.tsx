@@ -3,10 +3,12 @@ import { Search, ArrowUpRight, Image as ImageIcon, Trash2 } from 'lucide-react';
 import './quotes-trash.css';
 import { money, dDate } from '../../shared/lib/formatters';
 import type { Quote } from './types';
+import type { ShareSummary } from './useShareAnalytics';
 import { filterQuotes, QUOTE_FILTERS, quoteDisplayName, quoteDisplayStatus } from './model';
 
 type Props = {
   quotes: Quote[];
+  shareCounts:ShareSummary;
   btnQuote: ReactNode;
   search: string;
   setSearch: Dispatch<SetStateAction<string>>;
@@ -20,6 +22,7 @@ type Props = {
 /** Sección extraída sin modificar la interfaz ni las acciones del prototipo. */
 export default function QuotesScreen({
   quotes,
+  shareCounts,
   btnQuote,
   search,
   setSearch,
@@ -82,6 +85,13 @@ export default function QuotesScreen({
                 <div>
                   <strong>{quoteDisplayName(q)}</strong>
                   <small>{q.name && q.quoteTitle ? q.name+' · ' : ''}{q.location}</small>
+                  {quoteDisplayStatus(q.status)==='Enviada'&&
+                    <span className="hn-quote-share-count" aria-label={
+                      (shareCounts[q.id]?.shares||0)+' compartidos, '+
+                      (shareCounts[q.id]?.opens||0)+' aperturas, '+
+                      (shareCounts[q.id]?.devices||0)+' dispositivos distintos'}>
+                      {shareCounts[q.id]?.shares||0} compartidos · {shareCounts[q.id]?.opens||0} aperturas · {shareCounts[q.id]?.devices||0} dispositivos
+                    </span>}
                 </div>
               </div>
               <span className="table-date">{dDate(q.date)}</span>
