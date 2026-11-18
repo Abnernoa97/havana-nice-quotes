@@ -42,7 +42,7 @@ export default function PublicQuotePage({token}:Props){
   if(!payload?.quote?.id||visited.current)return;
   visited.current=true;
   // Random browser identity, not phone number, email, IP or personal tracking.
-  let visitorId=crypto.randomUUID();
+  let visitorId:string=crypto.randomUUID();
   try{
    const old=window.localStorage.getItem('hn-quotes-visitor-v1');
    if(old&&/^[a-f0-9-]{36}$/.test(old))visitorId=old;
