@@ -65,7 +65,11 @@ export async function publicShareVisit(request:Request,store:Store):Promise<Resp
  const visitor=body?.visitorId,visitId=body?.visitId;
  if(typeof visitor!=='string'||!uuid.test(visitor)||typeof visitId!=='string'||!uuid.test(visitId))
   return fail('Invalid anonymous visit ID.');
- const bytes=new TextEncoder().encode(visitor);
+ const daily=await store.DB.prepare(
+  "SELECT COUNT(*) AS n FROM quote_share_visits WHERE token=? AND created_at>unixepoch()-86400"
+ ).bind(match[1]).first<Row>();
+ if(Number(daily?.n||0)>=5000)return fail('Visit counter limit reached.',429);
+ const bytes=new TextEncoder().encode(String(share.q.id)+':'+visitor);
  const digest=await crypto.subtle.digest('SHA-256',bytes);
  const visitorHash=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
  // A real customer opening is proof the proposal was delivered,
