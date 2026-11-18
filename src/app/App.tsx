@@ -116,18 +116,11 @@ function App() {
       else routeTo(next, 'replace');
     } else routeTo(next);
   };
-  // No arrastrar mensajes sin enviar de una pareja a otra.
-  const activateQuote = (id: string) => {
-    if (id === active) return;
-    setNewMessage('');
-    setClientMessage('');
-    routeTo({ active: id });
-  };
   const addQuote = () => {
     const id='hn-'+crypto.randomUUID();
     templateQuoteSave.current=null;closedAfterSave.current.delete(id);
     setWorkingQuote(createQuoteDraft(id));
-    setNewMessage('');setClientMessage('');setSaveDialogOpen(false);
+    setClientMessage('');setSaveDialogOpen(false);
     routeTo({active:id,tab:'styles',section:'editor',preview:false,mobileMenu:false});
     setToast('Propuesta nueva. Se guardará en Cotizaciones al elegir Guardar.');
   };
@@ -136,7 +129,7 @@ function App() {
     templateQuoteSave.current=null;closedAfterSave.current.delete(id);
     setWorkingQuote(null);setSaveDialogOpen(false);
     setQuotes(list=>[createOwnTemplate(id),...list]);
-    setNewMessage('');setClientMessage('');
+    setClientMessage('');
     routeTo({active:id,tab:'design',section:'editor',preview:false,mobileMenu:false});
     setToast('Plantilla creada. Personalízala y pulsa Guardar.');
   };
@@ -147,7 +140,7 @@ function App() {
     const clone=duplicateQuote(source,id,resetClient);
     templateQuoteSave.current=null;closedAfterSave.current.delete(id);
     setWorkingQuote(clone);setSaveDialogOpen(false);
-    setNewMessage('');setClientMessage('');
+    setClientMessage('');
     routeTo({active:id,tab:'details',section:'editor',preview:false,mobileMenu:false});
     setToast('Propuesta creada desde el diseño original. No será cotización hasta que la guardes.');
   };
@@ -182,8 +175,7 @@ function App() {
     const ready=Boolean(selected&&!selected.isTemplate&&
       ['Listo para enviar','Enviada','En revisión','Aceptada'].includes(selected.status));
     if (id !== active) {
-      setNewMessage('');
-      setClientMessage('');
+            setClientMessage('');
     }
     routeTo({
       active: id,
