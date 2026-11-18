@@ -15,6 +15,7 @@ import { useTrash } from '../features/trash/useTrash';
 import TrashScreen from '../features/trash/TrashScreen';
 import HomeScreen from '../features/home/HomeScreen';
 import MessagesScreen from '../features/messages/MessagesScreen';
+import {useLiveInbox} from '../features/messages/useLiveInbox';
 import ClientPage from '../features/client/ClientPage';
 import QuoteEditorScreen from '../features/editor/QuoteEditorScreen';
 import QuoteSaveDialog from '../features/editor/QuoteSaveDialog';
@@ -46,6 +47,7 @@ function App() {
   const auth = useDeviceAccess();
   const enabled = auth.status === 'authorized';
   const { quotes, setQuotes, syncStatus, flush, refresh: refreshQuotes } = useQuoteStore(enabled);
+  const inbox=useLiveInbox(enabled);
   const { photos, bytesUsed, uploadPhotos, uploading, uploadProgress, trashing, trashPhotos, refreshPhotos, error: mediaError } = useMediaLibrary(enabled);
   const { view, routeTo, goBack } = useAppHistory('empty');
   const { section, active, tab, mobileMenu, preview, previewMode, installGuide, photoViewerId, photoSelecting } = view;
@@ -74,7 +76,7 @@ function App() {
   // Reuse this ID when a template-derived quote is retried after a sync failure.
   const templateQuoteSave=useRef<{sourceId:string;quoteId:string}|null>(null);
   const closedAfterSave=useRef(new Set<string>());
-  const [search, setSearch] = useState(''); const [newMessage, setNewMessage] = useState(''); const [clientMessage, setClientMessage] = useState('');
+  const [search, setSearch] = useState(''); const [clientMessage, setClientMessage] = useState('');
   const { standalone, installApplication } = useInstallPrompt(() => routeTo({ installGuide: true }));
   const installationGuide = installGuide ? (
     <InstallGuide onClose={goBack} />
@@ -255,19 +257,6 @@ function App() {
     setClientMessage('');
     setToast('Solicitud añadida a la bandeja de esta demo');
   };
-  const sendAdmin = () => {
-    if(!item)return;
-    if (!newMessage.trim()) {
-      setToast('Escribe una respuesta');
-      return;
-    }
-    edit('messages', [
-      ...(item.messages || []),
-      { from: 'admin', text: newMessage.trim(), time: 'Just now' },
-    ]);
-    setNewMessage('');
-    setToast('Respuesta de prueba guardada');
-  };
   // Uploading is separate from inserting a canvas layer: cancellation leaves the sheet unchanged.
   const uploadDesignPhoto = async (file: File): Promise<string> => {
     const result = await uploadPhotos([file]);
@@ -304,7 +293,7 @@ function App() {
       .catch(() => undefined);
   };
   const sidebar = (
-    <Sidebar pages={pages} quotes={clientQuotes} navigate={navigate} section={section}
+    <Sidebar pages={pages} quotes={clientQuotes} navigate={navigate} section={section} unreadCount={inbox.unreadTotal}
       onInvite={() => void invitePhone()} />
   );
   const topbar = (
@@ -356,18 +345,12 @@ function App() {
       <button className="btn" onClick={createTemplate}><Plus size={17}/> Crear plantilla</button>
     </div>
   );
-  const messagesView = item ? (
-    <MessagesScreen
-      quotes={clientQuotes}
-      item={item}
-      active={active}
-      setActive={activateQuote}
-      newMessage={newMessage}
-      setNewMessage={setNewMessage}
-      sendAdmin={sendAdmin}
-    />
-  ) : (
-    <div className="page hn-cloud-empty"><h1>Mensajes</h1><p>Aún no hay cotizaciones ni conversaciones.</p></div>
+  const messagesView = (
+    <MessagesScreen conversations={inbox.conversations}
+      unreadTotal={inbox.unreadTotal} loading={inbox.loading} error={inbox.error}
+      permission={inbox.permission} askNotifications={inbox.askNotifications}
+      refresh={inbox.refresh} openQuote={id=>selectQuote(id)}
+      initialQuoteId={section==='messages'&&inbox.conversations.some(c=>c.quoteId===active)?active:undefined}/>
   );
   const clientPage = item ? (
     <ClientPage
@@ -455,6 +438,9 @@ function App() {
             className={section === p.id ? 'active' : ''}
           >
             <p.icon size={19} />
+            {p.id==='messages'&&inbox.unreadTotal>0&&
+              <span className="hn-nav-unread" aria-label={inbox.unreadTotal+' mensajes nuevos'}>
+                {inbox.unreadTotal>99?'99+':inbox.unreadTotal}</span>}
             <span>{p.label}</span>
           </button>
         ))}
