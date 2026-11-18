@@ -293,7 +293,7 @@ function App() {
       .catch(() => undefined);
   };
   const sidebar = (
-    <Sidebar pages={pages} quotes={clientQuotes} navigate={navigate} section={section} unreadCount={inbox.unreadTotal}
+    <Sidebar pages={pages} navigate={navigate} section={section} unreadCount={inbox.unreadTotal}
       onInvite={() => void invitePhone()} />
   );
   const topbar = (
