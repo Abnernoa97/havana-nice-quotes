@@ -219,8 +219,8 @@ export function CarolinaBlankPage({item,page,interaction,onSelectExtraPhoto,stat
     aria-label={(pageKind(item.designLayout,page)==='chat'?'Página chat ':'Página en blanco ')+page}>
    <ExtraPhotos item={item} page={page} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
    <ExtraTexts item={item} page={page} interaction={interaction}/>
-   {pageKind(item.designLayout,page)==='chat'&&
-     <QuoteChatPanel quoteId={item.id} pageId={page} staticPreview={staticChat} isTemplate={item.isTemplate}/>}
+   {pageKind(item.designLayout,page)==='chat'&&!staticChat&&
+     <QuoteChatPanel quoteId={item.id} pageId={page} isTemplate={item.isTemplate}/>}
  </div>;
 }
 export default function CarolinaDocument({ item }: { item: Quote }) {
