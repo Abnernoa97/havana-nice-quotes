@@ -67,6 +67,10 @@ function App() {
   };
   const [toast, setToast] = useState('');
   const [messageTarget,setMessageTarget]=useState<string|null>(null);
+  useEffect(()=>{const incoming=(e:Event)=>{const d=(e as CustomEvent<{title:string;kind:string}>).detail;
+    if(d?.title)setToast((d.kind==='audio'?'Nueva nota de voz: ':'Nuevo mensaje: ')+d.title);};
+    window.addEventListener('hn-quotes-incoming-message',incoming);
+    return ()=>window.removeEventListener('hn-quotes-incoming-message',incoming);},[]);
   const [inviteUrl, setInviteUrl] = useState(''); const [inviteBusy, setInviteBusy] = useState(false);
   const [filter, setFilter] = useState('Todas');
   // New quotations are private editor work until an explicit named Save.
