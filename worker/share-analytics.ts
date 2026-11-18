@@ -69,6 +69,13 @@ export async function publicShareVisit(request:Request,store:Store):Promise<Resp
  const bytes=new TextEncoder().encode(visitor);
  const digest=await crypto.subtle.digest('SHA-256',bytes);
  const visitorHash=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
+ // A real customer opening is proof the proposal was delivered,
+ // including links shared before analytics was implemented.
+ await store.DB.prepare(
+  `UPDATE quotes SET payload=json_set(payload,'$.status','Enviada'),
+   revision=revision+1,updated_at=unixepoch()
+   WHERE id=? AND deleted_at IS NULL AND json_extract(payload,'$.status')='Listo para enviar'`
+ ).bind(String(share.q.id)).run();
  const result=await store.DB.prepare(
   'INSERT OR IGNORE INTO quote_share_visits (id,quote_id,token,visitor_hash,visit_id) VALUES (?,?,?,?,?)'
  ).bind(crypto.randomUUID(),String(share.q.id),match[1],visitorHash,visitId).run();
