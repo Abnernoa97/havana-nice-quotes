@@ -9,7 +9,7 @@ type InboxRow=Row & {
 };
 type MessageRow=Row & {
  id:string;quote_id:string;page_id:number;kind:'text'|'audio';
- sender:'owner'|'client';text:string;created_at:number;cursor:number;
+ sender:'owner'|'client';text:string;created_at:number;cursor:number;mime:string|null;
 };
 const idRE=/^hn-[a-f0-9-]{20,64}$/;
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{status,headers:{
@@ -56,11 +56,11 @@ export async function ownerInboxApi(request:Request,store:Store):Promise<Respons
  if(!await exists(store.DB,quoteId))return error('Cotización no encontrada.',404);
  if(!match[2]&&method==='GET'){
   const rows=await store.DB.prepare(
-   'SELECT rowid AS cursor,id,quote_id,page_id,kind,sender,text,created_at FROM quote_chat_messages WHERE quote_id=? ORDER BY rowid ASC LIMIT 400'
+   'SELECT rowid AS cursor,id,quote_id,page_id,kind,sender,text,created_at,mime FROM quote_chat_messages WHERE quote_id=? ORDER BY rowid ASC LIMIT 400'
   ).bind(quoteId).all<MessageRow>();
   const messages=rows.results.map(m=>({
    cursor:m.cursor,id:m.id,pageId:m.page_id,kind:m.kind,sender:m.sender,
-   text:m.kind==='text'?m.text:'',createdAt:m.created_at,
+   text:m.kind==='text'?m.text:'',createdAt:m.created_at,mime:m.mime,
    audioUrl:m.kind==='audio'
     ?'/api/quote-chat/'+quoteId+'/'+m.page_id+'/audio/'+m.id:null
   }));
