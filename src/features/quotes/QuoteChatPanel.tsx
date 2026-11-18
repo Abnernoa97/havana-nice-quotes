@@ -1,9 +1,11 @@
 import {useEffect,useRef,useState} from 'react';
 import {Mic,Send,Square} from 'lucide-react';
+import {compatibleVoice,preferredVoiceMime} from './voice-audio';
+import VoiceNotePlayer from './VoiceNotePlayer';
 import './quote-chat.css';
 
 type Message={id:string;sender:'owner'|'client';kind:'text'|'audio';
- text:string;audioUrl:string|null;createdAt:number};
+ text:string;audioUrl:string|null;mime?:string|null;createdAt:number};
 type Props={quoteId:string;pageId:number;compact?:boolean;staticPreview?:boolean;isTemplate?:boolean};
 const token=typeof window!=='undefined'
  ?window.location.pathname.match(/^\/q\/([a-f0-9]{64})\/?$/)?.[1]:undefined;
@@ -82,8 +84,7 @@ export default function QuoteChatPanel({quoteId,pageId,compact=false,staticPrevi
   try{
    const mic=await navigator.mediaDevices.getUserMedia({audio:true});
    stream.current=mic;
-   const formats=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'];
-   const selected=formats.find(format=>MediaRecorder.isTypeSupported(format));
+   const selected=preferredVoiceMime();
    const media=new MediaRecorder(mic,selected?{mimeType:selected}:undefined);
    recorder.current=media;chunks.current=[];
    media.ondataavailable=event=>{if(event.data.size>0)chunks.current.push(event.data);};
@@ -93,10 +94,11 @@ export default function QuoteChatPanel({quoteId,pageId,compact=false,staticPrevi
     stream.current=null;
     const blob=new Blob(chunks.current,{type:media.mimeType});
     chunks.current=[];
-    const mime=blob.type.split(';')[0];
-    if(blob.size&&blob.size<=6*1024*1024&&mime.startsWith('audio/'))
-     void send(blob,mime);
-    else if(blob.size)setError(translate('Audio demasiado largo.','Recording is too long.'));
+    if(!blob.size)return;
+    void compatibleVoice(blob).then(audio=>{
+      if(audio.size<=6*1024*1024)return send(audio,audio.type.split(';')[0]);
+      throw Error(translate('Audio demasiado largo.','Recording is too long.'));
+    }).catch(cause=>setError(cause instanceof Error?cause.message:'Error de audio.'));
    };
    media.start(500);setRecording(true);
    stopTimer.current=setTimeout(endRecording,90000);
@@ -115,8 +117,8 @@ export default function QuoteChatPanel({quoteId,pageId,compact=false,staticPrevi
      'Send a message or voice note.')}</p>}
     {messages.map(msg=><div key={msg.id}
        className={'hn-chat-bubble'+(msg.sender===who?' mine':' theirs')}>
-       {msg.kind==='audio'?<div><span>{translate('Nota de voz','Voice note')}</span>
-         <audio controls preload="none" src={msg.audioUrl||undefined}/></div>
+       {msg.kind==='audio'?<VoiceNotePlayer url={msg.audioUrl||''} mime={msg.mime}
+          label={translate('Nota de voz','Voice note')}/>
         :<span>{msg.text}</span>}
        <small>{fmt(msg.createdAt)}</small>
       </div>)}
@@ -128,8 +130,8 @@ export default function QuoteChatPanel({quoteId,pageId,compact=false,staticPrevi
      aria-label={translate('Escribir mensaje','Write a message')}
      onChange={e=>setText(e.target.value)}
      onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendText();}}}/>
-   <button type="button" disabled={disabled||(!text.trim()&&!recording)}
-     onClick={text.trim()?sendText:endRecording} className="hn-chat-send"
+   <button type="button" disabled={disabled||!text.trim()||recording}
+     onClick={sendText} className="hn-chat-send"
      aria-label={recording?'Stop recording':'Send message'}>
       {recording?<Square size={17}/>:<Send size={19}/>}
    </button>
