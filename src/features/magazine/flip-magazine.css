@@ -89,3 +89,29 @@
 
 /* Vertical scrolling works directly over the 3D book; horizontal swipes still turn pages. */
 .hn-magazine-stage,.hn-magazine-stage *{touch-action:pan-y pinch-zoom!important}
+
+
+/* The final chat sheet is a stationary, scrollable part of the book.
+   PageFlip's cloned DOM never receives a second composer or pointer gestures. */
+.hn-magazine-stage{position:relative}
+.hn-magazine-chat-lock{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;
+ justify-content:flex-end;align-items:center;pointer-events:auto;touch-action:pan-y}
+.hn-magazine-chat-lock>.hn-quote-chat-compact{position:relative;z-index:2;
+ width:min(100%,410px);height:58%;min-height:225px;margin:0 auto;
+ border-radius:11px 11px 2px 2px;box-shadow:0 -8px 28px #111d1230;
+ background:#f9faf7f7;pointer-events:auto}
+.hn-magazine-chat-lock .hn-quote-chat-messages{overscroll-behavior:contain}
+.hn-magazine-chat-lock input,.hn-magazine-chat-lock textarea,
+.hn-magazine-chat-lock button,.hn-magazine-chat-lock audio,
+.hn-magazine-chat-lock .hn-quote-chat-messages{touch-action:auto!important}
+.hn-magazine-chat-back{position:absolute;top:7px;left:max(6px,calc(50% - 200px));
+ z-index:3;border:1px solid #d2ded3;background:#f9fbf6e8;color:#214c35;
+ padding:10px 13px;display:flex;align-items:center;gap:7px;border-radius:9px;
+ font:600 12px system-ui;cursor:pointer}
+.hn-magazine-video-play{position:absolute;z-index:15;left:50%;top:52%;transform:translate(-50%,-50%);
+ border:1px solid #ffffffaa;border-radius:30px;background:#152e23dc;
+ color:#fff;padding:13px 21px;font:600 13px system-ui;cursor:pointer}
+@media(max-width:700px){
+ .hn-magazine-chat-lock>.hn-quote-chat-compact{width:min(100%,410px);height:61%;min-height:205px}
+ .hn-magazine-chat-back{top:5px;left:6px;padding:8px 11px}
+}
