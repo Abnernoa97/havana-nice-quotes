@@ -1,11 +1,9 @@
 import type { LucideIcon } from 'lucide-react';
 import { Sparkles, Link2, Menu, Download, Cloud, CloudOff } from 'lucide-react';
-import type { Quote } from '../features/quotes/types';
 
 export type NavItem = { id: string; label: string; icon: LucideIcon };
 type SidebarProps = {
   pages: NavItem[];
-  quotes: Quote[];
   navigate: (section: string) => void;
   section: string;
   onInvite: () => void;
@@ -28,7 +26,7 @@ function Logo() {
   );
 }
 
-export function Sidebar({ pages, quotes, navigate, section, onInvite, unreadCount }: SidebarProps) {
+export function Sidebar({ pages, navigate, section, onInvite, unreadCount }: SidebarProps) {
   return (
     <aside className="sidebar">
       <Logo />
