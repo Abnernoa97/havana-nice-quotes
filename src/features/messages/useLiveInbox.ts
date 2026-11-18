@@ -34,7 +34,7 @@ export function useLiveInbox(enabled:boolean){
     for(const c of data.conversations){
      if(c.sender!=='client'||c.unread===0)continue;
      const seen=previous.get(c.quoteId);
-     if(seen===undefined||c.cursor<=seen)continue;
+     if(seen!==undefined&&c.cursor<=seen)continue;
      const message=c.kind==='audio'?'Nueva nota de voz':c.text.slice(0,110);
      if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
       try{
