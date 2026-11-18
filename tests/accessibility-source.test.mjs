@@ -15,7 +15,7 @@ test('Navegación móvil y respuestas reales tienen nombres accesibles', () => {
   assert.match(source('app/WorkspaceChrome.tsx'), /aria-label="Abrir menú"/);
   assert.match(source('app/App.tsx'), /aria-label="Cerrar menú"/);
   assert.match(source('features/messages/MessagesScreen.tsx'), /aria-label="Enviar mensaje"/);
-  assert.match(source('features/messages/MessagesScreen.tsx'), /aria-label="Grabar nota de voz"/);
+  assert.match(source('features/messages/MessagesScreen.tsx'), /aria-label=\{recording\?'Detener nota de voz':'Grabar nota de voz'\}/);
   assert.match(source('features/quotes/QuotesScreen.tsx'), /aria-label="Buscar cotizaciones"/);
 });
 
