@@ -3,3 +3,6 @@
 .hn-quote-trash-action { flex: 0 0 39px; display: grid; place-items: center; align-self: stretch; background: #fff; color: #9ba89b; border: 0; cursor: pointer; }
 .hn-quote-trash-action:hover,.hn-quote-trash-action:focus-visible { background: #f7efee; color: #9c514b; }
 @media(max-width:600px) { .hn-quote-trash-action { flex-basis: 43px; } }
+
+.hn-quote-share-count{display:block;max-width:100%;color:#64816c;font-size:11px;line-height:1.4;white-space:normal;margin-top:4px;font-weight:500}
+@media(max-width:600px){.hn-quote-share-count{font-size:10px}}
