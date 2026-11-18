@@ -40,3 +40,11 @@
 .hn-quote-chat-compose button{flex-basis:34px;width:34px;height:34px}
 .hn-quote-chat-compose textarea{min-height:38px;padding:9px 11px}
 .hn-quote-chat-compact{height:280px;padding:12px}}
+
+
+/* Three stable columns: input, send and microphone stay aligned on iOS Safari. */
+.hn-quote-chat-compose{display:grid;grid-template-columns:minmax(0,1fr) 38px 38px;align-items:end;gap:7px}
+.hn-quote-chat-compose textarea{width:100%;min-width:0}
+.hn-quote-chat-compose button{width:38px;height:38px;min-width:38px;min-height:38px;flex:none;place-self:end}
+@media(max-width:530px){.hn-quote-chat-compose{grid-template-columns:minmax(0,1fr) 36px 36px;gap:6px}
+.hn-quote-chat-compose button{width:36px;height:36px;min-width:36px;min-height:36px}}
