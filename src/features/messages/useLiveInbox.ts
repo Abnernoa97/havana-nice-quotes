@@ -36,6 +36,9 @@ export function useLiveInbox(enabled:boolean){
      const seen=previous.get(c.quoteId);
      if(seen!==undefined&&c.cursor<=seen)continue;
      const message=c.kind==='audio'?'Nueva nota de voz':c.text.slice(0,110);
+     window.dispatchEvent(new CustomEvent('hn-quotes-incoming-message',{detail:{
+       quoteId:c.quoteId,title:c.title,kind:c.kind,text:message
+     }}));
      if(typeof Notification!=='undefined'&&Notification.permission==='granted'){
       try{
        const reg=await navigator.serviceWorker?.getRegistration();
