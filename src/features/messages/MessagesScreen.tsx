@@ -36,6 +36,7 @@ export default function MessagesScreen({
  const stopTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
  const containerRef=useRef<HTMLDivElement|null>(null);
  const fetchingRef=useRef(false);
+ const readCursorRef=useRef(0);
  const selected=conversations.find(c=>c.quoteId===selectedId)||null;
  const base=selectedId?'/api/quote-inbox/'+encodeURIComponent(selectedId):'';
  const threadPage=selected?.pageId;
@@ -48,6 +49,7 @@ export default function MessagesScreen({
  },[conversations,selectedId]);
  useEffect(()=>{
   setMessages([]);setThreadLoading(true);setThreadError('');
+  readCursorRef.current=0;
  },[selectedId]);
  useEffect(()=>{
   if(!selectedId)return;
@@ -63,12 +65,12 @@ export default function MessagesScreen({
     setMessages(data.messages||[]);
     setThreadError('');
     const cursor=data.messages?.length?data.messages[data.messages.length-1].cursor:undefined;
-    if(cursor!==undefined){
+    if(cursor!==undefined&&cursor>readCursorRef.current){
      const ack=await fetch(base+'/read',{
       method:'POST',credentials:'same-origin',
       headers:{'Content-Type':'application/json'},body:JSON.stringify({cursor})
      });
-     if(ack.ok)void refresh();
+     if(ack.ok){readCursorRef.current=cursor;void refresh();}
     }
    }catch{if(mounted)setThreadError('No pudimos actualizar esta conversación.');}
    finally{fetchingRef.current=false;if(mounted)setThreadLoading(false);}
