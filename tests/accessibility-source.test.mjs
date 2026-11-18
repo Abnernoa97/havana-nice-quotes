@@ -11,10 +11,11 @@ test('Fotografías decorativas no repiten los nombres junto al texto de pareja',
   }
 });
 
-test('Navegación móvil y envío demo tienen nombres accesibles', () => {
+test('Navegación móvil y respuestas reales tienen nombres accesibles', () => {
   assert.match(source('app/WorkspaceChrome.tsx'), /aria-label="Abrir menú"/);
   assert.match(source('app/App.tsx'), /aria-label="Cerrar menú"/);
-  assert.match(source('features/messages/MessagesScreen.tsx'), /aria-label="Enviar respuesta de prueba"/);
+  assert.match(source('features/messages/MessagesScreen.tsx'), /aria-label="Enviar mensaje"/);
+  assert.match(source('features/messages/MessagesScreen.tsx'), /aria-label="Grabar nota de voz"/);
   assert.match(source('features/quotes/QuotesScreen.tsx'), /aria-label="Buscar cotizaciones"/);
 });
 
@@ -28,12 +29,13 @@ test('Pestañas de edición y modo de lectura exponen sus estados a lectores de 
   assert.match(publish, /aria-pressed=\{mode === 'scroll'\}/);
 });
 
-test('Cambiar de pareja limpia borradores sin enviar y registra la selección en el historial', () => {
+test('La bandeja cambia de cotización sin mezclar borradores de respuesta', () => {
   const app = source('app/App.tsx');
   const messages = source('features/messages/MessagesScreen.tsx');
-  assert.match(app, /const activateQuote = \(id: string\) => \{\s*if \(id === active\) return;\s*setNewMessage\(''\);\s*setClientMessage\(''\);\s*routeTo\(\{ active: id \}\);/);
-  assert.match(app, /setActive=\{activateQuote\}/);
-  assert.match(messages, /setActive: \(id: string\) => void;/);
+  assert.match(app,/conversations=\{inbox.conversations\}/);
+  assert.match(messages,/const \[selectedId,setSelectedId\]=useState/);
+  assert.match(messages,/const \[draft,setDraft\]=useState\(''\)/);
+  assert.doesNotMatch(app,/setNewMessage/);
 });
 
 test('La selección inicial utiliza la primera cotización y no un ID fijo', () => {
