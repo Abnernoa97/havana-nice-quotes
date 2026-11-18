@@ -2,7 +2,7 @@ import type { Quote } from './types';
 
 /** Templates and unsaved work never appear as quotations. Legacy response
  * states are still retrievable under Sent without deleting their history. */
-export const QUOTE_FILTERS=['Todas','Enviadas','Borrador','Listo para enviar'] as const;
+export const QUOTE_FILTERS=['Todas','Borrador','Listo para enviar','Enviadas'] as const;
 export function quoteDisplayStatus(status:Quote['status']):string {
  return status==='En revisión'||status==='Aceptada'?'Enviada':status;
 }
