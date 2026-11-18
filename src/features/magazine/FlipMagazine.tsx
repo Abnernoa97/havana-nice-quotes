@@ -154,8 +154,8 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
           <QuoteChatPanel key={selectedPages[page]} quoteId={item.id}
             pageId={selectedPages[page]} compact isTemplate={item.isTemplate}/>
         </div>}
-        {videoBlocked&&!finalChat&&<button className="hn-magazine-video-play" type="button"
-          onClick={()=>{
+        {videoBlocked&&<button className="hn-magazine-video-play" type="button"
+          style={finalChat?{top:'25%'}:undefined} onClick={()=>{
             const media=mountRef.current?.querySelectorAll<HTMLVideoElement>('.hn-leaf')[page]?.querySelector('video');
             if(media){media.muted=true;media.playsInline=true;void media.play().then(()=>setVideoBlocked(false)).catch(()=>setVideoBlocked(true));}
           }}>Play video</button>}
