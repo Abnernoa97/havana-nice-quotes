@@ -1,11 +1,13 @@
 import {useEffect,useRef,useState} from 'react';
-import {ArrowUpRight,Bell,MessageCircle,Mic,Send,Square,Volume2} from 'lucide-react';
+import {ArrowUpRight,Bell,MessageCircle,Mic,Send,Square} from 'lucide-react';
+import VoiceNotePlayer from '../quotes/VoiceNotePlayer';
+import {compatibleVoice,preferredVoiceMime} from '../quotes/voice-audio';
 import type {InboxConversation} from './useLiveInbox';
 import './messages-inbox.css';
 
 type Message={
  id:string;cursor:number;pageId:number;kind:'text'|'audio';sender:'owner'|'client';
- text:string;createdAt:number;audioUrl:string|null;
+ text:string;createdAt:number;audioUrl:string|null;mime?:string|null;
 };
 type Props={
  conversations:InboxConversation[];
@@ -123,8 +125,7 @@ export default function MessagesScreen({
   try{
    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
    streamRef.current=stream;
-   const mime=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg']
-    .find(x=>MediaRecorder.isTypeSupported(x));
+   const mime=preferredVoiceMime();
    const recorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
    recordingRef.current=recorder;chunksRef.current=[];
    recorder.ondataavailable=e=>{if(e.data.size)chunksRef.current.push(e.data);};
@@ -135,9 +136,10 @@ export default function MessagesScreen({
     const blob=new Blob(chunksRef.current,{type:recorder.mimeType});
     chunksRef.current=[];
     if(!blob.size)return;
-    if(blob.size>6*1024*1024){setThreadError('Nota de voz demasiado grande.');return;}
-    const type=blob.type.split(';')[0];
-    if(type.startsWith('audio/'))void send(blob,type);
+    void compatibleVoice(blob).then(audio=>{
+      if(audio.size>6*1024*1024)throw Error('Nota de voz demasiado grande.');
+      return send(audio,audio.type.split(';')[0]);
+    }).catch(cause=>setThreadError(cause instanceof Error?cause.message:'Error de voz.'));
    };
    recorder.start(400);setRecording(true);
    stopTimer.current=setTimeout(stopRecording,90000);
@@ -191,10 +193,8 @@ export default function MessagesScreen({
       <div className="hn-thread-bubbles" ref={containerRef} role="log" aria-label="Historial de mensajes">
        {threadLoading&&messages.length===0&&<p className="hn-message-empty">Abriendo conversación…</p>}
        {messages.map(m=><div key={m.id} className={'hn-thread-msg '+(m.sender==='owner'?'owner':'client')}>
-         {m.kind==='audio'?<div className="hn-thread-audio">
-          <span><Volume2 size={14}/> Nota de voz</span>
-          <audio controls preload="none" src={m.audioUrl||undefined}/>
-         </div>:<p>{m.text}</p>}
+         {m.kind==='audio'?<VoiceNotePlayer url={m.audioUrl||''} mime={m.mime}
+           label="Nota de voz" owner/>:<p>{m.text}</p>}
          <small>{m.sender==='owner'?'HAVANA NICE':'Cliente'} · {formatDay(m.createdAt)} {formatTime(m.createdAt)}</small>
         </div>)}
       </div>
