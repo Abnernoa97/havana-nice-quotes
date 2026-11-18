@@ -30,7 +30,7 @@ function isRealAudio(bytes:Uint8Array,mime:string){
 function findRoute(path:string,publicMode:boolean){
  const re=publicMode
   ? /^\/api\/shared\/([a-f0-9]{64})\/chat\/(\d{1,4})(?:\/audio\/([a-f0-9-]{36}))?$/
-  : /^\/api\/quote-chat\/(hn-[a-f0-9-]{20,64})\/(\d{1,4})(?:\/audio\/([a-f0-9-]{36}))?$/;
+  : /^\/api\/quote-chat\/(hn-[a-f0-9-]{20,64})\/(\d{1,4})(?:\/audio\/([a-f0-9-]{36})(\/compatible)?)?$/;
  return re.exec(path);
 }
 function hasChatPage(q:Row,page:number):boolean{
@@ -50,14 +50,14 @@ async function loadOwnerQuote(store:Store,id:string){
 function asMessage(row:MessageRow,route:string){
  return {id:row.id,sender:row.sender,kind:row.kind,
   text:row.kind==='text'?row.text:'',createdAt:row.created_at,
-  audioUrl:row.kind==='audio'?route+'/audio/'+row.id:null};
+  audioUrl:row.kind==='audio'?route+'/audio/'+row.id:null,mime:row.mime};
 }
 /** Every request is tied to a single saved quote, a chat-typed page, and
  * either the authorized owner device or a currently active share token. */
 export async function quoteChatApi(request:Request,store:Store,publicMode:boolean):Promise<Response|undefined>{
  const url=new URL(request.url),match=findRoute(url.pathname,publicMode);
  if(!match)return undefined;
- const [_,identity,pageText,messageId]=match,method=request.method.toUpperCase();
+ const [_,identity,pageText,messageId,compatibleAction]=match,method=request.method.toUpperCase();
  const page=Number(pageText);
  const shared=publicMode?await readShare(store,identity):null;
  const quote=publicMode?shared?.q:await loadOwnerQuote(store,identity);
@@ -65,18 +65,57 @@ export async function quoteChatApi(request:Request,store:Store,publicMode:boolea
  const quoteId=publicMode?String(shared!.q.id):identity;
  const route='/api/'+(publicMode?'shared/'+identity+'/chat/':'quote-chat/'+identity+'/')+page;
  if(messageId){
+  if(compatibleAction){
+   if(publicMode||method!=='PUT')return fail('Method not allowed.',405);
+   if(mimeType(request)!=='audio/wav'||Number(request.headers.get('Content-Length')||0)>LIMIT)
+    return fail('Only compatible WAV audio is accepted.',415);
+   const original=await store.DB.prepare(
+    "SELECT mime FROM quote_chat_messages WHERE id=? AND quote_id=? AND page_id=? AND kind='audio'"
+   ).bind(messageId,quoteId,page).first<Row>();
+   if(!original||original.mime!=='audio/webm')return fail('Audio already compatible or unavailable.',409);
+   const data=await request.arrayBuffer();
+   if(data.byteLength<48||data.byteLength>LIMIT||
+     !isRealAudio(new Uint8Array(data.slice(0,16)),'audio/wav'))
+    return fail('Invalid WAV recording.',415);
+   const key='quotes-studio/quote-chat/'+quoteId+'/'+messageId+'-iphone.wav';
+   await store.MEDIA.put(key,data,{httpMetadata:{contentType:'audio/wav'},
+    customMetadata:{module:'havana-nice-quotes',kind:'chat-voice-compatible',quoteId}});
+   const update=await store.DB.prepare(
+    "UPDATE quote_chat_messages SET audio_key=?,mime='audio/wav' WHERE id=? AND quote_id=? AND page_id=? AND mime='audio/webm'"
+   ).bind(key,messageId,quoteId,page).run();
+   return reply({converted:Boolean(update.meta.changes)},update.meta.changes?200:409);
+  }
   if(method!=='GET'&&method!=='HEAD')return fail('Method not allowed.',405);
   const row=await store.DB.prepare(
    'SELECT audio_key,mime FROM quote_chat_messages WHERE id=? AND quote_id=? AND page_id=? AND kind=?'
   ).bind(messageId,quoteId,page,'audio').first<Row>();
   const key=row?.audio_key;
-  if(typeof key!=='string'||!key.startsWith('quotes-studio/quote-chat/'+quoteId+'/'))return fail('Audio unavailable.',404);
-  const media=await store.MEDIA.get(key);
-  if(!media)return fail('Audio unavailable.',404);
-  return new Response(method==='HEAD'?null:media.body,{status:200,headers:{
-   'Content-Type':String(row?.mime||'audio/webm'),'Content-Length':String(media.size),
-   'Cache-Control':'private, no-store','Referrer-Policy':'no-referrer','X-Content-Type':'nosniff'
-  }});
+  if(typeof key!=='string'||!key.startsWith('quotes-studio/quote-chat/'+quoteId+'/'))
+   return fail('Audio unavailable.',404);
+  const audio=await store.MEDIA.get(key);
+  if(!audio)return fail('Audio unavailable.',404);
+  const total=audio.size;
+  const header=request.headers.get('Range'),range=header?.match(/^bytes=(\d*)-(\d*)$/);
+  let start=0,end=total-1,isPartial=false;
+  if(header){
+   if(!range||(!range[1]&&!range[2]))return new Response(null,{status:416,headers:{
+    'Content-Range':'bytes */'+total,'Cache-Control':'no-store'}});
+   if(!range[1]){const size=Number(range[2]);start=Math.max(0,total-size);}
+   else start=Number(range[1]);
+   if(range[1]&&range[2])end=Math.min(total-1,Number(range[2]));
+   if(!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||start>=total||end<start)
+    return new Response(null,{status:416,headers:{'Content-Range':'bytes */'+total}});
+   isPartial=true;
+  }
+  const object=isPartial?await store.MEDIA.get(key,{range:{offset:start,length:end-start+1}}):audio;
+  if(!object)return fail('Audio unavailable.',404);
+  const headers=new Headers({
+   'Content-Type':String(row?.mime||'audio/wav'),'Content-Length':String(end-start+1),
+   'Accept-Ranges':'bytes','Cache-Control':'private, no-store',
+   'Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'
+  });
+  if(isPartial)headers.set('Content-Range','bytes '+start+'-'+end+'/'+total);
+  return new Response(method==='HEAD'?null:object.body,{status:isPartial?206:200,headers});
  }
  if(method==='GET'){
   const all=await store.DB.prepare(
