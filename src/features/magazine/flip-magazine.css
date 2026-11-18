@@ -108,7 +108,7 @@
  z-index:3;border:1px solid #d2ded3;background:#f9fbf6e8;color:#214c35;
  padding:10px 13px;display:flex;align-items:center;gap:7px;border-radius:9px;
  font:600 12px system-ui;cursor:pointer}
-.hn-magazine-video-play{position:absolute;z-index:15;left:50%;top:52%;transform:translate(-50%,-50%);
+.hn-magazine-video-play{position:absolute;z-index:40;left:50%;top:52%;transform:translate(-50%,-50%);
  border:1px solid #ffffffaa;border-radius:30px;background:#152e23dc;
  color:#fff;padding:13px 21px;font:600 13px system-ui;cursor:pointer}
 @media(max-width:700px){
