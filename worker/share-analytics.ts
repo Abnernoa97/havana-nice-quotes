@@ -3,7 +3,6 @@ import type {VideoStore} from './videos.ts';
 type Store=VideoStore;
 type Row=Record<string,unknown>;
 const uuid=/^[a-f0-9-]{36}$/;
-const tokenRE=/^[a-f0-9]{64}$/;
 const json=(data:unknown,status=200)=>new Response(JSON.stringify(data),{
  status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
  'Referrer-Policy':'no-referrer','X-Content-Type-Options':'nosniff'}});
