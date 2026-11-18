@@ -3,6 +3,7 @@ import { isTemplateStyle } from '../src/features/templates/template-registry.ts'
 import { handleVideoApi, videoPrefix, videoPosterKey } from './videos.ts';
 import { ownerSharing, publicSharing } from './quote-sharing.ts';
 import { quoteChatApi } from './quote-chat.ts';
+import { ownerInboxApi } from './quote-inbox.ts';
 import {syncCalendarQuote,reconcileCalendarQuotes} from './calendar-bridge.ts';
 import type {CalendarDatabase,CalendarQuote} from './calendar-bridge.ts';
 /**
@@ -201,6 +202,8 @@ async function api(request: Request, env: Env,
     return chat||await publicSharing(request,env)||bad('Ruta no encontrada.',404);
   }
   if (!await authorized(request, env)) return unauthorized();
+  if(path.startsWith('/api/quote-inbox'))
+    return await ownerInboxApi(request,env)||bad('Ruta no encontrada.',404);
   if(path.startsWith('/api/quote-chat/'))
     return await quoteChatApi(request,env,false)||bad('Ruta no encontrada.',404);
   if (path.startsWith('/api/share-links'))
