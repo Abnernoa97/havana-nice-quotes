@@ -43,9 +43,8 @@ export default function MessagesScreen({
   if(initialQuoteId)setSelectedId(initialQuoteId);
  },[initialQuoteId]);
  useEffect(()=>{
-  if(!selectedId||!conversations.some(c=>c.quoteId===selectedId)){
-   setSelectedId(conversations[0]?.quoteId||null);
-  }
+  // Do not silently mark a conversation read on opening the inbox itself.
+  if(selectedId&&!conversations.some(c=>c.quoteId===selectedId))setSelectedId(null);
  },[conversations,selectedId]);
  useEffect(()=>{
   setMessages([]);setThreadLoading(true);setThreadError('');
