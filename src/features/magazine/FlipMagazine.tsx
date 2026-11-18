@@ -29,6 +29,9 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
   const [failure, setFailure] = useState(false);
   const selectedPages = carolinaPageOrder(item.designLayout);
   const total = selectedPages.length;
+  const chatPage=pageKind(item.designLayout,selectedPages[page])==='chat';
+  const finalChat=page===total-1&&chatPage;
+  const [videoBlocked,setVideoBlocked]=useState(false);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -42,8 +45,12 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
       host?.querySelectorAll<HTMLElement>('.hn-leaf').forEach((leaf,leafIndex)=>{
         leaf.querySelectorAll('video').forEach(media=>{
           media.muted=true;media.loop=true;media.controls=false;
-          if(!document.hidden&&leafIndex===index)void media.play().catch(()=>{});
-          else media.pause();
+          media.playsInline=true;
+          if(!document.hidden&&leafIndex===index){
+            media.preload='auto';media.autoplay=true;
+            if(media.networkState===HTMLMediaElement.NETWORK_EMPTY)media.load();
+            void media.play().then(()=>setVideoBlocked(false)).catch(()=>setVideoBlocked(true));
+          }else{media.pause();media.preload='none';}
         });
       });
     };
@@ -139,6 +146,17 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
 
       <div className="hn-magazine-stage">
         <div className="hn-magazine-surface" ref={mountRef} aria-label={'Revista interactiva de ' + total + ' páginas'} />
+        {finalChat&&<div className="hn-magazine-chat-lock" onPointerDown={e=>e.stopPropagation()}>
+          <button type="button" className="hn-magazine-chat-back"
+            onClick={()=>changePage('prev')}><ArrowLeft size={15}/> Previous page</button>
+          <QuoteChatPanel key={selectedPages[page]} quoteId={item.id}
+            pageId={selectedPages[page]} compact isTemplate={item.isTemplate}/>
+        </div>}
+        {videoBlocked&&!finalChat&&<button className="hn-magazine-video-play" type="button"
+          onClick={()=>{
+            const media=mountRef.current?.querySelectorAll<HTMLVideoElement>('.hn-leaf')[page]?.querySelector('video');
+            if(media){media.muted=true;media.playsInline=true;void media.play().then(()=>setVideoBlocked(false));}
+          }}>Play video</button>}
       </div>
 
       {failure && (
@@ -160,7 +178,7 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
           <ArrowRight size={19} />
         </button>
       </div>
-      {pageKind(item.designLayout,selectedPages[page])==='chat'&&
+      {chatPage&&!finalChat&&
         <QuoteChatPanel key={selectedPages[page]} quoteId={item.id}
           pageId={selectedPages[page]} compact isTemplate={item.isTemplate}/>}
       {!clientView&&<p className="hn-magazine-disclaimer">Design preview only · Delivery and acceptance are not active.</p>}
@@ -176,7 +194,7 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
             : selectedPage===0?<EditorialCover item={item}/>:
               selectedPage===1?<EditorialCollage item={item}/>:
               selectedPage===2?<EditorialTerms item={item}/>:
-              <CarolinaBlankPage item={item} page={selectedPage}/>}
+              <CarolinaBlankPage item={item} page={selectedPage} staticChat/>}
         </MagazineLeaf>)}
       </div>
     </section>
