@@ -42,17 +42,19 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
     let onVisibility: (()=>void) | undefined;
     let activePageIndex=0;
     const syncCoverVideos=(index:number)=>{
+      let visibleVideo=false;
       host?.querySelectorAll<HTMLElement>('.hn-leaf').forEach((leaf,leafIndex)=>{
         leaf.querySelectorAll('video').forEach(media=>{
           media.muted=true;media.loop=true;media.controls=false;
           media.playsInline=true;
           if(!document.hidden&&leafIndex===index){
-            media.preload='auto';media.autoplay=true;
+            visibleVideo=true;media.preload='auto';media.autoplay=true;
             if(media.networkState===HTMLMediaElement.NETWORK_EMPTY)media.load();
             void media.play().then(()=>setVideoBlocked(false)).catch(()=>setVideoBlocked(true));
           }else{media.pause();media.preload='none';}
         });
       });
+      if(!visibleVideo)setVideoBlocked(false);
     };
     try {
       host = document.createElement('div');
