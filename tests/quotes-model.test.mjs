@@ -19,7 +19,7 @@ test('La nube empieza en cero y no importa los datos ficticios del almacenamient
 });
 
 test('Cotizaciones: cuatro filtros sin respuestas de mensajes',()=>{
- assert.deepEqual(QUOTE_FILTERS,['Todas','Enviadas','Borrador','Listo para enviar']);
+ assert.deepEqual(QUOTE_FILTERS,['Todas','Borrador','Listo para enviar','Enviadas']);
  assert.equal(filterQuotes(seed,'Todas','').length,3);
  assert.equal(filterQuotes(seed,'Enviadas','').length,3);
  assert.equal(filterQuotes(seed,'Todas','LOS CABOS').length,1);
