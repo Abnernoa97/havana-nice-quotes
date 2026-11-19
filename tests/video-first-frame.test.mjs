@@ -7,10 +7,10 @@ test('Video: muestra JPEG ligero y de alta prioridad antes de descargar el strea
  const node=source('src/features/templates/CarolinaPhotoNode.tsx');
  assert.match(node,/const posterUrl=isVideo\?url\+'\/poster':undefined/);
  assert.match(node,/className="hn-carolina-image-fill hn-carolina-video-poster"/);
- assert.match(node,/fetchPriority=\{cover\?'high':'auto'\}/);
- assert.match(node,/loading=\{cover\|\|pageBackground\?'eager':'lazy'\}/);
+ assert.match(node,/fetchPriority=\{cover\|\|pageBackground\?'high':'auto'\}/);
+ assert.match(node,/loading="lazy"/);
  assert.ok(node.indexOf('hn-carolina-video-poster')<node.indexOf('hn-carolina-video-fill'));
- assert.match(node,/src=\{url\} poster=\{posterSrc\} muted loop playsInline disablePictureInPicture[\s\S]*preload=\{cover\|\|pageBackground\?'metadata':'none'\}/);
+ assert.match(node,/data-hn-video-src=\{url\} poster=\{posterSrc\} muted loop playsInline disablePictureInPicture[\s\S]*preload="none"/);
  assert.doesNotMatch(node,/src=\{url\} autoPlay/);
  assert.match(node,/IntersectionObserver/);
  assert.match(node,/media\.pause\(\)/);
