@@ -72,7 +72,7 @@ test('Scroll y revista 3D pintan hojas blancas con los mismos nodos',()=>{
  const editorial=src('features/templates/EditorialTemplate.tsx');
  const flip=src('features/magazine/FlipMagazine.tsx');
  assert.match(canvas,/onClick=\{\(\)=>addPage\('chat'\)\}/);
- assert.match(canvas,/isBlankPage\(page\) && <CarolinaBlankPage/);
+ assert.match(canvas,/\(isBlankPage\(page\)\|\|cleanCarolina\) && <CarolinaBlankPage/);
  assert.match(carolina,/export function CarolinaBlankPage/);
  assert.match(carolina,/<ExtraPhotos item=\{item\} page=\{page\}/);
  assert.match(carolina,/<ExtraTexts item=\{item\} page=\{page\}/);

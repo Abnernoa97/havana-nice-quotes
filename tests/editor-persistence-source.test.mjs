@@ -493,7 +493,7 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   assert.doesNotMatch(canvas,/hn-canvas-pages|Páginas seleccionadas para la revista/);
   assert.match(canvas,/className="hn-canvas-pager"/);
   assert.match(canvas,/onClick=\{\(\)=>changePage\(1\)\}/);
-  assert.match(canvas,/page===2 && \(editorial/);
+  assert.match(canvas,/page===2 && !cleanCarolina && \(editorial/);
   assert.match(layout,/pageOrder\?: CarolinaPageId\[\]/);
 });
 
@@ -505,7 +505,7 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
   const layout=src('features/templates/carolina-layout.ts');
   assert.match(canvas,/onClick=\{addPhotoAnywhere\}/);
   assert.match(canvas,/const addPhotoAnywhere=\(\)=>/);
-  assert.match(canvas,/if \(page===1\) \{ addPhotoBlock\(\); return; \}/);
+  assert.match(canvas,/if \(page===1 && !cleanCarolina\) \{ addPhotoBlock\(\); return; \}/);
   assert.match(canvas,/setTarget\(`extra:\$\{crypto\.randomUUID\(\)\}`\)/);
   assert.match(canvas,/onSelectExtraPhoto=\{id=>selectPhoto\('photo-extra:'\+id\)\}/);
   assert.match(canvas,/const removePhoto = \(id:string\) =>/);

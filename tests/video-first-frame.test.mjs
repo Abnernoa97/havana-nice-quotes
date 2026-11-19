@@ -10,7 +10,7 @@ test('Video: muestra JPEG ligero y de alta prioridad antes de descargar el strea
  assert.match(node,/fetchPriority=\{cover\?'high':'auto'\}/);
  assert.match(node,/loading=\{cover\|\|pageBackground\?'eager':'lazy'\}/);
  assert.ok(node.indexOf('hn-carolina-video-poster')<node.indexOf('hn-carolina-video-fill'));
- assert.match(node,/src=\{url\} poster=\{posterSrc\} muted loop playsInline disablePictureInPicture preload="none"/);
+ assert.match(node,/src=\{url\} poster=\{posterSrc\} muted loop playsInline disablePictureInPicture[\s\S]*preload=\{cover\|\|pageBackground\?'metadata':'none'\}/);
  assert.doesNotMatch(node,/src=\{url\} autoPlay/);
  assert.match(node,/IntersectionObserver/);
  assert.match(node,/media\.pause\(\)/);
