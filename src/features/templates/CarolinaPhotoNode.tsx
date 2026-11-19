@@ -68,14 +68,19 @@ export default function CarolinaPhotoNode({
     let inView=false;
     const sync=()=>{
       if(inView&&!document.hidden){
-        media.preload='auto';
-        if(media.networkState===HTMLMediaElement.NETWORK_EMPTY)media.load();
-        void media.play().catch(()=>{/* Mobile autoplay policies vary by device. */});
+        // Defer assigning src until visible. This avoids downloading duplicate
+        // video streams for PageFlip's hidden React source and its cloned pages.
+        if(!media.getAttribute('src')){
+          media.preload='auto';
+          media.src=url;
+          media.load();
+        }
+        void media.play().catch(()=>{/* iOS may require a real user tap. */});
       }else{media.pause();media.preload='none';}
     };
     if(typeof IntersectionObserver==='undefined'){
-      // Only the mounted, visible media may start; PageFlip controls its clones.
-      if(!document.hidden)void media.play().catch(()=>{});
+      // The fallback starts only a genuinely visible, mounted element.
+      if(media.getClientRects().length>0){inView=true;sync();}
       return ()=>media.pause();
     }
     const observer=new IntersectionObserver(entries=>{
@@ -121,13 +126,13 @@ export default function CarolinaPhotoNode({
             <img className="hn-carolina-image-fill hn-carolina-video-poster"
               src={posterSrc} alt="" draggable={false}
               onError={recoverMissingPoster}
-              loading={cover||pageBackground?'eager':'lazy'}
-              decoding="async" fetchPriority={cover?'high':'auto'}
+              loading="lazy"
+              decoding="async" fetchPriority={cover||pageBackground?'high':'auto'}
               style={{...picture,backgroundImage:undefined,
                 objectFit:'cover',objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
             <video ref={videoRef} className="hn-carolina-image-fill hn-carolina-video-fill"
-              src={url} poster={posterSrc} muted loop playsInline disablePictureInPicture
-              preload={cover||pageBackground?'metadata':'none'}
+              data-hn-video-src={url} poster={posterSrc} muted loop playsInline disablePictureInPicture
+              preload="none"
               style={{...picture,backgroundImage:undefined,
                 objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
           </>
