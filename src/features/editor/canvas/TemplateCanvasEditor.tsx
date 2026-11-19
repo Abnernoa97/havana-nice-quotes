@@ -537,8 +537,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         <span>{pageIndex+1} / {selectedPages.length}</span>
         <button type="button" disabled={pageIndex>=selectedPages.length-1} aria-label="Página siguiente"
           onClick={()=>changePage(1)}><ChevronRight size={18}/></button>
-        <button type="button" onClick={duplicatePage} disabled={!isBlankPage(page)}
-          title={isBlankPage(page)?'Duplicar página':'Solo se duplican páginas propias'}
+        <button type="button" onClick={duplicatePage} disabled={!isBlankPage(page)&&!cleanCarolina}
+          title={isBlankPage(page)||cleanCarolina?'Duplicar página':'Solo se duplican páginas propias'}
           aria-label="Duplicar página"><Copy size={17}/></button>
         <button type="button" onClick={deletePage} disabled={selectedPages.length<=1}
           title="Eliminar página" aria-label="Eliminar página"><Trash2 size={17}/></button>
