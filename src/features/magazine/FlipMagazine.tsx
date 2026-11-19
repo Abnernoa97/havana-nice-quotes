@@ -49,7 +49,13 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
           media.playsInline=true;
           if(!document.hidden&&leafIndex===index){
             visibleVideo=true;media.preload='auto';media.autoplay=true;
-            if(media.networkState===HTMLMediaElement.NETWORK_EMPTY)media.load();
+            // Only the visible PageFlip clone gets a video source. Original
+            // hidden React leaves and nonvisible pages never download streams.
+            const mediaUrl=media.dataset.hnVideoSrc;
+            if(!media.getAttribute('src')&&mediaUrl){
+              media.src=mediaUrl;
+              media.load();
+            }
             void media.play().then(()=>setVideoBlocked(false)).catch(()=>setVideoBlocked(true));
           }else{media.pause();media.preload='none';}
         });
@@ -157,7 +163,13 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
         {videoBlocked&&<button className="hn-magazine-video-play" type="button"
           style={finalChat?{top:'25%'}:undefined} onClick={()=>{
             const media=mountRef.current?.querySelectorAll<HTMLVideoElement>('.hn-leaf')[page]?.querySelector('video');
-            if(media){media.muted=true;media.playsInline=true;void media.play().then(()=>setVideoBlocked(false)).catch(()=>setVideoBlocked(true));}
+            if(media){
+              media.muted=true;media.playsInline=true;
+              if(!media.getAttribute('src')&&media.dataset.hnVideoSrc){
+                media.src=media.dataset.hnVideoSrc;media.load();
+              }
+              void media.play().then(()=>setVideoBlocked(false)).catch(()=>setVideoBlocked(true));
+            }
           }}>Play video</button>}
       </div>
 
