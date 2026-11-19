@@ -165,3 +165,17 @@ test('La fecha manual se reconoce por día, mes y año y calcula el día correct
   assert.match(weddingWeekday('2027-05-22'), /sábado/i);
   assert.equal(weddingWeekday(''), '');
 });
+
+test('Nuevas Carolina parten de tres hojas independientes blancas sin alterar diseños antiguos',async()=>{
+ const {validCarolinaLayout}=await import('../src/features/templates/carolina-layout.ts');
+ const fresh=createQuoteDraft('hn-new');
+ assert.equal(fresh.designLayout?.freeCanvas,true);
+ assert.deepEqual(fresh.designLayout?.pageOrder,[0,1,2]);
+ assert.equal(validCarolinaLayout(fresh.designLayout),true);
+ assert.equal(validCarolinaLayout({pageOrder:[0,1,2],freeCanvas:false}),false);
+ assert.equal(fresh.weddingPlanner,'');
+ assert.equal(fresh.city,'');
+ assert.equal(fresh.venue,'');
+ const historical={pageOrder:[0,1,2]};
+ assert.equal(validCarolinaLayout(historical),true);
+});

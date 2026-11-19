@@ -67,8 +67,11 @@ export default function CarolinaPhotoNode({
     if(!isVideo||!media)return;
     let inView=false;
     const sync=()=>{
-      if(inView&&!document.hidden)void media.play().catch(()=>{});
-      else media.pause();
+      if(inView&&!document.hidden){
+        media.preload='auto';
+        if(media.networkState===HTMLMediaElement.NETWORK_EMPTY)media.load();
+        void media.play().catch(()=>{/* Mobile autoplay policies vary by device. */});
+      }else{media.pause();media.preload='none';}
     };
     if(typeof IntersectionObserver==='undefined'){
       // Only the mounted, visible media may start; PageFlip controls its clones.
@@ -123,7 +126,8 @@ export default function CarolinaPhotoNode({
               style={{...picture,backgroundImage:undefined,
                 objectFit:'cover',objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
             <video ref={videoRef} className="hn-carolina-image-fill hn-carolina-video-fill"
-              src={url} poster={posterSrc} muted loop playsInline disablePictureInPicture preload="none"
+              src={url} poster={posterSrc} muted loop playsInline disablePictureInPicture
+              preload={cover||pageBackground?'metadata':'none'}
               style={{...picture,backgroundImage:undefined,
                 objectPosition:(photoStyle?.cropX ?? D.cropX)+'% '+(photoStyle?.cropY ?? D.cropY)+'%'}}/>
           </>

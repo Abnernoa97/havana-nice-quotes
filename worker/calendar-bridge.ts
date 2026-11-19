@@ -5,7 +5,8 @@
  */
 export type CalendarQuote={
  id:string;name:string;date:string;location:string;price:number;currency?:'MX'|'USD';
- isTemplate?:boolean;package?:string;desc?:string;note?:string
+ isTemplate?:boolean;package?:string;desc?:string;note?:string;
+ weddingPlanner?:string;venue?:string;city?:string;quoteTitle?:string;deposit?:number
 };
 export type BridgeRow={id:string;payload:string;modified_at:number;deleted:number};
 export interface CalendarStatement{
@@ -15,7 +16,7 @@ export interface CalendarStatement{
  run():Promise<{meta:{changes:number}}>;
 }
 export interface CalendarDatabase{prepare(sql:string):CalendarStatement}
-const FIELDS=['name','date','amount','currency','venue','quote'] as const;
+const FIELDS=['name','date','amount','currency','venue','city','weddingPlanner','quote'] as const;
 type SourceField=typeof FIELDS[number];
 type SourceValues=Partial<Record<SourceField,string|number>>;
 const recordId=(id:string)=>'hnq:'+id;
@@ -31,14 +32,22 @@ export function isCompleteCalendarQuote(q:CalendarQuote){
 }
 export function sourceValues(quote:CalendarQuote):SourceValues{
  const pkg=str(quote.package).trim(),desc=str(quote.desc).trim(),note=str(quote.note).trim();
- const details=[pkg&&'Servicio: '+pkg,desc&&'Descripción: '+desc,note&&'Nota: '+note]
+ const title=str(quote.quoteTitle).trim();
+ const deposit=Number.isFinite(quote.deposit)&&Number(quote.deposit)>0
+  ? 'Anticipo: '+quote.deposit+'%':'';
+ const details=[title&&'Cotización: '+title,pkg&&'Servicio: '+pkg,
+  desc&&'Descripción: '+desc,note&&'Nota de portada: '+note,deposit]
   .filter(Boolean).join('\n').slice(0,12000);
  const values:SourceValues={
   name:str(quote.name).trim().slice(0,100),date:quote.date,
   currency:quote.currency==='MX'?'MXN':'USD'
  };
- const venue=str(quote.location).trim().slice(0,120);
+ const venue=(str(quote.venue).trim()||str(quote.location).trim()).slice(0,120);
+ const city=str(quote.city).trim().slice(0,100);
+ const planner=str(quote.weddingPlanner).trim().slice(0,120);
  if(venue)values.venue=venue;
+ if(city)values.city=city;
+ if(planner)values.weddingPlanner=planner;
  if(details)values.quote=details;
  if(Number.isFinite(quote.price)&&quote.price>0){
   values.amount=Math.min(999999999.99,Math.round(quote.price*100)/100);

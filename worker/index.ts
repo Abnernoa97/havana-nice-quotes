@@ -125,6 +125,10 @@ function validQuote(input: unknown, id: string): input is Record<string, unknown
     REQUIRED_FIELDS.every(field => typeof q[field] === 'string') &&
     (q.quoteTitle === undefined || typeof q.quoteTitle === 'string' &&
       q.quoteTitle.trim().length > 0 && q.quoteTitle.length <= 150) &&
+    (q.venue === undefined || typeof q.venue === 'string' && q.venue.length <= 120) &&
+    (q.city === undefined || typeof q.city === 'string' && q.city.length <= 100) &&
+    (q.weddingPlanner === undefined || typeof q.weddingPlanner === 'string' &&
+      q.weddingPlanner.length <= 120) &&
     typeof q.price === 'number' && Number.isFinite(q.price) && q.price >= 0 &&
     typeof q.deposit === 'number' && Number.isFinite(q.deposit) && q.deposit >= 0 && q.deposit <= 100 &&
     (q.currency === undefined || q.currency === 'USD' || q.currency === 'MX') &&

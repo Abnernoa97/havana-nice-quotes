@@ -31,12 +31,7 @@ function StyleCard({s, value, onChange, photo}: {s: StyleOption; value: string; 
             onClick={()=>onChange(s.id)}>
             <div className={'hn-style-mini hn-mini-'+s.id}>
               {s.id==='carolina' ? (
-                <>
-                  {photo && <div className="hn-mini-photo" style={{backgroundImage:'url('+photo+')'}}/>}
-                  <strong>HAVANA NICE</strong>
-                  <em>Live Wedding Music</em>
-                  <div className="hn-mini-carolina-bottom"><span/><span/><span/><span/></div>
-                </>
+                <div className="hn-mini-blank-page" aria-hidden="true"/>
               ) : s.id==='libre' ? (
                 <><div className="hn-mini-square"/><strong>YOUR<br/>STORY.</strong><small>A PERSONAL VISION</small></>
               ) : s.id==='nyt' ? (
@@ -99,7 +94,7 @@ export default function EditorialStyles({value,onChange,photo,ownTemplates,exist
 
   return (
     <div className="hn-styles-tab">
-      <details className="hn-style-accordion" open>
+      <details className="hn-style-accordion">
         <summary><span>Plantillas originales</span><ChevronDown size={19}/></summary>
         <div className="hn-style-accordion-content">
           <div className="hn-styles-gallery hn-styles-original">

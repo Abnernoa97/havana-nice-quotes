@@ -32,6 +32,9 @@ export function createQuoteDraft(id: string): Quote {
     client: '',
     email: '',
     location: '',
+    venue: '',
+    city: '',
+    weddingPlanner: '',
     date: '',
     price: 0,
     deposit: 0,
@@ -46,6 +49,9 @@ export function createQuoteDraft(id: string): Quote {
     messages: [],
     style: 'carolina',
     readingMode: 'flip',
+    // Newly created Carolina quotes are three real white sheets. Older saved
+    // Carolina layouts without this flag retain every original element.
+    designLayout: {pageOrder:[0,1,2],freeCanvas:true},
   };
 }
 
@@ -92,6 +98,7 @@ export function duplicateQuote(source:Quote,id:string,resetClient=false):Quote{
  if(resetClient){
   next.name='';next.client='';next.email='';next.location='';next.date='';
   next.price=0;next.deposit=0;
+  next.venue='';next.city='';next.weddingPlanner='';
  }
  return next;
 }

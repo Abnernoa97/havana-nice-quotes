@@ -15,6 +15,9 @@ export type Quote = {
   client: string;
   email: string;
   location: string;
+  venue?: string; // Calendar venue; legacy location remains the destination fallback.
+  city?: string;
+  weddingPlanner?: string;
   date: string;
   price: number;
   deposit: number;

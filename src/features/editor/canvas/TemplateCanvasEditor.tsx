@@ -38,6 +38,7 @@ const pageTitle=(page:number,index:number)=>isBlankPage(page)?'Página '+(index+
 /** The same real sheet is edited and displayed in Scroll and the 3D magazine. */
 export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto }: Props) {
   const editorial=templateFamily(item.style)==='editorial';
+  const cleanCarolina=item.style==='carolina'&&item.designLayout?.freeCanvas===true;
   const [page, setPage] = useState<CarolinaPageId>(()=>carolinaPageOrder(item.designLayout)[0]);
   const selectedPages=carolinaPageOrder(item.designLayout);
   const [target, setTarget] = useState<PhotoTarget | null>(null);
@@ -335,7 +336,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const addPhotoAnywhere=()=>{
     if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
     clearSelection();
-    if (page===1) { addPhotoBlock(); return; }
+    if (page===1 && !cleanCarolina) { addPhotoBlock(); return; }
     const existing=(item.designLayout?.extraPhotos||[]).filter(photo=>!!photo.url);
     if(existing.length>=MAX_DESIGN_ELEMENTS){
       setError('Máximo de fotografías y videos añadidos alcanzado.');return;
@@ -451,7 +452,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       {<div className="hn-canvas-toolbar">
         <button type="button" onClick={addFreeText}>+ Texto</button>
         <button type="button" onClick={addPhotoAnywhere}
-          disabled={page===1&&photoOrder.length>=CAROLINA_MAX_SLOTS}>+ Foto</button>
+          disabled={page===1&&!cleanCarolina&&photoOrder.length>=CAROLINA_MAX_SLOTS}>+ Foto</button>
         <div className="hn-page-kind-wrap">
           <button type="button" onClick={()=>{clearSelection();setShowPageMenu(v=>!v);}}
             className="hn-canvas-add-page" aria-expanded={showPageMenu}
@@ -497,7 +498,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           event.preventDefault();event.stopPropagation();
         }
       }}>
-        {page===0 && <div className="hn-canvas-cover">
+        {page===0 && !cleanCarolina && <div className="hn-canvas-cover">
           {editorial
             ? <EditorialCover item={renderItem} interaction={textInteraction}
                 onSelectCover={()=>selectPhoto('photo:cover')}
@@ -506,19 +507,19 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
                 onSelectCover={()=>selectPhoto('photo:cover')}
                 onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>}
         </div>}
-        {page===1 && (editorial
+        {page===1 && !cleanCarolina && (editorial
           ? <EditorialCollage item={renderItem} interaction={textInteraction}
               onSelectPhoto={index=>selectPhoto('photo:'+index)}
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
           : <CarolinaCollage item={renderItem} interaction={textInteraction}
               onSelectPhoto={index=>selectPhoto('photo:'+index)}
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>)}
-        {page===2 && (editorial
+        {page===2 && !cleanCarolina && (editorial
           ? <EditorialTerms item={renderItem} interaction={textInteraction}
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
           : <CarolinaTerms item={renderItem} interaction={textInteraction}
               onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>)}
-        {isBlankPage(page) && <CarolinaBlankPage item={renderItem} page={page}
+        {(isBlankPage(page)||cleanCarolina) && <CarolinaBlankPage item={renderItem} page={page}
           interaction={textInteraction} onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>}
         {transformingId && !activeTextTool && (
           <button type="button" data-hn-text-trash

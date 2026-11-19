@@ -179,3 +179,7 @@
   box-shadow:0 3px 14px #a5343420;cursor:pointer
 }
 .hn-own-template .hn-own-template-delete:active{background:#b52d36;color:white}
+
+/* New Carolina proposals begin on a genuine white sheet, not the brown demo. */
+.hn-styles-original .hn-mini-carolina{background:#f1f2ef!important;padding:16px;display:grid;place-items:center}
+.hn-mini-blank-page{width:88%;height:100%;background:#fff;border:1px solid #e5e8e2;box-shadow:0 3px 12px #283e3210}

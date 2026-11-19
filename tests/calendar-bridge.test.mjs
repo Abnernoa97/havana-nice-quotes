@@ -124,3 +124,32 @@ test('No escribe fichas sin fecha, ni plantillas, ni registros ajenos',async()=>
  assert.equal(incomplete,null);
  assert.equal(await syncCalendarQuote(undefined,quote(),1),'unavailable');
 });
+
+test('Ficha técnica completa: planner, ciudad, venue, moneda, servicio y anticipo sincronizados',async()=>{
+ const f=fakeCalendar();
+ const full=quote({weddingPlanner:'Luxury Events',venue:'Casa de la Bola',
+  city:'Ciudad de México',location:'CDMX',quoteTitle:'Isabella & Daniel 2027',
+  deposit:40,note:'Welcome party',desc:'Live wedding band'});
+ assert.equal(await syncCalendarQuote(f.db,full,1),'synced');
+ const record=f.record();
+ assert.equal(record.weddingPlanner,'Luxury Events');
+ assert.equal(record.venue,'Casa de la Bola');
+ assert.equal(record.city,'Ciudad de México');
+ assert.equal(record.amount,150000);
+ assert.equal(record.currency,'MXN');
+ assert.match(record.quote,/Servicio: Cocktail/);
+ assert.match(record.quote,/Descripción: Live wedding band/);
+ assert.match(record.quote,/Nota de portada: Welcome party/);
+ assert.match(record.quote,/Anticipo: 40%/);
+ const previous=f.rows.get(calendarQuoteId(id));
+ f.rows.set(calendarQuoteId(id),{...previous,payload:JSON.stringify({...record,city:'Ciudad manual'})});
+ await syncCalendarQuote(f.db,{...full,city:'Querétaro',weddingPlanner:'Another Planner'},2);
+ assert.equal(f.record().city,'Ciudad manual');
+ assert.equal(f.record().weddingPlanner,'Another Planner');
+});
+test('Campos no informados permanecen vacíos, sin convertir ubicación en ciudad',()=>{
+ const entry=sourceValues(quote({location:'Venue simple'}));
+ assert.equal(entry.venue,'Venue simple');
+ assert.equal(entry.city,undefined);
+ assert.equal(entry.weddingPlanner,undefined);
+});

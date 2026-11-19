@@ -18,11 +18,26 @@ export default function QuoteDetailsPanel({ item, edit }: Props) {
                 />
               </label>
               <label>
-                Destino / Venue
+                Destino / ubicación
                 <input
                   value={item.location}
                   onChange={e => edit('location', e.target.value)}
                 />
+              </label>
+              <label>
+                Venue
+                <input value={item.venue||''} maxLength={120}
+                  onChange={e=>edit('venue',e.target.value)}/>
+              </label>
+              <label>
+                Ciudad
+                <input value={item.city||''} maxLength={100}
+                  onChange={e=>edit('city',e.target.value)}/>
+              </label>
+              <label>
+                Wedding planner
+                <input value={item.weddingPlanner||''} maxLength={120}
+                  onChange={e=>edit('weddingPlanner',e.target.value)}/>
               </label>
               <QuoteDateField quoteId={item.id} value={item.date}
                 onChange={date => edit('date', date)} />

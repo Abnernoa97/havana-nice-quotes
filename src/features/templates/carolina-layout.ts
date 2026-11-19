@@ -72,6 +72,9 @@ export type PageKind='chat';
 export const pageKind=(layout:CarolinaLayout|undefined,page:number):PageKind|'blank'=>
   layout?.pageKinds?.[String(page)]==='chat'?'chat':'blank';
 export type CarolinaLayout = {
+  // Only new Carolina proposals start with completely blank independent pages.
+  // Missing flag means the historical Carolina layout, unchanged.
+  freeCanvas?: boolean;
   fixed?: Partial<Record<CarolinaFixedKey, string>>;
   transforms?: Record<string, CarolinaTransform>;
   extras?: CarolinaExtra[];
@@ -117,7 +120,8 @@ export function clampTransform(value: CarolinaTransform): CarolinaTransform {
 export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const layout = value as Record<string, unknown>;
-  if (Object.keys(layout).some(k => !['fixed', 'transforms', 'extras', 'photoOrder', 'pageOrder', 'extraPhotos', 'pageKinds', 'defaultFont', 'fonts', 'textStyles', 'photoStyles'].includes(k))) return false;
+  if (Object.keys(layout).some(k => !['freeCanvas','fixed', 'transforms', 'extras', 'photoOrder', 'pageOrder', 'extraPhotos', 'pageKinds', 'defaultFont', 'fonts', 'textStyles', 'photoStyles'].includes(k))) return false;
+  if(layout.freeCanvas!==undefined&&layout.freeCanvas!==true)return false;
   if (layout.defaultFont !== undefined && !isElegantFontId(layout.defaultFont)) return false;
   if (layout.fonts !== undefined) {
     if (!layout.fonts || typeof layout.fonts !== 'object' || Array.isArray(layout.fonts)) return false;

@@ -227,6 +227,8 @@ export default function CarolinaDocument({ item }: { item: Quote }) {
   return (
     <div className="hn-carolina-document">
       {carolinaPageOrder(item.designLayout).map(page=>{
+        if(item.style==='carolina'&&item.designLayout?.freeCanvas)
+          return <CarolinaBlankPage key={page} item={item} page={page}/>;
         if (page===0) return <CarolinaCover key="cover" item={item}/>;
         if (page===1) return <CarolinaCollage key="collage" item={item}/>;
         if(page===2)return <CarolinaTerms key="terms" item={item}/>;
