@@ -61,6 +61,17 @@ test('Página libre conserva textos y fotos privados para las tres vistas',()=>{
 test('No permite borrar última página o duplicar las hojas estructurales',()=>{
  assert.equal(removeDesignPage({pageOrder:[3]},3),null);
  assert.equal(duplicateBlankPage({pageOrder:[0,1,2]},0),null);
+ const clean={pageOrder:[0,1,2],freeCanvas:true,
+   extras:[{id:'text-first',page:0,text:'Havana Nice'}],
+   extraPhotos:[{id:'photo-first',page:0,url:'/api/media/11111111-1111-4111-8111-111111111111'}]};
+ const cloned=duplicateBlankPage(clean,0);
+ assert.ok(cloned);
+ assert.equal(cloned.page,3);
+ assert.deepEqual(cloned.layout.pageOrder,[0,3,1,2]);
+ assert.equal(cloned.layout.extras.find(x=>x.page===3)?.text,'Havana Nice');
+ assert.notEqual(cloned.layout.extras.find(x=>x.page===3)?.id,'text-first');
+ assert.equal(cloned.layout.extraPhotos.find(x=>x.page===3)?.url,clean.extraPhotos[0].url);
+ assert.notEqual(cloned.layout.extraPhotos.find(x=>x.page===3)?.id,'photo-first');
  let current={pageOrder:[3]};
  for(let i=1;i<MAX_DESIGN_PAGES;i++)current=insertBlankPage(current).layout;
  assert.equal(insertBlankPage(current),null);
