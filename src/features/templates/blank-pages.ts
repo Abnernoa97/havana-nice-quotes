@@ -49,9 +49,10 @@ export function removeDesignPage(layout:CarolinaLayout|undefined,page:number):Pa
   textStyles:clean(layout?.textStyles),photoStyles:clean(layout?.photoStyles)},
   page:nextOrder[Math.min(index,nextOrder.length-1)]};
 }
-/** Duplicate only freeform pages. Built-in cover/collage/terms remain single-source. */
+/** Duplicate truly blank pages, including clean Carolina's initial 0/1/2.
+ * Historical built-in cover/collage/terms remain single-source. */
 export function duplicateBlankPage(layout:CarolinaLayout|undefined,page:number):PageChange|null{
- if(!isBlankPage(page))return null;
+ if(!isBlankPage(page)&&layout?.freeCanvas!==true)return null;
  const texts=(layout?.extras||[]).filter(e=>e.page===page);
  const photos=(layout?.extraPhotos||[]).filter(p=>p.page===page);
  if((layout?.extras?.length||0)+texts.length>MAX_DESIGN_ELEMENTS ||
