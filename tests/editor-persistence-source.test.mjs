@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const src = file => readFileSync(new URL('../src/' + file, import.meta.url), 'utf8');
-const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
 
 test('Plantilla real y cinco estilos mantienen ambos modos editor/cliente', () => {
   const editor = src('features/editor/QuoteEditorScreen.tsx');
@@ -494,7 +494,8 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   assert.match(canvas,/aria-label="Eliminar página"/);
   assert.doesNotMatch(canvas,/hn-canvas-pages|Páginas seleccionadas para la revista/);
   assert.match(canvas,/className="hn-canvas-pager"/);
-  assert.match(canvas,/onClick=\{\(\)=>changePage\(1\)\}/);
+  assert.match(canvas,/onChangePage=\{changePage\}/);
+   assert.match(canvas,/onClick=\{\(\)=>onChangePage\(1\)\}/);
   assert.match(canvas,/page===2 && !cleanCarolina && \(editorial/);
   assert.match(layout,/pageOrder\?: CarolinaPageId\[\]/);
 });

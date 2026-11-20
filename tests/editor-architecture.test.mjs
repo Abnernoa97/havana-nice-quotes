@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
-const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts"].map(p=>read('features/editor/canvas/'+p)).join('\n');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>read('features/editor/canvas/'+p)).join('\n');
 test('Editor tiene una sola arquitectura activa y ningún archivo antiguo',()=>{
   const main=canvasSource();
   const workspace=read('features/editor/photos/PhotoEditingWorkspace.tsx');

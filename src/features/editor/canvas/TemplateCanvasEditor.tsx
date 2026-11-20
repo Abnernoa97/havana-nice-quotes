@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, Trash2, Copy } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { isCarolinaCopyField } from '../../templates/carolina-edit-fields';
 import type { CarolinaTextField } from '../../templates/carolina-edit-fields';
 import TextStyleDock from '../texts/TextStyleDock';
@@ -14,13 +14,14 @@ import type { ElegantFontId } from '../../templates/elegant-fonts';
 import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle } from '../../templates/carolina-layout';
 import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts, CAROLINA_PAGE_TITLES } from '../../templates/carolina-layout';
 import { pageBackgroundMediaId } from '../../templates/page-background';
-import { insertBlankPage, duplicateBlankPage, removeDesignPage } from '../../templates/blank-pages';
-import type { CarolinaPageId,PageKind } from '../../templates/carolina-layout';
+import type { CarolinaPageId } from '../../templates/carolina-layout';
 import type { Quote } from '../../quotes/types';
 import type { CloudPhoto } from '../../photos/useMediaLibrary';
 import { templateFamily } from '../../templates/template-registry';
 import CanvasPageToolbar from './components/CanvasPageToolbar';
 import CanvasPageContent from './components/CanvasPageContent';
+import CanvasPagePager from './components/CanvasPagePager';
+import { useCanvasPageActions } from './hooks/useCanvasPageActions';
 import { useCanvasTapConfirmation } from './hooks/useCanvasTapConfirmation';
 import { createCanvasTextInteraction } from './interactions/createCanvasTextInteraction';
 import { canvasPhotoUrl } from './media/canvasPhotoUrl';
@@ -151,60 +152,12 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setDraftText(null);setPhotoLayersOpen(false);setTransformingId(null);setEditingId(null);
     setLastTextId(null);setActiveTextTool(null);setSelectedPhotoId(null);setPhotoTool(null);setTrashHovered(false);
   };
-  const togglePageMenu=()=>{
-    if(busy)return;
-    if(showPageMenu){setShowPageMenu(false);return;}
-    if(editingId && document.activeElement instanceof HTMLElement)document.activeElement.blur();
-    // A new page action replaces whichever text, photo or gesture tool was open.
-    clearSelection();setTarget(null);setBank(false);setError('');
-    setShowPageMenu(true);
-  };
-  useEffect(()=>{
-    if(!showPageMenu)return;
-    // A tap outside + Página dismisses it, without swallowing the next action.
-    const onPointerDown=(event:PointerEvent)=>{
-      if(!(event.target instanceof Element)||!event.target.closest('.hn-page-kind-wrap'))
-        setShowPageMenu(false);
-    };
-    const onKeyDown=(event:KeyboardEvent)=>{
-      if(event.key==='Escape')setShowPageMenu(false);
-    };
-    document.addEventListener('pointerdown',onPointerDown,true);
-    document.addEventListener('keydown',onKeyDown);
-    return ()=>{
-      document.removeEventListener('pointerdown',onPointerDown,true);
-      document.removeEventListener('keydown',onKeyDown);
-    };
-  },[showPageMenu]);
-  const addPage=(kind?:PageKind)=>{
-    const result=insertBlankPage(item.designLayout,page,kind);
-    setShowPageMenu(false);
-    if(!result){setError('Máximo de páginas alcanzado.');return}
-    edit('designLayout',result.layout);
-    setPage(result.page);clearSelection();setError('');
-  };
-  const duplicatePage=()=>{
-    const result=duplicateBlankPage(item.designLayout,page);
-    if(!result){setError('Solo puedes duplicar páginas en blanco o has alcanzado el límite de elementos.');return}
-    edit('designLayout',result.layout);
-    setPage(result.page);clearSelection();setError('');
-  };
-  const deletePage=()=>{
-    if(selectedPages.length<=1){setError('La plantilla debe tener al menos una página.');return}
-    if(!window.confirm('¿Eliminar esta página y sus elementos de la plantilla? Las fotos de la nube se conservarán.'))return;
-    const next=removeDesignPage(item.designLayout,page);
-    if(!next)return;
-    edit('designLayout',next.layout);setPage(next.page);clearSelection();setError('');
-  };
-  const changePage = (direction: -1 | 1) => {
-    setShowPageMenu(false);setPhotoLayersOpen(false);
-    setPage(current => {
-      const index = selectedPages.indexOf(current);
-      const next = Math.max(0, Math.min(selectedPages.length - 1, index + direction));
-      return selectedPages[next] ?? current;
-    });
-    setTransformingId(null); setEditingId(null); setLastTextId(null); setSelectedPhotoId(null); setPhotoTool(null); setTrashHovered(false);
-  };
+  const {togglePageMenu,addPage,duplicatePage,deletePage,changePage}=useCanvasPageActions({
+    item,edit,page,selectedPages,showPageMenu,busy,editingId,clearSelection,
+    setShowPageMenu,setTarget,setBank,setError,setPage,
+    setPhotoLayersOpen,setTransformingId,setEditingId,setLastTextId,
+    setSelectedPhotoId,setPhotoTool,setTrashHovered,
+  });
   const chooseFont = (font:ElegantFontId|null) => {
     if (!lastTextId) return;
     const fonts={...item.designLayout?.fonts};
@@ -389,18 +342,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         )}
       </div>
       </div>
-      <div className="hn-canvas-pager" role="group" aria-label="Navegación y acciones de páginas">
-        <button type="button" disabled={pageIndex<=0} aria-label="Página anterior"
-          onClick={()=>changePage(-1)}><ChevronLeft size={18}/></button>
-        <span>{pageIndex+1} / {selectedPages.length}</span>
-        <button type="button" disabled={pageIndex>=selectedPages.length-1} aria-label="Página siguiente"
-          onClick={()=>changePage(1)}><ChevronRight size={18}/></button>
-        <button type="button" onClick={duplicatePage} disabled={!isBlankPage(page)&&!cleanCarolina}
-          title={isBlankPage(page)||cleanCarolina?'Duplicar página':'Solo se duplican páginas propias'}
-          aria-label="Duplicar página"><Copy size={17}/></button>
-        <button type="button" onClick={deletePage} disabled={selectedPages.length<=1}
-          title="Eliminar página" aria-label="Eliminar página"><Trash2 size={17}/></button>
-      </div>
+      <CanvasPagePager pageIndex={pageIndex} totalPages={selectedPages.length}
+        canDuplicate={isBlankPage(page)||cleanCarolina}
+        onChangePage={changePage} onDuplicatePage={duplicatePage} onDeletePage={deletePage}/>
       {lastTextId && target===null && !selectedPhotoId && (
         <TextStyleDock textId={lastTextId}
           fontId={item.designLayout?.fonts?.[lastTextId] || item.designLayout?.defaultFont}
