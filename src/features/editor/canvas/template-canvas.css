@@ -10,7 +10,8 @@
 .hn-canvas-pager{display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:nowrap;margin:17px 0;color:#56745d;font-size:12px}
 .hn-canvas-pager button{width:40px;height:40px;flex:0 0 39px;display:grid;place-items:center;border:1px solid #d9e4d7;border-radius:9px;background:#fff;color:#315840;cursor:pointer}
 .hn-canvas-pager button:disabled{opacity:.35;cursor:default}
-.hn-canvas-error{color:#a14b43}
+/* The canvas error is a direct sheet-level message, never the picker overlay. */
+.hn-canvas > .hn-canvas-error{color:#a14b43}
 .hn-canvas button:focus-visible,.hn-canvas label:focus-within{outline:3px solid #bfa373;outline-offset:2px}
 @media(max-width:550px){.hn-canvas{padding:12px 6px 22px}.hn-canvas-shade{padding:7px}.hn-canvas-picker{padding:14px;border-radius:16px}}
 

@@ -12,7 +12,8 @@
 .hn-canvas-bank button svg{position:absolute;top:5px;right:5px;background:#254937;border-radius:50%;color:#fff}
 .hn-canvas-bank p{grid-column:1/-1;color:#83968b;text-align:center;font-size:12px}
 .hn-canvas-remove{grid-column:1/-1;padding:11px;border-radius:8px;border:1px solid #dee6da;background:#fff;color:#607f66;cursor:pointer}
-.hn-canvas-message,.hn-canvas-error{text-align:center;font-size:12px;color:#31583e}
+/* Keep picker feedback isolated from errors shown on the canvas itself. */
+.hn-canvas-picker .hn-canvas-message,.hn-canvas-picker .hn-canvas-error{text-align:center;font-size:12px;color:#31583e}
 
 .hn-canvas-cloud-categories{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;
  background:#ecf1ea;border-radius:10px;padding:4px}
