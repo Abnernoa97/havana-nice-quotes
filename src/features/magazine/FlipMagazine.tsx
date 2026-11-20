@@ -209,11 +209,11 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
   return (
     <section className={'hn-magazine hn-v2-book-paper hn-font-' + item.font + ' hn-style-' + (item.style || 'carolina')} style={{ '--paper-accent': item.color } as CSSProperties} aria-label="Propuesta de música en vivo en formato revista">
       <div className={'hn-magazine-stage'+(total>1?' hn-magazine-stage-bound':'')} style={{
-        '--hn-page-stack-depth': Math.min(18, 8 + Math.max(0, total - 1) * 2) + 'px',
+        '--hn-page-stack-depth': Math.min(15, 7 + Math.max(0, total - 1) * 1.6) + 'px',
         '--hn-page-stack-count': String(Math.max(0, total - 1)),
         '--hn-page-stack-left': String(Math.min(page, total - 1)),
         '--hn-page-stack-right': String(Math.max(0, total - page - 1)),
-      } as CSSProperties}>
+      } as CSSProperties} data-book-orientation={orientation}>
         {total>1&&<div className="hn-magazine-page-block" ref={bookBlockRef} aria-hidden="true">
           <span className="hn-magazine-page-block-bottom"/>
           <span className="hn-magazine-page-block-side"/>

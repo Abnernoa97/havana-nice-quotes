@@ -150,14 +150,14 @@
 }
 
 
-/* HAVANA NICE · Book binding, not a second flip engine.
-   The block is measured from PageFlip's actual DOM bounds. It remains behind
-   the active leaf while the real PageFlip paper continues to fold above it. */
+/* HAVANA NICE · Book paper / French-fold inspired edge.
+   These are stationary decorative layers. PageFlip alone turns real leaves.
+   Position comes from the engine's measured page block, not screen guesses. */
 .hn-magazine-stage-bound {
-  --hn-page-stack-depth: 16px;
+  --hn-page-stack-depth: 13px;
   --hn-page-stack-left: 0;
   --hn-page-stack-right: 4;
-  margin-bottom: calc(var(--hn-page-stack-depth) + 10px);
+  margin-bottom: calc(var(--hn-page-stack-depth) + 7px);
 }
 .hn-magazine-page-block {
   position: absolute;
@@ -165,83 +165,118 @@
   visibility: hidden;
   pointer-events: none;
   box-sizing: border-box;
-  border-radius: 2px;
   background: transparent;
-  box-shadow: 0 7px 19px #33261926;
 }
+/* Slightly sloped paper fore-edge; darkest line meets the page itself.
+   Tapered bottom silhouette replaces the detached horizontal notebook bar. */
 .hn-magazine-page-block-bottom {
   position: absolute;
   z-index: 1;
   left: 1px;
-  right: 2px;
-  top: calc(100% - 1px);
-  height: var(--hn-page-stack-depth);
-  border-radius: 0 0 3px 3px;
-  border-top: 1px solid #a99f8f;
-  border-bottom: 2px solid #8c7b66;
+  right: 1px;
+  top: calc(100% - 4px);
+  height: calc(var(--hn-page-stack-depth) + 2px);
+  border-radius: 0 0 5px 5px;
+  clip-path: polygon(0 0,100% 0,100% 64%,97% 73%,78% 81%,48% 91%,13% 100%,0 90%);
   background:
     linear-gradient(to bottom,
-      #62534445 0%,#e0d6c5 9%,#faf6ea 26%,
-      transparent 42%,#fffaf1 78%,#ae9d85 100%),
+      #3b342c55 0%,#a89980a1 10%,#efe8dbad 22%,
+      transparent 40%,#fffdf4ae 67%,#a69881c2 100%),
     repeating-linear-gradient(to bottom,
-      #fdf9ee 0px,#fdf9ee 1px,#d4c9b8 1.6px,
-      #f6f0e5 2.7px,#ebe2d6 3.4px,#fdf9ee 4.5px);
-  box-shadow: 0 3px 3px #30271f25,0 9px 13px #33261945;
-  transform: perspective(240px) rotateX(-13deg);
-  transform-origin: top;
+      #fffdf7 0px,#e0d6c6 1.2px,#fffaf1 2.2px,
+      #cfc2ae 3px,#f7f2e7 4px);
+  box-shadow: inset 0 2px 4px #241b1455,0 4px 8px #2e251f3d;
+  transform: perspective(540px) rotateX(-8deg) skewY(-0.27deg);
+  transform-origin: top left;
+  filter: drop-shadow(1px 5px 3px #241e1740);
+}
+/* One top seam, then real small stacked paper rules below. */
+.hn-magazine-page-block-bottom::before {
+  content: "";
+  position: absolute;
+  top: 0;left: 0;right: 0;height: 3px;
+  background: linear-gradient(90deg,#4b4135a8,#b5aa97 9%,#fff9ec 34%,#beb2a0 84%,#71644f);
+  box-shadow: 0 1px 2px #30271c45;
 }
 .hn-magazine-page-block-bottom::after {
   content: "";
   position: absolute;
-  left: 3%;
-  right: 3%;
-  top: 1px;
-  height: 2px;
-  background: linear-gradient(90deg,#a2947d99,transparent 12%,#fffef8a9 50%,transparent 88%,#a2947d99);
+  top: 0;bottom: 0;left: 0;width: clamp(13px,3%,24px);
+  background: linear-gradient(90deg,#32271e94,#75624c90 26%,#e7d8bd77 64%,transparent);
 }
+/* Thin fore-edge. No square wooden-looking thickness. */
 .hn-magazine-page-block-side {
   position: absolute;
   z-index: 1;
-  top: 3px;
-  right: -5px;
-  bottom: 0;
-  width: 6px;
+  top: 4px;right: -3px;bottom: 1px;
+  width: 4px;
   border-radius: 0 2px 3px 0;
   background: repeating-linear-gradient(to right,
-    #ad9e87 0px,#fbf7ed 1px,#d3c9b9 2px,#fffaf1 3px);
-  box-shadow: 3px 3px 4px #382d2252;
+    #9b907e 0px,#faf5ea 1px,#c8bba7 2px,#fbf7ee 3px);
+  box-shadow: 2px 2px 3px #382d223b;
 }
+/* The visible binding forms a gentle concave gutter, not a thick flat rail.
+   It meets the tapered bottom block and the top recess in each actual leaf. */
 .hn-magazine-page-block-spine {
   position: absolute;
   z-index: 1;
-  top: 3px;
-  left: -6px;
-  bottom: 0;
-  width: 9px;
-  background: linear-gradient(90deg,
-    #322820b2 0%,#7766529c 25%,#d4c5aa9f 58%,
-    #fff7e56e 77%,transparent 100%);
-  border-radius: 3px 0 0 3px;
-  box-shadow: -2px 3px 5px #1c160f38;
+  top: 2px;bottom: -8px;left: -1px;
+  width: clamp(9px,1.65%,14px);
+  border-radius: 45% 8% 38% 16% / 2% 3% 7% 2%;
+  background:
+    linear-gradient(90deg,
+      #272119b0 0%,#5e50409c 16%,#30281d7c 35%,
+      #aa997fa6 59%,#e7dcc585 75%,transparent 100%);
+  box-shadow: -2px 2px 4px #211b143d,inset -1px 0 2px #fff8e68a;
 }
-/* Separation at the inner binding looks like a classic folded magazine:
-   only a narrow fixed edge appears; the moving sheet stays untouched. */
+.hn-magazine-page-block-spine::before {
+  content: "";
+  position: absolute;
+  top: 0;left: -2px;
+  width: clamp(14px,2.7vw,22px);height: 14px;
+  border-radius: 0 0 65% 42%;
+  background: radial-gradient(ellipse 100% 80% at 21% 0%,
+    #1c211b94 0%,#5349397a 29%,#d6c8af7f 54%,transparent 85%);
+}
+/* The top notch is drawn on each REAL leaf, so it follows the curl.
+   Its binding shade runs down the left edge and meets the page-stack spine. */
+.hn-v2-book-paper .hn-leaf::before{
+  width: clamp(9px,2.8%,17px);
+  background:
+    radial-gradient(ellipse 15px 10px at 3px 0px,
+      #22261d99 0%,#8a7b6294 40%,transparent 95%),
+    linear-gradient(90deg,
+      #2a261e82 0%,#75654f7b 17%,#d0c0a665 49%,transparent 100%);
+}
+.hn-v2-book-paper .hn-leaf.hn-leaf-cover::before{
+  width: clamp(10px,3%,19px);
+  background:
+    radial-gradient(ellipse 16px 11px at 3px 0px,
+      #0a1510c2 0%,#607360ad 40%,transparent 95%),
+    linear-gradient(90deg,
+      #081a13cb 0%,#314b3b94 29%,#d7cfaa41 66%,transparent 100%);
+}
 .hn-magazine-stage-bound .hn-flip-host.stf__parent .stf__wrapper{
-  filter: drop-shadow(0 3px 2px #372b1f24)
-          drop-shadow(2px 10px 10px #2b231d2b);
+  filter: drop-shadow(0 2px 2px #372b1f24)
+          drop-shadow(2px 7px 7px #2b231d28);
 }
-/* No pseudo-sheets on PageFlip's own wrapper. They get clipped or cover
-   the engine's paper on phones. All decorative depth is a sibling below it. */
 .hn-magazine-stage-bound .hn-magazine-surface {z-index: 1}
 .hn-magazine-stage-bound .hn-magazine-page-block,
 .hn-magazine-page-block * {pointer-events:none!important}
+/* Open spreads are bound in the center, not at their outside left edge. */
+.hn-magazine-stage-bound[data-book-orientation="landscape"] .hn-magazine-page-block-spine {
+  left: calc(50% - 5px);
+}
+.hn-magazine-stage-bound[data-book-orientation="landscape"] .hn-magazine-page-block-spine::before {
+  left: -4px;
+}
 @media(max-width:700px){
-  .hn-magazine-stage-bound {margin-bottom: calc(var(--hn-page-stack-depth) + 13px)}
-  .hn-magazine-page-block-bottom {
-    background:
-      linear-gradient(to bottom,#81736165 0%,#e4dacb 15%,transparent 32%,#fffaf1 70%,#a99a86 100%),
-      repeating-linear-gradient(to bottom,#fffaf0 0px,#d5c8b5 1.4px,#f6f0e5 2.6px,#e5dacb 3.2px,#fffaf0 4.2px);
+  .hn-magazine-stage-bound {margin-bottom: calc(var(--hn-page-stack-depth) + 9px)}
+  .hn-magazine-page-block-bottom{
+    top: calc(100% - 5px);
+    filter: drop-shadow(0 3px 3px #241e1731);
   }
-  .hn-magazine-page-block-side{right:-3px;width:4px}
-  .hn-magazine-page-block-spine{left:-4px;width:7px}
+  .hn-magazine-page-block-side{right:-2px;width:3px}
+  .hn-magazine-page-block-spine{left:0;width:10px}
+  .hn-magazine-page-block-spine::before{left:0;width:14px;height:12px}
 }
