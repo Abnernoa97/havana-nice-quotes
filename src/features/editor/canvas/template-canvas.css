@@ -1,5 +1,5 @@
 /* Page-centered editing canvas; the reader components remain the source of truth. */
-.hn-canvas{padding:9px 10px 26px;background:#f6f8f4;touch-action:pan-y}
+.hn-canvas{padding:9px 10px 26px;background:#f3eddf;touch-action:pan-y}
 .hn-canvas-sheet{position:relative;width:min(100%,620px);min-width:0;margin:auto;background:#fff;box-sizing:border-box;isolation:isolate;border:1px solid #d7d1c3;box-shadow:0 12px 32px #21382930,inset 0 1px 0 #fff9,inset 2px 0 7px #342c201c,inset -2px 0 5px #fcf2dd32;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 /* Exact physical-paper edge and spine treatment from HAVANA NICE V2 book.css.
    These static decorations never intercept touch, change text or crop images. */

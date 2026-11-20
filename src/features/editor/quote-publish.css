@@ -11,9 +11,14 @@
 .hn-publish-open { margin: 22px auto 0; width: min(100%, 720px); min-height: 49px; display:flex; align-items:center; justify-content:center; gap: 10px; background: #214738; color: #fff; border: 0; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; }
 .hn-publish-open:focus-visible,.hn-publish-mode button:focus-visible { outline: 3px solid #ad9364; outline-offset: 2px; }
 @media(max-width:600px) {
-  .hn-publish { padding: 14px 8px 22px; }
-  .hn-publish-head { padding: 8px; }
+  .hn-publish { padding: 14px 0 22px; }
+  .hn-publish-head { padding: 8px 12px; }
   .hn-publish-mode { width: 100%; }
   .hn-publish-mode button { flex:1; justify-content:center; }
-  .hn-publish-document > .hn-magazine { padding-inline: 0; }
+  /* V2-sized paper on phones, including inside the designer preview: avoid
+     the nested white card shrinking it by almost a tenth of the viewport. */
+  .editor-page .edit-panel:has(> .hn-publish) { overflow: visible; }
+  .hn-publish-document { position: relative; left: 50%; transform: translateX(-50%);
+    width: calc(100vw - 16px); max-width: none; }
+  .hn-publish-document > .hn-magazine { padding-inline: 0; border-radius: 0; }
 }

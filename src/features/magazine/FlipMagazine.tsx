@@ -166,13 +166,7 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
     orientation,changePage});
 
   return (
-    <section className={'hn-magazine hn-font-' + item.font + ' hn-style-' + (item.style || 'carolina')} style={{ '--paper-accent': item.color } as CSSProperties} aria-label="Propuesta de música en vivo en formato revista">
-      <header className="hn-magazine-intro">
-        <span className="hn-magazine-kicker">HAVANA NICE / THE PRIVATE EDITION</span>
-        <h1>A proposal for <em>{item.name}.</em></h1>
-        <p>Turn a page or use the arrows to explore your proposal.</p>
-      </header>
-
+    <section className={'hn-magazine hn-v2-book-paper hn-font-' + item.font + ' hn-style-' + (item.style || 'carolina')} style={{ '--paper-accent': item.color } as CSSProperties} aria-label="Propuesta de música en vivo en formato revista">
       <div className="hn-magazine-stage">
         <div className="hn-magazine-surface" ref={mountRef}
           aria-label={'Revista interactiva de ' + total + ' páginas'}
@@ -224,13 +218,11 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
       {chatPage&&!finalChat&&
         <QuoteChatPanel key={selectedPages[page]} quoteId={item.id}
           pageId={selectedPages[page]} compact isTemplate={item.isTemplate}/>}
-      {!clientView&&<p className="hn-magazine-disclaimer">Design preview only · Delivery and acceptance are not active.</p>}
-
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
-        {selectedPages.map(selectedPage=><MagazineLeaf key={selectedPage}
+        {selectedPages.map((selectedPage,index)=><MagazineLeaf key={selectedPage}
           paperStyle={pagePaperStyle(item.designLayout,selectedPage)}
           className={(templateFamily(item.style)==='carolina'?'hn-carolina-leaf':'hn-editorial-leaf')+
-            (selectedPage===selectedPages[0]?' hn-leaf-cover':'')}>
+            (index===0?' hn-leaf-cover':' hn-leaf-photo')}>
           {item.style==='carolina'&&item.designLayout?.freeCanvas
             ? <CarolinaBlankPage item={item} page={selectedPage} staticChat/>
             : templateFamily(item.style)==='carolina'
@@ -242,6 +234,12 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
               selectedPage===1?<EditorialCollage item={item}/>:
               selectedPage===2?<EditorialTerms item={item}/>:
               <CarolinaBlankPage item={item} page={selectedPage} staticChat/>}
+          {index===0 ? <>
+            <span className="hn-quote-book-cover-corner" aria-hidden="true"/>
+            {(item.cover||item.coverVideo||item.designLayout?.extraPhotos?.some(photo=>photo.page===selectedPage&&photo.url))&&
+              <span className="hn-quote-book-cover-edition" aria-hidden="true">01 / EDITION</span>}
+          </> : pageKind(item.designLayout,selectedPage)!=='chat'&&
+            <span className="hn-quote-book-folio" aria-hidden="true">{String(index+1).padStart(2,'0')}</span>}
         </MagazineLeaf>)}
       </div>
     </section>
