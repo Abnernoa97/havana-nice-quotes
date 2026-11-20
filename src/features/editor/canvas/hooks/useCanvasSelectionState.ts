@@ -29,14 +29,17 @@ export function useCanvasSelectionState(
   const [bank, setBank] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  useEffect(() => {
-    setPage(carolinaPageOrder(item.designLayout)[0]); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
-    setLastTextId(null); setActiveTextTool(null); setSelectedPhotoId(null); setPhotoTool(null); setPhotoLayersOpen(false); setTrashHovered(false); setDraftText(null); setShowPageMenu(false);
-  }, [item.id, item.style]);
   const clearSelection=()=>{
     setDraftText(null);setPhotoLayersOpen(false);setTransformingId(null);setEditingId(null);
     setLastTextId(null);setActiveTextTool(null);setSelectedPhotoId(null);setPhotoTool(null);setTrashHovered(false);
   };
+  useEffect(() => {
+    // Reuse the same deselection path on a quote change, including pending unsaved text.
+    setPage(carolinaPageOrder(item.designLayout)[0]);
+    clearSelection();setTarget(null);setBank(false);setShowPageMenu(false);setError('');
+    newlyConfirmedText.current=null;
+    justMoved.current=false;lastGestureMoveAt.current=0;
+  }, [item.id, item.style]);
   return {
     target,setTarget,editingId,setEditingId,draftText,setDraftText,newlyConfirmedText,
     lastGestureMoveAt,justMoved,selectedPhotoId,setSelectedPhotoId,photoTool,setPhotoTool,photoAspect,

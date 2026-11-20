@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/verify-canvas-audit-once.yml'
+      - 'src/features/editor/canvas/hooks/useCanvasSelectionState.ts'
+      - 'tests/canvas-selection-source.test.mjs'
 permissions:
   contents: read
 jobs:

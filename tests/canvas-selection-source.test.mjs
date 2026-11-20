@@ -19,3 +19,14 @@ test('Clearing selection closes mutually exclusive tools without modifying quote
  assert.match(selection,/setLastTextId\(null\)/);
  assert.doesNotMatch(selection,/edit\('designLayout'|fetch\(|localStorage/);
 });
+
+test('Changing quotation also clears any unsaved confirmed text, old errors and gesture timing',()=>{
+ const source=read('hooks/useCanvasSelectionState.ts');
+ const reset=source.split('useEffect(() => {')[1].split('}, [item.id, item.style]);')[0];
+ assert.match(reset,/clearSelection\(\)/);
+ assert.match(reset,/setError\(''\)/);
+ assert.match(reset,/newlyConfirmedText\.current=null/);
+ assert.match(reset,/justMoved\.current=false/);
+ assert.match(reset,/lastGestureMoveAt\.current=0/);
+ assert.match(reset,/setShowPageMenu\(false\)/);
+});
