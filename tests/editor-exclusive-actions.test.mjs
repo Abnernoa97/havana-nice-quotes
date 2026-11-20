@@ -39,7 +39,7 @@ test('Opening pages closes photo/text tools; outside tap and Escape dismiss menu
   assert.match(toggle,/setShowPageMenu\(true\)/);
   assert.match(toggle,/!event\.target\.closest\('\.hn-page-kind-wrap'\)/);
   assert.match(toggle,/event\.key==='Escape'/);
-  assert.match(canvas,/onTogglePageMenu=\{togglePageMenu\}/);
+  assert.match(canvas,/onTogglePageMenu=\{\(\)=>\{setPaperMenuOpen\(false\);togglePageMenu\(\);\}\}/);
   assert.match(canvas,/onClick=\{onTogglePageMenu\}/);
   assert.match(canvas,/aria-expanded=\{pageMenuVisible\}/);
 });

@@ -438,7 +438,7 @@ test('Un texto tiene cinco opciones pero muestra solo la herramienta elegida', (
   assert.match(canvas, /onTap: id => \{ setShowPageMenu\(false\);setActiveTextTool\(null\);setSelectedPhotoId\(null\); setTransformingId\(null\); setEditingId\(id\); setLastTextId\(id\)/);
   assert.match(dock, /\{!tab && <div className="hn-text-dock-switches"/);
   assert.match(canvas, /<TextStyleDock textId=\{lastTextId\}/);
-  assert.match(canvas,/onAddText=\{addFreeText\}/);
+  assert.match(canvas,/onAddText=\{\(\)=>\{setPaperMenuOpen\(false\);addFreeText\(\);\}\}/);
   assert.match(canvas, /<button type="button" onClick=\{onAddText\}>\+ Texto<\/button>/);
   assert.doesNotMatch(canvas, /<Type size=\{16\}\/> Tipografías/);
   assert.match(canvas, /onFontChange=\{chooseFont\} onStyleChange=\{changeTextStyle\}/);
@@ -494,7 +494,7 @@ test('Libro 3D refleja exactamente páginas incluidas y nunca crea contraportada
   assert.match(canvas,/aria-label="Eliminar página"/);
   assert.doesNotMatch(canvas,/hn-canvas-pages|Páginas seleccionadas para la revista/);
   assert.match(canvas,/className="hn-canvas-pager"/);
-  assert.match(canvas,/onChangePage=\{changePage\}/);
+  assert.match(canvas,/onChangePage=\{direction=>\{setPaperMenuOpen\(false\);changePage\(direction\);\}\}/);
    assert.match(canvas,/onClick=\{\(\)=>onChangePage\(1\)\}/);
   assert.match(canvas,/page===2 && !cleanCarolina && \(editorial/);
   assert.match(layout,/pageOrder\?: CarolinaPageId\[\]/);
@@ -506,7 +506,7 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
   const template=src('features/templates/CarolinaTemplate.tsx');
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
   const layout=src('features/templates/carolina-layout.ts');
-  assert.match(canvas,/onAddPhoto=\{addPhotoAnywhere\}/);
+  assert.match(canvas,/onAddPhoto=\{\(\)=>\{setPaperMenuOpen\(false\);addPhotoAnywhere\(\);\}\}/);
   assert.match(canvas,/onClick=\{onAddPhoto\}/);
   assert.match(canvas,/const addPhotoAnywhere=\(\)=>/);
   assert.match(canvas,/if \(page===1 && !cleanCarolina\) \{ addPhotoBlock\(\); return; \}/);
