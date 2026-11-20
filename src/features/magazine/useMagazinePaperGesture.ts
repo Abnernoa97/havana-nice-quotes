@@ -8,7 +8,6 @@ type Point={x:number;y:number};
 export type InteractiveMagazineFlip=PageFlip;
 type TouchStart=Point&{id:number;at:number;corner:boolean;vertical:boolean;dragging:boolean};
 type Args={
- mountRef:RefObject<HTMLDivElement|null>;
  flipRef:RefObject<PageFlip|null>;
  turningRef:RefObject<boolean>;
  orientation:string;
@@ -17,7 +16,7 @@ type Args={
 /** The same live drag mechanism as HAVANA NICE V2, scoped to the Quotes book.
  * The engine renders the paper, while React decides between scrolling,
  * a sustained corner fold and a quick tap. No second renderer or animation. */
-export function useMagazinePaperGesture({mountRef,flipRef,turningRef,orientation,changePage}:Args){
+export function useMagazinePaperGesture({flipRef,turningRef,orientation,changePage}:Args){
  const touch=useRef<TouchStart|null>(null);
  const engine=()=>flipRef.current as InteractiveMagazineFlip|null;
  const relativePoint=(x:number,y:number):Point=>{

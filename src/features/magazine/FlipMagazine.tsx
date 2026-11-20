@@ -161,7 +161,7 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
       flip.flipPrev('bottom');
     }
   };
-  const paperGesture=useMagazinePaperGesture({mountRef,flipRef,turningRef,
+  const paperGesture=useMagazinePaperGesture({flipRef,turningRef,
     orientation,changePage});
 
   return (
