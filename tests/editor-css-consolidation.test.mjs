@@ -25,7 +25,11 @@ test('Text panel has one base expanded rule without a redundant border override'
 test('Media selector stays above the photo workspace without repeated z-index declarations',()=>{
  const picker=read('photos/photo-source-picker.css');
  const photo=read('photos/photo-style-dock.css');
- assert.equal(blocks(picker,'.hn-canvas-shade').length,1);
- assert.match(blocks(picker,'.hn-canvas-shade')[0],/z-index:1100/);
+ // The second .hn-canvas-shade rule is the intentional mobile @media override.
+ // Count only canonical base rules; the mobile override is checked separately.
+ const base=picker.split('@media(')[0];
+ assert.equal(blocks(base,'.hn-canvas-shade').length,1);
+ assert.match(blocks(base,'.hn-canvas-shade')[0],/z-index:1100/);
+ assert.match(picker,/@media\(max-width:550px\)\{\.hn-canvas-shade\{padding:7px\}/);
  assert.match(blocks(photo,'.hn-photo-workspace')[0],/z-index:1000/);
 });
