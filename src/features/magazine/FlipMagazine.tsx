@@ -125,11 +125,14 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
         setPage(next);
       });
       flip.on('changeOrientation', e => setOrientation(String(e.data)));
-      flip.on('changeState',e=>{
-        const busy=String(e.data)==='flipping';
-        turningRef.current=busy;
-        setTurning(busy);
-      });
+      // StPageFlip 2.0.7 emits changeState at runtime; its bundled TS event
+      // union omits that event even though the working V2 reader uses it.
+      (flip as unknown as {on:(name:'changeState',listener:(e:{data:string})=>void)=>void})
+        .on('changeState',e=>{
+          const busy=e.data==='flipping';
+          turningRef.current=busy;
+          setTurning(busy);
+        });
       flipRef.current = flip;
       setPage(0);
       setFailure(false);
