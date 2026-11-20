@@ -12,7 +12,6 @@ type Params = {
  showPageMenu:boolean;busy:boolean;editingId:string|null;clearSelection:()=>void;
  setShowPageMenu:Setter<boolean>;setTarget:Setter<PhotoTarget|null>;
  setBank:Setter<boolean>;setError:Setter<string>;setPage:Setter<CarolinaPageId>;
-
 };
 /** Page actions update the existing designLayout without a second page model. */
 export function useCanvasPageActions({

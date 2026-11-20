@@ -1,61 +1,70 @@
 # 10 · Arquitectura vigente del editor
 
-**HAVANA NICE QUOTES · 16 de noviembre de 2026 · Rama de producción `main`**
+**HAVANA NICE QUOTES · Revisado 20 de noviembre de 2026 · Rama única `main`**
+
+La pantalla principal no administra herramientas paralelas. Su función es componer un único estado de sesión, un modelo `Quote.designLayout` y los módulos propietarios de cada acción.
 
 ```text
 src/features/editor/
-├── QuoteEditorScreen.tsx          # Datos · Estilos · Diseño · Publicar
-├── QuoteDesignPanel.tsx           # Entrada al diseñador
-├── styles/                        # Estilos editoriales existentes
+├── QuoteEditorScreen.tsx               # Estilos · Datos · Diseño · Publicar
+├── QuoteDesignPanel.tsx                # Entrada única al diseñador
+├── QuoteDetailsPanel.tsx               # Datos e inversión
+├── QuotePublishPanel.tsx               # Revisión para cliente
 ├── canvas/
-│   ├── TemplateCanvasEditor.tsx   # Selección, páginas, texto, foto, papelera
+│   ├── TemplateCanvasEditor.tsx        # Coordinador; no renderiza herramientas internamente
+│   ├── components/
+│   │   ├── CanvasPageToolbar.tsx       # Botones y menú + Página
+│   │   ├── CanvasPagePager.tsx         # Navegación, duplicar y eliminar
+│   │   ├── CanvasSheetSurface.tsx      # Hoja, tap y papelera
+│   │   ├── CanvasPageContent.tsx       # Render de Carolina/editorial/hojas propias
+│   │   └── CanvasEditorPanels.tsx      # Paneles de texto, foto y selección de medios
+│   ├── hooks/
+│   │   ├── useCanvasSelectionState.ts  # Estado UI transitorio único y clearSelection()
+│   │   ├── useCanvasPageActions.ts     # Insertar, duplicar, borrar y navegar páginas
+│   │   └── useCanvasTapConfirmation.ts # Tap intencional sin confundirlo con un arrastre
+│   ├── interactions/
+│   │   ├── createCanvasTextInteraction.ts
+│   │   ├── createCanvasTextStyleActions.ts
+│   │   └── createCanvasRemovalActions.ts
+│   ├── media/
+│   │   ├── createCanvasPhotoActions.ts # Subir/elegir/reemplazar y ordenar imágenes
+│   │   ├── canvasPhotoTarget.ts        # Identificador UI → objetivo de media
+│   │   └── canvasPhotoUrl.ts           # Identificador UI → URL de imagen/video
 │   └── template-canvas.css
-├── photos/
-│   ├── PhotoEditingWorkspace.tsx  # Pantalla de edición y gestos de recorte
-│   ├── PhotoStyleDock.tsx         # Color, fondo, opacidad, viñeta, giro
-│   ├── PhotoSourcePicker.tsx      # Teléfono o banco de fotos R2
-│   ├── PhotoLayersPanel.tsx       # Recuperar imágenes detrás de textos
-│   ├── photo-layers.ts            # Selector puro de capas
-│   └── *.css                      # Estilos propios de fotos
-├── texts/
-│   ├── TextStyleDock.tsx          # Fuente, color, tamaño, ancho, alto
-│   ├── ElegantFontBank.tsx        # Catálogo de fuentes
-│   └── *.css                      # Estilos propios de textos
+├── photos/                              # Herramientas reales de foto/video y capas
+├── texts/                               # Panel de tipografía y catálogo de fuentes
+├── styles/                              # Plantillas y presentación editorial
 └── shared/
-    └── editor-types.ts           # Tipos comunes de selección de foto
+    ├── editor-types.ts                 # PhotoTarget y EditQuoteField compartidos
+    └── pointer-intent.ts               # Gestos de interfaz
 ```
 
-## Una sola fuente por función
+## Responsabilidad única y flujo
 
-- **Edición de píxeles** (color, recorte, opacidad, giro, viñeta): `editor/photos/`. No existe una segunda ruta de efectos en el lienzo.
-- **Edición de texto**: `editor/texts/`. Guarda estilos por ID, sin cambiar la plantilla fuente.
-- **Selección y páginas**: `editor/canvas/`. Coordina acciones y guardado de la cotización.
-- **Vista compartida**: `src/features/templates/` sigue siendo el render de Portada, Collage y Propuesta usado también por Scroll/3D.
-- **Gesto compartido**: `templates/useCarolinaGesture.ts` solo mueve/gira/escala el marco cuando se mantiene pulsado; el editor de fotografía a pantalla completa posee recorte y efectos.
-- **Modelo de recorte y persistencia**: `templates/photo-crop.ts` y `carolina-layout.ts`.
-- **Revista 3D**: `src/features/magazine/FlipMagazine.tsx`, independiente y sin modificar en esta reorganización.
+1. **`QuoteEditorScreen`** cambia de sección; **`QuoteDesignPanel`** monta el mismo `TemplateCanvasEditor`.
+2. **`TemplateCanvasEditor`** coordina página activa, `Quote.designLayout`, acciones y paneles; no crea otra cotización ni otro lienzo.
+3. **`hooks/useCanvasSelectionState.ts`** es dueño de estados transitorios: texto provisional, herramienta activa, selección, menú y visor. Las acciones de navegación llaman al mismo `clearSelection()`, incluyendo textos provisionales.
+4. **`hooks/useCanvasPageActions.ts`** utiliza `templates/blank-pages.ts` para insertar, duplicar y eliminar hojas. Los componentes `CanvasPageToolbar` y `CanvasPagePager` solo presentan botones.
+5. **`interactions/`** aplica texto, formatos, transformaciones y eliminaciones sobre el `Quote` existente; **`media/`** resuelve identificadores y actualiza referencias, sin borrar objetos R2.
+6. **`photos/`** controla recorte, color, opacidad, viñeta, capas y selector de biblioteca; **`texts/`** controla tipografía, color y tamaño.
+7. **`templates/`** renderiza el documento compartido por Diseño, Scroll y PageFlip. **`magazine/FlipMagazine.tsx`** sigue siendo independiente y no se reescribe para edición.
 
-## Dónde corregir los problemas futuros
+## Contratos y reglas que deben mantenerse
 
-| Problema | Archivo propietario |
-|---|---|
-| No cambia la hoja, selección, borrar elemento | `canvas/TemplateCanvasEditor.tsx` |
-| Foto tapada, editar/mover/borrar capa | `photos/PhotoLayersPanel.tsx` y `photo-layers.ts` |
-| Recorte, zoom, giro con dedos | `photos/PhotoEditingWorkspace.tsx` + `templates/photo-crop.ts` |
-| Fondo, color, opacidad, viñeta | `photos/PhotoStyleDock.tsx` + `templates/CarolinaPhotoNode.tsx` |
-| Teléfono / banco de fotografías | `photos/PhotoSourcePicker.tsx` |
-| Tipografía, color o expansión de letras | `texts/TextStyleDock.tsx` |
-| Catálogo de letras | `texts/ElegantFontBank.tsx` |
-| Efectos de revista 3D | `magazine/FlipMagazine.tsx` |
+- Un solo `EditQuoteField` para cambios de campos, en `editor/shared/editor-types.ts`.
+- Un solo `Quote.designLayout` persistido. No reintroducir `carolinaLayout`, un segundo almacén ni copias de páginas para Scroll/3D.
+- Al cambiar de página, cerrar menú, selector, herramientas y borradores provisionales a través del estado compartido; evitar limpiezas manuales en otros módulos.
+- Los componentes de presentación no mantienen estado de cotización ni importan al coordinador padre; las acciones y hooks no dependen de componentes de presentación.
+- Mantener el motor 3D, las tres páginas originales y las páginas independientes en la misma colección de `pageOrder`.
+- Un solo `main`. No crear ramas auxiliares, editores `v2`, duplicados ni PR para estos cambios. Comprobar SHA antes de cada actualización y conservar historial para rollback.
+- Validar la estructura, las pruebas de regresión, TypeScript y el build. **El build no reemplaza las pruebas de gestos en Android/iPhone reales.**
+- No usar GitHub Actions ni modificar D1/R2 por mantenimiento estructural.
 
-## Reglas
+## Estado de la fase 1–3
 
-1. Cada función tiene **un solo módulo propietario**. No crear copias `v2`, `old` o parches CSS para ocultar componentes viejos.
-2. Mover archivos significa eliminar los anteriores del árbol Git, actualizar imports y pruebas de regresión.
-3. No cambiar esquemas D1/R2 ni eliminar medios del banco al borrar referencias del diseño.
-4. Mantener las páginas originales existentes y añadir folios en blanco sobre el mismo motor; Scroll, revista 3D y guardado comparten el orden.
-5. Validar con auditoría, tests, TypeScript, build Cloudflare y deployment. El comportamiento táctil en Android requiere prueba física adicional.
-6. No habilitar GitHub Actions ni proveedores nuevos para este mantenimiento.
+- Arquitectura, contratos y navegación depurados en `main`; comprobación automatizada del grafo de dependencias, sin ciclos internos y con componentes presentacionales sin estado de negocio.
+- **Preparado para QA móvil**, pero no se considera comprobado en teléfonos físicos hasta realizar los recorridos de edición, gestos, guardado, videos y revista 3D.
+- Cualquier problema funcional descubierto en móvil debe corregirse en su módulo propietario, conservando esta arquitectura.
 
 ## Universalización · 16/11/2026
 
