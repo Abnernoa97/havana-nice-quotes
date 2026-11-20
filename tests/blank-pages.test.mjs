@@ -290,7 +290,8 @@ test('El chat comparte la hoja blanca en Diseñador y Scroll; en 3D usa panel ex
  const panel=src('features/quotes/QuoteChatPanel.tsx');
  assert.match(editor,/Página en blanco/);
  assert.match(editor,/Página chat/);
- assert.match(editor,/onClick=\{\(\)=>addPage\('chat'\)\}/);
+ assert.match(editor,/onAddPage=\{addPage\}/);
+ assert.match(editor,/onClick=\{\(\)=>onAddPage\('chat'\)\}/);
  assert.match(page,/pageKind\(item\.designLayout,page\)==='chat'/);
  assert.match(page,/<QuoteChatPanel quoteId=\{item\.id\}/);
  assert.match(magazine,/staticChat/);

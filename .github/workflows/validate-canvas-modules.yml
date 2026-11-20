@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/validate-canvas-modules.yml'
+      - 'tests/blank-pages.test.mjs'
 permissions:
   contents: read
 jobs:
