@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from 'react';
+import type { EditQuoteField } from '../../shared/editor-types';
 import { isCarolinaCopyField } from '../../../templates/carolina-edit-fields';
 import type { CarolinaTextField } from '../../../templates/carolina-edit-fields';
 import type { CarolinaFixedKey, CarolinaLayout } from '../../../templates/carolina-layout';
@@ -8,7 +9,7 @@ import type { Quote } from '../../../quotes/types';
 type SetValue<T> = Dispatch<SetStateAction<T>>;
 type Params = {
   item: Quote;
-  edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
+  edit: EditQuoteField;
   updateLayout: (patch: Partial<CarolinaLayout>) => void;
   isPhotoId: (id:string) => boolean;
   setEditingId:SetValue<string|null>;

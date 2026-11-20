@@ -1,4 +1,5 @@
 import type { Dispatch, RefObject, SetStateAction } from 'react';
+import type { EditQuoteField } from '../../shared/editor-types';
 import type { TextToolTab } from '../../texts/TextStyleDock';
 import { isCarolinaCopyField } from '../../../templates/carolina-edit-fields';
 import type { CarolinaTextField } from '../../../templates/carolina-edit-fields';
@@ -11,7 +12,7 @@ type Setter<T> = Dispatch<SetStateAction<T>>;
 type DraftText = {id:string;page:CarolinaPageId};
 type ConfirmedText = DraftText & {text:string;centered:true};
 type Context = {
-  item:Quote; edit:(key:keyof Quote,value:Quote[keyof Quote])=>void;
+  item:Quote; edit:EditQuoteField;
   updateLayout:(patch:Partial<CarolinaLayout>)=>void;
   editingId:string|null;transformingId:string|null;draftText:DraftText|null;
   newlyConfirmedText:RefObject<ConfirmedText|null>;

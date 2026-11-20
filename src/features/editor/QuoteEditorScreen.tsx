@@ -5,7 +5,7 @@ import type { CloudPhoto } from '../photos/useMediaLibrary';
 import EditorialStyles from './styles/EditorialStyles';
 import QuoteDetailsPanel from './QuoteDetailsPanel';
 import QuoteDesignPanel from './QuoteDesignPanel';
-import type { PhotoTarget } from './shared/editor-types';
+import type { PhotoTarget, EditQuoteField } from './shared/editor-types';
 import QuotePublishPanel from './QuotePublishPanel';
 
 type Props = {
@@ -20,7 +20,7 @@ type Props = {
   tab: string;
   setTab: Dispatch<SetStateAction<string>>;
   styleName: string;
-  edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
+  edit: EditQuoteField;
   openClientPreview: () => void;
   save: () => void;
   cloudPhotos: CloudPhoto[];

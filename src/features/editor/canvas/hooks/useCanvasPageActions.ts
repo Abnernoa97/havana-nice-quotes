@@ -1,28 +1,23 @@
 import { useEffect } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { Quote } from '../../../quotes/types';
-import type { PhotoTarget } from '../../shared/editor-types';
+import type { PhotoTarget, EditQuoteField } from '../../shared/editor-types';
 import type { CarolinaPageId, PageKind } from '../../../templates/carolina-layout';
 import { insertBlankPage, duplicateBlankPage, removeDesignPage } from '../../../templates/blank-pages';
 
 type Setter<T> = Dispatch<SetStateAction<T>>;
 type Params = {
- item:Quote;edit:(key:keyof Quote,value:Quote[keyof Quote])=>void;
+ item:Quote;edit:EditQuoteField;
  page:CarolinaPageId;selectedPages:CarolinaPageId[];
  showPageMenu:boolean;busy:boolean;editingId:string|null;clearSelection:()=>void;
  setShowPageMenu:Setter<boolean>;setTarget:Setter<PhotoTarget|null>;
  setBank:Setter<boolean>;setError:Setter<string>;setPage:Setter<CarolinaPageId>;
- setPhotoLayersOpen:Setter<boolean>;setTransformingId:Setter<string|null>;
- setEditingId:Setter<string|null>;setLastTextId:Setter<string|null>;
- setSelectedPhotoId:Setter<string|null>;
- setPhotoTool:Setter<'crop'|'vignette'|null>;setTrashHovered:Setter<boolean>;
+
 };
 /** Page actions update the existing designLayout without a second page model. */
 export function useCanvasPageActions({
  item,edit,page,selectedPages,showPageMenu,busy,editingId,clearSelection,
  setShowPageMenu,setTarget,setBank,setError,setPage,
- setPhotoLayersOpen,setTransformingId,setEditingId,setLastTextId,
- setSelectedPhotoId,setPhotoTool,setTrashHovered,
 }:Params){
   const togglePageMenu=()=>{
     if(busy)return;
@@ -70,13 +65,15 @@ export function useCanvasPageActions({
     edit('designLayout',next.layout);setPage(next.page);clearSelection();setError('');
   };
   const changePage = (direction: -1 | 1) => {
-    setShowPageMenu(false);setPhotoLayersOpen(false);
+    // Switching a sheet closes the entire edit session, including an unsaved text draft.
+    if(editingId && document.activeElement instanceof HTMLElement)document.activeElement.blur();
+    clearSelection();
+    setTarget(null);setBank(false);setShowPageMenu(false);setError('');
     setPage(current => {
       const index = selectedPages.indexOf(current);
       const next = Math.max(0, Math.min(selectedPages.length - 1, index + direction));
       return selectedPages[next] ?? current;
     });
-    setTransformingId(null); setEditingId(null); setLastTextId(null); setSelectedPhotoId(null); setPhotoTool(null); setTrashHovered(false);
   };
  return {togglePageMenu,addPage,duplicatePage,deletePage,changePage};
 }

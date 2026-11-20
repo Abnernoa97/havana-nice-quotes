@@ -1,11 +1,11 @@
 import type { Quote } from '../quotes/types';
 import type { CloudPhoto } from '../photos/useMediaLibrary';
 import TemplateCanvasEditor from './canvas/TemplateCanvasEditor';
-import type { PhotoTarget } from './shared/editor-types';
+import type { PhotoTarget, EditQuoteField } from './shared/editor-types';
 
 type Props = {
   item: Quote;
-  edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
+  edit: EditQuoteField;
   cloudPhotos: CloudPhoto[];
   onUploadPhoto: (file: File, target: PhotoTarget) => Promise<string>;
 };

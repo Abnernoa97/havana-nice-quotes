@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { EditQuoteField } from '../../shared/editor-types';
 import type { PhotoTarget } from '../shared/editor-types';
 import type { CarolinaLayout } from '../../templates/carolina-layout';
 import { carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts } from '../../templates/carolina-layout';
@@ -21,7 +22,7 @@ import './template-canvas.css';
 
 type Props = {
   item: Quote;
-  edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
+  edit: EditQuoteField;
   photos: CloudPhoto[];
   onUploadPhoto: (file: File, target: PhotoTarget) => Promise<string>;
 };
@@ -82,8 +83,6 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const {togglePageMenu,addPage,duplicatePage,deletePage,changePage}=useCanvasPageActions({
     item,edit,page,selectedPages,showPageMenu,busy,editingId,clearSelection,
     setShowPageMenu,setTarget,setBank,setError,setPage,
-    setPhotoLayersOpen,setTransformingId,setEditingId,setLastTextId,
-    setSelectedPhotoId,setPhotoTool,setTrashHovered,
   });
   const textActions=createCanvasTextStyleActions({
     item,lastTextId,updateLayout,

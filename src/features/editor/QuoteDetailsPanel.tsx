@@ -1,10 +1,11 @@
 import type { Quote } from '../quotes/types';
+import type { EditQuoteField } from './shared/editor-types';
 import QuoteDateField from './QuoteDateField';
 import QuotePricingPanel from './QuotePricingPanel';
 
 type Props = {
   item: Quote;
-  edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
+  edit: EditQuoteField;
 };
 
 export default function QuoteDetailsPanel({ item, edit }: Props) {

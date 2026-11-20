@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { Quote } from '../../../quotes/types';
-import type { PhotoTarget } from '../../shared/editor-types';
+import type { PhotoTarget, EditQuoteField } from '../../shared/editor-types';
 import type { CarolinaLayout, CarolinaPhotoStyle } from '../../../templates/carolina-layout';
 import { MAX_DESIGN_ELEMENTS, photoSlotToAdd } from '../../../templates/carolina-layout';
 import { carolinaPhotos } from '../../../templates/CarolinaTemplate';
@@ -9,7 +9,7 @@ import { canvasPhotoTarget } from './canvasPhotoTarget';
 
 type Set<T> = Dispatch<SetStateAction<T>>;
 type Params = {
-  item:Quote;edit:(key:keyof Quote,value:Quote[keyof Quote])=>void;
+  item:Quote;edit:EditQuoteField;
   updateLayout:(patch:Partial<CarolinaLayout>)=>void;
   page:number;cleanCarolina:boolean;photoOrder:number[];
   editingId:string|null;lastTextId:string|null;

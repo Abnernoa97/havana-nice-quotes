@@ -1,4 +1,5 @@
 import type { Quote } from '../quotes/types';
+import type { EditQuoteField } from './shared/editor-types';
 import { BookOpen, AlignJustify, ExternalLink } from 'lucide-react';
 import Proposal from '../client/Proposal';
 import FlipMagazine from '../magazine/FlipMagazine';
@@ -7,7 +8,7 @@ import './quote-publish.css';
 type Props = {
   item: Quote;
   styleName: string;
-  edit: (key: keyof Quote, value: Quote[keyof Quote]) => void;
+  edit: EditQuoteField;
   openClientPreview: () => void;
 };
 
