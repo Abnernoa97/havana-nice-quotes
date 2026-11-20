@@ -40,7 +40,9 @@ test('Un único modelo universal; el diseño anterior no se lee ni mezcla',()=>{
  }
  assert.match(canvas,/export default function TemplateCanvasEditor\(\{ item, edit, photos, onUploadPhoto \}/);
  assert.match(proposal,/export default function Proposal\(\{item,styleName,embedded=false\}/);
- assert.match(magazine,/export default function FlipMagazine\(\{ item, clientView=false \}/);
+ // The optional clientView prop remains compatible, but is no longer bound
+ // because the V2-style reader does not render a separate demo disclaimer.
+ assert.match(magazine,/export default function FlipMagazine\(\{ item \}: \{ item: Quote; clientView\?:boolean \}\)/);
 });
 test('Todos los estilos comparten el motor universal, con páginas originales y hojas libres',()=>{
  const canvas=canvasSource();

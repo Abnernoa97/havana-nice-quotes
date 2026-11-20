@@ -27,7 +27,7 @@ test('3D magazine stage preserves geometry and vertical touch gestures in one ru
  assert.equal(x.length,1);
  assert.match(x[0],/position:relative/);
  assert.match(x[0],/overflow:visible/);
- assert.match(css.magazine,/\.hn-magazine-stage\{min-height:0\}/);
+ assert.match(css.magazine,/\.hn-magazine-stage\{min-height:0;height:min\(142vw,72svh\)\}/);
  assert.match(css.magazine,/\.hn-magazine-stage,\.hn-magazine-stage \*\{touch-action:pan-y pinch-zoom!important\}/);
 });
 test('Recoverable personal template uses one rule for long-hold and selection',()=>{
