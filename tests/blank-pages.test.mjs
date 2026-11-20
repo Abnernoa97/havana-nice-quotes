@@ -6,7 +6,7 @@ import {validCarolinaLayout,carolinaPageOrder,MAX_DESIGN_PAGES,cleanEmptyExtraTe
 import {insertBlankPage,duplicateBlankPage,shiftPage,removeDesignPage} from '../src/features/templates/blank-pages.ts';
 import {pageBackgroundMediaId} from '../src/features/templates/page-background.ts';
 const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
-const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx"].map(p=>src('features/editor/canvas/'+p)).join('\n');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
 const one='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',two='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 test('Crear plantilla desde cero abre una sola hoja blanca persistente',()=>{
  const tpl=createOwnTemplate('hn-new');
@@ -162,7 +162,7 @@ test('Video se edita como foto con opacidad, colores, recorte y viñeta',()=>{
  const dock=src('features/editor/photos/PhotoStyleDock.tsx');
  const media=src('features/templates/CarolinaPhotoNode.tsx');
  const cover=src('features/templates/CoverMediaNode.tsx');
- assert.match(canvas,/const url = id==='photo:cover' \? \(item\.coverVideo \|\| item\.cover\)/);
+ assert.match(canvas,/const url = canvasPhotoUrl\(item,id\)/);
  assert.match(canvas,/if \(!url\) \{/);
  assert.match(workspace,/const isVideo=url\.startsWith\('\/api\/videos\/'\)/);
  assert.match(workspace,/isVideo=\{isVideo\}/);

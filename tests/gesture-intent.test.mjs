@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {classifyTwoFingerAction,promoteZoomToRotation,shortestTurnDegrees,snapToOrigin,wrapRotation} from '../src/features/templates/gesture-intent.ts';
 const src=path=>readFileSync(new URL('../src/'+path,import.meta.url),'utf8');
-const canvasSource=()=>['TemplateCanvasEditor.tsx','components/CanvasPageToolbar.tsx','components/CanvasPageContent.tsx','hooks/useCanvasTapConfirmation.ts'].map(p=>src('features/editor/canvas/'+p)).join('\n');
+const canvasSource=()=>['TemplateCanvasEditor.tsx','components/CanvasPageToolbar.tsx','components/CanvasPageContent.tsx','interactions/createCanvasTextInteraction.ts','media/canvasPhotoUrl.ts','hooks/useCanvasTapConfirmation.ts'].map(p=>src('features/editor/canvas/'+p)).join('\n');
 
 test('Un pellizco pequeño amplía sin girar; cambios mínimos no hacen nada',()=>{
  assert.equal(classifyTwoFingerAction(150,152,3),'pending');
