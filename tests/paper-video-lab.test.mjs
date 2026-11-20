@@ -11,3 +11,5 @@ assert.match(lab,/URL.revokeObjectURL/);
 const production=readFileSync(new URL('../src/features/magazine/FlipMagazine.tsx',import.meta.url),'utf8');
 assert.doesNotMatch(production,/paper-video-lab/);
 });
+
+test('LAB video inline script parses as valid JavaScript',()=>{const script=lab.match(/<script>([\s\S]*?)<\/script>/)?.[1];assert.ok(script);assert.doesNotThrow(()=>new Function(script));});

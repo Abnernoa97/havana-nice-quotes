@@ -91,7 +91,7 @@ const update=()=>{elapsed.textContent=seconds(video.currentTime);progress.style.
 const start=async()=>{if(!src)return;armed=false;stage.dataset.done='false';video.pause();try{video.currentTime=0}catch{};progress.style.width='0%';armed=true;status.textContent='Reproduciendo el video original…';play.textContent='Reproduciendo';try{await video.play()}catch(e){armed=false;status.textContent='Pulsa Reproducir para permitir la reproducción en el teléfono.';play.textContent='Reproducir';}};
 file.addEventListener('change',()=>{
 const selected=file.files?.[0];if(!selected)return;
-if(!/^video\\/(mp4|webm|quicktime)$/.test(selected.type)){status.textContent='Selecciona un archivo MP4, WebM o MOV.';return;}
+if(!['video/mp4','video/webm','video/quicktime'].includes(selected.type)){status.textContent='Selecciona un archivo MP4, WebM o MOV.';return;}
 armed=false;video.pause();if(src)URL.revokeObjectURL(src);
 src=URL.createObjectURL(selected);stage.dataset.available='true';stage.dataset.done='false';video.src=src;video.load();
 play.disabled=false;again.disabled=false;skip.disabled=false;
