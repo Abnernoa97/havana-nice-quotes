@@ -204,7 +204,7 @@ export function useCarolinaGesture<T extends HTMLElement>(
   // The selected element owns gestures that begin anywhere else on its page.
   // A freshly typed text can enter the same gesture on the first drag, without a hold.
   useEffect(() => {
-    if ((!selected && !editingHere) || !node.current) return;
+    if (disabled || (!selected && !editingHere) || !node.current) return;
     const page = node.current.closest('.hn-carolina-page') as HTMLElement | null;
     if (!page) return;
     const outsideNode = (event: PointerEvent) =>
@@ -268,11 +268,8 @@ export function useCarolinaGesture<T extends HTMLElement>(
 
   const onPointerDown = (event: ReactPointerEvent<T>) => {
     if (!interaction || event.pointerType === 'mouse' && event.button !== 0) return;
-    if(disabled && editingHere){
-      // Touching the typed text is just as valid as starting on the background.
-      beginEditDrag(event.pointerId,event.clientX,event.clientY);
-      return;
-    }
+    // The contenteditable text owns native caret positioning and handles.
+    // Gesture tracking resumes only after its edit session has closed.
     if(disabled)return;
     begin(event.pointerId, event.clientX, event.clientY);
     // A previously armed layer is explicitly being moved; otherwise leave the

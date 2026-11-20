@@ -20,17 +20,41 @@ type Props = {
 export default function CarolinaTextNode({ id, text, transform, interaction, extra = false, fontId, textStyle }: Props) {
   const node = useRef<HTMLSpanElement>(null);
   const editing = interaction?.editingId === id;
+  const initialCaretPoint = useRef<{x:number;y:number}|null>(null);
   const gesture = useCarolinaGesture(id, node, transform, interaction, editing);
   useEffect(() => { if (fontId) loadElegantFont(fontId); }, [fontId]);
 
   useEffect(() => {
     if (!editing || !node.current) return;
-    node.current.textContent = text;
-    node.current.focus();
-    const range = document.createRange();
-    range.selectNodeContents(node.current);
-    range.collapse(false);
-    const selection = window.getSelection();
+    const element=node.current;
+    element.textContent=text;
+    element.focus();
+    const point=initialCaretPoint.current;
+    initialCaretPoint.current=null;
+    const doc=document as Document & {
+      caretPositionFromPoint?:(x:number,y:number)=>{offsetNode:Node;offset:number}|null;
+      caretRangeFromPoint?:(x:number,y:number)=>Range|null;
+    };
+    let range:Range|null=null;
+    if(point){
+      const position=doc.caretPositionFromPoint?.(point.x,point.y);
+      if(position && element.contains(position.offsetNode)){
+        range=document.createRange();
+        range.setStart(position.offsetNode,position.offset);
+        range.collapse(true);
+      } else {
+        const native=doc.caretRangeFromPoint?.(point.x,point.y);
+        if(native && element.contains(native.startContainer))range=native;
+      }
+    }
+    if(!range){
+      // New empty text still starts at the end, but subsequent taps use the
+      // browser's own caret/selection machinery without any forced reset.
+      range=document.createRange();
+      range.selectNodeContents(element);
+      range.collapse(false);
+    }
+    const selection=window.getSelection();
     selection?.removeAllRanges();
     selection?.addRange(range);
   }, [editing]);
@@ -53,11 +77,14 @@ export default function CarolinaTextNode({ id, text, transform, interaction, ext
       role={interaction ? 'textbox' : undefined}
       aria-label={interaction ? 'Editar texto: ' + id : undefined}
       tabIndex={interaction && !editing ? 0 : undefined}
-      onPointerDown={gesture.onPointerDown} onPointerMove={gesture.onPointerMove}
-      onPointerUp={gesture.onPointerUp} onPointerCancel={gesture.onPointerCancel}
-      onContextMenu={event => event.preventDefault()}
-      onClick={() => {
+      onPointerDown={editing ? undefined : gesture.onPointerDown}
+      onPointerMove={editing ? undefined : gesture.onPointerMove}
+      onPointerUp={editing ? undefined : gesture.onPointerUp}
+      onPointerCancel={editing ? undefined : gesture.onPointerCancel}
+      onContextMenu={event => { if (!editing) event.preventDefault(); }}
+      onClick={event => {
         if (!interaction || editing || gesture.suppressTap()) return;
+        initialCaretPoint.current={x:event.clientX,y:event.clientY};
         interaction.onTap(id);
       }}
       onKeyDown={event => {

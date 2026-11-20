@@ -19,7 +19,7 @@ test('Editing text stays selectable, legible, and has one canonical rule',()=>{
  assert.equal(active.length,1);
  assert.match(active[0],/font-size:max\(16px,1em\)/);
  assert.match(active[0],/user-select:text;-webkit-user-select:text/);
- assert.match(active[0],/-webkit-touch-callout:none;touch-action:auto/);
+ assert.match(active[0],/-webkit-touch-callout:default;touch-action:auto/);
 });
 test('Long-hold grids and mobile toolbar keep their final gesture rules',()=>{
  assert.doesNotMatch(css,/\.hn-canvas \.hn-carolina-page\.hn-layout-grid\s*\{\s*touch-action:pan-y/);

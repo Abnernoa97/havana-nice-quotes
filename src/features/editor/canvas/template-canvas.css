@@ -23,7 +23,7 @@
 .hn-canvas .hn-carolina-text-node{cursor:text;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .hn-canvas .hn-carolina-text-node.empty{min-width:1em;min-height:1em;color:#b09666}
 .hn-canvas .hn-carolina-text-node:hover:not(.editing){outline:1px dashed #ad915f}
-.hn-canvas .hn-carolina-text-node.editing{min-width:1.5em;font-size:max(16px,1em);outline:1px solid #ad915f;outline-offset:2px;background:#fff9;border-radius:3px;user-select:text;-webkit-user-select:text;-webkit-touch-callout:none;touch-action:auto;cursor:text}
+.hn-canvas .hn-carolina-text-node.editing{min-width:1.5em;font-size:max(16px,1em);outline:1px solid #ad915f;outline-offset:2px;background:#fff9;border-radius:3px;user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;touch-action:auto;cursor:text}
 .hn-canvas .hn-carolina-cover-brand,.hn-canvas .hn-carolina-cover-personal{z-index:3}
 .hn-canvas .hn-carolina-extra-layer{z-index:16}
 .hn-canvas .hn-carolina-page.hn-layout-grid::before{z-index:4}
@@ -117,9 +117,16 @@
 .hn-canvas .hn-carolina-photo-overlay{
   -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
 }
-/* The active page owns drag gestures even when a keyboard is open. */
+/* The active page owns drag gestures until a native text-edit session starts. */
 .hn-canvas.hn-text-focus .hn-canvas-sheet,
 .hn-canvas.hn-text-focus .hn-carolina-page{touch-action:none;overscroll-behavior:contain}
+/* While typing, Android/iPhone select and reposition the real native caret.
+   The gesture model is disabled and page ancestors must not cancel selection. */
+.hn-canvas.hn-text-focus .hn-canvas-sheet:has(.hn-carolina-text-node.editing),
+.hn-canvas.hn-text-focus .hn-carolina-page:has(.hn-carolina-text-node.editing),
+.hn-canvas .hn-carolina-page.hn-layout-grid:has(.hn-carolina-text-node.editing){
+  touch-action:auto;user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;
+}
 
 /* The centered white default always wins over the old blank-page dark placeholder
    color; per-element user-picked text colors still win through inline styles. */

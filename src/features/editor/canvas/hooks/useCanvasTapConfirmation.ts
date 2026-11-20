@@ -20,6 +20,8 @@ export function useCanvasTapConfirmation(transformingId:string|null,activeTextTo
     const down=(event:PointerEvent)=>{
       if(!(event.target instanceof Element)||event.button!==0)return;
       const el=event.target;
+      // Native text editing must never be interpreted as an outside confirmation.
+      if(el.closest('[data-carolina-text].editing'))return;
       // Switching tools uses the same tap: never swallow toolbar or navigation clicks.
       // A tap on empty canvas still confirms the current transform.
       if(el.closest('.hn-canvas-toolbar,.hn-canvas-pager,.hn-text-dock,.hn-photo-workspace,.edit-tabs,.editor-actions,[data-hn-text-trash]'))return;
