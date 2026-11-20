@@ -38,8 +38,16 @@ test('Premium magazine binding is tapered and has an upper notch connected with 
   assert.match(css,/\.hn-v2-book-paper \.hn-leaf::before/);
   assert.match(css,/\.hn-v2-book-paper \.hn-leaf\.hn-leaf-cover::before/);
   assert.match(css,/data-book-orientation="landscape"/);
-  assert.match(css,/width:26px/);
-  assert.match(css,/perspective\(380px\) rotateY\(-10deg\)/);
+  assert.match(book,/computeMagazineBindingGeometry\(rect,stageRect,depth\)/);
+  assert.match(book,/binding\.style\.width=geometry\.width/);
+  assert.match(book,/hn-magazine-binding-joint/);
+  assert.match(css,/\.hn-magazine-binding-joint \{/);
+  assert.match(css,/width: 29%/);
+  const board=css.slice(css.indexOf('/* HAVANA NICE · Flat laminated board'));
+  assert.ok(board.length>100);
+  assert.doesNotMatch(board,/rotateY\(|radial-gradient\(/);
+  assert.doesNotMatch(board,/border-radius: ?(?:65%|50%)/);
+  assert.match(board,/height: calc\(var\(--hn-page-stack-depth\) \+ 2px\)/);
   assert.match(css,/pointer-events:none!important/);
   assert.match(css,/margin-bottom: calc\(var\(--hn-page-stack-depth\) \+ 9px\)/);
   assert.doesNotMatch(css,/\.hn-magazine-stage-bound::after/);
