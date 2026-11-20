@@ -34,3 +34,6 @@
 .hn-canvas-cloud-video-preview .hn-video-poster{position:absolute;inset:0}
 .hn-canvas-cloud-video-preview .hn-video-poster img{display:block;width:100%;height:100%;
  object-fit:cover}
+
+/* The picker owns its mobile padding even when rendered through a portal. */
+@media(max-width:550px){.hn-canvas-shade{padding:7px}.hn-canvas-picker{padding:14px;border-radius:16px}}

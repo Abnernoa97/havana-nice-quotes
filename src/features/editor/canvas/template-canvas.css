@@ -13,7 +13,7 @@
 /* The canvas error is a direct sheet-level message, never the picker overlay. */
 .hn-canvas > .hn-canvas-error{color:#a14b43}
 .hn-canvas button:focus-visible,.hn-canvas label:focus-within{outline:3px solid #bfa373;outline-offset:2px}
-@media(max-width:550px){.hn-canvas{padding:12px 6px 22px}.hn-canvas-shade{padding:7px}.hn-canvas-picker{padding:14px;border-radius:16px}}
+@media(max-width:550px){.hn-canvas{padding:12px 6px 22px}}
 
 
 .hn-canvas-cover .hn-carolina-cover-personal { z-index: 2; }
