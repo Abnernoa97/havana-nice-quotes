@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import type { Quote } from '../quotes/types';
 import { PageFlip } from '@gullabs/flipbook-core';
 import { useMagazinePaperGesture } from './useMagazinePaperGesture';
+import { computeMagazineBindingGeometry } from './magazine-binding-geometry';
 import type { InteractiveMagazineFlip } from './useMagazinePaperGesture';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
 import { CarolinaCover, CarolinaCollage, CarolinaTerms, CarolinaBlankPage } from '../templates/CarolinaTemplate';
@@ -65,13 +66,16 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
       background.style.width=rect.width+'px';
       background.style.height=rect.height+'px';
       background.style.visibility='visible';
-      // Raised cover binding is a sibling ABOVE the visible leaf; the pages
-      // remain beneath it. A behind-the-leaf binding was fully obscured.
+      // Flat laminated cover board outside the page + a shallow sewn hinge
+      // inside. Position from the live PageFlip block so it survives resize.
       const binding=bindingRef.current;
       if(binding){
-        binding.style.left=(rect.left-stageRect.left-3)+'px';
-        binding.style.top=(rect.top-stageRect.top)+'px';
-        binding.style.height=(rect.height+Math.min(15,7+Math.max(0,source.children.length-1)*1.6)-2)+'px';
+        const depth=Math.min(15,7+Math.max(0,source.children.length-1)*1.6);
+        const geometry=computeMagazineBindingGeometry(rect,stageRect,depth);
+        binding.style.left=geometry.left+'px';
+        binding.style.top=geometry.top+'px';
+        binding.style.width=geometry.width+'px';
+        binding.style.height=geometry.height+'px';
         binding.style.visibility='visible';
       }
     };
@@ -229,7 +233,9 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
           <span className="hn-magazine-page-block-bottom"/>
           <span className="hn-magazine-page-block-side"/>
         </div>}
-        {total>1&&<div className="hn-magazine-binding" ref={bindingRef} aria-hidden="true"/>}
+        {total>1&&<div className="hn-magazine-binding" ref={bindingRef} aria-hidden="true">
+          <span className="hn-magazine-binding-joint"/>
+        </div>}}
         <div className="hn-magazine-surface" ref={mountRef}
           aria-label={'Revista interactiva de ' + total + ' páginas'}
           onTouchStartCapture={event=>event.stopPropagation()}
