@@ -31,7 +31,9 @@ test('Todas las portadas reales usan únicamente su imagen guardada; nunca imág
 
 test('El lector 3D sigue intacto y sus hojas no traen fotos de prueba', () => {
   const magazine = readFileSync(new URL('../src/features/magazine/FlipMagazine.tsx', import.meta.url), 'utf8');
-  assert.match(magazine, /flippingTime: 1080/);
+  assert.match(magazine, /flippingTime: 650/);
+   assert.match(magazine, /disableFlipByClick: true/);
+   assert.match(magazine, /useMagazinePaperGesture/);
   assert.match(magazine, /maxShadowOpacity: 0\.72/);
   const editorial=readFileSync(new URL('../src/features/templates/EditorialTemplate.tsx',import.meta.url),'utf8');
   assert.match(magazine, /<EditorialCover item=\{item\}/);
