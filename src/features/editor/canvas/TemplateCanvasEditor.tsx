@@ -62,7 +62,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const [error, setError] = useState('');
   useEffect(() => {
     setPage(carolinaPageOrder(item.designLayout)[0]); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
-    setLastTextId(null); setActiveTextTool(null); setSelectedPhotoId(null); setPhotoTool(null); setPhotoLayersOpen(false); setTrashHovered(false); setDraftText(null);
+    setLastTextId(null); setActiveTextTool(null); setSelectedPhotoId(null); setPhotoTool(null); setPhotoLayersOpen(false); setTrashHovered(false); setDraftText(null); setShowPageMenu(false);
   }, [item.id, item.style]);
   useEffect(()=>{
     if(!selectedPages.includes(page))setPage(selectedPages[0]);
@@ -76,8 +76,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   },[item.id,item.designLayout?.extras]);
   const textInteraction: CarolinaTextInteraction = {
     editingId, transformingId,
-    onTap: id => { setActiveTextTool(null);setSelectedPhotoId(null); setTransformingId(null); setEditingId(id); setLastTextId(id); setError(''); },
+    onTap: id => { setShowPageMenu(false);setActiveTextTool(null);setSelectedPhotoId(null); setTransformingId(null); setEditingId(id); setLastTextId(id); setError(''); },
     onSelectTransform: id => {
+      setShowPageMenu(false);
       // Dragging the selected text from the page immediately hides the keyboard.
       if (editingId===id && id.startsWith('extra:')) {
         const node=document.querySelector<HTMLElement>('[data-carolina-text="'+id+'"]');
@@ -162,6 +163,8 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     },
   };
   const addFreeText = () => {
+    setShowPageMenu(false);
+    setTarget(null);setBank(false);
     if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
     clearSelection();
     if((item.designLayout?.extras?.length||0)>=MAX_DESIGN_ELEMENTS){
@@ -236,6 +239,31 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setDraftText(null);setPhotoLayersOpen(false);setTransformingId(null);setEditingId(null);
     setLastTextId(null);setActiveTextTool(null);setSelectedPhotoId(null);setPhotoTool(null);setTrashHovered(false);
   };
+  const togglePageMenu=()=>{
+    if(busy)return;
+    if(showPageMenu){setShowPageMenu(false);return;}
+    if(editingId && document.activeElement instanceof HTMLElement)document.activeElement.blur();
+    // A new page action replaces whichever text, photo or gesture tool was open.
+    clearSelection();setTarget(null);setBank(false);setError('');
+    setShowPageMenu(true);
+  };
+  useEffect(()=>{
+    if(!showPageMenu)return;
+    // A tap outside + Página dismisses it, without swallowing the next action.
+    const onPointerDown=(event:PointerEvent)=>{
+      if(!(event.target instanceof Element)||!event.target.closest('.hn-page-kind-wrap'))
+        setShowPageMenu(false);
+    };
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.key==='Escape')setShowPageMenu(false);
+    };
+    document.addEventListener('pointerdown',onPointerDown,true);
+    document.addEventListener('keydown',onKeyDown);
+    return ()=>{
+      document.removeEventListener('pointerdown',onPointerDown,true);
+      document.removeEventListener('keydown',onKeyDown);
+    };
+  },[showPageMenu]);
   const addPage=(kind?:PageKind)=>{
     const result=insertBlankPage(item.designLayout,page,kind);
     setShowPageMenu(false);
@@ -290,6 +318,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const pageBackgroundId=pageBackgroundMediaId(item.designLayout,page);
   const setPhotoOrder = (order:number[]) => updateLayout({photoOrder:order});
   const selectPhoto = (id:string) => {
+    setShowPageMenu(false);
     // Exactly one active session: a different tap first dismisses text, never opens media.
     if (lastTextId || transformingId) {clearSelection();return;}
     // Empty frames open the source picker, populated photos open the immersive editor.
@@ -315,6 +344,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setError('');
   };
   const movePhotoLayer=(id:string)=>{
+    setShowPageMenu(false);
     setPhotoLayersOpen(false); setEditingId(null); setSelectedPhotoId(null);
     setPhotoTool(null); setLastTextId(null); setTrashHovered(false);
     setTransformingId(id);
@@ -334,6 +364,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       open(Number(selectedPhotoId.slice(6)));
   };
   const addPhotoAnywhere=()=>{
+    setShowPageMenu(false);
     if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
     clearSelection();
     if (page===1 && !cleanCarolina) { addPhotoBlock(); return; }
@@ -346,6 +377,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setBank(false);setError('');setTarget(`extra:${crypto.randomUUID()}`);
   };
   const addPhotoBlock = () => {
+    setShowPageMenu(false);
     if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
     clearSelection();
     const slot=photoSlotToAdd(photoOrder,carolinaPhotos(item));
@@ -353,7 +385,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setTransformingId(null);setSelectedPhotoId(null);
     setTarget(slot);setBank(false);setError('');
   };
-  const open = (slot: PhotoTarget) => { setSelectedPhotoId(null); setPhotoTool(null); setTarget(slot); setBank(false); setError(''); };
+  const open = (slot: PhotoTarget) => { setShowPageMenu(false);setSelectedPhotoId(null); setPhotoTool(null); setTarget(slot); setBank(false); setError(''); };
   const close = () => { if (!busy) { setTarget(null); setBank(false); setError(''); } };
   const applyMedia=(url:string,video:boolean)=>{
     if(target===null)return;
@@ -444,6 +476,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       document.removeEventListener('pointercancel',cancel,true);
     };
   },[transformingId,activeTextTool,editingId]);
+  const pageMenuVisible=showPageMenu&&target===null&&!lastTextId&&!selectedPhotoId&&!transformingId&&!editingId;
   const renderItem:Quote=draftText?{...item,designLayout:{...item.designLayout,
     extras:[...(item.designLayout?.extras||[]),{id:draftText.id,page:draftText.page,text:'',centered:true as const}]}}:item;
   return (
@@ -454,11 +487,11 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         <button type="button" onClick={addPhotoAnywhere}
           disabled={page===1&&!cleanCarolina&&photoOrder.length>=CAROLINA_MAX_SLOTS}>+ Foto</button>
         <div className="hn-page-kind-wrap">
-          <button type="button" onClick={()=>{clearSelection();setShowPageMenu(v=>!v);}}
-            className="hn-canvas-add-page" aria-expanded={showPageMenu}
+          <button type="button" onClick={togglePageMenu}
+            className="hn-canvas-add-page" aria-expanded={pageMenuVisible}
             aria-controls="hn-page-kind-menu"
             aria-label="Elegir tipo de página"><Plus size={17}/> Página</button>
-          {showPageMenu&&<div className="hn-page-kind-menu" id="hn-page-kind-menu"
+          {pageMenuVisible&&<div className="hn-page-kind-menu" id="hn-page-kind-menu"
             role="group" aria-label="Tipos de página">
             <button type="button" onClick={()=>addPage()}>
               <FileText size={18}/> Página en blanco</button>
