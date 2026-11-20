@@ -1,21 +1,14 @@
 import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { Trash2 } from 'lucide-react';
-import TextStyleDock from '../texts/TextStyleDock';
-import PhotoLayersPanel from '../photos/PhotoLayersPanel';
-import PhotoSourcePicker from '../photos/PhotoSourcePicker';
-import { listPhotoLayers } from '../photos/photo-layers';
 import type { PhotoTarget } from '../shared/editor-types';
-import PhotoEditingWorkspace from '../photos/PhotoEditingWorkspace';
 import type { CarolinaLayout } from '../../templates/carolina-layout';
-import { carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts, CAROLINA_PAGE_TITLES } from '../../templates/carolina-layout';
-import { pageBackgroundMediaId } from '../../templates/page-background';
+import { carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts } from '../../templates/carolina-layout';
 import type { CarolinaPageId } from '../../templates/carolina-layout';
 import type { Quote } from '../../quotes/types';
 import type { CloudPhoto } from '../../photos/useMediaLibrary';
 import { templateFamily } from '../../templates/template-registry';
 import CanvasPageToolbar from './components/CanvasPageToolbar';
-import CanvasPageContent from './components/CanvasPageContent';
+import CanvasSheetSurface from './components/CanvasSheetSurface';
+import CanvasEditorPanels from './components/CanvasEditorPanels';
 import CanvasPagePager from './components/CanvasPagePager';
 import { useCanvasPageActions } from './hooks/useCanvasPageActions';
 import { useCanvasSelectionState } from './hooks/useCanvasSelectionState';
@@ -23,7 +16,6 @@ import { useCanvasTapConfirmation } from './hooks/useCanvasTapConfirmation';
 import { createCanvasTextInteraction } from './interactions/createCanvasTextInteraction';
 import { createCanvasRemovalActions } from './interactions/createCanvasRemovalActions';
 import { createCanvasTextStyleActions } from './interactions/createCanvasTextStyleActions';
-import { canvasPhotoUrl } from './media/canvasPhotoUrl';
 import { createCanvasPhotoActions } from './media/createCanvasPhotoActions';
 import './template-canvas.css';
 
@@ -33,7 +25,6 @@ type Props = {
   photos: CloudPhoto[];
   onUploadPhoto: (file: File, target: PhotoTarget) => Promise<string>;
 };
-const pageTitle=(page:number,index:number)=>isBlankPage(page)?'Página '+(index+1):CAROLINA_PAGE_TITLES[page as 0|1|2]||'Página '+(index+1);
 
 /** The same real sheet is edited and displayed in Scroll and the 3D magazine. */
 export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto }: Props) {
@@ -41,6 +32,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const cleanCarolina=item.style==='carolina'&&item.designLayout?.freeCanvas===true;
   const [page, setPage] = useState<CarolinaPageId>(()=>carolinaPageOrder(item.designLayout)[0]);
   const selectedPages=carolinaPageOrder(item.designLayout);
+  const selection=useCanvasSelectionState(item,setPage);
   const {
     target,setTarget,editingId,setEditingId,draftText,setDraftText,newlyConfirmedText,
     lastGestureMoveAt,justMoved,selectedPhotoId,setSelectedPhotoId,
@@ -48,7 +40,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     lastTextId,setLastTextId,activeTextTool,setActiveTextTool,
     showPageMenu,setShowPageMenu,trashHovered,setTrashHovered,transformingId,setTransformingId,
     bank,setBank,busy,setBusy,error,setError,clearSelection,
-  }=useCanvasSelectionState(item,setPage);
+  }=selection;
   useEffect(()=>{
     if(!selectedPages.includes(page))setPage(selectedPages[0]);
   },[page,JSON.stringify(selectedPages)]);
@@ -93,14 +85,11 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setPhotoLayersOpen,setTransformingId,setEditingId,setLastTextId,
     setSelectedPhotoId,setPhotoTool,setTrashHovered,
   });
-  const {chooseFont,changeTextStyle}=createCanvasTextStyleActions({
+  const textActions=createCanvasTextStyleActions({
     item,lastTextId,updateLayout,
   });
   const photoOrder = carolinaPhotoOrder(item.designLayout);
-  const photoLayers=listPhotoLayers(item,page);
-  const pageBackgroundId=pageBackgroundMediaId(item.designLayout,page);
-  const {selectPhoto,movePhotoLayer,updatePhotoStyle,replacePhoto,
-    addPhotoAnywhere,close,choose,chooseVideo,selectPhone}=createCanvasPhotoActions({
+  const mediaActions=createCanvasPhotoActions({
     item,edit,updateLayout,page,cleanCarolina,photoOrder,
     editingId,lastTextId,transformingId,selectedPhotoId,target,busy,
     clearSelection,removePhoto,onUploadPhoto,
@@ -109,6 +98,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setEditingId,setLastTextId,setError,setTrashHovered,
     setBank,setTarget,setBusy,
   });
+  const {selectPhoto,addPhotoAnywhere}=mediaActions;
   const textInteraction=createCanvasTextInteraction({
     item,edit,updateLayout,editingId,transformingId,draftText,
     newlyConfirmedText,lastGestureMoveAt,justMoved,
@@ -129,86 +119,15 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
         addPhotoDisabled={page===1&&!cleanCarolina&&photoOrder.length>=CAROLINA_MAX_SLOTS}
         onTogglePageMenu={togglePageMenu} pageMenuVisible={pageMenuVisible}
         onAddPage={addPage} transformingId={transformingId}/>
-      <div className="hn-canvas-stage" onClick={event=>{
-        // A tap in the whitespace surrounding the sheet accepts the current edit.
-        if(event.target===event.currentTarget && (lastTextId||transformingId||editingId)){
-          if(editingId && document.activeElement instanceof HTMLElement)document.activeElement.blur();
-          clearSelection();
-        }
-      }}>
-      <div className="hn-canvas-sheet" onClickCapture={event=>{
-        // Pointer capture can produce a synthetic click after a drag. Never let it
-        // silently close the toolbar: only a separate, intentional tap does that.
-        if(Date.now()-lastGestureMoveAt.current<180){
-          event.preventDefault();event.stopPropagation();return;
-        }
-        const clicked=event.target;
-        if(!(clicked instanceof Element)||clicked.closest('[data-hn-text-trash]'))return;
-        const node=clicked.closest('[data-hn-photo-id], [data-carolina-text]');
-        const clickedId=node?.getAttribute('data-hn-photo-id')||node?.getAttribute('data-carolina-text');
-        const activeId=lastTextId||transformingId||editingId;
-        if(activeId && clickedId!==activeId){
-          if(editingId && document.activeElement instanceof HTMLElement)document.activeElement.blur();
-          clearSelection();
-          event.preventDefault();event.stopPropagation();
-        }
-      }}>
-        <CanvasPageContent page={page} cleanCarolina={cleanCarolina}
-          editorial={editorial} renderItem={renderItem}
-          textInteraction={textInteraction} selectPhoto={selectPhoto}/>
-        {transformingId && !activeTextTool && (
-          <button type="button" data-hn-text-trash
-            className={'hn-canvas-trash'+(trashHovered?' hot':'')}
-            aria-label={isPhotoId(transformingId)?'Eliminar foto o video seleccionado':'Eliminar texto seleccionado'}
-            title="Arrastra aquí para eliminar" onClick={()=>removeElement(transformingId)}>
-            <Trash2 size={25}/>
-          </button>
-        )}
-      </div>
-      </div>
+      <CanvasSheetSurface page={page} cleanCarolina={cleanCarolina} editorial={editorial}
+        renderItem={renderItem} textInteraction={textInteraction} selectPhoto={selectPhoto}
+        selection={selection} removeElement={removeElement} isPhotoId={isPhotoId}/>
       <CanvasPagePager pageIndex={pageIndex} totalPages={selectedPages.length}
         canDuplicate={isBlankPage(page)||cleanCarolina}
         onChangePage={changePage} onDuplicatePage={duplicatePage} onDeletePage={deletePage}/>
-      {lastTextId && target===null && !selectedPhotoId && (
-        <TextStyleDock textId={lastTextId}
-          fontId={item.designLayout?.fonts?.[lastTextId] || item.designLayout?.defaultFont}
-          style={item.designLayout?.textStyles?.[lastTextId]}
-          onFontChange={chooseFont} onStyleChange={changeTextStyle}
-          onToolChange={tool=>{
-            setActiveTextTool(tool);
-            if(tool){
-              if(editingId&&document.activeElement instanceof HTMLElement)
-                document.activeElement.blur();
-              setEditingId(null);setTransformingId(null);setTrashHovered(false);
-            }
-          }}
-          onClose={()=>{
-            if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
-            clearSelection();
-          }}/>
-      )}
-      {selectedPhotoId && !transformingId && !editingId && target===null &&
-        createPortal(
-          <PhotoEditingWorkspace photoId={selectedPhotoId}
-            aspect={photoAspect} pageName={pageTitle(page,pageIndex)} activeTool={photoTool}
-            url={canvasPhotoUrl(item,selectedPhotoId)}
-            style={item.designLayout?.photoStyles?.[selectedPhotoId]}
-            isPageBackground={selectedPhotoId==='photo-extra:'+pageBackgroundId}
-            layersPanel={<PhotoLayersPanel layers={photoLayers} open={photoLayersOpen}
-              onToggle={()=>setPhotoLayersOpen(value=>!value)}
-              onEdit={selectPhoto} onMove={movePhotoLayer} onDelete={removePhoto}/>}
-            onStyleChange={updatePhotoStyle} onReplace={replacePhoto}
-            onToolChange={setPhotoTool}
-            onClose={()=>{setSelectedPhotoId(null);setPhotoTool(null);setPhotoLayersOpen(false);}}/>,
-          document.body
-        )}
-      {error && !target && <p className="hn-canvas-error" role="alert">{error}</p>}
-      {target !== null && createPortal(
-        <PhotoSourcePicker target={target} item={item} photos={photos}
-          bank={bank} busy={busy} error={error} onClose={close}
-          onToggleBank={()=>setBank(v=>!v)} onPhoneFile={file=>{void selectPhone(file);}}
-          onChoose={choose} onChooseVideo={chooseVideo}/>,document.body
-      )}
+      <CanvasEditorPanels item={item} photos={photos} page={page} pageIndex={pageIndex}
+        selection={selection} mediaActions={mediaActions} textActions={textActions}
+        removePhoto={removePhoto}/>
     </section>
   );
 }

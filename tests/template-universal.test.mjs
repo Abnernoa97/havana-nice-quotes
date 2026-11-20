@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {TEMPLATE_IDS,isTemplateStyle,templateFamily} from '../src/features/templates/template-registry.ts';
 import {validCarolinaLayout} from '../src/features/templates/carolina-layout.ts';
 const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
-const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","interactions/createCanvasRemovalActions.ts","interactions/createCanvasTextStyleActions.ts","hooks/useCanvasSelectionState.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","interactions/createCanvasRemovalActions.ts","interactions/createCanvasTextStyleActions.ts","hooks/useCanvasSelectionState.ts","components/CanvasPagePager.tsx","components/CanvasSheetSurface.tsx","components/CanvasEditorPanels.tsx","hooks/useCanvasPageActions.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
 const mockQuote=(changes={})=>({
  id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',name:'Test',client:'',email:'',location:'',
  date:'',price:15000,deposit:40,status:'Borrador',cover:'',font:'editorial',

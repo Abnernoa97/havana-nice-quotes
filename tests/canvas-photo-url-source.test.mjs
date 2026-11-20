@@ -6,7 +6,7 @@ test('Picker and immersive editor share one photo URL resolver',()=>{
  const editor=read('TemplateCanvasEditor.tsx'),resolver=read('media/canvasPhotoUrl.ts');
  const actions=read('media/createCanvasPhotoActions.ts');
  assert.match(actions,/const url = canvasPhotoUrl\(item,id\)/);
- assert.match(editor,/url=\{canvasPhotoUrl\(item,selectedPhotoId\)\}/);
+ assert.match(read('components/CanvasEditorPanels.tsx'),/url=\{canvasPhotoUrl\(item,selectedPhotoId\)\}/);
  assert.match(resolver,/if\(id==='photo:cover'\)/);
  assert.match(resolver,/id\.startsWith\('photo-extra:'\)/);
  assert.doesNotMatch(editor,/coverVideo \|\| item\.cover/);

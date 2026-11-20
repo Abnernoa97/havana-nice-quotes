@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const src=path=>readFileSync(new URL('../src/'+path,import.meta.url),'utf8');
-const canvasSource=()=>['TemplateCanvasEditor.tsx','components/CanvasPageToolbar.tsx','components/CanvasPageContent.tsx','interactions/createCanvasTextInteraction.ts','media/canvasPhotoUrl.ts','media/createCanvasPhotoActions.ts','interactions/createCanvasRemovalActions.ts','interactions/createCanvasTextStyleActions.ts','hooks/useCanvasSelectionState.ts','components/CanvasPagePager.tsx','hooks/useCanvasPageActions.ts','hooks/useCanvasTapConfirmation.ts'].map(p=>src('features/editor/canvas/'+p)).join('\n');
+const canvasSource=()=>['TemplateCanvasEditor.tsx','components/CanvasPageToolbar.tsx','components/CanvasPageContent.tsx','interactions/createCanvasTextInteraction.ts','media/canvasPhotoUrl.ts','media/createCanvasPhotoActions.ts','interactions/createCanvasRemovalActions.ts','interactions/createCanvasTextStyleActions.ts','hooks/useCanvasSelectionState.ts','components/CanvasPagePager.tsx','components/CanvasSheetSurface.tsx','components/CanvasEditorPanels.tsx','hooks/useCanvasPageActions.ts','hooks/useCanvasTapConfirmation.ts'].map(p=>src('features/editor/canvas/'+p)).join('\n');
 
 test('Papelera: un solo filtro compacto, opciones aparecen al lado y se cierran al elegir',()=>{
  const trash=src('features/trash/TrashScreen.tsx');

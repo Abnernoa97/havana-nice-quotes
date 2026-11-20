@@ -19,7 +19,8 @@ test('Portada: el mismo botón + permite elegir o cambiar foto/video sin duplica
 test('Selector reutiliza fotos y videos privados en portada y páginas libres',()=>{
  const picker=src('features/editor/photos/PhotoSourcePicker.tsx');
  const hook=src('features/videos/useCloudVideoOptions.ts');
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx')+'\n'+src('features/editor/canvas/media/createCanvasPhotoActions.ts');
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx')+'\n'+src('features/editor/canvas/media/createCanvasPhotoActions.ts'); 
+   const overlays=src('features/editor/canvas/components/CanvasEditorPanels.tsx');
  const app=src('app/App.tsx');
  assert.match(picker,/const canPickVideo=cover\|\|/);
  assert.match(picker,/canPickVideo&&bank&&kind==='videos'/);
@@ -30,7 +31,7 @@ test('Selector reutiliza fotos y videos privados en portada y páginas libres',(
  assert.match(canvas,/const chooseVideo=\(url:string\)=>applyMedia\(url,true\)/);
  assert.match(canvas,/edit\('coverVideo',video\?url:''\)/);
  assert.match(canvas,/edit\('cover',video\?'':url\)/);
- assert.match(canvas,/onChoose=\{choose\} onChooseVideo=\{chooseVideo\}/);
+ assert.match(overlays,/onChoose=\{choose\} onChooseVideo=\{chooseVideo\}/);
  assert.match(app,/return saved\.url/);
 });
 test('Foto y video de portada comparten edición, efectos y reproducción con pausa fuera de pantalla',()=>{

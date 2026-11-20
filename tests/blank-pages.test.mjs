@@ -6,7 +6,7 @@ import {validCarolinaLayout,carolinaPageOrder,MAX_DESIGN_PAGES,cleanEmptyExtraTe
 import {insertBlankPage,duplicateBlankPage,shiftPage,removeDesignPage} from '../src/features/templates/blank-pages.ts';
 import {pageBackgroundMediaId} from '../src/features/templates/page-background.ts';
 const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
-const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","interactions/createCanvasRemovalActions.ts","interactions/createCanvasTextStyleActions.ts","hooks/useCanvasSelectionState.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","interactions/createCanvasRemovalActions.ts","interactions/createCanvasTextStyleActions.ts","hooks/useCanvasSelectionState.ts","components/CanvasPagePager.tsx","components/CanvasSheetSurface.tsx","components/CanvasEditorPanels.tsx","hooks/useCanvasPageActions.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
 const one='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',two='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 test('Crear plantilla desde cero abre una sola hoja blanca persistente',()=>{
  const tpl=createOwnTemplate('hn-new');
@@ -124,7 +124,7 @@ test('Selección de archivo es requisito para persistir un nuevo recuadro',()=>{
  assert.match(canvas,/onChooseVideo=\{chooseVideo\}/);
  assert.match(picker,/canPickVideo&&kind==='videos'/);
  assert.match(node,/<video ref=\{videoRef\} className="hn-carolina-image-fill hn-carolina-video-fill"/);
- const sheet=canvas.split('<div className="hn-canvas-sheet"')[1].split('<CanvasPagePager ')[0];
+ const sheet=src('features/editor/canvas/components/CanvasSheetSurface.tsx');
  assert.match(sheet,/data-hn-text-trash/);
  assert.doesNotMatch(sheet,/Eliminar foto · Arrastra aquí/);
 });
