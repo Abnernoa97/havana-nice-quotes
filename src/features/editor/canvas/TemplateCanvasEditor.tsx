@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Trash2 } from 'lucide-react';
-import { isCarolinaCopyField } from '../../templates/carolina-edit-fields';
-import type { CarolinaTextField } from '../../templates/carolina-edit-fields';
 import TextStyleDock from '../texts/TextStyleDock';
 import type { TextToolTab } from '../texts/TextStyleDock';
 import PhotoLayersPanel from '../photos/PhotoLayersPanel';
@@ -10,8 +8,7 @@ import PhotoSourcePicker from '../photos/PhotoSourcePicker';
 import { listPhotoLayers } from '../photos/photo-layers';
 import type { PhotoTarget } from '../shared/editor-types';
 import PhotoEditingWorkspace from '../photos/PhotoEditingWorkspace';
-import type { ElegantFontId } from '../../templates/elegant-fonts';
-import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle } from '../../templates/carolina-layout';
+import type { CarolinaLayout } from '../../templates/carolina-layout';
 import { carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts, CAROLINA_PAGE_TITLES } from '../../templates/carolina-layout';
 import { pageBackgroundMediaId } from '../../templates/page-background';
 import type { CarolinaPageId } from '../../templates/carolina-layout';
@@ -24,9 +21,10 @@ import CanvasPagePager from './components/CanvasPagePager';
 import { useCanvasPageActions } from './hooks/useCanvasPageActions';
 import { useCanvasTapConfirmation } from './hooks/useCanvasTapConfirmation';
 import { createCanvasTextInteraction } from './interactions/createCanvasTextInteraction';
+import { createCanvasRemovalActions } from './interactions/createCanvasRemovalActions';
+import { createCanvasTextStyleActions } from './interactions/createCanvasTextStyleActions';
 import { canvasPhotoUrl } from './media/canvasPhotoUrl';
 import { createCanvasPhotoActions } from './media/createCanvasPhotoActions';
-import { carolinaPhotos } from '../../templates/CarolinaTemplate';
 import './template-canvas.css';
 
 type Props = {
@@ -98,56 +96,11 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     const rect=element.getBoundingClientRect();
     return x>=rect.left && x<=rect.right && y>=rect.top && y<=rect.bottom;
   };
-  const removeText = (id:string) => {
-    if (!/^(fixed:[a-zA-Z]+|field:[a-z]+(?::cover)?|extra:[a-f0-9-]{36})$/.test(id)) return;
-    const transforms={...item.designLayout?.transforms};
-    const fonts={...item.designLayout?.fonts};
-    const textStyles={...item.designLayout?.textStyles};
-    delete transforms[id]; delete fonts[id]; delete textStyles[id];
-    const clean={transforms,fonts,textStyles};
-    if (id.startsWith('fixed:')) {
-      const key=id.slice(6) as CarolinaFixedKey;
-      updateLayout({...clean,fixed:{...item.designLayout?.fixed,[key]:''}});
-    } else if (id.startsWith('extra:')) {
-      updateLayout({...clean,extras:(item.designLayout?.extras||[])
-        .filter(extra=>'extra:'+extra.id!==id)});
-    } else {
-      const field=id.slice(6).split(':')[0] as CarolinaTextField;
-      if (field==='price' || field==='deposit') edit(field,0);
-      else if (isCarolinaCopyField(field)) {
-        edit('carolinaCopy',{...item.carolinaCopy,[field]:''});
-      } else edit(field,'');
-      updateLayout(clean);
-    }
-    setEditingId(null); setTransformingId(null); setLastTextId(null); setTrashHovered(false);
-    setError('');
-  };
-  /** Only remove image references from the current quote; never delete its R2 media. */
-  const removePhoto = (id:string) => {
-    const transforms={...item.designLayout?.transforms};
-    const photoStyles={...item.designLayout?.photoStyles};
-    delete transforms[id]; delete photoStyles[id];
-    if (id==='photo:cover') {
-      edit('cover','');
-      edit('coverVideo','');
-      updateLayout({transforms,photoStyles});
-    } else if (id.startsWith('photo-extra:')) {
-      const photoId=id.slice('photo-extra:'.length);
-      updateLayout({transforms,photoStyles,extraPhotos:(item.designLayout?.extraPhotos||[])
-        .filter(photo=>photo.id!==photoId)});
-    } else {
-      const match=/^photo:(1[01]|[0-9])$/.exec(id);
-      if (!match) return;
-      const slot=Number(match[1]);
-      const gallery=carolinaPhotos(item);
-      gallery[slot]='';
-      edit('gallery',gallery);
-      // Keep the collage frame in place when its image is cleared.
-      updateLayout({transforms,photoStyles});
-    }
-    setTransformingId(null);setSelectedPhotoId(null);setLastTextId(null);setPhotoLayersOpen(false);setTrashHovered(false);setError('');
-  };
-  const removeElement = (id:string) => isPhotoId(id) ? removePhoto(id) : removeText(id);
+  const {removeText,removePhoto,removeElement}=createCanvasRemovalActions({
+    item,edit,updateLayout,isPhotoId,
+    setEditingId,setTransformingId,setLastTextId,setSelectedPhotoId,
+    setPhotoLayersOpen,setTrashHovered,setError,
+  });
   const pageIndex=selectedPages.indexOf(page);
   const clearSelection=()=>{
     setDraftText(null);setPhotoLayersOpen(false);setTransformingId(null);setEditingId(null);
@@ -159,26 +112,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setPhotoLayersOpen,setTransformingId,setEditingId,setLastTextId,
     setSelectedPhotoId,setPhotoTool,setTrashHovered,
   });
-  const chooseFont = (font:ElegantFontId|null) => {
-    if (!lastTextId) return;
-    const fonts={...item.designLayout?.fonts};
-    if (font) fonts[lastTextId]=font;
-    else delete fonts[lastTextId];
-    updateLayout({fonts});
-  };
-  const changeTextStyle = (key:keyof CarolinaTextStyle,value:string|number|undefined) => {
-    if (!lastTextId) return;
-    const textStyles={...item.designLayout?.textStyles};
-    const next:CarolinaTextStyle={...textStyles[lastTextId]};
-    if (value===undefined) delete next[key];
-    else if (key==='color' && typeof value==='string') next.color=value;
-    else if (key==='size' && typeof value==='number') next.size=value;
-    else if (key==='stretchX' && typeof value==='number') next.stretchX=value;
-    else if (key==='stretchY' && typeof value==='number') next.stretchY=value;
-    if (Object.keys(next).length) textStyles[lastTextId]=next;
-    else delete textStyles[lastTextId];
-    updateLayout({textStyles});
-  };
+  const {chooseFont,changeTextStyle}=createCanvasTextStyleActions({
+    item,lastTextId,updateLayout,
+  });
   const photoOrder = carolinaPhotoOrder(item.designLayout);
   const photoLayers=listPhotoLayers(item,page);
   const pageBackgroundId=pageBackgroundMediaId(item.designLayout,page);

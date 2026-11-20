@@ -5,7 +5,7 @@ import {
   CAROLINA_FIXED, ZERO_TRANSFORM, fixedText, validCarolinaLayout, clampTransform,
 } from '../src/features/templates/carolina-layout.ts';
 
-const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>readFileSync(new URL('../src/features/editor/canvas/'+p,import.meta.url),'utf8')).join('\n');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","interactions/createCanvasRemovalActions.ts","interactions/createCanvasTextStyleActions.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>readFileSync(new URL('../src/features/editor/canvas/'+p,import.meta.url),'utf8')).join('\n');
 
 test('Textos originales de Carolina son editables y se conserva la plantilla sin cambios', () => {
   assert.equal(Object.keys(CAROLINA_FIXED).length, 18);

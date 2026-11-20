@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
-const canvas=["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>readFileSync(new URL('../src/features/editor/canvas/'+p,import.meta.url),'utf8')).join('\n');
+const canvas=["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","interactions/createCanvasRemovalActions.ts","interactions/createCanvasTextStyleActions.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>readFileSync(new URL('../src/features/editor/canvas/'+p,import.meta.url),'utf8')).join('\n');
 const block=(start,end)=>{
   const a=canvas.indexOf(start);
   const b=canvas.indexOf(end,a+start.length);
