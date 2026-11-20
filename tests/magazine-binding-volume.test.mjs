@@ -19,7 +19,7 @@ test('Physical book uses PageFlip bounds and real page count',()=>{
   assert.match(book,/const pages = Array\.from\(source\.children\)\.map\(node => node\.cloneNode\(true\)\)/);
 });
 test('Premium magazine binding is tapered and has an upper notch connected with bottom fore-edge',()=>{
-  for(const part of ['hn-magazine-page-block-bottom','hn-magazine-page-block-side','hn-magazine-page-block-spine']){
+  for(const part of ['hn-magazine-page-block-bottom','hn-magazine-page-block-side','hn-magazine-binding']){
     assert.match(book,new RegExp(part));
     assert.match(css,new RegExp('\\.'+part+' \\{'));
   }
@@ -28,10 +28,18 @@ test('Premium magazine binding is tapered and has an upper notch connected with 
   assert.match(css,/clip-path: polygon\(0 0,100% 0,100% 64%/);
   assert.match(css,/skewY\(-0\.27deg\)/);
   assert.match(css,/repeating-linear-gradient\(to bottom/);
-  assert.match(css,/\.hn-magazine-page-block-spine::before/);
+  assert.match(css,/\.hn-magazine-binding::before/);
+  assert.match(css,/\.hn-magazine-binding::after/);
+  assert.match(book,/bindingRef = useRef<HTMLDivElement/);
+  assert.match(book,/binding\.style\.visibility='visible'/);
+  assert.match(book,/binding\.style\.left=/);
+  assert.match(css,/z-index:2/);
+  assert.doesNotMatch(book,/hn-magazine-page-block-spine/);
   assert.match(css,/\.hn-v2-book-paper \.hn-leaf::before/);
   assert.match(css,/\.hn-v2-book-paper \.hn-leaf\.hn-leaf-cover::before/);
   assert.match(css,/data-book-orientation="landscape"/);
+  assert.match(css,/width:26px/);
+  assert.match(css,/perspective\(380px\) rotateY\(-10deg\)/);
   assert.match(css,/pointer-events:none!important/);
   assert.match(css,/margin-bottom: calc\(var\(--hn-page-stack-depth\) \+ 9px\)/);
   assert.doesNotMatch(css,/\.hn-magazine-stage-bound::after/);

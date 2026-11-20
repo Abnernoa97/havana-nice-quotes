@@ -217,27 +217,6 @@
 }
 /* The visible binding forms a gentle concave gutter, not a thick flat rail.
    It meets the tapered bottom block and the top recess in each actual leaf. */
-.hn-magazine-page-block-spine {
-  position: absolute;
-  z-index: 1;
-  top: 2px;bottom: -8px;left: -1px;
-  width: clamp(9px,1.65%,14px);
-  border-radius: 45% 8% 38% 16% / 2% 3% 7% 2%;
-  background:
-    linear-gradient(90deg,
-      #272119b0 0%,#5e50409c 16%,#30281d7c 35%,
-      #aa997fa6 59%,#e7dcc585 75%,transparent 100%);
-  box-shadow: -2px 2px 4px #211b143d,inset -1px 0 2px #fff8e68a;
-}
-.hn-magazine-page-block-spine::before {
-  content: "";
-  position: absolute;
-  top: 0;left: -2px;
-  width: clamp(14px,2.7vw,22px);height: 14px;
-  border-radius: 0 0 65% 42%;
-  background: radial-gradient(ellipse 100% 80% at 21% 0%,
-    #1c211b94 0%,#5349397a 29%,#d6c8af7f 54%,transparent 85%);
-}
 /* The top notch is drawn on each REAL leaf, so it follows the curl.
    Its binding shade runs down the left edge and meets the page-stack spine. */
 .hn-v2-book-paper .hn-leaf::before{
@@ -263,13 +242,6 @@
 .hn-magazine-stage-bound .hn-magazine-surface {z-index: 1}
 .hn-magazine-stage-bound .hn-magazine-page-block,
 .hn-magazine-page-block * {pointer-events:none!important}
-/* Open spreads are bound in the center, not at their outside left edge. */
-.hn-magazine-stage-bound[data-book-orientation="landscape"] .hn-magazine-page-block-spine {
-  left: calc(50% - 5px);
-}
-.hn-magazine-stage-bound[data-book-orientation="landscape"] .hn-magazine-page-block-spine::before {
-  left: -4px;
-}
 @media(max-width:700px){
   .hn-magazine-stage-bound {margin-bottom: calc(var(--hn-page-stack-depth) + 9px)}
   .hn-magazine-page-block-bottom{
@@ -277,6 +249,62 @@
     filter: drop-shadow(0 3px 3px #241e1731);
   }
   .hn-magazine-page-block-side{right:-2px;width:3px}
-  .hn-magazine-page-block-spine{left:0;width:10px}
-  .hn-magazine-page-block-spine::before{left:0;width:14px;height:12px}
+}
+
+/* HAVANA NICE - satin-bound fashion magazine. The raised left binding
+   is distinct from the ivory paper stack and visible above the real sheet.
+   Purely visual: no gestures, PageFlip pages or layout dimensions change. */
+.hn-magazine-binding{
+  position:absolute;
+  z-index:2;
+  top:0;
+  left:0;
+  width:clamp(24px,3.7vw,33px);
+  visibility:hidden;
+  pointer-events:none;
+  border-radius:9px 4px 4px 8px / 18px 6px 9px 12px;
+  background:linear-gradient(to right,
+    #0e211ba8 0%,#1d3930ed 8%,#587565ec 21%,
+    #152b25f7 35%,#0a211dd9 46%,#6f8e7ac9 60%,
+    #263b32b5 74%,#16281c69 84%,transparent 100%);
+  box-shadow:-4px 2px 6px #12231a78,2px 0 5px #13291a62,
+    inset 2px 0 2px #dbe5d37a;
+  transform:perspective(380px) rotateY(-10deg);
+  transform-origin:right center;
+  isolation:isolate;
+}
+/* Curved, laminated headcap follows the left-side binding. */
+.hn-magazine-binding::before{
+  content:"";
+  position:absolute;
+  left:0;right:3px;top:0;
+  height:19px;
+  border-radius:65% 38% 0 0 / 55% 60% 0 0;
+  background:radial-gradient(ellipse 80% 100% at 42% 5%,
+    #c5d2bbab,transparent 78%),
+    linear-gradient(to bottom,#0a1c16c9 0%,#6b8776a1 40%,transparent 100%);
+  box-shadow:inset 0 2px 2px #c9d6c187;
+}
+/* Dark rounded tail touches the ivory U-shaped lower page block. */
+.hn-magazine-binding::after{
+  content:"";
+  position:absolute;
+  left:0;right:3px;bottom:-2px;
+  height:18px;
+  border-radius:0 0 5px 7px;
+  background:linear-gradient(to bottom,
+    transparent 0%,#172b24dc 48%,#4d6350c9 74%,#9eaf987a 100%);
+  box-shadow:0 3px 4px #1a251c55;
+}
+/* In an open spread the paper curl itself defines the middle gutter. */
+.hn-magazine-stage-bound[data-book-orientation="landscape"] .hn-magazine-binding{
+  display:none;
+}
+@media(max-width:700px){
+  .hn-magazine-binding{
+    width:26px;
+    border-radius:8px 3px 4px 7px / 17px 5px 7px 11px;
+    box-shadow:-3px 2px 6px #17261c8c,2px 0 5px #1e302575,
+      inset 2px 0 2px #d8e2d27a;
+  }
 }
