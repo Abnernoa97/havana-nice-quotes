@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Trash2 } from 'lucide-react';
 import TextStyleDock from '../texts/TextStyleDock';
-import type { TextToolTab } from '../texts/TextStyleDock';
 import PhotoLayersPanel from '../photos/PhotoLayersPanel';
 import PhotoSourcePicker from '../photos/PhotoSourcePicker';
 import { listPhotoLayers } from '../photos/photo-layers';
@@ -19,6 +18,7 @@ import CanvasPageToolbar from './components/CanvasPageToolbar';
 import CanvasPageContent from './components/CanvasPageContent';
 import CanvasPagePager from './components/CanvasPagePager';
 import { useCanvasPageActions } from './hooks/useCanvasPageActions';
+import { useCanvasSelectionState } from './hooks/useCanvasSelectionState';
 import { useCanvasTapConfirmation } from './hooks/useCanvasTapConfirmation';
 import { createCanvasTextInteraction } from './interactions/createCanvasTextInteraction';
 import { createCanvasRemovalActions } from './interactions/createCanvasRemovalActions';
@@ -41,29 +41,14 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const cleanCarolina=item.style==='carolina'&&item.designLayout?.freeCanvas===true;
   const [page, setPage] = useState<CarolinaPageId>(()=>carolinaPageOrder(item.designLayout)[0]);
   const selectedPages=carolinaPageOrder(item.designLayout);
-  const [target, setTarget] = useState<PhotoTarget | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  // New text lives only in local React state until the user actually writes it.
-  const [draftText, setDraftText] = useState<{id:string;page:CarolinaPageId}|null>(null);
-  const newlyConfirmedText=useRef<{id:string;page:CarolinaPageId;text:string;centered:true}|null>(null);
-  const lastGestureMoveAt=useRef(0);
-  const justMoved=useRef(false);
-  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
-  const [photoTool, setPhotoTool] = useState<'crop'|'vignette'|null>(null);
-  const [photoAspect, setPhotoAspect] = useState(3/4);
-  const [photoLayersOpen, setPhotoLayersOpen] = useState(false);
-  const [lastTextId, setLastTextId] = useState<string | null>(null);
-  const [activeTextTool,setActiveTextTool]=useState<TextToolTab|null>(null);
-  const [showPageMenu,setShowPageMenu]=useState(false);
-  const [trashHovered, setTrashHovered] = useState(false);
-  const [transformingId, setTransformingId] = useState<string | null>(null);
-  const [bank, setBank] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  useEffect(() => {
-    setPage(carolinaPageOrder(item.designLayout)[0]); setTarget(null); setBank(false); setEditingId(null); setTransformingId(null);
-    setLastTextId(null); setActiveTextTool(null); setSelectedPhotoId(null); setPhotoTool(null); setPhotoLayersOpen(false); setTrashHovered(false); setDraftText(null); setShowPageMenu(false);
-  }, [item.id, item.style]);
+  const {
+    target,setTarget,editingId,setEditingId,draftText,setDraftText,newlyConfirmedText,
+    lastGestureMoveAt,justMoved,selectedPhotoId,setSelectedPhotoId,
+    photoTool,setPhotoTool,photoAspect,setPhotoAspect,photoLayersOpen,setPhotoLayersOpen,
+    lastTextId,setLastTextId,activeTextTool,setActiveTextTool,
+    showPageMenu,setShowPageMenu,trashHovered,setTrashHovered,transformingId,setTransformingId,
+    bank,setBank,busy,setBusy,error,setError,clearSelection,
+  }=useCanvasSelectionState(item,setPage);
   useEffect(()=>{
     if(!selectedPages.includes(page))setPage(selectedPages[0]);
   },[page,JSON.stringify(selectedPages)]);
@@ -102,10 +87,6 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     setPhotoLayersOpen,setTrashHovered,setError,
   });
   const pageIndex=selectedPages.indexOf(page);
-  const clearSelection=()=>{
-    setDraftText(null);setPhotoLayersOpen(false);setTransformingId(null);setEditingId(null);
-    setLastTextId(null);setActiveTextTool(null);setSelectedPhotoId(null);setPhotoTool(null);setTrashHovered(false);
-  };
   const {togglePageMenu,addPage,duplicatePage,deletePage,changePage}=useCanvasPageActions({
     item,edit,page,selectedPages,showPageMenu,busy,editingId,clearSelection,
     setShowPageMenu,setTarget,setBank,setError,setPage,

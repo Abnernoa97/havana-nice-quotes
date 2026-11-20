@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const src = file => readFileSync(new URL('../src/' + file, import.meta.url), 'utf8');
-const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","interactions/createCanvasRemovalActions.ts","interactions/createCanvasTextStyleActions.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","interactions/createCanvasRemovalActions.ts","interactions/createCanvasTextStyleActions.ts","hooks/useCanvasSelectionState.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
 
 test('Plantilla real y cinco estilos mantienen ambos modos editor/cliente', () => {
   const editor = src('features/editor/QuoteEditorScreen.tsx');

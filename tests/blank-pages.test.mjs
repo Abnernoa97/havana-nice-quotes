@@ -6,7 +6,7 @@ import {validCarolinaLayout,carolinaPageOrder,MAX_DESIGN_PAGES,cleanEmptyExtraTe
 import {insertBlankPage,duplicateBlankPage,shiftPage,removeDesignPage} from '../src/features/templates/blank-pages.ts';
 import {pageBackgroundMediaId} from '../src/features/templates/page-background.ts';
 const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
-const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","interactions/createCanvasRemovalActions.ts","interactions/createCanvasTextStyleActions.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx","interactions/createCanvasTextInteraction.ts","media/canvasPhotoUrl.ts","media/createCanvasPhotoActions.ts","interactions/createCanvasRemovalActions.ts","interactions/createCanvasTextStyleActions.ts","hooks/useCanvasSelectionState.ts","components/CanvasPagePager.tsx","hooks/useCanvasPageActions.ts"].map(p=>src('features/editor/canvas/'+p)).join('\n');
 const one='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',two='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 test('Crear plantilla desde cero abre una sola hoja blanca persistente',()=>{
  const tpl=createOwnTemplate('hn-new');

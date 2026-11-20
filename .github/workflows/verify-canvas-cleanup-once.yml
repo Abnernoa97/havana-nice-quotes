@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/verify-canvas-cleanup-once.yml'
+      - 'src/features/editor/canvas/hooks/useCanvasSelectionState.ts'
 permissions:
   contents: read
 jobs:
