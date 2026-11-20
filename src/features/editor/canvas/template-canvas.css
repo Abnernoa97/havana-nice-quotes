@@ -167,3 +167,14 @@
 .hn-canvas-paper-swatch.beige{background:#f1ebdf}
 .hn-canvas-pager .hn-canvas-paper-all{width:100%;min-height:37px;display:flex;align-items:center;justify-content:center;gap:7px;padding:6px 9px;font-size:11px;background:#e9eee7}
 @media(max-width:530px){.hn-canvas .hn-canvas-pager{gap:5px}.hn-canvas .hn-canvas-pager button{width:36px;height:38px;flex-basis:36px}.hn-canvas .hn-canvas-pager .hn-canvas-paper-toggle{min-width:70px;width:auto;padding:0 5px}.hn-canvas-paper-menu{right:-50px}}
+
+/* The selected text has a larger invisible touch target, not larger typography. */
+.hn-canvas .hn-carolina-text-node.transforming:not(.editing)::after{
+ content:"";position:absolute;inset:-13px;pointer-events:auto;
+}
+.hn-canvas .hn-carolina-page .hn-carolina-added-text:has(.hn-carolina-text-node.editing){
+ user-select:text;-webkit-user-select:text;-webkit-touch-callout:default;touch-action:auto;
+}
+.hn-canvas.hn-text-focus .hn-carolina-text-node.editing{
+ pointer-events:auto;user-select:text;-webkit-user-select:text;touch-action:auto;
+}

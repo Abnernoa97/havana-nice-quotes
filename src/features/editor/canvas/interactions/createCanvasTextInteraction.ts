@@ -97,8 +97,13 @@ export function createCanvasTextInteraction({
       if(value)setTransformingId(id);
     },
     onDeselectTransform: id => {
-      // A confirming tap closes ALL tools for this element, not just its move state.
-      if(isPhotoId(id))setPhotoLayersOpen(false);
+      if(!isPhotoId(id)){
+        // Tap a transformed word to place the native editing caret, not to discard it.
+        setTransformingId(null);setEditingId(id);setLastTextId(id);
+        setActiveTextTool(null);setTrashHovered(false);
+        return;
+      }
+      setPhotoLayersOpen(false);
       clearSelection();
     },
     onCommitTransform: (id: string, transform: CarolinaTransform) => {

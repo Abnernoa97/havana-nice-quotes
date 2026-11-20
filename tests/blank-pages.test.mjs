@@ -220,16 +220,16 @@ test('Crear texto no persiste cuadros vacíos ni genera cajas invisibles en Scro
  assert.match(canvas,/cleanEmptyExtraTexts\(item\.designLayout\)/);
  assert.match(page,/Boolean\(e\.text\.trim\(\)\)/);
  assert.match(node,/interaction && !extra \? '✎' : ''/);
- assert.match(gesture,/pendingPageEdit\.current/);
+ assert.doesNotMatch(gesture,/pendingPageEdit\.current/);
 });
-test('Movimiento inmediato desde la hoja: texto activo, fotos y videos comparten un solo gesto',()=>{
+test('Movimiento exclusivo de la capa elegida: no se mueve el fondo desde un texto',()=>{
  const hook=src('features/templates/useCarolinaGesture.ts');
  const canvas=canvasSource();
  const css=src('features/editor/canvas/template-canvas.css');
- assert.match(hook,/page\.addEventListener\('pointerdown',down\)/);
- assert.match(hook,/page\.setPointerCapture\(event\.pointerId\)/);
+ assert.doesNotMatch(hook,/page\.addEventListener\('pointerdown',down\)/);
+ assert.match(hook,/if\(owner && owner!==id\)return/);
  assert.match(hook,/interactionRef\.current\?\.onSelectTransform\(id\)/);
- assert.match(hook,/Math\.hypot\(event\.clientX-start\.x,event\.clientY-start\.y\)<7/);
+ assert.match(hook,/event\.currentTarget\.setPointerCapture\(event\.pointerId\)/);
  assert.match(hook,/finish\(event\.pointerId,event\.clientX,event\.clientY\)/);
  assert.match(canvas,/if\(Date\.now\(\)-lastGestureMoveAt\.current<180\)/);
  assert.match(css,/\.hn-canvas\.hn-text-focus \.hn-carolina-page\{touch-action:none\}/);
@@ -258,12 +258,12 @@ test('Texto editable cede el toque al cursor; drag vuelve al cerrar teclado',()=
  const gesture=src('features/templates/useCarolinaGesture.ts');
  const node=src('features/templates/CarolinaTextNode.tsx');
  const canvas=canvasSource();
- assert.match(gesture,/if \(disabled \|\| \(!selected && !editingHere\) \|\| !node\.current\) return/);
+ assert.doesNotMatch(gesture,/page\.addEventListener\('pointerdown'/);
  assert.doesNotMatch(gesture,/if\(disabled && editingHere\)/);
  assert.match(node,/onPointerDown=\{editing \? undefined : gesture\.onPointerDown\}/);
  assert.match(node,/caretPositionFromPoint/);
  assert.match(gesture,/interactionRef\.current\?\.onSelectTransform\(id\)/);
- assert.match(gesture,/page\.setPointerCapture\(event\.pointerId\)/);
+ assert.match(gesture,/if\(owner && owner!==id\)return/);
  assert.match(canvas,/if \(editingId && document\.activeElement instanceof HTMLElement\)document\.activeElement\.blur\(\)/);
  assert.match(canvas,/newlyConfirmedText\.current/);
 });

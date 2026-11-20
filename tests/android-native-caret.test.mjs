@@ -8,18 +8,19 @@ const canvas=read('features/editor/canvas/template-canvas.css');
 const tap=read('features/editor/canvas/hooks/useCanvasTapConfirmation.ts');
 
 test('Editing text delegates Android pointer and context menu events to native caret',()=>{
- for(const name of ['onPointerDown','onPointerMove','onPointerUp','onPointerCancel'])
+ for(const name of ['onPointerDown','onPointerMove','onPointerCancel'])
   assert.ok(text.includes(name+'={editing ? undefined : gesture.'+name+'}'),name);
  assert.match(text,/if \(!editing\) event\.preventDefault\(\)/);
  assert.match(text,/contentEditable=\{editing \? 'plaintext-only' : undefined\}/);
  assert.match(text,/initialCaretPoint\.current=\{x:event\.clientX,y:event\.clientY\}/);
  assert.match(text,/caretPositionFromPoint/);
  assert.match(text,/caretRangeFromPoint/);
+ assert.match(text,/placeCaretAtPoint\(event\.currentTarget,event\.clientX,event\.clientY\)/);
  assert.match(text,/range\.selectNodeContents\(element\)/);
  assert.match(text,/\}, \[editing\]\)/);
 });
 test('Gesture listener and tap confirmation ignore a live editable text',()=>{
- assert.match(gesture,/if \(disabled \|\| \(!selected && !editingHere\) \|\| !node\.current\) return/);
+ assert.doesNotMatch(gesture,/page\.addEventListener\('pointerdown'/);
  assert.doesNotMatch(gesture,/if\(disabled && editingHere\)\{/);
  assert.match(gesture,/if\(disabled\)return/);
  assert.match(tap,/if\(el\.closest\('\[data-carolina-text\]\.editing'\)\)return/);

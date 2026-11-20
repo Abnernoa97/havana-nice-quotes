@@ -27,8 +27,8 @@ function geometry(values: Point[]) {
     angle: b ? Math.atan2(b.y - a.y, b.x - a.x) : 0 };
 }
 
-/** One shared interaction for images and text. D1 writes only when the final finger lifts.
- * Pointer capture keeps dragging smooth; second finger may touch anywhere on the sheet. */
+/** One shared gesture for photos and text. It never captures touches from the sheet.
+ * Only the element which received pointerdown may move, zoom or rotate. */
 export function useCarolinaGesture<T extends HTMLElement>(
   id: string, node: RefObject<T | null>, saved: CarolinaTransform | undefined,
   interaction: CarolinaGestureInteraction | undefined, disabled = false,
@@ -43,13 +43,11 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const swallowClick = useRef(false);
   const selectedAtPress = useRef(false);
   const movedDuringPress = useRef(false);
-  const pendingPageEdit = useRef(false);
   const twoFingerAction=useRef<TwoFingerAction>('pending');
   const previousAngle=useRef<number|null>(null);
   const cumulativeTurn=useRef(0);
   const pinchUsed=useRef(false);
   const selected = interaction?.transformingId === id;
-  const editingHere = interaction?.editingId === id;
   const interactionRef = useRef(interaction);
   interactionRef.current = interaction;
 
@@ -78,18 +76,6 @@ export function useCarolinaGesture<T extends HTMLElement>(
     twoFingerAction.current='pending';
     previousAngle.current=pointers.current.size>=2?frame.angle:null;
     cumulativeTurn.current=0;
-  };
-  const beginEditDrag=(pointerId:number,x:number,y:number)=>{
-    pendingPageEdit.current=true;
-    press.current={x,y};
-    pointers.current.set(pointerId,{x,y});
-    selectedAtPress.current=false;
-    movedDuringPress.current=false;
-  };
-  const finishEditTap=(pointerId:number)=>{
-    pendingPageEdit.current=false;
-    pointers.current.delete(pointerId);
-    press.current=null;
   };
   const pageWidth = () => node.current?.closest('.hn-carolina-page')?.getBoundingClientRect().width || 1;
 
@@ -188,7 +174,7 @@ export function useCarolinaGesture<T extends HTMLElement>(
       const changed = JSON.stringify(current.current) !== JSON.stringify(saved || ZERO_TRANSFORM);
       if (!dropped && changed) {
         interactionRef.current?.onCommitTransform(id, current.current);
-      } else if (!dropped && selectedAtPress.current && !movedDuringPress.current) {
+      } else if (!dropped && selectedAtPress.current && !movedDuringPress.current && !pinchUsed.current) {
         // This is a confirming tap, not a request to reopen the media/text editor.
         interactionRef.current?.onDeselectTransform?.(id);
       }
@@ -201,76 +187,14 @@ export function useCarolinaGesture<T extends HTMLElement>(
     cumulativeTurn.current=0;
   };
 
-  // The selected element owns gestures that begin anywhere else on its page.
-  // A freshly typed text can enter the same gesture on the first drag, without a hold.
-  useEffect(() => {
-    if (disabled || (!selected && !editingHere) || !node.current) return;
-    const page = node.current.closest('.hn-carolina-page') as HTMLElement | null;
-    if (!page) return;
-    const outsideNode = (event: PointerEvent) =>
-      !!node.current && !node.current.contains(event.target as Node);
-    const isDeleteTarget = (event: PointerEvent) =>
-      event.target instanceof Element && !!event.target.closest('[data-hn-text-trash]');
-    const down = (event: PointerEvent) => {
-      if (!outsideNode(event) || isDeleteTarget(event)) return;
-      if (!pointers.current.size && interactionRef.current?.editingId===id) {
-        // A tap outside still confirms. Movement of 7px turns it into an immediate drag.
-        beginEditDrag(event.pointerId,event.clientX,event.clientY);
-        return;
-      }
-      begin(event.pointerId,event.clientX,event.clientY);
-      try { page.setPointerCapture(event.pointerId); } catch { /* OS cancelled */ }
-    };
-    const move = (event: PointerEvent) => {
-      if (!pointers.current.has(event.pointerId)) return;
-      if (pendingPageEdit.current) {
-        const start=press.current;
-        if (!start || Math.hypot(event.clientX-start.x,event.clientY-start.y)<7) return;
-        pendingPageEdit.current=false;
-        cancelHold();
-        longPressed.current=true;
-        swallowClick.current=true;
-        resetBaseline();
-        interactionRef.current?.onSelectTransform(id);
-        try {page.setPointerCapture(event.pointerId);}catch{/* OS cancelled */}
-      }
-      update(event.pointerId,event.clientX,event.clientY);
-    };
-    const up = (event: PointerEvent) => {
-      if (!pointers.current.has(event.pointerId)) return;
-      if (pendingPageEdit.current) {
-        finishEditTap(event.pointerId);
-        return;
-      }
-      finish(event.pointerId,event.clientX,event.clientY);
-    };
-    const cancel = (event: PointerEvent) => {
-      if (!pointers.current.has(event.pointerId)) return;
-      cancelHold();
-      pendingPageEdit.current=false;
-      pointers.current.delete(event.pointerId);
-      if (pointers.current.size) {resetBaseline();return;}
-      baseline.current=null;press.current=null;longPressed.current=false;
-      current.current=saved||ZERO_TRANSFORM;
-      setLive(saved||ZERO_TRANSFORM);
-    };
-    page.addEventListener('pointerdown',down);
-    page.addEventListener('pointermove',move);
-    page.addEventListener('pointerup',up);
-    page.addEventListener('pointercancel',cancel);
-    return () => {
-      page.removeEventListener('pointerdown',down);
-      page.removeEventListener('pointermove',move);
-      page.removeEventListener('pointerup',up);
-      page.removeEventListener('pointercancel',cancel);
-    };
-  },[selected,editingHere,id]);
-
   const onPointerDown = (event: ReactPointerEvent<T>) => {
     if (!interaction || event.pointerType === 'mouse' && event.button !== 0) return;
     // The contenteditable text owns native caret positioning and handles.
     // Gesture tracking resumes only after its edit session has closed.
     if(disabled)return;
+    // Each touch belongs to its original text/photo; never to a page-wide owner.
+    const owner=interaction.transformingId || interaction.editingId;
+    if(owner && owner!==id)return;
     begin(event.pointerId, event.clientX, event.clientY);
     // A previously armed layer is explicitly being moved; otherwise leave the
     // pointer unclaimed and allow native vertical scrolling / pointercancel.
@@ -279,7 +203,6 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const onPointerMove = (event: ReactPointerEvent<T>) =>
     update(event.pointerId, event.clientX, event.clientY);
   const onPointerUp = (event: ReactPointerEvent<T>) => {
-    if(pendingPageEdit.current){finishEditTap(event.pointerId);return;}
     finish(event.pointerId,event.clientX,event.clientY);
   };
   const onPointerCancel = (event: ReactPointerEvent<T>) => {
