@@ -1,111 +1,113 @@
 <!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f2ecdf">
-<title>HAVANA NICE — LAB 5 · Cinematic Video</title>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f1ebdf"><title>HAVANA NICE · LAB 5 · Video real</title>
 <style>
-:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;--ink:#214336;--cream:#f2ecdf;--outline:#d5d0c3}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--cream);color:var(--ink);min-height:100%}
-button,input,select{font:inherit}
-button{cursor:pointer}
-button:focus-visible,.pick:focus-within,select:focus-visible{outline:3px solid #b29b69;outline-offset:3px}
-main{max-width:960px;margin:0 auto;min-height:100svh;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);background:radial-gradient(ellipse at 50% 39%,#fffaf1 2%,#eee8db 90%)}
-header{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:21px 7px 10px}
-.brand{font:400 clamp(18px,5vw,25px) Georgia,serif;letter-spacing:.08em}
-.lab{border:1px solid #c8c7b8;padding:8px 12px;border-radius:40px;font:700 10px system-ui;letter-spacing:.15em;color:#68766c}
-.intro{text-align:center;padding:12px 12px 14px}
-.kicker{font:700 10px system-ui;letter-spacing:.2em;color:#8a9689}
-.intro h1{font:400 clamp(29px,7vw,40px)/1.14 Georgia,serif;margin:9px 0}
-.intro p{font-size:12px;line-height:1.5;color:#778579;max-width:480px;margin:0 auto}
-.stage{position:relative;overflow:hidden;isolation:isolate;width:min(100%,540px);height:min(104vw,62svh);min-height:330px;max-height:570px;margin:0 auto;background:radial-gradient(circle at 50% 48%,#fdf9f1,#d7cdbb);box-shadow:0 18px 45px #5346393b;display:grid;place-items:center}
-.stage video{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center;display:block;background:#eee8dc}
-.stage[data-available=false] video{display:none}
-.stage .empty{max-width:250px;padding:25px;text-align:center;z-index:2;font:400 20px/1.25 Georgia,serif;color:#586d60}
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f1ebdf;color:#224535}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%}
+button,a{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible,.pick:focus-within{outline:2px solid #b19b70;outline-offset:3px}
+main{min-height:100svh;max-width:680px;margin:auto;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);display:flex;flex-direction:column;align-items:center;background:radial-gradient(ellipse at 50% 42%,#fffbf4,#eee9de 92%)}
+header{width:100%;display:flex;justify-content:space-between;align-items:center;padding:21px 8px 10px;gap:10px}
+.brand{font:400 clamp(17px,4.8vw,24px) Georgia,serif;letter-spacing:.08em}
+.lab{font:700 10px system-ui;letter-spacing:.13em;border:1px solid #cdd0c4;border-radius:99px;padding:8px 12px;color:#748476}
+header+div{text-align:center;padding:15px 8px 16px}.kicker{font-size:10px;letter-spacing:.22em;color:#859387;font-weight:700}
+h1{font:400 clamp(28px,7vw,38px)/1.05 Georgia,serif;margin:9px 0}
+.subtitle{font-size:12px;line-height:1.45;color:#6e8072;margin:0}
+.stage{width:min(100%,min(48svh * .5625,420px));max-width:100%;aspect-ratio:9/16;position:relative;isolation:isolate;background:#e3dac9;overflow:hidden;box-shadow:0 18px 40px #4e433831}
+.stage video{width:100%;height:100%;object-fit:contain;display:block;background:#eee8dc}
+.stage .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:30px;text-align:center;color:#55685d;font:400 20px/1.3 Georgia,serif}
 .stage[data-available=true] .empty{display:none}
-.stage .shade{position:absolute;inset:0;pointer-events:none;z-index:3;background:linear-gradient(180deg,#1d241411,transparent 45%,#151e1740);opacity:.45;transition:opacity .35s}
-.stage .cover{position:absolute;z-index:4;inset:7% 13%;background:linear-gradient(145deg,#385448 0%,#173d2e 39%,#08291d 100%);box-shadow:inset 8px 0 15px #091c14ab,0 24px 28px #101c1448,inset 0 0 0 1px #dfd0b755;opacity:0;transform:translate3d(0,24px,0) scale(.97);transition:opacity .85s ease,transform 1.15s cubic-bezier(.2,.72,.3,1);pointer-events:none}
-.stage .cover::before{content:"";position:absolute;inset:2%;border:1px solid #efe4c993;box-shadow:inset 0 0 0 3px #1d3b2b30}
-.stage .cover::after{content:"";position:absolute;top:0;bottom:0;left:0;width:5.5%;background:linear-gradient(90deg,#061a1299,#e8d2a537 70%,transparent)}
-.cover-inside{position:absolute;inset:9% 10%;display:flex;flex-direction:column;color:#fff}
-.cover-inside small{font:700 9px system-ui;letter-spacing:.2em}
-.cover-inside strong{font:400 clamp(34px,11vw,65px)/.96 Georgia,serif;letter-spacing:.055em;margin-top:10%}
-.cover-inside footer{font:700 8px system-ui;letter-spacing:.12em;display:flex;justify-content:space-between;gap:6px;margin-top:auto}
-.stage[data-done=true] video{filter:blur(5px) brightness(.75);transition:filter .85s}
-.stage[data-done=true] .cover{opacity:1;transform:none}
-.stage[data-done=true] .shade{opacity:.7}
-.timeline{width:min(100%,540px);margin:11px auto 2px;height:3px;border-radius:4px;background:#c9cabe;overflow:hidden}
-.timeline>span{display:block;height:100%;background:#305943;width:0;transition:width .08s linear}
-.meta{width:min(100%,540px);margin:0 auto;display:flex;justify-content:space-between;padding:8px 0 4px;color:#819082;font:500 11px system-ui}
-.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;padding:9px 0}
-.btn,.pick{min-height:43px;border:1px solid #d2d5ca;border-radius:99px;background:#fffcf6;color:#284638;padding:12px 18px;font:650 12px system-ui;display:flex;justify-content:center;align-items:center}
-.btn.primary{background:#214836;border-color:#214836;color:#fff}
-.pick{position:relative;overflow:hidden}
-.pick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
-.config{max-width:560px;margin:8px auto 0;display:flex;flex-wrap:wrap;justify-content:center;gap:9px;align-items:center;font-size:12px;color:#687c6b}
-.config select{border:1px solid #d3d6cc;border-radius:50px;padding:10px;background:#fffaf3;color:#284638}
-.status{text-align:center;color:#607567;max-width:560px;margin:8px auto;min-height:34px;font-size:12px;line-height:1.5}
-.help{max-width:550px;text-align:center;margin:16px auto 0;padding:12px 10px 25px;font:400 11px/1.6 system-ui;color:#8b968c}
-.help a{color:#365c43}
-@media(max-width:380px){.stage{min-height:310px;height:90vw}.btn,.pick{padding:11px 13px}}
-@media(prefers-reduced-motion:reduce){.stage video,.stage .cover,.stage .shade{transition:none!important}}
-</style>
-</head>
-<body>
-<main>
+.stage .endnote{position:absolute;bottom:12px;left:12px;right:12px;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.stage .endnote span{display:inline-block;color:#213f32;background:#f9f5ecda;backdrop-filter:blur(4px);padding:8px 12px;border-radius:22px;font:600 11px system-ui}
+.stage[data-done=true] .endnote{opacity:1}
+.track{margin:14px auto 3px;width:100%;max-width:420px;height:3px;background:#c7cabe}
+.track>div{width:0;height:100%;background:#315f48}
+.times{display:flex;width:100%;max-width:420px;justify-content:space-between;color:#748477;font-size:11px}
+.controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0 7px}
+.btn,.pick,.app-link{min-height:43px;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;padding:12px 16px;border:1px solid #d2d7cd;border-radius:99px;background:#fffdf7;color:#284638;font-size:12px;font-weight:650;text-decoration:none}
+.btn.primary{background:#214534;border-color:#214534;color:white}
+.pick{position:relative;overflow:hidden}.pick input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
+.app-link{background:#e9ede6;border-color:#ced9d0}
+.settings{font-size:12px;color:#697a6c;display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+select{border:1px solid #d1d7cb;background:#fffcf6;border-radius:99px;padding:10px 12px;color:#234534;font:inherit}
+.status{min-height:24px;font-size:12px;line-height:1.4;color:#5e7765;text-align:center;margin:9px 12px}
+footer{margin:auto 0 0;text-align:center;padding:10px 17px max(16px,env(safe-area-inset-bottom));font-size:10px;color:#889387;line-height:1.55}
+footer a{color:#41644a}
+@media(max-height:770px){header+div{padding-top:4px;padding-bottom:8px}.stage{width:min(100%,min(43svh * .5625,420px))}}
+@media(prefers-reduced-motion:reduce){.stage .endnote{transition:none}}
+</style></head>
+<body><main>
 <header><span class="brand">HAVANA NICE</span><span class="lab">CINEMATIC LAB 5</span></header>
-<section class="intro"><span class="kicker">THE PAPER EXPERIENCE</span><h1>Real Video Transition</h1><p>Prueba tu video real y experimenta cómo conecta con la portada de la revista. Todo sucede en tu teléfono.</p></section>
-<div class="stage" data-available="false" data-done="false" id="stage">
-  <video id="video" playsinline webkit-playsinline muted preload="metadata" disablepictureinpicture></video>
-  <div class="empty">Selecciona el MP4 que acabas de generar para iniciar la prueba.</div>
-  <div class="shade"></div>
-  <div class="cover" aria-hidden="true">
-    <div class="cover-inside"><small>THE PRIVATE EDITION</small><strong>HAVANA<br>NICE</strong><footer><span>BOOK HAVANA NICE</span><span>01 / EDITION</span></footer></div>
-  </div>
+<div><span class="kicker">THE PAPER EXPERIENCE</span><h1>Real Video</h1><p class="subtitle">Tu libro verdadero en video, sin portadas inventadas.</p></div>
+<div class="stage" id="stage" data-available="false" data-done="false">
+<video id="video" muted autoplay playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
+<div class="empty">Importa tu video real una sola vez para probarlo aquí.</div>
+<div class="endnote"><span>El fotograma del video se conserva sin efectos añadidos</span></div>
 </div>
-<div class="timeline"><span id="progress"></span></div>
-<div class="meta"><span id="elapsed">00:00</span><span id="total">00:00</span></div>
+<div class="track"><div id="progress"></div></div>
+<div class="times"><span id="elapsed">00:00</span><span id="total">00:00</span></div>
 <div class="controls">
-<label class="pick">Elegir mi video<input id="file" type="file" accept="video/mp4,video/webm,video/quicktime" aria-label="Seleccionar video local"></label>
-<button type="button" id="play" class="btn primary" disabled>Reproducir</button>
-<button type="button" id="again" class="btn" disabled>Repetir</button>
-<button type="button" id="skip" class="btn" disabled>Ir a portada</button>
+<label class="pick">Importar MP4<input id="file" type="file" accept="video/mp4,video/webm,video/quicktime"></label>
+<button class="btn primary" type="button" id="play" disabled>Reproducir</button>
+<button class="btn" type="button" id="again" disabled>Repetir</button>
+<button class="btn" type="button" id="skip" disabled>Ir al final</button>
+<a class="app-link" href="/" title="Abre la aplicación original; no una portada ficticia">Abrir HAVANA QUOTES</a>
 </div>
-<div class="config">
-<label for="cut">Transición a portada:</label>
-<select id="cut" aria-label="Momento de transición"><option value="2.8">2.8 s · Antes de cierre</option><option value="4.7">4.7 s · Cambio de escena</option><option value="7.6" selected>7.6 s · Video completo</option><option value="0">Al finalizar video</option></select>
+<div class="settings"><label for="cut">Detener video en:</label>
+<select id="cut"><option value="0" selected>El final real</option><option value="2.8">2.8 segundos</option><option value="4.7">4.7 segundos</option><option value="7.6">7.6 segundos</option></select>
 </div>
-<p class="status" id="status" aria-live="polite">Sin video seleccionado. El archivo nunca sale de tu teléfono.</p>
-<p class="help">LAB independiente. No altera la revista 3D ni guarda tus cotizaciones. La portada final es una demostración de la transición; todavía no abre la revista interactiva. <a href="/paper-motion-studio.html">Ver LAB 2–4</a> · <a href="/">Volver a HAVANA QUOTES</a></p>
-</main>
+<p class="status" id="status" aria-live="polite">El video se conservará únicamente en este dispositivo para las siguientes pruebas.</p>
+<footer>Laboratorio completamente aislado de las cotizaciones, fotografías y revista 3D. No se modifica ni desenfoca tu video, y no se reemplaza con una portada verde. <a href="/paper-motion-studio.html">Otros laboratorios</a></footer>
 <script>
 (()=>{
 'use strict';
-const file=document.getElementById('file'),video=document.getElementById('video'),stage=document.getElementById('stage'),progress=document.getElementById('progress'),status=document.getElementById('status'),play=document.getElementById('play'),again=document.getElementById('again'),skip=document.getElementById('skip'),cut=document.getElementById('cut'),elapsed=document.getElementById('elapsed'),total=document.getElementById('total');
-let src=null,armed=false;
-const seconds=s=>{s=Math.max(0,Number(s)||0);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0')};
-const finish=()=>{armed=false;video.pause();stage.dataset.done='true';status.textContent='La portada está alineada y lista para enlazar con la revista 3D real. Esta conexión todavía no está activada.';play.textContent='Reproducir';};
-const update=()=>{elapsed.textContent=seconds(video.currentTime);progress.style.width=video.duration?Math.min(100,100*video.currentTime/video.duration)+'%':'0%';if(armed && ((Number(cut.value)>0&&video.currentTime>=Number(cut.value))||video.ended))finish()};
-const start=async()=>{if(!src)return;armed=false;stage.dataset.done='false';video.pause();try{video.currentTime=0}catch{};progress.style.width='0%';armed=true;status.textContent='Reproduciendo el video original…';play.textContent='Reproduciendo';try{await video.play()}catch(e){armed=false;status.textContent='Pulsa Reproducir para permitir la reproducción en el teléfono.';play.textContent='Reproducir';}};
-file.addEventListener('change',()=>{
-const selected=file.files?.[0];if(!selected)return;
-if(!['video/mp4','video/webm','video/quicktime'].includes(selected.type)){status.textContent='Selecciona un archivo MP4, WebM o MOV.';return;}
-armed=false;video.pause();if(src)URL.revokeObjectURL(src);
-src=URL.createObjectURL(selected);stage.dataset.available='true';stage.dataset.done='false';video.src=src;video.load();
-play.disabled=false;again.disabled=false;skip.disabled=false;
-status.textContent=selected.name+' cargado solo en este teléfono. Puedes reproducirlo.';
-play.textContent='Reproducir';progress.style.width='0%';elapsed.textContent='00:00';
+const video=document.getElementById('video'),stage=document.getElementById('stage'),file=document.getElementById('file'),play=document.getElementById('play'),again=document.getElementById('again'),skip=document.getElementById('skip'),cut=document.getElementById('cut'),status=document.getElementById('status'),elapsed=document.getElementById('elapsed'),total=document.getElementById('total'),progress=document.getElementById('progress');
+let url=null,armed=false;
+const fmt=s=>{s=Math.max(0,Number(s)||0);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0')};
+function openDb(){return new Promise((resolve,reject)=>{
+ if(!('indexedDB' in window)){reject(new Error('Storage unavailable'));return;}
+ const req=indexedDB.open('hn-paper-lab5-local',1);
+ req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('videos'))req.result.createObjectStore('videos')};
+ req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+})}
+async function cacheVideo(blob){const db=await openDb();return new Promise((resolve,reject)=>{
+ const tx=db.transaction('videos','readwrite');tx.objectStore('videos').put(blob,'intro');
+ tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)};
+})}
+async function readCachedVideo(){const db=await openDb();return new Promise((resolve,reject)=>{
+ const tx=db.transaction('videos','readonly');const req=tx.objectStore('videos').get('intro');
+ req.onsuccess=()=>{db.close();resolve(req.result||null)};req.onerror=()=>{db.close();reject(req.error)};
+})}
+function finish(){
+ armed=false;video.pause();stage.dataset.done='true';play.textContent='Reproducir';
+ status.textContent='Este es el fotograma REAL de tu video. El botón HAVANA QUOTES abre la aplicación original, sin ninguna portada simulada.';
+}
+function update(){elapsed.textContent=fmt(video.currentTime);progress.style.width=video.duration?Math.min(100,video.currentTime/video.duration*100)+'%':'0%';
+ const mark=Number(cut.value);if(armed&&mark>0&&video.currentTime>=mark)finish();
+}
+async function start(){if(!url)return;video.pause();try{video.currentTime=0}catch{}
+ stage.dataset.done='false';armed=true;status.textContent='Reproduciendo tu video original';play.textContent='Pausar';
+ try{await video.play()}catch{armed=false;status.textContent='Toca Reproducir para autorizar el video.';play.textContent='Reproducir'}
+}
+function load(blob,restored=false){
+ if(url)URL.revokeObjectURL(url);
+ url=URL.createObjectURL(blob);stage.dataset.available='true';stage.dataset.done='false';
+ video.src=url;video.load();play.disabled=false;again.disabled=false;skip.disabled=false;
+ status.textContent=restored?'Video real recuperado de este teléfono; listo para reproducir.':'Video real cargado. Se conservará localmente en este teléfono.';
+ video.addEventListener('loadedmetadata',()=>{total.textContent=fmt(video.duration)},{once:true});
+ if(restored)video.addEventListener('loadeddata',()=>{void start()},{once:true});
+}
+file.addEventListener('change',async()=>{
+ const selected=file.files?.[0];if(!selected)return;
+ if(!['video/mp4','video/webm','video/quicktime'].includes(selected.type)){status.textContent='Elige un video MP4, WebM o MOV.';return;}
+ load(selected);
+ try{await cacheVideo(selected)}catch{status.textContent='Video cargado, pero el navegador no permitió guardarlo localmente.'}
 });
-video.addEventListener('loadedmetadata',()=>{total.textContent=seconds(video.duration);if(video.duration<7.6)cut.value='0';});
-video.addEventListener('timeupdate',update);
-video.addEventListener('ended',finish);
-play.addEventListener('click',start);
-again.addEventListener('click',start);
-skip.addEventListener('click',finish);
-window.addEventListener('pagehide',()=>{video.pause();if(src)URL.revokeObjectURL(src)});
+video.addEventListener('timeupdate',update);video.addEventListener('ended',finish);
+play.addEventListener('click',()=>{if(video.paused)void start();else{video.pause();armed=false;play.textContent='Reproducir';status.textContent='Video en pausa'}});
+again.addEventListener('click',()=>{void start()});
+skip.addEventListener('click',()=>{if(!url)return;const mark=Number(cut.value);try{video.currentTime=mark>0?Math.min(mark,video.duration):Math.max(0,video.duration-0.05)}catch{}finish()});
+window.addEventListener('pagehide',()=>{video.pause();if(url)URL.revokeObjectURL(url)});
+readCachedVideo().then(blob=>{if(blob)load(blob,true)}).catch(()=>{});
 })();
-</script>
-</body>
-</html>
+</script></main></body></html>
