@@ -106,7 +106,8 @@ export function duplicateQuote(source:Quote,id:string,resetClient=false):Quote{
 export function createOwnTemplate(id:string,source?:Quote):Quote{
  const foundation=source?duplicateQuote(source,id,true):createQuoteDraft(id);
  return {...foundation,style:source?.style||'libre',
-  // Templates created without a source start with exactly one truly blank page.
-  designLayout:source?.designLayout||{pageOrder:[3]},
+  // Only a brand-new template starts blank. Historical quotes without designLayout
+  // retain the original three sheets; sourced layouts use the independent deep copy.
+  designLayout:source ? foundation.designLayout : {pageOrder:[3]},
   isTemplate:true,templateName:source?.templateName?.trim()||'Mi nueva plantilla'};
 }
