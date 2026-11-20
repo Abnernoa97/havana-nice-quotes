@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {classifyTwoFingerAction,promoteZoomToRotation,shortestTurnDegrees,snapToOrigin,wrapRotation} from '../src/features/templates/gesture-intent.ts';
 const src=path=>readFileSync(new URL('../src/'+path,import.meta.url),'utf8');
+const canvasSource=()=>['TemplateCanvasEditor.tsx','components/CanvasPageToolbar.tsx','components/CanvasPageContent.tsx','hooks/useCanvasTapConfirmation.ts'].map(p=>src('features/editor/canvas/'+p)).join('\n');
 
 test('Un pellizco pequeño amplía sin girar; cambios mínimos no hacen nada',()=>{
  assert.equal(classifyTwoFingerAction(150,152,3),'pending');
@@ -38,7 +39,7 @@ test('Una sola acción por secuencia: un dedo mueve, dos amplían o giran',()=>{
  assert.match(gesture,/wrapRotation\(b\.transform\.rotation\+cumulativeTurn\.current\)/);
 });
 test('Tocar fuera de página confirma; deslizar o usar más de un dedo no confirma',()=>{
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  assert.match(canvas,/document\.addEventListener\('pointerdown',down,true\)/);
  assert.match(canvas,/document\.addEventListener\('pointermove',move,true\)/);
  assert.match(canvas,/document\.addEventListener\('pointerup',up,true\)/);
@@ -49,7 +50,7 @@ test('Tocar fuera de página confirma; deslizar o usar más de un dedo no confir
 });
 test('Tipografías, color, tamaño, ancho y alto nunca se muestran simultáneamente',()=>{
  const dock=src('features/editor/texts/TextStyleDock.tsx');
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  assert.match(dock,/\{!tab && <div className="hn-text-dock-switches"/);
  assert.match(dock,/\{tab && \(/);
  assert.match(dock,/aria-label="Volver a herramientas de texto"/);

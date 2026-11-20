@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const src=path=>readFileSync(new URL('../src/'+path,import.meta.url),'utf8');
+const canvasSource=()=>['TemplateCanvasEditor.tsx','components/CanvasPageToolbar.tsx','components/CanvasPageContent.tsx','hooks/useCanvasTapConfirmation.ts'].map(p=>src('features/editor/canvas/'+p)).join('\n');
 
 test('Papelera: un solo filtro compacto, opciones aparecen al lado y se cierran al elegir',()=>{
  const trash=src('features/trash/TrashScreen.tsx');
@@ -57,7 +58,7 @@ test('Añadir fotografía es botón real tanto en Carolina como en todas las edi
  const editorial=src('features/templates/EditorialTemplate.tsx');
  const prompt=src('features/templates/CoverAddPrompt.tsx');
  const photo=src('features/templates/CarolinaPhotoNode.tsx');
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const css=src('features/templates/cover-add-prompt.css');
  for(const view of [carolina,editorial]){
    assert.match(view,/<CoverAddPrompt onAdd=\{onSelectCover\} occupied=\{Boolean\(item\.cover \|\| item\.coverVideo\)\}/);
