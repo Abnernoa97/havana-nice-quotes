@@ -19,7 +19,7 @@ test('Portada: el mismo botón + permite elegir o cambiar foto/video sin duplica
 test('Selector reutiliza fotos y videos privados en portada y páginas libres',()=>{
  const picker=src('features/editor/photos/PhotoSourcePicker.tsx');
  const hook=src('features/videos/useCloudVideoOptions.ts');
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx')+'\n'+src('features/editor/canvas/media/createCanvasPhotoActions.ts');
  const app=src('app/App.tsx');
  assert.match(picker,/const canPickVideo=cover\|\|/);
  assert.match(picker,/canPickVideo&&bank&&kind==='videos'/);

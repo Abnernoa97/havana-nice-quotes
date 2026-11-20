@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/verify-canvas-navigation-once.yml'
       - 'src/features/editor/canvas/media/createCanvasPhotoActions.ts'
+      - 'tests/cover-media.test.mjs'
+      - 'tests/canvas-photo-url-source.test.mjs'
 permissions:
   contents: read
 jobs:
