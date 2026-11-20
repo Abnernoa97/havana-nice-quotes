@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { PhotoTarget, EditQuoteField } from '../shared/editor-types';
-import type { CarolinaLayout } from '../../templates/carolina-layout';
+import type { CarolinaLayout, PagePaperTone } from '../../templates/carolina-layout';
+import {pagePaperTone,setPagePaperTone,setAllPagePaperTones} from '../../templates/page-paper';
 import { carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts } from '../../templates/carolina-layout';
 import type { CarolinaPageId } from '../../templates/carolina-layout';
 import type { Quote } from '../../quotes/types';
@@ -31,8 +32,20 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const editorial=templateFamily(item.style)==='editorial';
   const cleanCarolina=item.style==='carolina'&&item.designLayout?.freeCanvas===true;
   const [page, setPage] = useState<CarolinaPageId>(()=>carolinaPageOrder(item.designLayout)[0]);
+  const [paperMenuOpen,setPaperMenuOpen]=useState(false);
   const selectedPages=carolinaPageOrder(item.designLayout);
   const selection=useCanvasSelectionState(item,setPage);
+  useEffect(()=>setPaperMenuOpen(false),[page,item.id]);
+  useEffect(()=>{
+    if(!paperMenuOpen)return;
+    const outside=(event:PointerEvent)=>{
+      if(event.target instanceof Element&&!event.target.closest('.hn-canvas-paper-wrap'))setPaperMenuOpen(false);
+    };
+    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')setPaperMenuOpen(false);};
+    document.addEventListener('pointerdown',outside,true);
+    document.addEventListener('keydown',escape);
+    return ()=>{document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',escape);};
+  },[paperMenuOpen]);
   const {
     target,setTarget,editingId,setEditingId,draftText,setDraftText,newlyConfirmedText,
     lastGestureMoveAt,justMoved,selectedPhotoId,setSelectedPhotoId,
@@ -46,6 +59,21 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   },[page,JSON.stringify(selectedPages)]);
   const updateLayout = (patch: Partial<CarolinaLayout>) => {
     edit('designLayout', { ...item.designLayout, ...patch });
+  };
+  const togglePaperMenu=()=>{
+    if(paperMenuOpen){setPaperMenuOpen(false);return;}
+    if(editingId&&document.activeElement instanceof HTMLElement)document.activeElement.blur();
+    clearSelection();setTarget(null);setBank(false);setShowPageMenu(false);
+    setPaperMenuOpen(true);
+  };
+  const choosePaper=(tone:PagePaperTone)=>{
+    edit('designLayout',setPagePaperTone(item.designLayout,page,tone));
+  };
+  const applyPaperAll=()=>{
+    const tone=pagePaperTone(item.designLayout,page);
+    if(!tone)return;
+    edit('designLayout',setAllPagePaperTones(item.designLayout,tone));
+    setPaperMenuOpen(false);
   };
   useEffect(()=>{
     const cleaned=cleanEmptyExtraTexts(item.designLayout);
@@ -113,16 +141,22 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     <section className={'hn-canvas'+(lastTextId && target===null?' hn-text-focus':'')+
       (activeTextTool?' hn-tool-open':'')}>
       <CanvasPageToolbar
-        onAddText={addFreeText} onAddPhoto={addPhotoAnywhere}
+        onAddText={()=>{setPaperMenuOpen(false);addFreeText();}}
+        onAddPhoto={()=>{setPaperMenuOpen(false);addPhotoAnywhere();}}
         addPhotoDisabled={page===1&&!cleanCarolina&&photoOrder.length>=CAROLINA_MAX_SLOTS}
-        onTogglePageMenu={togglePageMenu} pageMenuVisible={pageMenuVisible}
+        onTogglePageMenu={()=>{setPaperMenuOpen(false);togglePageMenu();}} pageMenuVisible={pageMenuVisible}
         onAddPage={addPage} transformingId={transformingId}/>
       <CanvasSheetSurface page={page} cleanCarolina={cleanCarolina} editorial={editorial}
         renderItem={renderItem} textInteraction={textInteraction} selectPhoto={selectPhoto}
         selection={selection} removeElement={removeElement} isPhotoId={isPhotoId}/>
       <CanvasPagePager pageIndex={pageIndex} totalPages={selectedPages.length}
         canDuplicate={isBlankPage(page)||cleanCarolina}
-        onChangePage={changePage} onDuplicatePage={duplicatePage} onDeletePage={deletePage}/>
+        onChangePage={direction=>{setPaperMenuOpen(false);changePage(direction);}}
+        onDuplicatePage={()=>{setPaperMenuOpen(false);duplicatePage();}}
+        onDeletePage={()=>{setPaperMenuOpen(false);deletePage();}}
+        paperTone={pagePaperTone(item.designLayout,page)} paperMenuOpen={paperMenuOpen}
+        onTogglePaper={togglePaperMenu} onChoosePaper={choosePaper}
+        onApplyPaperAll={applyPaperAll}/>
       <CanvasEditorPanels item={item} photos={photos} page={page} pageIndex={pageIndex}
         selection={selection} mediaActions={mediaActions} textActions={textActions}
         removePhoto={removePhoto}/>

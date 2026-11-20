@@ -7,6 +7,7 @@ import { carolinaPageOrder, fixedText } from './carolina-layout';
 import type { CarolinaFixedKey } from './carolina-layout';
 import { CarolinaCollage, CarolinaBlankPage, ExtraPhotos, ExtraTexts, carolinaDate } from './CarolinaTemplate';
 import { money } from '../../shared/lib/formatters';
+import { pagePaperStyle } from './page-paper';
 import './editorial-template.css';
 
 type Props={item:Quote;interaction?:CarolinaTextInteraction;onSelectCover?:()=>void;
@@ -30,7 +31,8 @@ const skin=(item:Quote)=>'hn-style-'+(item.style||'libre');
 /** Page 1: a distinct visual skin, with the same editable IDs and photo engine. */
 export function EditorialCover({item,interaction,onSelectCover,onSelectExtraPhoto}:Props){
  return <div className={'hn-carolina-page hn-editorial-page hn-editorial-cover '+skin(item)+
-   (interaction?.transformingId?' hn-layout-grid':'')}>
+   (interaction?.transformingId?' hn-layout-grid':'')}
+   style={pagePaperStyle(item.designLayout,0)}>
    <CoverMediaNode item={item} interaction={interaction} onSelect={onSelectCover}/>
    <div className="hn-editorial-photo-shade"/>
    <div className="hn-editorial-top">
@@ -57,7 +59,8 @@ export function EditorialCover({item,interaction,onSelectCover,onSelectExtraPhot
 
 /** Page 2: the existing movable photo grid. No alternative implementation of photo effects. */
 export function EditorialCollage({item,interaction,onSelectPhoto,onSelectExtraPhoto}:Props){
- return <div className={'hn-editorial-collage '+skin(item)}>
+ return <div className={'hn-editorial-collage '+skin(item)}
+    style={pagePaperStyle(item.designLayout,1)}>
   <CarolinaCollage item={item} interaction={interaction}
     onSelectPhoto={onSelectPhoto} onSelectExtraPhoto={onSelectExtraPhoto}/>
  </div>;
@@ -66,7 +69,8 @@ export function EditorialCollage({item,interaction,onSelectPhoto,onSelectExtraPh
 /** Page 3: terms, package and pricing use precisely the same editing contract. */
 export function EditorialTerms({item,interaction,onSelectExtraPhoto}:Props){
  return <div className={'hn-carolina-page hn-editorial-page hn-editorial-terms '+skin(item)+
-   (interaction?.transformingId?' hn-layout-grid':'')}>
+   (interaction?.transformingId?' hn-layout-grid':'')}
+   style={pagePaperStyle(item.designLayout,2)}>
    <div className="hn-editorial-rule">
      <Fixed item={item} name="brand" interaction={interaction}/>
    </div>

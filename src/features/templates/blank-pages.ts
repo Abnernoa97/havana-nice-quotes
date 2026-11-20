@@ -37,12 +37,13 @@ export function removeDesignPage(layout:CarolinaLayout|undefined,page:number):Pa
   ...removedPhotos.map(x=>'photo-extra:'+x.id),
  ]);
  const pageKinds={...layout?.pageKinds};delete pageKinds[String(page)];
+ const pagePapers={...layout?.pagePapers};delete pagePapers[String(page)];
  const clean=<T,>(map:Record<string,T>|undefined):Record<string,T>=>{
   const result={...map};
   for(const id of removedIds)delete result[id];
   return result;
  };
- return {layout:{...layout,pageOrder:nextOrder,pageKinds,
+ return {layout:{...layout,pageOrder:nextOrder,pageKinds,pagePapers,
   extras:(layout?.extras||[]).filter(x=>x.page!==page),
   extraPhotos:(layout?.extraPhotos||[]).filter(x=>x.page!==page),
   transforms:clean(layout?.transforms),fonts:clean(layout?.fonts),
@@ -77,7 +78,9 @@ export function duplicateBlankPage(layout:CarolinaLayout|undefined,page:number):
   }
   return result;
  };
+ const oldPaper=layout?.pagePapers?.[String(page)];
  return {page:inserted.page,layout:{...inserted.layout,
+  ...(oldPaper?{pagePapers:{...inserted.layout.pagePapers,[inserted.page]:oldPaper}}:{}),
   extras:[...(layout?.extras||[]),...extras],
   extraPhotos:[...(layout?.extraPhotos||[]),...extraPhotos],
   transforms:cloneMap(layout?.transforms),fonts:cloneMap(layout?.fonts),

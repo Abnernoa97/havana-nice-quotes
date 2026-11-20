@@ -29,6 +29,7 @@ export const CAROLINA_DEFAULT_ORDER = Array.from({ length: CAROLINA_DEFAULT_SLOT
 export const CAROLINA_PAGE_TITLES = ['Portada', 'Collage', 'Propuesta'] as const;
 /** Pages 0–2 are existing compositions. IDs >=3 are truly empty editable sheets. */
 export type CarolinaPageId = number;
+export type PagePaperTone = 'white' | 'beige';
 export const MAX_DESIGN_PAGES = 32;
 export const MAX_DESIGN_PAGE_ID = 1024;
 export const MAX_DESIGN_ELEMENTS = 120;
@@ -81,6 +82,8 @@ export type CarolinaLayout = {
   photoOrder?: number[];
   pageOrder?: CarolinaPageId[];
   pageKinds?: Record<string,PageKind>;
+  /** Only explicit paper choices override existing templates. */
+  pagePapers?: Record<string,PagePaperTone>;
   extraPhotos?: CarolinaExtraPhoto[];
   defaultFont?: ElegantFontId;
   fonts?: Record<string, ElegantFontId>;
@@ -120,7 +123,7 @@ export function clampTransform(value: CarolinaTransform): CarolinaTransform {
 export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const layout = value as Record<string, unknown>;
-  if (Object.keys(layout).some(k => !['freeCanvas','fixed', 'transforms', 'extras', 'photoOrder', 'pageOrder', 'extraPhotos', 'pageKinds', 'defaultFont', 'fonts', 'textStyles', 'photoStyles'].includes(k))) return false;
+  if (Object.keys(layout).some(k => !['freeCanvas','fixed', 'transforms', 'extras', 'photoOrder', 'pageOrder', 'extraPhotos', 'pageKinds', 'pagePapers', 'defaultFont', 'fonts', 'textStyles', 'photoStyles'].includes(k))) return false;
   if(layout.freeCanvas!==undefined&&layout.freeCanvas!==true)return false;
   if (layout.defaultFont !== undefined && !isElegantFontId(layout.defaultFont)) return false;
   if (layout.fonts !== undefined) {
@@ -186,6 +189,13 @@ export function validCarolinaLayout(value: unknown): value is CarolinaLayout {
       layout.pageOrder.some((page:unknown)=>!isDesignPage(page))) return false;
   }
   const visiblePages=layout.pageOrder===undefined ? CAROLINA_DEFAULT_PAGES : layout.pageOrder as number[];
+  if(layout.pagePapers!==undefined){
+    if(!layout.pagePapers||typeof layout.pagePapers!=='object'||Array.isArray(layout.pagePapers)||
+      Object.entries(layout.pagePapers).length>MAX_DESIGN_PAGES||
+      Object.entries(layout.pagePapers).some(([key,tone])=>
+        !/^(0|[1-9][0-9]*)$/.test(key)||!visiblePages.includes(Number(key))||
+        (tone!=='white'&&tone!=='beige')))return false;
+  }
   if(layout.pageKinds!==undefined){
     if(!layout.pageKinds||typeof layout.pageKinds!=='object'||Array.isArray(layout.pageKinds)||
       Object.entries(layout.pageKinds).some(([k,v])=>!/^\d{1,4}$/.test(k)||

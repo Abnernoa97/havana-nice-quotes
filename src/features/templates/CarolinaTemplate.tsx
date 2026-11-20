@@ -7,6 +7,7 @@ import CoverAddPrompt from './CoverAddPrompt';
 import type { CarolinaFixedKey } from './carolina-layout';
 import { fixedText, carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS } from './carolina-layout';
 import { pageBackgroundMediaId } from './page-background';
+import { pagePaperStyle } from './page-paper';
 import { pageKind } from './carolina-layout';
 import QuoteChatPanel from '../quotes/QuoteChatPanel';
 import { quoteCurrency, usd } from '../../shared/lib/formatters';
@@ -98,7 +99,8 @@ export function CarolinaCover({ item, interaction, onSelectCover, onSelectExtraP
 }) {
   return (
     <div className={'hn-carolina-page hn-carolina-cover' +
-      (interaction?.transformingId ? ' hn-layout-grid' : '')}>
+      (interaction?.transformingId ? ' hn-layout-grid' : '')}
+      style={pagePaperStyle(item.designLayout,0)}>
       <CoverMediaNode item={item} interaction={interaction} onSelect={onSelectCover}/>
       <div className="hn-carolina-cover-brand">
         <strong><FixedNode item={item} field="brand" interaction={interaction}/></strong>
@@ -134,7 +136,8 @@ export function CarolinaCollage({ item, onSelectPhoto, interaction, onSelectExtr
   return (
     <div className={'hn-carolina-page hn-carolina-collage' +
       (order.length === CAROLINA_SLOTS ? ' original-six' : ' flexible-collage') +
-      (interaction?.transformingId ? ' hn-layout-grid' : '')}>
+      (interaction?.transformingId ? ' hn-layout-grid' : '')}
+      style={pagePaperStyle(item.designLayout,1)}>
       <div className="hn-carolina-photo-column left">
         {left.map((slot, i) => <CarolinaPhotoNode key={slot} id={'photo:' + slot}
           url={images[slot]} position={i + 1}
@@ -158,7 +161,8 @@ export function CarolinaTerms({ item, interaction, onSelectExtraPhoto }: PagePro
   const copy = carolinaCopy(item);
   return (
     <div className={'hn-carolina-page hn-carolina-terms' +
-      (interaction?.transformingId ? ' hn-layout-grid' : '')}>
+      (interaction?.transformingId ? ' hn-layout-grid' : '')}
+      style={pagePaperStyle(item.designLayout,2)}>
       <section className="hn-carolina-term-group celebration">
         <h2><FixedNode item={item} field="celebration" interaction={interaction}/></h2>
         <div className="hn-carolina-term-lines">
@@ -216,6 +220,7 @@ export function CarolinaBlankPage({item,page,interaction,onSelectExtraPhoto,stat
 }) {
  return <div className={'hn-carolina-page hn-blank-page' +
     (interaction?.transformingId?' hn-layout-grid':'')}
+    style={pagePaperStyle(item.designLayout,page)}
     aria-label={(pageKind(item.designLayout,page)==='chat'?'Página chat ':'Página en blanco ')+page}>
    <ExtraPhotos item={item} page={page} interaction={interaction} onSelectPhoto={onSelectExtraPhoto}/>
    <ExtraTexts item={item} page={page} interaction={interaction}/>

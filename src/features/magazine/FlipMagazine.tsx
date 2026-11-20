@@ -9,11 +9,12 @@ import { CarolinaCover, CarolinaCollage, CarolinaTerms, CarolinaBlankPage } from
 import { EditorialCover, EditorialCollage, EditorialTerms } from '../templates/EditorialTemplate';
 import { templateFamily } from '../templates/template-registry';
 import { carolinaPageOrder, pageKind } from '../templates/carolina-layout';
+import {pagePaperStyle} from '../templates/page-paper';
 import QuoteChatPanel from '../quotes/QuoteChatPanel';
 import './flip-magazine.css';
 
-function MagazineLeaf({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={'hn-leaf ' + className} data-density="soft">{children}</div>;
+function MagazineLeaf({ children, className = '', paperStyle }: { children: ReactNode; className?: string; paperStyle?:CSSProperties }) {
+  return <div className={'hn-leaf ' + className} data-density="soft" style={paperStyle}>{children}</div>;
 }
 
 /**
@@ -227,6 +228,7 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
 
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
         {selectedPages.map(selectedPage=><MagazineLeaf key={selectedPage}
+          paperStyle={pagePaperStyle(item.designLayout,selectedPage)}
           className={templateFamily(item.style)==='carolina'?'hn-carolina-leaf':'hn-editorial-leaf'}>
           {item.style==='carolina'&&item.designLayout?.freeCanvas
             ? <CarolinaBlankPage item={item} page={selectedPage} staticChat/>
