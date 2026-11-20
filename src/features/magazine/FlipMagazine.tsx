@@ -219,10 +219,12 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
         <QuoteChatPanel key={selectedPages[page]} quoteId={item.id}
           pageId={selectedPages[page]} compact isTemplate={item.isTemplate}/>}
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
-        {selectedPages.map((selectedPage,index)=><MagazineLeaf key={selectedPage}
+        {selectedPages.map(selectedPage=>{
+          const index=selectedPages.indexOf(selectedPage);
+          return <MagazineLeaf key={selectedPage}
           paperStyle={pagePaperStyle(item.designLayout,selectedPage)}
           className={(templateFamily(item.style)==='carolina'?'hn-carolina-leaf':'hn-editorial-leaf')+
-            (index===0?' hn-leaf-cover':' hn-leaf-photo')}>
+            (selectedPage===selectedPages[0]?' hn-leaf-cover':' hn-leaf-photo')}>
           {item.style==='carolina'&&item.designLayout?.freeCanvas
             ? <CarolinaBlankPage item={item} page={selectedPage} staticChat/>
             : templateFamily(item.style)==='carolina'
@@ -240,7 +242,8 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
               <span className="hn-quote-book-cover-edition" aria-hidden="true">01 / EDITION</span>}
           </> : pageKind(item.designLayout,selectedPage)!=='chat'&&
             <span className="hn-quote-book-folio" aria-hidden="true">{String(index+1).padStart(2,'0')}</span>}
-        </MagazineLeaf>)}
+        </MagazineLeaf>;
+        })}
       </div>
     </section>
   );

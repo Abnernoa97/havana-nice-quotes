@@ -7,7 +7,7 @@
 .hn-magazine{background:#f3eddf;color:#22392d;min-height:calc(100vh - 64px);padding:14px 10px 26px;overflow-x:clip}
 .hn-magazine-stage{position:relative;width:100%;max-width:1140px;min-width:0;min-height:0;
  height:clamp(440px,min(64vw,74svh),700px);margin:0 auto;display:flex;
- align-items:center;justify-content:center;overflow:hidden;isolation:isolate;
+ align-items:center;justify-content:center;overflow:visible;isolation:isolate;
  background:radial-gradient(ellipse 52% 46% at 50% 53%,#253a2818,transparent 82%)}
 /* V2-inspired bound-book depth: one static shadow below the turning pages. */
 .hn-magazine-stage::before{content:"";position:absolute;pointer-events:none;
