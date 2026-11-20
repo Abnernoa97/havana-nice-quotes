@@ -27,8 +27,8 @@ function geometry(values: Point[]) {
     angle: b ? Math.atan2(b.y - a.y, b.x - a.x) : 0 };
 }
 
-/** One shared gesture for photos and text. It never captures touches from the sheet.
- * Only the element which received pointerdown may move, zoom or rotate. */
+/** One transform owner for photos and text. An already selected layer may
+ * receive gestures from anywhere inside its sheet, without moving the page. */
 export function useCarolinaGesture<T extends HTMLElement>(
   id: string, node: RefObject<T | null>, saved: CarolinaTransform | undefined,
   interaction: CarolinaGestureInteraction | undefined, disabled = false,
@@ -160,7 +160,7 @@ export function useCarolinaGesture<T extends HTMLElement>(
     // Trash activation belongs ONLY to actual one-finger movement.
     interactionRef.current?.onDrag?.(id,mode==='move'?x:-1,mode==='move'?y:-1);
   };
-  const finish = (pointerId: number, x?: number, y?: number) => {
+  const finish = (pointerId: number, x?: number, y?: number, allowDeselect = true) => {
     cancelHold();
     if (!pointers.current.has(pointerId)) return;
     pointers.current.delete(pointerId);
@@ -174,7 +174,7 @@ export function useCarolinaGesture<T extends HTMLElement>(
       const changed = JSON.stringify(current.current) !== JSON.stringify(saved || ZERO_TRANSFORM);
       if (!dropped && changed) {
         interactionRef.current?.onCommitTransform(id, current.current);
-      } else if (!dropped && selectedAtPress.current && !movedDuringPress.current && !pinchUsed.current) {
+      } else if (!dropped && allowDeselect && selectedAtPress.current && !movedDuringPress.current && !pinchUsed.current) {
         // This is a confirming tap, not a request to reopen the media/text editor.
         interactionRef.current?.onDeselectTransform?.(id);
       }
@@ -192,7 +192,7 @@ export function useCarolinaGesture<T extends HTMLElement>(
     // The contenteditable text owns native caret positioning and handles.
     // Gesture tracking resumes only after its edit session has closed.
     if(disabled)return;
-    // Each touch belongs to its original text/photo; never to a page-wide owner.
+    // A direct touch always belongs to this node; empty-paper touches are delegated only when selected.
     const owner=interaction.transformingId || interaction.editingId;
     if(owner && owner!==id)return;
     begin(event.pointerId, event.clientX, event.clientY);
@@ -205,16 +205,69 @@ export function useCarolinaGesture<T extends HTMLElement>(
   const onPointerUp = (event: ReactPointerEvent<T>) => {
     finish(event.pointerId,event.clientX,event.clientY);
   };
-  const onPointerCancel = (event: ReactPointerEvent<T>) => {
+  const cancel = (pointerId: number) => {
     // A system-cancelled gesture must never save or erase a photo.
     cancelHold();
-    pointers.current.delete(event.pointerId);
+    pointers.current.delete(pointerId);
     if (pointers.current.size) { resetBaseline(); return; }
     baseline.current = null; press.current = null; longPressed.current = false;
     swallowClick.current = true;
     current.current = saved || ZERO_TRANSFORM;
     setLive(saved || ZERO_TRANSFORM);
   };
+  const onPointerCancel = (event: ReactPointerEvent<T>) => cancel(event.pointerId);
+
+  // The selected layer (and ONLY that layer) owns gestures beginning on the
+  // sheet. It delegates to the same transform engine as direct layer touches;
+  // there is no background transform and no document-wide pointer listener.
+  useEffect(() => {
+    if (!selected || disabled || !interaction || !node.current) return;
+    const sheet = node.current.closest<HTMLElement>('.hn-canvas-sheet');
+    if (!sheet) return;
+    const indirect = new Set<number>();
+    const down = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      const target = event.target;
+      if (!(target instanceof Element) ||
+          node.current?.contains(target) ||
+          target.closest('[data-hn-text-trash], [contenteditable]')) return;
+      indirect.add(event.pointerId);
+      begin(event.pointerId, event.clientX, event.clientY);
+      try { sheet.setPointerCapture(event.pointerId); } catch { /* Browser owns it */ }
+    };
+    const move = (event: PointerEvent) => {
+      if (indirect.has(event.pointerId)) update(event.pointerId, event.clientX, event.clientY);
+    };
+    const up = (event: PointerEvent) => {
+      if (!indirect.delete(event.pointerId)) return;
+      // A short tap on empty paper confirms via the existing tap listener;
+      // only a tap directly ON selected text may enter native caret mode.
+      finish(event.pointerId, event.clientX, event.clientY, false);
+    };
+    const canceled = (event: PointerEvent) => {
+      if (indirect.delete(event.pointerId)) cancel(event.pointerId);
+    };
+    const preventScroll = (event: TouchEvent) => {
+      if (indirect.size && event.cancelable) event.preventDefault();
+    };
+    sheet.addEventListener('pointerdown', down);
+    sheet.addEventListener('pointermove', move);
+    sheet.addEventListener('pointerup', up);
+    sheet.addEventListener('pointercancel', canceled);
+    sheet.addEventListener('touchmove', preventScroll, { passive: false });
+    return () => {
+      sheet.removeEventListener('pointerdown', down);
+      sheet.removeEventListener('pointermove', move);
+      sheet.removeEventListener('pointerup', up);
+      sheet.removeEventListener('pointercancel', canceled);
+      sheet.removeEventListener('touchmove', preventScroll);
+      for (const pointerId of indirect) {
+        if (sheet.hasPointerCapture(pointerId)) sheet.releasePointerCapture(pointerId);
+        cancel(pointerId);
+      }
+    };
+  }, [selected, disabled, !!interaction]);
+
   const suppressTap = () => {
     if (!swallowClick.current) return false;
     swallowClick.current = false;

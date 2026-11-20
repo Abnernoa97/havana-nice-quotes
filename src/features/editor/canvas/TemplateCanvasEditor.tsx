@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PhotoTarget, EditQuoteField } from '../shared/editor-types';
 import type { CarolinaLayout, PagePaperTone } from '../../templates/carolina-layout';
 import {pagePaperTone,setPagePaperTone,setAllPagePaperTones} from '../../templates/page-paper';
@@ -54,6 +54,26 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     showPageMenu,setShowPageMenu,setTrashHovered,transformingId,setTransformingId,
     setBank,busy,setBusy,setError,clearSelection,
   }=selection;
+  const canvasRef=useRef<HTMLElement>(null);
+  const wasEditingRef=useRef(false);
+  const hasActiveEdit=Boolean(lastTextId||transformingId||editingId||selectedPhotoId||target!==null);
+  // When the user accepts an edit, restore the normal page and center the
+  // sheet inside the visible editor instead of leaving it below the fold.
+  useEffect(()=>{
+    const wasEditing=wasEditingRef.current;
+    wasEditingRef.current=hasActiveEdit;
+    if(!wasEditing||hasActiveEdit)return;
+    let nextFrame=0;
+    const firstFrame=requestAnimationFrame(()=>{
+      nextFrame=requestAnimationFrame(()=>{
+        const sheet=canvasRef.current?.querySelector<HTMLElement>('.hn-canvas-sheet');
+        if(!sheet?.isConnected)return;
+        const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        sheet.scrollIntoView({block:'center',inline:'nearest',behavior:reduced?'auto':'smooth'});
+      });
+    });
+    return()=>{cancelAnimationFrame(firstFrame);cancelAnimationFrame(nextFrame);};
+  },[hasActiveEdit,page]);
   useEffect(()=>{
     if(!selectedPages.includes(page))setPage(selectedPages[0]);
   },[page,JSON.stringify(selectedPages)]);
@@ -138,7 +158,7 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const renderItem:Quote=draftText?{...item,designLayout:{...item.designLayout,
     extras:[...(item.designLayout?.extras||[]),{id:draftText.id,page:draftText.page,text:'',centered:true as const}]}}:item;
   return (
-    <section className={'hn-canvas'+(lastTextId && target===null?' hn-text-focus':'')+
+    <section ref={canvasRef} className={'hn-canvas'+(lastTextId && target===null?' hn-text-focus':'')+
       (activeTextTool?' hn-tool-open':'')}>
       <CanvasPageToolbar
         onAddText={()=>{setPaperMenuOpen(false);addFreeText();}}

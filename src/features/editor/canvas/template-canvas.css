@@ -1,6 +1,12 @@
 /* Page-centered editing canvas; the reader components remain the source of truth. */
 .hn-canvas{padding:9px 10px 26px;background:#f6f8f4;touch-action:pan-y}
-.hn-canvas-sheet{position:relative;width:min(100%,620px);min-width:0;margin:auto;background:#fff;box-shadow:0 12px 32px #21382916;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.hn-canvas-sheet{position:relative;width:min(100%,620px);min-width:0;margin:auto;background:#fff;box-sizing:border-box;isolation:isolate;border:1px solid #d7d1c3;box-shadow:0 12px 32px #21382930,inset 0 1px 0 #fff9,inset 2px 0 7px #342c201c,inset -2px 0 5px #fcf2dd32;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+/* Exact physical-paper edge and spine treatment from HAVANA NICE V2 book.css.
+   These static decorations never intercept touch, change text or crop images. */
+.hn-canvas-sheet::before{content:"";position:absolute;inset:0 auto 0 0;width:4%;background:linear-gradient(90deg,#493e2e3b,#fff8ee36 55%,transparent);z-index:26;pointer-events:none}
+.hn-canvas-sheet::after{content:"";position:absolute;inset:1.2%;border:1px solid #8d765326;box-shadow:inset 0 0 0 1px #fff7;z-index:26;pointer-events:none}
+.hn-canvas-sheet:has(.hn-canvas-cover)::before{width:5%;background:linear-gradient(90deg,#071810a3,#f3edc029 62%,transparent)}
+.hn-canvas-sheet:has(.hn-canvas-cover)::after{inset:2.2%;border:1px solid #f3e7c57a;box-shadow:inset 0 0 0 3px #0b20151e}
 .hn-canvas-cover{position:relative;aspect-ratio:612/792}
 .hn-canvas-cover .hn-carolina-page{height:100%;width:100%}
 .hn-carolina-editable-photo{appearance:none;display:flex;align-items:center;justify-content:center;border:0;padding:0;cursor:pointer;color:#668a70}
@@ -102,7 +108,9 @@
 /* An armed item (photo, video or text) can be dragged anywhere on its page.
    Preserve the finger stream for panning/pinching instead of native scrolling. */
 .hn-canvas .hn-carolina-page.hn-layout-grid,
-.hn-canvas.hn-text-focus .hn-carolina-page{touch-action:none}
+.hn-canvas.hn-text-focus .hn-carolina-page,
+.hn-canvas .hn-canvas-sheet:has(.hn-carolina-text-node.transforming),
+.hn-canvas .hn-canvas-sheet:has(.hn-photo-transforming){touch-action:none}
 
 /* Text input stays on the same visible page, never in a tiny bottom-left hotspot. */
 .hn-canvas .hn-centered-extra-text .hn-carolina-text-node.editing{

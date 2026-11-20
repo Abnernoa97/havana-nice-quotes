@@ -28,6 +28,14 @@
 .hn-leaf::after{content:"";position:absolute;inset:1.2%;
   pointer-events:none;z-index:19;border:1px solid #8d765326;
   box-shadow:inset 0 0 0 1px #fff7}
+/* Match V2's cloth-bound front, inset gold print frame and side light.
+   The leaf content stays the real Quotes design, and PageFlip remains untouched. */
+.hn-leaf.hn-leaf-cover{box-shadow:inset 5px 0 8px #081d15a8,
+  inset -2px 0 5px #fcf2dd32,inset 0 0 0 1px #e9d8a84d}
+.hn-leaf.hn-leaf-cover::before{width:5%;
+  background:linear-gradient(90deg,#071810a3,#f3edc029 62%,transparent)}
+.hn-leaf.hn-leaf-cover::after{inset:2.2%;border:1px solid #f3e7c57a;
+  box-shadow:inset 0 0 0 3px #0b20151e}
 .hn-magazine-source{display:none}
 .hn-cover-image,.hn-ensemble-cover{background-color:#173c2e;height:100%;width:100%;background-position:center;background-size:cover;position:relative;display:flex;flex-direction:column;color:white}
 .hn-cover-top{padding:7.2% 8%;display:flex;justify-content:space-between;gap:10px;align-items:center}

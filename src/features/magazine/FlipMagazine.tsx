@@ -229,7 +229,8 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
       <div className="hn-magazine-source" ref={sourceRef} aria-hidden="true">
         {selectedPages.map(selectedPage=><MagazineLeaf key={selectedPage}
           paperStyle={pagePaperStyle(item.designLayout,selectedPage)}
-          className={templateFamily(item.style)==='carolina'?'hn-carolina-leaf':'hn-editorial-leaf'}>
+          className={(templateFamily(item.style)==='carolina'?'hn-carolina-leaf':'hn-editorial-leaf')+
+            (selectedPage===selectedPages[0]?' hn-leaf-cover':'')}>
           {item.style==='carolina'&&item.designLayout?.freeCanvas
             ? <CarolinaBlankPage item={item} page={selectedPage} staticChat/>
             : templateFamily(item.style)==='carolina'
