@@ -108,7 +108,7 @@
 /* An armed item (photo, video or text) can be dragged anywhere on its page.
    Preserve the finger stream for panning/pinching instead of native scrolling. */
 .hn-canvas .hn-carolina-page.hn-layout-grid,
-.hn-canvas.hn-text-focus .hn-carolina-page,
+.hn-canvas.hn-text-focus .hn-carolina-page{touch-action:none}
 .hn-canvas .hn-canvas-sheet:has(.hn-carolina-text-node.transforming),
 .hn-canvas .hn-canvas-sheet:has(.hn-photo-transforming){touch-action:none}
 
