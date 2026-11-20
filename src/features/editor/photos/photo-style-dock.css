@@ -23,7 +23,7 @@
 .hn-photo-workspace-frame>.hn-carolina-photo,
 .hn-photo-workspace-frame>.hn-carolina-cover-photo{position:absolute;inset:0;width:100%;height:100%;max-width:none;
   transform:none;pointer-events:none;box-sizing:border-box}
-.hn-photo-workspace-frame.editing-effect{outline:2px solid #b9a278;outline-offset:2px;cursor:crosshair;touch-action:none}
+.hn-photo-workspace-frame.editing-effect{outline:2px solid #b9a278;outline-offset:2px;cursor:crosshair}
 .hn-photo-workspace-frame .hn-carolina-image-fill,
 .hn-photo-workspace-frame .hn-carolina-image-vignette{pointer-events:none}
 .hn-photo-workspace .hn-photo-dock{position:relative;flex:0 0 auto;left:auto;bottom:auto;transform:none;
@@ -31,10 +31,10 @@
   border-radius:16px 16px 0 0;box-shadow:0 -6px 25px #142e2518;
   display:flex;flex-direction:column;overflow:hidden;background:#fafcf9;margin:0}
 .hn-photo-workspace .hn-photo-expanded{flex:0 1 auto;min-height:0;max-height:min(27dvh,225px);
-  overflow-y:auto;overscroll-behavior:contain;overscroll-behavior-y:contain;
+  overflow-y:auto;overscroll-behavior:contain;
   touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:7px 12px 9px;scrollbar-width:thin}
-.hn-photo-workspace .hn-photo-tools-rail{position:relative;flex:0 0 auto;flex-shrink:0;border-top:1px solid #e1e8e0}
-.hn-photo-workspace .hn-photo-switches{display:flex;grid-template-columns:none;flex-wrap:nowrap;
+.hn-photo-workspace .hn-photo-tools-rail{position:relative;flex:0 0 auto;border-top:1px solid #e1e8e0}
+.hn-photo-workspace .hn-photo-switches{display:flex;flex-wrap:nowrap;
   gap:4px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
   padding:6px 19px 7px 7px;scroll-snap-type:x proximity;justify-content:flex-start;touch-action:pan-x}
 .hn-photo-workspace .hn-photo-switches::-webkit-scrollbar{display:none}

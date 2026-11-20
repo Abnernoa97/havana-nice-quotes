@@ -29,9 +29,9 @@
 .hn-style-vogue.hn-editorial-terms{background:#fff;color:#191919}
 .hn-style-vogue.hn-editorial-cover .hn-editorial-photo-shade{background:linear-gradient(180deg,#0707076b,transparent 25%,#070707c9)}
 .hn-style-lane.hn-editorial-cover .hn-editorial-hero h1,.hn-style-lane.hn-editorial-terms .hn-editorial-story h2{font-family:'Cormorant Garamond',Georgia,serif}
-.hn-style-lane.hn-editorial-terms{background:#f4efe6;color:#453d34}
+.hn-style-lane.hn-editorial-terms{background:#f4efe6;color:#453d34;padding:11% 9%;gap:6%}
 .hn-style-junebug.hn-editorial-cover .hn-editorial-hero h1,.hn-style-junebug.hn-editorial-terms .hn-editorial-story h2{font-family:'Fraunces',Georgia,serif}
-.hn-style-junebug.hn-editorial-terms{background:#fff4e9;color:#634334}
+.hn-style-junebug.hn-editorial-terms{background:#fff4e9;color:#634334;padding:9% 9% 8%}
 .hn-style-nyt.hn-editorial-cover .hn-editorial-hero h1,.hn-style-nyt.hn-editorial-terms .hn-editorial-story h2{font-family:Georgia,serif;font-weight:700}
 .hn-style-nyt.hn-editorial-terms{background:#f9f8f4;color:#222}
 .hn-style-nyt .hn-editorial-rule{border-top:3px double currentColor;border-bottom:3px double currentColor}
@@ -85,7 +85,6 @@
  padding:6%;gap:4%;background:#eee9df;grid-template-columns:1.25fr .75fr}
 .hn-style-lane.hn-editorial-collage .hn-carolina-photo-column{gap:3%}
 .hn-style-lane.hn-editorial-collage .hn-carolina-photo-column.left>:first-child{flex:1.8}
-.hn-style-lane.hn-editorial-terms{padding:11% 9%;gap:6%}
 .hn-style-lane.hn-editorial-terms .hn-editorial-rule{text-align:left;border-bottom:1px solid}
 .hn-style-lane.hn-editorial-terms .hn-editorial-story h2{font-size:clamp(33px,7.5cqw,60px)}
 
@@ -105,7 +104,6 @@
 .hn-style-junebug.hn-editorial-collage .hn-carolina-photo-column{gap:2.3%}
 .hn-style-junebug.hn-editorial-collage .hn-carolina-photo-column.right>:first-child{flex:1.7}
 .hn-style-junebug.hn-editorial-collage .hn-carolina-photo{border-radius:2.3cqw}
-.hn-style-junebug.hn-editorial-terms{background:#fff4e9;padding:9% 9% 8%}
 .hn-style-junebug.hn-editorial-terms .hn-editorial-rule{
  text-align:left;border:0;font-family:'Fraunces',Georgia,serif}
 .hn-style-junebug.hn-editorial-terms .hn-editorial-story{gap:4%}

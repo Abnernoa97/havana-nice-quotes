@@ -1,15 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Fraunces:opsz,wght@9..144,400&display=swap');
 .edit-tabs.hn-four-tabs {grid-template-columns:repeat(4,minmax(0,1fr));padding:9px;gap:3px}
 .edit-tabs.hn-four-tabs button {flex-direction:column;padding:10px 2px;gap:6px;font-size:10px;min-width:0}
-.hn-styles-tab{padding:24px 20px 28px}
 .hn-styles-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .hn-style-card{padding:0;display:flex;flex-direction:column;min-width:0;text-align:left;background:#fff;border:1px solid #e5e8e2;border-radius:7px;overflow:hidden;color:#284436}
 .hn-style-card.selected{border:2px solid #254c3b;box-shadow:0 3px 12px #2346341e}
 .hn-style-card:focus-visible{outline:2px solid #729b80}
 .hn-style-mini{height:174px;display:flex;flex-direction:column;position:relative;overflow:hidden;padding:13px;background:#edece5}
 .hn-mini-photo{position:absolute;inset:0;background-size:cover;background-position:center}
-.hn-card-caption{display:flex;flex-direction:column;gap:5px;padding:10px;flex:1}
-.hn-card-caption strong{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:12px}
+.hn-card-caption{display:flex;flex-direction:column;gap:5px;padding:10px;flex:1;min-height:48px;justify-content:center}
+.hn-card-caption strong{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:13px}
 .hn-mini-libre{color:#325242;background:#e8eee5;justify-content:space-between}
 .hn-mini-square{width:57px;height:73px;border:1px solid #789882;background:linear-gradient(115deg,#b3c3b1 50%,transparent 50%)}
 .hn-mini-libre strong{font:400 29px/1 'Playfair Display',serif;letter-spacing:-.05em;text-align:right}
@@ -126,8 +125,6 @@
 .hn-style-accordion[open]>summary svg{transform:rotate(180deg)}
 .hn-style-accordion>summary:focus-visible{outline:3px solid #ad9364;outline-offset:-3px}
 .hn-style-accordion-content{padding:16px}
-.hn-card-caption{min-height:48px;justify-content:center}
-.hn-card-caption strong{font-size:13px}
 @media(prefers-reduced-motion:reduce){.hn-style-accordion>summary svg{transition:none}}
 
 /* Original template workflows live inside the first accordion only. */
