@@ -434,7 +434,7 @@ test('Un texto tiene cinco opciones pero muestra solo la herramienta elegida', (
   const bank=src('features/editor/texts/ElegantFontBank.tsx');
   const node=src('features/templates/CarolinaTextNode.tsx');
   const template=src('features/templates/CarolinaTemplate.tsx');
-  assert.match(canvas, /onTap: id => \{ setActiveTextTool\(null\);setSelectedPhotoId\(null\); setTransformingId\(null\); setEditingId\(id\); setLastTextId\(id\)/);
+  assert.match(canvas, /onTap: id => \{ setShowPageMenu\(false\);setActiveTextTool\(null\);setSelectedPhotoId\(null\); setTransformingId\(null\); setEditingId\(id\); setLastTextId\(id\)/);
   assert.match(dock, /\{!tab && <div className="hn-text-dock-switches"/);
   assert.match(canvas, /<TextStyleDock textId=\{lastTextId\}/);
   assert.match(canvas, /<button type="button" onClick=\{addFreeText\}>\+ Texto<\/button>/);
