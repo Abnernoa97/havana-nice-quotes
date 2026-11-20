@@ -26,7 +26,6 @@ function MagazineLeaf({ children, className = '', paperStyle }: { children: Reac
 export default function FlipMagazine({ item }: { item: Quote; clientView?:boolean }) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const bookBlockRef = useRef<HTMLDivElement | null>(null);
-  const bindingRef = useRef<HTMLDivElement | null>(null);
   const sourceRef = useRef<HTMLDivElement | null>(null);
   const flipRef = useRef<PageFlip | null>(null);
   const turningRef = useRef(false);
@@ -65,15 +64,6 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
       background.style.width=rect.width+'px';
       background.style.height=rect.height+'px';
       background.style.visibility='visible';
-      // Raised cover binding is a sibling ABOVE the visible leaf; the pages
-      // remain beneath it. A behind-the-leaf binding was fully obscured.
-      const binding=bindingRef.current;
-      if(binding){
-        binding.style.left=(rect.left-stageRect.left-3)+'px';
-        binding.style.top=(rect.top-stageRect.top)+'px';
-        binding.style.height=(rect.height+Math.min(15,7+Math.max(0,source.children.length-1)*1.6)-2)+'px';
-        binding.style.visibility='visible';
-      }
     };
     const schedulePhysicalPageBlock=()=>{
       if(pageBlockFrame)cancelAnimationFrame(pageBlockFrame);
@@ -87,7 +77,6 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
       pageBlockResize?.disconnect();
       window.removeEventListener('resize',schedulePhysicalPageBlock);
       if(bookBlockRef.current)bookBlockRef.current.style.visibility='hidden';
-      if(bindingRef.current)bindingRef.current.style.visibility='hidden';
     };
     const syncCoverVideos=(index:number)=>{
       let visibleVideo=false;
@@ -228,8 +217,8 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
         {total>1&&<div className="hn-magazine-page-block" ref={bookBlockRef} aria-hidden="true">
           <span className="hn-magazine-page-block-bottom"/>
           <span className="hn-magazine-page-block-side"/>
+          <span className="hn-magazine-page-block-spine"/>
         </div>}
-        {total>1&&<div className="hn-magazine-binding" ref={bindingRef} aria-hidden="true"/>}
         <div className="hn-magazine-surface" ref={mountRef}
           aria-label={'Revista interactiva de ' + total + ' páginas'}
           onTouchStartCapture={event=>event.stopPropagation()}

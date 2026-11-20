@@ -3,52 +3,39 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 const book=readFileSync(new URL('../src/features/magazine/FlipMagazine.tsx',import.meta.url),'utf8');
 const css=readFileSync(new URL('../src/features/magazine/flip-magazine.css',import.meta.url),'utf8');
-
-test('Physical book uses PageFlip bounds and real page count',()=>{
-  assert.match(book,/getBlockElement\(\)/);
-  assert.match(book,/getBoundingClientRect\(\)/);
-  assert.match(book,/pageBlockResize=new ResizeObserver/);
-  assert.match(book,/pageBlockResize\.observe\(flip\.getBlockElement\(\)\)/);
-  assert.match(book,/window\.addEventListener\('resize',schedulePhysicalPageBlock\)/);
-  assert.match(book,/cleanupPhysicalPageBlock\(\)/);
-  assert.match(book,/schedulePhysicalPageBlock\(\)/);
-  assert.match(book,/--hn-page-stack-depth/);
-  assert.match(book,/data-book-orientation=\{orientation\}/);
-  assert.match(book,/total>1&&<div className="hn-magazine-page-block"/);
-  assert.match(book,/flip\.loadFromHTML\(host\.querySelectorAll<HTMLElement>\('\.hn-leaf'\)\)/);
-  assert.match(book,/const pages = Array\.from\(source\.children\)\.map\(node => node\.cloneNode\(true\)\)/);
+test('Physical binding follows the real PageFlip block',()=>{
+ assert.match(book,/getBlockElement\(\)/);
+ assert.match(book,/getBoundingClientRect\(\)/);
+ assert.match(book,/pageBlockResize=new ResizeObserver/);
+ assert.match(book,/pageBlockResize\.observe\(flip\.getBlockElement\(\)\)/);
+ assert.match(book,/window\.addEventListener\('resize',schedulePhysicalPageBlock\)/);
+ assert.match(book,/cleanupPhysicalPageBlock\(\)/);
+ assert.match(book,/hn-magazine-page-block-spine/);
+ assert.match(book,/flip\.loadFromHTML\(host\.querySelectorAll<HTMLElement>\('\.hn-leaf'\)\)/);
+ assert.doesNotMatch(book,/bindingRef|hn-magazine-binding/);
 });
-test('Premium magazine binding is tapered and has an upper notch connected with bottom fore-edge',()=>{
-  for(const part of ['hn-magazine-page-block-bottom','hn-magazine-page-block-side','hn-magazine-binding']){
-    assert.match(book,new RegExp(part));
-    assert.match(css,new RegExp('\\.'+part+' \\{'));
-  }
-  assert.match(css,/\.hn-magazine-page-block \{[\s\S]*?z-index: 0/);
-  assert.match(css,/\.hn-magazine-stage-bound \.hn-magazine-surface \{z-index: 1\}/);
-  assert.match(css,/clip-path: polygon\(0 0,100% 0,100% 64%/);
-  assert.match(css,/skewY\(-0\.27deg\)/);
-  assert.match(css,/repeating-linear-gradient\(to bottom/);
-  assert.match(css,/\.hn-magazine-binding::before/);
-  assert.match(css,/\.hn-magazine-binding::after/);
-  assert.match(book,/bindingRef = useRef<HTMLDivElement/);
-  assert.match(book,/binding\.style\.visibility='visible'/);
-  assert.match(book,/binding\.style\.left=/);
-  assert.match(css,/z-index:2/);
-  assert.doesNotMatch(book,/hn-magazine-page-block-spine/);
-  assert.match(css,/\.hn-v2-book-paper \.hn-leaf::before/);
-  assert.match(css,/\.hn-v2-book-paper \.hn-leaf\.hn-leaf-cover::before/);
-  assert.match(css,/data-book-orientation="landscape"/);
-  assert.match(css,/width:26px/);
-  assert.match(css,/perspective\(380px\) rotateY\(-10deg\)/);
-  assert.match(css,/pointer-events:none!important/);
-  assert.match(css,/margin-bottom: calc\(var\(--hn-page-stack-depth\) \+ 9px\)/);
-  assert.doesNotMatch(css,/\.hn-magazine-stage-bound::after/);
-  assert.doesNotMatch(css,/\.stf__wrapper::before/);
+test('The outside spine is below the page, not a thick rail over its content',()=>{
+ assert.match(css,/\.hn-magazine-stage-bound\[data-book-orientation="portrait"\]\{/);
+ assert.match(css,/padding-inline:18px/);
+ assert.match(css,/\.hn-magazine-page-block-spine\{/);
+ assert.match(css,/left:-16px/);
+ assert.match(css,/width:20px/);
+ assert.match(css,/clip-path:polygon\(/);
+ assert.match(css,/\.hn-magazine-page-block-spine::before/);
+ assert.match(css,/\.hn-magazine-page-block-spine::after/);
+ assert.match(css,/\.hn-magazine-stage-bound \.hn-magazine-surface \{z-index: 1\}/);
+ assert.match(css,/\.hn-magazine-page-block \{[\s\S]*?z-index: 0/);
+ assert.match(css,/pointer-events:none!important/);
+ assert.doesNotMatch(css,/\.hn-magazine-binding\s*\{/);
+ assert.doesNotMatch(css,/width:26px/);
 });
-test('No standalone cinematic labs or fabricated pages',()=>{
-  for(const name of ['paper-experience-lab','paper-motion-studio','paper-video-lab']){
-    assert.equal(existsSync(new URL('../public/'+name+'.html',import.meta.url)),false);
-    assert.equal(existsSync(new URL('./'+name+'.test.mjs',import.meta.url)),false);
-  }
-  assert.doesNotMatch(book,/paper-experience-lab|paper-motion-studio|paper-video-lab/);
+test('Existing paper stack, gestures and one PageFlip motor remain',()=>{
+ assert.match(css,/\.hn-magazine-page-block-bottom/);
+ assert.match(css,/repeating-linear-gradient\(to bottom/);
+ assert.match(book,/const pages = Array\.from\(source\.children\)\.map\(node => node\.cloneNode\(true\)\)/);
+ assert.match(book,/flipOnClick: 'never'/);
+ for(const name of ['paper-experience-lab','paper-motion-studio','paper-video-lab']){
+  assert.equal(existsSync(new URL('../public/'+name+'.html',import.meta.url)),false);
+  assert.equal(existsSync(new URL('./'+name+'.test.mjs',import.meta.url)),false);
+ }
 });
