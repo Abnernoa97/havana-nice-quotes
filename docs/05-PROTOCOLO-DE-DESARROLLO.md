@@ -61,7 +61,7 @@ npm run build
 
 ## Ramas y costos
 
-Actualmente **solo existe `main`**; la rama temporal anterior y su Preview se eliminaron. Si un cambio futuro necesita QA aislada, decidir una rama **estrictamente temporal**, no activar builds automáticos innecesarios y retirarla después de integrar; no dar por hecho que la conexión GitHub puede eliminar ramas. Mantener solo una fuente de producción.
+**Regla única desde 20/11/2026:** trabajar directamente sobre el único `main`. No crear ramas de desarrollo, experimentos, PR de integración, copias paralelas, ramas de respaldo o previews de ramas. Conservar el historial de commits para recuperar cambios si hiciera falta. Antes de actualizar `main`, comprobar el SHA actual; aplicar únicamente un commit de avance lineal y verificar que no hay ramas sobrantes. GitHub es fuente de código, no canal de publicación: validar la versión de Cloudflare por separado. No activar GitHub Actions ni nuevos servicios de build.
 
 ## Continuidad
 
