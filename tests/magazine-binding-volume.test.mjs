@@ -42,6 +42,7 @@ test('Premium magazine binding is tapered and has an upper notch connected with 
   assert.match(book,/binding\.style\.width=geometry\.width/);
   assert.match(book,/hn-magazine-binding-joint/);
   assert.match(css,/\.hn-magazine-binding-joint \{/);
+  assert.match(css,/padding-inline: clamp\(24px, 6vw, 32px\)/);
   assert.match(css,/width: 29%/);
   const board=css.slice(css.indexOf('/* HAVANA NICE · Flat laminated board'));
   assert.ok(board.length>100);
