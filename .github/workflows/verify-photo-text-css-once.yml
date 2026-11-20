@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/verify-photo-text-css-once.yml'
+      - 'tests/editor-persistence-source.test.mjs'
 permissions:
   contents: read
 jobs:
