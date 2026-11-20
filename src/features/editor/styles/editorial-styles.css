@@ -156,7 +156,8 @@
 .hn-own-templates{display:grid;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid #e4ece3}
 .hn-own-templates-heading{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#2b543e}
 .hn-own-template{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px;
- border:1px solid #e4eae2;border-radius:9px;background:#fff;min-width:0}
+ border:1px solid #e4eae2;border-radius:9px;background:#fff;min-width:0;
+ touch-action:pan-y;user-select:none;-webkit-user-select:none;position:relative}
 .hn-own-template-label{display:grid;gap:3px;flex:1 1 130px;min-width:0}
 .hn-own-template-label strong{font-size:12px;white-space:normal;overflow-wrap:anywhere;color:#284838}
 .hn-own-template-label small{font-size:10px;color:#829388}
@@ -166,7 +167,6 @@
 .hn-own-template .hn-own-template-use{background:#244a37;color:#fff;border-color:#244a37}
 
 /* Long-press template deletion uses the existing, recoverable quotation trash. */
-.hn-own-template{touch-action:pan-y;user-select:none;-webkit-user-select:none;position:relative}
 .hn-own-template:focus-visible{outline:2px solid #ad9364;outline-offset:2px}
 .hn-own-template.is-armed{border-color:#d9b8b8;background:#fffafa}
 .hn-own-template .hn-own-template-delete{

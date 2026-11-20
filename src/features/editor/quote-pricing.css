@@ -88,7 +88,7 @@
   display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; padding:10px;
   background:#fff; border:1px solid #dce6db; border-radius:13px; box-shadow:0 12px 26px #193b2821;
 }
-.hn-deposit-options button { min-height:41px; cursor:pointer; border:1px solid #e0e8de;
+.hn-deposit-options button { min-height:41px;  border:1px solid #e0e8de;
   border-radius:9px; background:#f9fbf8; color:#42634e; font-size:12px;
   font-weight:700; font-variant-numeric:tabular-nums; }
 .hn-deposit-options button.selected { color:#fff; background:#244a37; border-color:#244a37; }

@@ -8,7 +8,7 @@
 .hn-carolina-empty-photo{font-size:clamp(27px,7cqw,47px);opacity:.6}
 .hn-carolina-photo-index{position:absolute;bottom:7px;right:7px;padding:5px 6px;border-radius:5px;background:#254937d9;color:white;font-size:10px;font-weight:700}
 .hn-canvas-pager{display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:nowrap;margin:17px 0;color:#56745d;font-size:12px}
-.hn-canvas-pager button{width:40px;height:40px;flex:0 0 39px;display:grid;place-items:center;border:1px solid #d9e4d7;border-radius:9px;background:#fff;color:#315840;cursor:pointer}
+.hn-canvas-pager button{width:40px;height:40px;flex:0 0 39px;display:grid;place-items:center;border:1px solid #d9e4d7;border-radius:9px;background:#fff;color:#315840;}
 .hn-canvas-pager button:disabled{opacity:.35;cursor:default}
 /* The canvas error is a direct sheet-level message, never the picker overlay. */
 .hn-canvas > .hn-canvas-error{color:#a14b43}
@@ -19,7 +19,7 @@
 .hn-canvas-cover .hn-carolina-cover-personal { z-index: 2; }
 
 /* Inline editing, long-hold moving, pinch and rotate. No separate text dialog. */
-.hn-canvas-toolbar button{border:1px solid #cbd9cb;color:#244a36;background:#fff;border-radius:9px;min-height:41px;min-width:100px;font:600 13px 'DM Sans',sans-serif;cursor:pointer}
+.hn-canvas-toolbar button{border:1px solid #cbd9cb;color:#244a36;background:#fff;border-radius:9px;min-height:41px;min-width:100px;font:600 13px 'DM Sans',sans-serif;}
 .hn-canvas .hn-carolina-text-node{cursor:text;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .hn-canvas .hn-carolina-text-node.empty{min-width:1em;min-height:1em;color:#b09666}
 .hn-canvas .hn-carolina-text-node:hover:not(.editing){outline:1px dashed #ad915f}
@@ -140,7 +140,7 @@
  box-shadow:0 16px 34px #1a35263e}
 .hn-canvas-toolbar .hn-page-kind-menu button{width:100%;min-width:0;min-height:47px;
  display:flex;align-items:center;gap:10px;padding:9px 11px;text-align:left;
- border:0;border-radius:9px;background:transparent;color:#244a37;cursor:pointer;
+ border:0;border-radius:9px;background:transparent;color:#244a37;
  font:600 13px/1.25 system-ui,sans-serif}
 .hn-canvas-toolbar .hn-page-kind-menu button:hover:not(:disabled){background:#edf3ed}
 .hn-canvas-toolbar .hn-page-kind-menu button:disabled{color:#9ba99e;cursor:default}

@@ -164,7 +164,7 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
 }
 
 /* User-added image blocks: same layer in edit mode, Scroll and 3D. */
-.hn-carolina-photo-overlay{position:absolute;inset:0;pointer-events:none;z-index:4}
+.hn-carolina-photo-overlay{display:contents;pointer-events:none}
 .hn-carolina-photo-overlay .hn-carolina-floating-photo{
   position:absolute;top:33%;left:32%;width:36%;height:29%;
   display:block;pointer-events:auto;border:0;border-radius:2px;
@@ -191,7 +191,6 @@ button.hn-carolina-cover-photo { cursor:pointer; appearance:none; color:white;
 .hn-carolina-photo-shade{background:linear-gradient(180deg,rgba(20,15,13,.33),rgba(20,15,13,.09) 55%,rgba(20,15,13,.42))}
 .hn-carolina-image-vignette{z-index:1}
 .hn-carolina-photo-index,.hn-carolina-empty-photo{position:relative;z-index:2}
-.hn-carolina-photo-overlay{display:contents}
 .hn-carolina-term-group{position:relative;z-index:2}
 
 /* Crop aspect is confined to the image; page and collage frames never reflow. */

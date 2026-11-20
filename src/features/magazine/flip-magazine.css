@@ -10,7 +10,7 @@
 .hn-magazine-intro h1{font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,38px);font-weight:400;margin:8px 0}
 .hn-magazine-intro h1 em{color:#7a9581;font-weight:400}
 .hn-magazine-intro p{color:#7a887d;font-size:12px;line-height:1.5}
-.hn-magazine-stage{width:100%;max-width:1130px;min-height:540px;margin:0 auto;display:flex;align-items:center;justify-content:center;overflow:visible}
+.hn-magazine-stage{position:relative;width:100%;max-width:1130px;min-height:540px;margin:0 auto;display:flex;align-items:center;justify-content:center;overflow:visible}
 .hn-magazine-surface{width:100%;max-width:1130px;height:min(68vw,660px);min-height:500px;display:flex;justify-content:center;align-items:center}
 .hn-flip-host{width:100%;height:100%;margin:auto}
 .hn-leaf{height:100%;width:100%;overflow:hidden;background:#f8f6f0;border:1px solid #d7d5cd;box-shadow:inset 0 0 3px #362a2610;color:#193126;font-family:'DM Sans',sans-serif}
@@ -93,7 +93,6 @@
 
 /* The final chat sheet is a stationary, scrollable part of the book.
    PageFlip's cloned DOM never receives a second composer or pointer gestures. */
-.hn-magazine-stage{position:relative}
 .hn-magazine-chat-lock{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;
  justify-content:flex-end;align-items:center;pointer-events:auto;touch-action:pan-y}
 .hn-magazine-chat-lock>.hn-quote-chat-compact{position:relative;z-index:2;

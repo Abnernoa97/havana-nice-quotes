@@ -22,8 +22,8 @@
   border: 1px solid var(--studio-line);
   border-radius: 15px;
   box-shadow: 0 12px 42px #233e3210;
+  background: #fff;
 }
-.editor-page .edit-panel { background: #fff; }
 .editor-page .edit-tabs.hn-four-tabs {
   padding: 12px;
   background: #fcfcf9;
