@@ -254,7 +254,7 @@
 /* HAVANA NICE - satin-bound fashion magazine. The raised left binding
    is distinct from the ivory paper stack and visible above the real sheet.
    Purely visual: no gestures, PageFlip pages or layout dimensions change. */
-.hn-magazine-binding{
+.hn-magazine-binding {
   position:absolute;
   z-index:2;
   top:0;
