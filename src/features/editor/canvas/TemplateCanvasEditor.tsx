@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { EditQuoteField } from '../../shared/editor-types';
-import type { PhotoTarget } from '../shared/editor-types';
+import type { PhotoTarget, EditQuoteField } from '../shared/editor-types';
 import type { CarolinaLayout } from '../../templates/carolina-layout';
 import { carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts } from '../../templates/carolina-layout';
 import type { CarolinaPageId } from '../../templates/carolina-layout';
