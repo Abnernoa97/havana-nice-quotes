@@ -23,7 +23,7 @@ function MagazineLeaf({ children, className = '', paperStyle }: { children: Reac
  * The source leaves are kept outside the flip container so a React
  * StrictMode remount always gets fresh page nodes.
  */
-export default function FlipMagazine({ item, clientView=false }: { item: Quote; clientView?:boolean }) {
+export default function FlipMagazine({ item }: { item: Quote; clientView?:boolean }) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const sourceRef = useRef<HTMLDivElement | null>(null);
   const flipRef = useRef<PageFlip | null>(null);
