@@ -527,7 +527,7 @@ test('Añadir fotos en las tres hojas y borrar con pulsación larga sin tocar R2
 });
 
 
-test('Edición móvil sin selección nativa y 3D con scroll vertical', () => {
+test('Edición móvil con caret nativo y 3D con scroll vertical', () => {
   const gesture=src('features/templates/useCarolinaGesture.ts');
   const photo=src('features/templates/CarolinaPhotoNode.tsx');
   const textNode=src('features/templates/CarolinaTextNode.tsx');
@@ -535,7 +535,8 @@ test('Edición móvil sin selección nativa y 3D con scroll vertical', () => {
   const magazineCss=readFileSync(new URL('../src/features/magazine/flip-magazine.css',import.meta.url),'utf8');
   assert.match(gesture,/const onPointerCancel =/);
   assert.match(photo,/onPointerCancel=\{gesture\.onPointerCancel\}/);
-  assert.match(textNode,/onPointerCancel=\{gesture\.onPointerCancel\}/);
+  assert.match(textNode,/onPointerCancel=\{editing \? undefined : gesture\.onPointerCancel\}/);
+   assert.match(textNode,/onContextMenu=\{event => \{ if \(!editing\) event\.preventDefault\(\); \}\}/);
   assert.match(editCss,/-webkit-touch-callout:none/);
   assert.match(magazineCss,/touch-action:pan-y pinch-zoom!important/);
   const magazine=src('features/magazine/FlipMagazine.tsx');

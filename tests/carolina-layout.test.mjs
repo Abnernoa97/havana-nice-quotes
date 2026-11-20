@@ -41,7 +41,8 @@ test('Edición directa, presión larga y gesto de dos dedos mantienen un solo gu
   const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
   assert.match(gesture,/LONG_PRESS_MS = 550/);
   assert.match(node,/contentEditable=\{editing \? 'plaintext-only' : undefined\}/);
-  assert.match(node,/onPointerDown=\{gesture\.onPointerDown\} onPointerMove=\{gesture\.onPointerMove\}/);
+  assert.match(node,/onPointerDown=\{editing \? undefined : gesture\.onPointerDown\}/);
+   assert.match(node,/onPointerMove=\{editing \? undefined : gesture\.onPointerMove\}/);
   assert.match(node,/onBlur=\{\(\) =>/);
   assert.match(gesture,/Math\.hypot/);
   assert.match(gesture,/page\.addEventListener\('pointerdown',down\)/);

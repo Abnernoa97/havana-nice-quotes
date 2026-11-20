@@ -254,11 +254,14 @@ test('Texto nuevo: centrado blanco Playfair y sin recolocar textos históricos',
  assert.match(canvas,/setDraftText\(\{id,page\}\)/);
  assert.match(canvas,/newlyConfirmedText\.current/);
 });
-test('Texto tecleado se mueve arrastrando el mismo texto o el fondo y cierra teclado',()=>{
+test('Texto editable cede el toque al cursor; drag vuelve al cerrar teclado',()=>{
  const gesture=src('features/templates/useCarolinaGesture.ts');
+ const node=src('features/templates/CarolinaTextNode.tsx');
  const canvas=canvasSource();
- assert.match(gesture,/beginEditDrag\(event\.pointerId,event\.clientX,event\.clientY\)/);
- assert.match(gesture,/if\(disabled && editingHere\)/);
+ assert.match(gesture,/if \(disabled \|\| \(!selected && !editingHere\) \|\| !node\.current\) return/);
+ assert.doesNotMatch(gesture,/if\(disabled && editingHere\)/);
+ assert.match(node,/onPointerDown=\{editing \? undefined : gesture\.onPointerDown\}/);
+ assert.match(node,/caretPositionFromPoint/);
  assert.match(gesture,/interactionRef\.current\?\.onSelectTransform\(id\)/);
  assert.match(gesture,/page\.setPointerCapture\(event\.pointerId\)/);
  assert.match(canvas,/if \(editingId && document\.activeElement instanceof HTMLElement\)document\.activeElement\.blur\(\)/);

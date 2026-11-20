@@ -153,5 +153,5 @@ test('Google Translate y la selección solo se inhiben en zonas de lectura no ed
  assert.match(main,/nativeEditable\(event\.target\)/);
  assert.match(global,/#root input,#root textarea/);
  assert.match(canvas,/-webkit-touch-callout:none/);
- assert.match(text,/onContextMenu=\{event => event\.preventDefault\(\)\}/);
+ assert.match(text,/onContextMenu=\{event => \{ if \(!editing\) event\.preventDefault\(\); \}\}/);
 });
