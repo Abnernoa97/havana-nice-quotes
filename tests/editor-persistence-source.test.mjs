@@ -58,7 +58,7 @@ test('Publicar reutiliza el documento real Scroll y la revista 3D sin duplicar e
 
 test('La revista mantiene intactos los parámetros de plegado 3D', () => {
   const magazine = src('features/magazine/FlipMagazine.tsx');
-  assert.match(magazine, /flippingTime: 1080/);
+  assert.match(magazine, /flippingTime: 650/);
   assert.match(magazine, /maxShadowOpacity: 0\.72/);
   const editorial=src('features/templates/EditorialTemplate.tsx');
   assert.match(magazine,/EditorialCover/);
@@ -207,7 +207,7 @@ test('La plantilla Carolina tiene las 3 páginas originales editables, no un PDF
   assert.match(magazine, /templateFamily\(item\.style\)==='carolina'/);
   assert.doesNotMatch(magazine, /<CarolinaBlankReverse\/>/);
   assert.match(magazine, /selectedPages\.map\(selectedPage=>/);
-  assert.match(magazine, /flippingTime: 1080/);
+  assert.match(magazine, /flippingTime: 650/);
   assert.doesNotMatch(template, /<iframe|<embed|<object|\.pdf/);
 });
 

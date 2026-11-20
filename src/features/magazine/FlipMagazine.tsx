@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import type { Quote } from '../quotes/types';
 import { PageFlip } from 'page-flip';
+import { useMagazinePaperGesture } from './useMagazinePaperGesture';
+import type { InteractiveMagazineFlip } from './useMagazinePaperGesture';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
 import { CarolinaCover, CarolinaCollage, CarolinaTerms, CarolinaBlankPage } from '../templates/CarolinaTemplate';
 import { EditorialCover, EditorialCollage, EditorialTerms } from '../templates/EditorialTemplate';
@@ -24,6 +26,8 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
   const mountRef = useRef<HTMLDivElement | null>(null);
   const sourceRef = useRef<HTMLDivElement | null>(null);
   const flipRef = useRef<PageFlip | null>(null);
+  const turningRef = useRef(false);
+  const [turning, setTurning] = useState(false);
   const [page, setPage] = useState(0);
   const [orientation, setOrientation] = useState('portrait');
   const [failure, setFailure] = useState(false);
@@ -100,15 +104,17 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
         maxHeight: 792,
         drawShadow: true,
         maxShadowOpacity: 0.72,
-        flippingTime: 1080,
+        // Match V2's responsive physical book: keep the surface height in CSS.
+        flippingTime: 650,
         usePortrait: true,
-        autoSize: true,
+        autoSize: false,
         showCover: false,
         // Keep vertical touch scrolling available while horizontal swipes still turn pages.
         mobileScrollSupport: true,
         swipeDistance: 25,
-        showPageCorners: true,
-        disableFlipByClick: false,
+        // On touch devices a controlled finger drag owns the live fold.
+        showPageCorners: window.matchMedia('(hover:hover) and (pointer:fine)').matches,
+        disableFlipByClick: true,
       });
       flip.loadFromHTML(host.querySelectorAll<HTMLElement>('.hn-leaf'));
       flip.on('flip', e => {
@@ -119,6 +125,11 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
         setPage(next);
       });
       flip.on('changeOrientation', e => setOrientation(String(e.data)));
+      flip.on('changeState',e=>{
+        const busy=String(e.data)==='flipping';
+        turningRef.current=busy;
+        setTurning(busy);
+      });
       flipRef.current = flip;
       setPage(0);
       setFailure(false);
@@ -131,6 +142,7 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
       if(onVisibility)document.removeEventListener('visibilitychange',onVisibility);
       host?.querySelectorAll('video').forEach(media=>media.pause());
       flipRef.current = null;
+      turningRef.current=false;
       try { flip?.destroy(); } catch (error) { console.warn('Page flip cleanup', error); }
       mount.replaceChildren();
     };
@@ -138,11 +150,20 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
     JSON.stringify(item.gallery), JSON.stringify(item.carolinaCopy), JSON.stringify(item.designLayout)]);
 
   const changePage = (direction: 'next' | 'prev') => {
-    const flip = flipRef.current;
-    if (!flip) return;
-    if (direction === 'next' && page < total - 1) flip.flipNext('bottom');
-    if (direction === 'prev' && page > 0) flip.flipPrev('bottom');
+    const flip=flipRef.current as InteractiveMagazineFlip | null;
+    if(!flip||turningRef.current)return;
+    const collection=flip.getPageCollection();
+    const spread=collection.getCurrentSpreadIndex();
+    const last=collection.getSpreadIndexByPage(Math.max(0,total-1));
+    if(direction==='next'&&spread<last)flip.flipNext('bottom');
+    else if(direction==='prev'&&spread>0){
+      // V2 works around the page-flip 2.0.7 fixed x=10 previous-corner bug.
+      const rect=flip.getBoundsRect();
+      flip.getFlipController().flip({x:rect.left+10,y:rect.top+rect.height-2});
+    }
   };
+  const paperGesture=useMagazinePaperGesture({mountRef,flipRef,turningRef,
+    orientation,changePage});
 
   return (
     <section className={'hn-magazine hn-font-' + item.font + ' hn-style-' + (item.style || 'carolina')} style={{ '--paper-accent': item.color } as CSSProperties} aria-label="Propuesta de música en vivo en formato revista">
@@ -153,7 +174,15 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
       </header>
 
       <div className="hn-magazine-stage">
-        <div className="hn-magazine-surface" ref={mountRef} aria-label={'Revista interactiva de ' + total + ' páginas'} />
+        <div className="hn-magazine-surface" ref={mountRef}
+          aria-label={'Revista interactiva de ' + total + ' páginas'}
+          onTouchStartCapture={event=>event.stopPropagation()}
+          onTouchMoveCapture={event=>event.stopPropagation()}
+          onTouchEndCapture={event=>event.stopPropagation()}
+          onPointerDown={paperGesture.onPointerDown}
+          onPointerMove={paperGesture.onPointerMove}
+          onPointerUp={paperGesture.onPointerUp}
+          onPointerCancel={paperGesture.onPointerCancel}/>
         {finalChat&&<div className="hn-magazine-chat-lock" onPointerDown={e=>e.stopPropagation()}>
           <button type="button" className="hn-magazine-chat-back"
             onClick={()=>changePage('prev')}><ArrowLeft size={15}/> Previous page</button>
@@ -180,15 +209,15 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
       )}
 
       <div className="hn-magazine-controls">
-        <button type="button" className="hn-magazine-arrow" onClick={() => changePage('prev')} disabled={page===0 || failure} aria-label="Página anterior">
+        <button type="button" className="hn-magazine-arrow" onClick={() => changePage('prev')} disabled={page===0 || failure || turning} aria-label="Página anterior">
           <ArrowLeft size={19} />
         </button>
         <div className="hn-magazine-progress">
           <span className="hn-magazine-page-number">{String(page + 1).padStart(2, '0')} <i>/</i> {String(total).padStart(2, '0')}</span>
           <div className="hn-magazine-track"><div style={{ width: ((page + 1) / total * 100) + '%' }} /></div>
-          <small><Hand size={12} /> {orientation === 'portrait' ? 'Toca o arrastra la esquina para pasar' : 'Revista abierta · dos páginas'}</small>
+          <small><Hand size={12} /> {orientation === 'portrait' ? 'Sujeta una esquina y mueve la hoja · suelta para pasar o regresar' : 'Revista abierta · dos páginas'}</small>
         </div>
-        <button type="button" className="hn-magazine-arrow" onClick={() => changePage('next')} disabled={page>=total-1 || failure} aria-label="Página siguiente">
+        <button type="button" className="hn-magazine-arrow" onClick={() => changePage('next')} disabled={page>=total-1 || failure || turning} aria-label="Página siguiente">
           <ArrowRight size={19} />
         </button>
       </div>

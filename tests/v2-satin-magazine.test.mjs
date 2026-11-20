@@ -16,7 +16,7 @@ test('Paper finish is static and never steals touches from PageFlip',()=>{
  assert.match(css,/\.hn-magazine-stage::before\{[^}]*pointer-events:none/);
  assert.match(code,/drawShadow: true/);
  assert.match(code,/maxShadowOpacity: 0\.72/);
- assert.match(code,/flippingTime: 1080/);
+ assert.match(code,/flippingTime: 650/);
  assert.match(code,/const pages = Array\.from\(source\.children\)\.map\(node => node\.cloneNode\(true\)\)/);
  assert.match(css,/\.hn-magazine-stage,\.hn-magazine-stage \*\{touch-action:pan-y pinch-zoom!important\}/);
 });
