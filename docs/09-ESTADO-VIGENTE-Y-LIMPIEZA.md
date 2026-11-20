@@ -29,6 +29,10 @@ Fer & Noa indican cambios; el asistente modifica, comprueba y publica sin exigir
 
 La estructura vigente de Fotos, Textos, Lienzo y módulos compartidos está en [Arquitectura del editor](10-ARQUITECTURA-EDITOR.md). No se mantienen archivos duplicados de editores antiguos. Las plantillas y el modelo compartido siguen sirviendo al diseñador, Scroll y 3D.
 
+## Control de calidad progresivo
+
+La limpieza de CSS, la compatibilidad de cotizaciones antiguas y la validación física Android/iPhone se registran en [13 · QA móvil y compatibilidad](13-QA-MOVIL-Y-COMPATIBILIDAD.md). Un build correcto no certifica gestos ni persistencia real en dispositivos.
+
 ## Fuentes activas
 - [Visión](03-VISION-DEL-PRODUCTO.md)
 - [Roadmap](04-ROADMAP.md)
