@@ -234,10 +234,13 @@ if (fileSet.has('src/features/editor/canvas/TemplateCanvasEditor.tsx')) {
 const magazinePath = 'src/features/magazine/FlipMagazine.tsx';
 if (fileSet.has(magazinePath)) {
   const magazine = fs.readFileSync(path.join(ROOT, magazinePath), 'utf8');
-  check('Parámetros del Page Flip aprobado preservados',
-    ['flippingTime: 1080', 'maxShadowOpacity: 0.72', 'showCover: false',
-      'usePortrait: true', "flip.loadFromHTML("].every(x => magazine.includes(x)),
-    'Revisar pliegue 3D: cambió un parámetro protegido');
+  const paperGesture=fs.readFileSync(path.join(ROOT,'src/features/magazine/useMagazinePaperGesture.ts'),'utf8');
+  check('PageFlip V2: parámetros y doblez manipulable protegidos',
+    ['flippingTime: 650', 'maxShadowOpacity: 0.72', 'showCover: false',
+      'usePortrait: true', 'autoSize: false', 'disableFlipByClick: true',
+      'flip.loadFromHTML(', 'onPointerMove={paperGesture.onPointerMove}'].every(x=>magazine.includes(x)) &&
+    ['flip.startUserTouch(', 'flip.userMove(', 'flip.userStop('].every(x=>paperGesture.includes(x)),
+    'Revisar gestos de pliegue 3D: se perdió un parámetro o el arrastre V2');
 }
 
 console.log('HAVANA NICE · Auditoría de estructura (solo lectura)');
