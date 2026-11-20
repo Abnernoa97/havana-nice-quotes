@@ -12,7 +12,8 @@ test('Photo editor retains one base rule per scrolling and gesture surface',()=>
    '.hn-photo-workspace .hn-photo-switches'])
    assert.equal(blocks(base,selector).length,1,selector);
  assert.match(blocks(base,'.hn-photo-workspace-stage')[0],/overflow:hidden;overflow-y:auto/);
- assert.match(blocks(base,'.hn-photo-workspace-frame.editing-effect')[0],/touch-action:none/);
+ assert.match(blocks(base,'.hn-photo-workspace-frame')[0],/touch-action:none/);
+ assert.doesNotMatch(blocks(base,'.hn-photo-workspace-frame.editing-effect')[0],/touch-action:/);
  assert.match(blocks(base,'.hn-photo-workspace .hn-photo-switches')[0],/touch-action:pan-x/);
  assert.match(css,/@media\(max-height:590px\)/);
 });

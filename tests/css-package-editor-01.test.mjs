@@ -7,7 +7,7 @@ const editor=css('features/editor/styles/editorial-styles.css');
 const carolina=css('features/templates/carolina-template.css');
 const editorial=css('features/templates/editorial-template.css');
 const photo=css('features/editor/photos/photo-style-dock.css');
-const selectors=(sheet,selector)=>[...sheet.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+const selectors=(sheet,selector)=>[...sheet.replace(/\/\*[\s\S]*?\*\//g,'').matchAll(/([^{}]+)\{([^{}]*)\}/g)]
   .filter(match=>match[1].trim()===selector).map(match=>match[2]);
 
 test('Editorial controls and preview captions have one final base style',()=>{
