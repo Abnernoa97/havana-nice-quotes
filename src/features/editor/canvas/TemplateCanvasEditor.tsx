@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Trash2, Copy } from 'lucide-react';
+import { isCarolinaCopyField } from '../../templates/carolina-edit-fields';
+import type { CarolinaTextField } from '../../templates/carolina-edit-fields';
 import TextStyleDock from '../texts/TextStyleDock';
 import type { TextToolTab } from '../texts/TextStyleDock';
 import PhotoLayersPanel from '../photos/PhotoLayersPanel';
@@ -9,7 +11,7 @@ import { listPhotoLayers } from '../photos/photo-layers';
 import type { PhotoTarget } from '../shared/editor-types';
 import PhotoEditingWorkspace from '../photos/PhotoEditingWorkspace';
 import type { ElegantFontId } from '../../templates/elegant-fonts';
-import type { CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle } from '../../templates/carolina-layout';
+import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle } from '../../templates/carolina-layout';
 import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts, CAROLINA_PAGE_TITLES } from '../../templates/carolina-layout';
 import { pageBackgroundMediaId } from '../../templates/page-background';
 import { insertBlankPage, duplicateBlankPage, removeDesignPage } from '../../templates/blank-pages';

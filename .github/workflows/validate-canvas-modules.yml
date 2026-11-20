@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/validate-canvas-modules.yml'
       - 'tests/blank-pages.test.mjs'
+      - 'src/features/editor/canvas/TemplateCanvasEditor.tsx'
 permissions:
   contents: read
 jobs:
