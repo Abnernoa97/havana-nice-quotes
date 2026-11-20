@@ -30,7 +30,7 @@ test('Custom corner drag and satin styles survive core engine migration',()=>{
  assert.match(book,/flipOnClick: 'never'/);
  assert.match(book,/allowTouchScroll: true/);
  assert.match(book,/pageBackground: '#f8f6f0'/);
- assert.match(gesture,/flip\.getBlockElement\(\)\.getBoundingClientRect\(\)/);
+ assert.match(gesture,/flip\?\.getBlockElement\(\)\.getBoundingClientRect\(\)/);
  assert.match(gesture,/flip\.startUserTouch\(/);
  assert.match(gesture,/flip\.userMove\(/);
  assert.match(gesture,/flip\.userStop\(/);

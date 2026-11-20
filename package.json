@@ -8,8 +8,7 @@
     "build": "npm run audit:structure && npm test && tsc --noEmit && vite build",
     "preview": "vite preview",
     "audit:structure": "node scripts/project-audit.mjs",
-    "test": "node --experimental-strip-types --test tests/*.test.mjs",
-    "prebuild": "npm view @gullabs/flipbook-core@3.2.2 dist.integrity"
+    "test": "node --experimental-strip-types --test tests/*.test.mjs"
   },
   "dependencies": {
     "@gullabs/flipbook-core": "3.2.2",
