@@ -150,75 +150,98 @@
 }
 
 
-/* HAVANA NICE · Physical bound volume. Decorative layers sit BELOW the
-   existing PageFlip motor; they cannot intercept a gesture or cover content.
-   Their thickness follows the actual selected page and number of leaves. */
-.hn-magazine-stage-bound{
-  --hn-page-stack-depth:8px;
-  --hn-page-stack-count:3;
-  --hn-page-stack-left:0;
-  --hn-page-stack-right:3;
+/* HAVANA NICE · Book binding, not a second flip engine.
+   The block is measured from PageFlip's actual DOM bounds. It remains behind
+   the active leaf while the real PageFlip paper continues to fold above it. */
+.hn-magazine-stage-bound {
+  --hn-page-stack-depth: 16px;
+  --hn-page-stack-left: 0;
+  --hn-page-stack-right: 4;
+  margin-bottom: calc(var(--hn-page-stack-depth) + 10px);
 }
-/* The stage itself is deliberately larger than the live leaf. Its two
-   inset sheets are a shallow underlay, not fake pages inserted into PageFlip. */
-.hn-magazine-stage-bound::after{
-  content:"";
-  position:absolute;
-  z-index:0;
-  pointer-events:none;
-  left:calc(50% - min(205px, 29vw));
-  right:calc(50% - min(205px, 29vw));
-  top:calc(50% - min(290px, 34svh) + 3px);
-  bottom:calc(50% - min(290px, 34svh) - var(--hn-page-stack-depth));
-  border-radius:1px 3px 4px 3px;
-  background:repeating-linear-gradient(
-    to bottom,#e9e3d6 0px,#e9e3d6 1px,
-    #b8ae9b 1.5px,#fff9ee 2px,#f2eee4 3px);
-  box-shadow:3px 8px 8px #241e1830,0 13px 18px #241e1820;
-  opacity:.9;
+.hn-magazine-page-block {
+  position: absolute;
+  z-index: 0;
+  visibility: hidden;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-radius: 2px;
+  background: transparent;
+  box-shadow: 0 7px 19px #33261926;
 }
-/* Real leaf width is controlled by PageFlip. Keep this binding on the
-   actual PageFlip wrapper rather than placing a fake page over it. */
-.hn-magazine-stage-bound .hn-flip-host.stf__parent .stf__wrapper{
-  filter:drop-shadow(1px 7px 4px #32291e28)
-         drop-shadow(3px 13px 11px #241f1933);
-}
-.hn-magazine-stage-bound .hn-flip-host.stf__parent .stf__wrapper::before{
-  content:"";
-  position:absolute;
-  z-index:-1;
-  pointer-events:none;
-  inset:2px 0 calc(-1 * var(--hn-page-stack-depth)) 0;
-  border-radius:2px 2px 4px 4px;
+.hn-magazine-page-block-bottom {
+  position: absolute;
+  z-index: 1;
+  left: 1px;
+  right: 2px;
+  top: calc(100% - 1px);
+  height: var(--hn-page-stack-depth);
+  border-radius: 0 0 3px 3px;
+  border-top: 1px solid #a99f8f;
+  border-bottom: 2px solid #8c7b66;
   background:
-    linear-gradient(90deg,#63544155 0%,#d8ccba 2%,#faf7ef 7%,transparent 18%,transparent 83%,#f5f0e6 95%,#a99a81 100%),
-    repeating-linear-gradient(to bottom,#f8f4ea 0px,#e0d8ca 1px,#fffaf0 2px,#c5b8a5 3px);
-  box-shadow:0 5px 6px #2d241b24,0 13px 17px #211b1730;
+    linear-gradient(to bottom,
+      #62534445 0%,#e0d6c5 9%,#faf6ea 26%,
+      transparent 42%,#fffaf1 78%,#ae9d85 100%),
+    repeating-linear-gradient(to bottom,
+      #fdf9ee 0px,#fdf9ee 1px,#d4c9b8 1.6px,
+      #f6f0e5 2.7px,#ebe2d6 3.4px,#fdf9ee 4.5px);
+  box-shadow: 0 3px 3px #30271f25,0 9px 13px #33261945;
+  transform: perspective(240px) rotateX(-13deg);
+  transform-origin: top;
 }
-.hn-magazine-stage-bound .hn-flip-host.stf__parent .stf__wrapper::after{
-  content:"";
-  position:absolute;
-  z-index:-1;
-  pointer-events:none;
-  top:0;bottom:0;left:0;
-  width:clamp(6px,2%,13px);
-  background:linear-gradient(90deg,#342b2390,#6f615477 22%,#b6a99555 55%,transparent);
-  border-radius:2px 0 0 3px;
-  box-shadow:inset 2px 0 2px #211a1450;
+.hn-magazine-page-block-bottom::after {
+  content: "";
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  top: 1px;
+  height: 2px;
+  background: linear-gradient(90deg,#a2947d99,transparent 12%,#fffef8a9 50%,transparent 88%,#a2947d99);
 }
-/* Portrait leaves can be centered at variable widths on narrow devices.
-   The only reliable thickness is the wrapper's own width. Hide the stage
-   underlay there to avoid an off-center rectangle on mobile. */
+.hn-magazine-page-block-side {
+  position: absolute;
+  z-index: 1;
+  top: 3px;
+  right: -5px;
+  bottom: 0;
+  width: 6px;
+  border-radius: 0 2px 3px 0;
+  background: repeating-linear-gradient(to right,
+    #ad9e87 0px,#fbf7ed 1px,#d3c9b9 2px,#fffaf1 3px);
+  box-shadow: 3px 3px 4px #382d2252;
+}
+.hn-magazine-page-block-spine {
+  position: absolute;
+  z-index: 1;
+  top: 3px;
+  left: -6px;
+  bottom: 0;
+  width: 9px;
+  background: linear-gradient(90deg,
+    #322820b2 0%,#7766529c 25%,#d4c5aa9f 58%,
+    #fff7e56e 77%,transparent 100%);
+  border-radius: 3px 0 0 3px;
+  box-shadow: -2px 3px 5px #1c160f38;
+}
+/* Separation at the inner binding looks like a classic folded magazine:
+   only a narrow fixed edge appears; the moving sheet stays untouched. */
+.hn-magazine-stage-bound .hn-flip-host.stf__parent .stf__wrapper{
+  filter: drop-shadow(0 3px 2px #372b1f24)
+          drop-shadow(2px 10px 10px #2b231d2b);
+}
+/* No pseudo-sheets on PageFlip's own wrapper. They get clipped or cover
+   the engine's paper on phones. All decorative depth is a sibling below it. */
+.hn-magazine-stage-bound .hn-magazine-surface {z-index: 1}
+.hn-magazine-stage-bound .hn-magazine-page-block,
+.hn-magazine-page-block * {pointer-events:none!important}
 @media(max-width:700px){
-  .hn-magazine-stage-bound::after{display:none}
-  .hn-magazine-stage-bound .hn-flip-host.stf__parent .stf__wrapper{
-    filter:drop-shadow(1px 5px 3px #34291f2b)
-           drop-shadow(2px 10px 8px #261e1733);
+  .hn-magazine-stage-bound {margin-bottom: calc(var(--hn-page-stack-depth) + 13px)}
+  .hn-magazine-page-block-bottom {
+    background:
+      linear-gradient(to bottom,#81736165 0%,#e4dacb 15%,transparent 32%,#fffaf1 70%,#a99a86 100%),
+      repeating-linear-gradient(to bottom,#fffaf0 0px,#d5c8b5 1.4px,#f6f0e5 2.6px,#e5dacb 3.2px,#fffaf0 4.2px);
   }
-}
-/* Preserve touch interaction and avoid introducing a second page animation. */
-.hn-magazine-stage-bound::after,
-.hn-magazine-stage-bound .hn-flip-host .stf__wrapper::before,
-.hn-magazine-stage-bound .hn-flip-host .stf__wrapper::after{
-  touch-action:none;
+  .hn-magazine-page-block-side{right:-3px;width:4px}
+  .hn-magazine-page-block-spine{left:-4px;width:7px}
 }

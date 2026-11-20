@@ -25,6 +25,7 @@ function MagazineLeaf({ children, className = '', paperStyle }: { children: Reac
  */
 export default function FlipMagazine({ item }: { item: Quote; clientView?:boolean }) {
   const mountRef = useRef<HTMLDivElement | null>(null);
+  const bookBlockRef = useRef<HTMLDivElement | null>(null);
   const sourceRef = useRef<HTMLDivElement | null>(null);
   const flipRef = useRef<PageFlip | null>(null);
   const turningRef = useRef(false);
@@ -45,7 +46,38 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
     let flip: PageFlip | undefined;
     let host: HTMLDivElement | undefined;
     let onVisibility: (()=>void) | undefined;
+    let pageBlockResize: ResizeObserver | undefined;
+    let pageBlockFrame=0;
     let activePageIndex=0;
+    // Measure the engine's real block. CSS-only offsets fail on portrait
+    // phones, landscape spreads and responsive page widths.
+    const alignPhysicalPageBlock=()=>{
+      const background=bookBlockRef.current;
+      const stage=mount.parentElement;
+      const actual=flip?.getBlockElement();
+      if(!background||!stage||!actual)return;
+      const rect=actual.getBoundingClientRect();
+      const stageRect=stage.getBoundingClientRect();
+      if(rect.width<80||rect.height<80)return;
+      background.style.left=(rect.left-stageRect.left)+'px';
+      background.style.top=(rect.top-stageRect.top)+'px';
+      background.style.width=rect.width+'px';
+      background.style.height=rect.height+'px';
+      background.style.visibility='visible';
+    };
+    const schedulePhysicalPageBlock=()=>{
+      if(pageBlockFrame)cancelAnimationFrame(pageBlockFrame);
+      pageBlockFrame=requestAnimationFrame(()=>{
+        pageBlockFrame=0;
+        alignPhysicalPageBlock();
+      });
+    };
+    const cleanupPhysicalPageBlock=()=>{
+      if(pageBlockFrame)cancelAnimationFrame(pageBlockFrame);
+      pageBlockResize?.disconnect();
+      window.removeEventListener('resize',schedulePhysicalPageBlock);
+      if(bookBlockRef.current)bookBlockRef.current.style.visibility='hidden';
+    };
     const syncCoverVideos=(index:number)=>{
       let visibleVideo=false;
       host?.querySelectorAll<HTMLElement>('.hn-leaf').forEach((leaf,leafIndex)=>{
@@ -121,14 +153,22 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
         flipOnClick: 'never',
       });
       flip.loadFromHTML(host.querySelectorAll<HTMLElement>('.hn-leaf'));
+      if(typeof ResizeObserver!=='undefined'){
+        pageBlockResize=new ResizeObserver(schedulePhysicalPageBlock);
+        pageBlockResize.observe(flip.getBlockElement());
+        pageBlockResize.observe(mount);
+      }
+      window.addEventListener('resize',schedulePhysicalPageBlock);
+      schedulePhysicalPageBlock();
       flip.on('flip', e => {
         const next=e.data.page;
         activePageIndex=next;
         // Stop old leaves; resume the muted infinite loop when cover returns.
         syncCoverVideos(next);
         setPage(next);
+        schedulePhysicalPageBlock();
       });
-      flip.on('changeOrientation', e => setOrientation(e.data.orientation));
+      flip.on('changeOrientation', e => {setOrientation(e.data.orientation);schedulePhysicalPageBlock();});
       flip.on('changeState',e=>{
         const busy=e.data.state==='flipping';
         turningRef.current=busy;
@@ -144,6 +184,7 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
     }
     return () => {
       if(onVisibility)document.removeEventListener('visibilitychange',onVisibility);
+      cleanupPhysicalPageBlock();
       host?.querySelectorAll('video').forEach(media=>media.pause());
       flipRef.current = null;
       turningRef.current=false;
@@ -168,11 +209,16 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
   return (
     <section className={'hn-magazine hn-v2-book-paper hn-font-' + item.font + ' hn-style-' + (item.style || 'carolina')} style={{ '--paper-accent': item.color } as CSSProperties} aria-label="Propuesta de música en vivo en formato revista">
       <div className={'hn-magazine-stage'+(total>1?' hn-magazine-stage-bound':'')} style={{
-        '--hn-page-stack-depth': Math.min(14, Math.max(2, total - 1)) + 'px',
+        '--hn-page-stack-depth': Math.min(18, 8 + Math.max(0, total - 1) * 2) + 'px',
         '--hn-page-stack-count': String(Math.max(0, total - 1)),
         '--hn-page-stack-left': String(Math.min(page, total - 1)),
         '--hn-page-stack-right': String(Math.max(0, total - page - 1)),
       } as CSSProperties}>
+        {total>1&&<div className="hn-magazine-page-block" ref={bookBlockRef} aria-hidden="true">
+          <span className="hn-magazine-page-block-bottom"/>
+          <span className="hn-magazine-page-block-side"/>
+          <span className="hn-magazine-page-block-spine"/>
+        </div>}
         <div className="hn-magazine-surface" ref={mountRef}
           aria-label={'Revista interactiva de ' + total + ' páginas'}
           onTouchStartCapture={event=>event.stopPropagation()}
