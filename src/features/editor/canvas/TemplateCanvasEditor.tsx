@@ -441,7 +441,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
     const down=(event:PointerEvent)=>{
       if(!(event.target instanceof Element)||event.button!==0)return;
       const el=event.target;
-      if(el.closest('.hn-text-dock,.hn-photo-workspace,[data-hn-text-trash]'))return;
+      // Switching tools uses the same tap: never swallow toolbar or navigation clicks.
+      // A tap on empty canvas still confirms the current transform.
+      if(el.closest('.hn-canvas-toolbar,.hn-canvas-pager,.hn-text-dock,.hn-photo-workspace,.edit-tabs,.editor-actions,[data-hn-text-trash]'))return;
       if(candidate){candidate=null;return;} // multiple fingers are not a confirming tap
       candidate={id:event.pointerId,x:event.clientX,y:event.clientY,
         insideSheet:!!el.closest('.hn-canvas-sheet')};
