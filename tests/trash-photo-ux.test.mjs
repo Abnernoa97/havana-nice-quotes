@@ -68,7 +68,8 @@ test('Añadir fotografía es botón real tanto en Carolina como en todas las edi
  assert.match(prompt,/Añadir archivo/);
  assert.match(canvas,/onSelectCover=\{\(\)=>selectPhoto\('photo:cover'\)\}/);
  assert.match(canvas,/if \(!url\)/);
- assert.match(canvas,/if \(id==='photo:cover'\) open\('cover'\)/);
+ assert.match(canvas,/const nextTarget=canvasPhotoTarget\(id\)/);
+  assert.match(canvas,/if\(nextTarget!==null\)open\(nextTarget\)/);
  assert.match(canvas,/if\(target==='cover'\)\{/);
  assert.match(canvas,/edit\('coverVideo',video\?url:''\)/);
  assert.match(css,/z-index:10/);

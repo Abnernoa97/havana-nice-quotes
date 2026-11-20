@@ -5,6 +5,7 @@ import type { CarolinaLayout, CarolinaPhotoStyle } from '../../../templates/caro
 import { MAX_DESIGN_ELEMENTS, photoSlotToAdd } from '../../../templates/carolina-layout';
 import { carolinaPhotos } from '../../../templates/CarolinaTemplate';
 import { canvasPhotoUrl } from './canvasPhotoUrl';
+import { canvasPhotoTarget } from './canvasPhotoTarget';
 
 type Set<T> = Dispatch<SetStateAction<T>>;
 type Params = {
@@ -42,9 +43,8 @@ export function createCanvasPhotoActions({
     // Empty frames open the source picker, populated photos open the immersive editor.
     const url = canvasPhotoUrl(item,id);
     if (!url) {
-      if (id==='photo:cover') open('cover');
-      else if (id.startsWith('photo-extra:')) open(`extra:${id.slice('photo-extra:'.length)}`);
-      else open(Number(id.slice(6)));
+      const nextTarget=canvasPhotoTarget(id);
+      if(nextTarget!==null)open(nextTarget);
       return;
     }
     const rect=document.querySelector<HTMLElement>('[data-hn-photo-id="'+id+'"]')?.getBoundingClientRect();
@@ -72,11 +72,8 @@ export function createCanvasPhotoActions({
   };
   const replacePhoto = () => {
     if (!selectedPhotoId) return;
-    if (selectedPhotoId === 'photo:cover') open('cover');
-    else if (selectedPhotoId.startsWith('photo-extra:'))
-      open(`extra:${selectedPhotoId.slice('photo-extra:'.length)}`);
-    else if (/^photo:(1[01]|[0-9])$/.test(selectedPhotoId))
-      open(Number(selectedPhotoId.slice(6)));
+    const nextTarget=canvasPhotoTarget(selectedPhotoId);
+    if(nextTarget!==null)open(nextTarget);
   };
   const addPhotoAnywhere=()=>{
     setShowPageMenu(false);
