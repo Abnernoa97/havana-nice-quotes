@@ -11,8 +11,8 @@ import { listPhotoLayers } from '../photos/photo-layers';
 import type { PhotoTarget } from '../shared/editor-types';
 import PhotoEditingWorkspace from '../photos/PhotoEditingWorkspace';
 import type { ElegantFontId } from '../../templates/elegant-fonts';
-import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle } from '../../templates/carolina-layout';
-import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts, CAROLINA_PAGE_TITLES } from '../../templates/carolina-layout';
+import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle } from '../../templates/carolina-layout';
+import { carolinaPhotoOrder, carolinaPageOrder, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts, CAROLINA_PAGE_TITLES } from '../../templates/carolina-layout';
 import { pageBackgroundMediaId } from '../../templates/page-background';
 import type { CarolinaPageId } from '../../templates/carolina-layout';
 import type { Quote } from '../../quotes/types';
@@ -25,6 +25,7 @@ import { useCanvasPageActions } from './hooks/useCanvasPageActions';
 import { useCanvasTapConfirmation } from './hooks/useCanvasTapConfirmation';
 import { createCanvasTextInteraction } from './interactions/createCanvasTextInteraction';
 import { canvasPhotoUrl } from './media/canvasPhotoUrl';
+import { createCanvasPhotoActions } from './media/createCanvasPhotoActions';
 import { carolinaPhotos } from '../../templates/CarolinaTemplate';
 import './template-canvas.css';
 
@@ -181,110 +182,16 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const photoOrder = carolinaPhotoOrder(item.designLayout);
   const photoLayers=listPhotoLayers(item,page);
   const pageBackgroundId=pageBackgroundMediaId(item.designLayout,page);
-  const setPhotoOrder = (order:number[]) => updateLayout({photoOrder:order});
-  const selectPhoto = (id:string) => {
-    setShowPageMenu(false);
-    // Exactly one active session: a different tap first dismisses text, never opens media.
-    if (lastTextId || transformingId) {clearSelection();return;}
-    // Empty frames open the source picker, populated photos open the immersive editor.
-    const url = canvasPhotoUrl(item,id);
-    if (!url) {
-      if (id==='photo:cover') open('cover');
-      else if (id.startsWith('photo-extra:')) open(`extra:${id.slice('photo-extra:'.length)}`);
-      else open(Number(id.slice(6)));
-      return;
-    }
-    const rect=document.querySelector<HTMLElement>('[data-hn-photo-id="'+id+'"]')?.getBoundingClientRect();
-    setPhotoAspect(rect?.width&&rect?.height
-      ? Math.max(.45,Math.min(2.5,rect.width/rect.height)) : 3/4);
-    setPhotoTool(null);
-    setPhotoLayersOpen(false);
-    setSelectedPhotoId(id);
-    setTransformingId(null);
-    setEditingId(null);
-    setLastTextId(null);
-    setError('');
-  };
-  const movePhotoLayer=(id:string)=>{
-    setShowPageMenu(false);
-    setPhotoLayersOpen(false); setEditingId(null); setSelectedPhotoId(null);
-    setPhotoTool(null); setLastTextId(null); setTrashHovered(false);
-    setTransformingId(id);
-  };
-  const updatePhotoStyle = (patch: Partial<CarolinaPhotoStyle>) => {
-    if (!selectedPhotoId) return;
-    const styles = { ...item.designLayout?.photoStyles };
-    styles[selectedPhotoId] = { ...styles[selectedPhotoId], ...patch };
-    updateLayout({ photoStyles: styles });
-  };
-  const replacePhoto = () => {
-    if (!selectedPhotoId) return;
-    if (selectedPhotoId === 'photo:cover') open('cover');
-    else if (selectedPhotoId.startsWith('photo-extra:'))
-      open(`extra:${selectedPhotoId.slice('photo-extra:'.length)}`);
-    else if (/^photo:(1[01]|[0-9])$/.test(selectedPhotoId))
-      open(Number(selectedPhotoId.slice(6)));
-  };
-  const addPhotoAnywhere=()=>{
-    setShowPageMenu(false);
-    if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
-    clearSelection();
-    if (page===1 && !cleanCarolina) { addPhotoBlock(); return; }
-    const existing=(item.designLayout?.extraPhotos||[]).filter(photo=>!!photo.url);
-    if(existing.length>=MAX_DESIGN_ELEMENTS){
-      setError('Máximo de fotografías y videos añadidos alcanzado.');return;
-    }
-    // Keep the new frame in local picker state until a file is really chosen.
-    setTransformingId(null);setSelectedPhotoId(null);setLastTextId(null);
-    setBank(false);setError('');setTarget(`extra:${crypto.randomUUID()}`);
-  };
-  const addPhotoBlock = () => {
-    setShowPageMenu(false);
-    if (editingId && document.activeElement instanceof HTMLElement) document.activeElement.blur();
-    clearSelection();
-    const slot=photoSlotToAdd(photoOrder,carolinaPhotos(item));
-    if(slot===null)return;
-    setTransformingId(null);setSelectedPhotoId(null);
-    setTarget(slot);setBank(false);setError('');
-  };
-  const open = (slot: PhotoTarget) => { setShowPageMenu(false);setSelectedPhotoId(null); setPhotoTool(null); setTarget(slot); setBank(false); setError(''); };
-  const close = () => { if (!busy) { setTarget(null); setBank(false); setError(''); } };
-  const applyMedia=(url:string,video:boolean)=>{
-    if(target===null)return;
-    if(video&&(typeof target==='number'||!url.startsWith('/api/videos/')))return;
-    if(target==='cover'){
-      edit('cover',video?'':url);
-      edit('coverVideo',video?url:'');
-    }else if(typeof target==='string'&&target.startsWith('extra:')){
-      const photoId=target.slice(6);
-      const previous=(item.designLayout?.extraPhotos||[]).filter(photo=>!!photo.url);
-      if(url){
-        const found=previous.some(photo=>photo.id===photoId);
-        updateLayout({extraPhotos:found
-          ? previous.map(photo=>photo.id===photoId?{...photo,url}:photo)
-          : [...previous,{id:photoId,page,url}]});
-      }else if(previous.some(photo=>photo.id===photoId)){
-        removePhoto('photo-extra:'+photoId);
-      }
-    }else if(typeof target==='number'){
-      const gallery=carolinaPhotos(item);
-      gallery[target]=url;edit('gallery',gallery);
-      if(url&&!photoOrder.includes(target))setPhotoOrder([...photoOrder,target]);
-    }
-    setTarget(null);setBank(false);setError('');
-  };
-  const choose=(url:string)=>applyMedia(url,false);
-  const chooseVideo=(url:string)=>applyMedia(url,true);
-  const selectPhone=async(file?:File)=>{
-    if(!file||target===null)return;
-    setBusy(true);
-    try{
-      const savedUrl=await onUploadPhoto(file,target);
-      applyMedia(savedUrl,false);
-    }catch(cause){
-      setError(cause instanceof Error?cause.message:'No se pudo guardar la fotografía.');
-    }finally{setBusy(false);}
-  };
+  const {selectPhoto,movePhotoLayer,updatePhotoStyle,replacePhoto,
+    addPhotoAnywhere,close,choose,chooseVideo,selectPhone}=createCanvasPhotoActions({
+    item,edit,updateLayout,page,cleanCarolina,photoOrder,
+    editingId,lastTextId,transformingId,selectedPhotoId,target,busy,
+    clearSelection,removePhoto,onUploadPhoto,
+    setShowPageMenu,setPhotoAspect,setPhotoTool,
+    setPhotoLayersOpen,setSelectedPhotoId,setTransformingId,
+    setEditingId,setLastTextId,setError,setTrashHovered,
+    setBank,setTarget,setBusy,
+  });
   const textInteraction=createCanvasTextInteraction({
     item,edit,updateLayout,editingId,transformingId,draftText,
     newlyConfirmedText,lastGestureMoveAt,justMoved,

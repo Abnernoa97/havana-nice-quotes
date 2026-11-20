@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/verify-canvas-navigation-once.yml'
+      - 'src/features/editor/canvas/media/createCanvasPhotoActions.ts'
 permissions:
   contents: read
 jobs:
