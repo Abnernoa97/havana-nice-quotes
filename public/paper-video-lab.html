@@ -13,7 +13,7 @@ header{width:100%;display:flex;justify-content:space-between;align-items:center;
 header+div{text-align:center;padding:15px 8px 16px}.kicker{font-size:10px;letter-spacing:.22em;color:#859387;font-weight:700}
 h1{font:400 clamp(28px,7vw,38px)/1.05 Georgia,serif;margin:9px 0}
 .subtitle{font-size:12px;line-height:1.45;color:#6e8072;margin:0}
-.stage{width:min(100%,min(48svh * .5625,420px));max-width:100%;aspect-ratio:9/16;position:relative;isolation:isolate;background:#e3dac9;overflow:hidden;box-shadow:0 18px 40px #4e433831}
+.stage{width:min(100%,46svh,400px);max-width:100%;aspect-ratio:9/16;position:relative;isolation:isolate;background:#e3dac9;overflow:hidden;box-shadow:0 18px 40px #4e433831}
 .stage video{width:100%;height:100%;object-fit:contain;display:block;background:#eee8dc}
 .stage .empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:30px;text-align:center;color:#55685d;font:400 20px/1.3 Georgia,serif}
 .stage[data-available=true] .empty{display:none}
@@ -33,7 +33,7 @@ select{border:1px solid #d1d7cb;background:#fffcf6;border-radius:99px;padding:10
 .status{min-height:24px;font-size:12px;line-height:1.4;color:#5e7765;text-align:center;margin:9px 12px}
 footer{margin:auto 0 0;text-align:center;padding:10px 17px max(16px,env(safe-area-inset-bottom));font-size:10px;color:#889387;line-height:1.55}
 footer a{color:#41644a}
-@media(max-height:770px){header+div{padding-top:4px;padding-bottom:8px}.stage{width:min(100%,min(43svh * .5625,420px))}}
+@media(max-height:770px){header+div{padding-top:4px;padding-bottom:8px}.stage{width:min(100%,44svh,400px)}}
 @media(prefers-reduced-motion:reduce){.stage .endnote{transition:none}}
 </style></head>
 <body><main>
