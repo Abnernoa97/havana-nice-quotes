@@ -21,10 +21,13 @@ test('Studio editor panel has one canonical border, shadow and white background'
  for(const prop of ['border: 1px solid var(--studio-line)','box-shadow: 0 12px 42px #233e3210','background: #fff'])assert.ok(x[0].includes(prop),prop);
 });
 test('3D magazine stage preserves geometry and vertical touch gestures in one rule',()=>{
- const x=rules(css.magazine,'.hn-magazine-stage');
+ // The second occurrence is the legitimate max-width:700px layout override.
+ const base=css.magazine.split('@media(max-width:700px)')[0];
+ const x=rules(base,'.hn-magazine-stage');
  assert.equal(x.length,1);
  assert.match(x[0],/position:relative/);
  assert.match(x[0],/overflow:visible/);
+ assert.match(css.magazine,/\.hn-magazine-stage\{min-height:0\}/);
  assert.match(css.magazine,/\.hn-magazine-stage,\.hn-magazine-stage \*\{touch-action:pan-y pinch-zoom!important\}/);
 });
 test('Recoverable personal template uses one rule for long-hold and selection',()=>{
