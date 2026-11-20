@@ -9,7 +9,7 @@
 .hn-text-dock-switches button{display:flex;min-width:0;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:54px;padding:7px 3px;border:1px solid transparent;border-radius:10px;background:#eef4ed;color:#4c6d56;cursor:pointer}
 .hn-text-dock-switches button.active{background:#244a37;color:#fff;box-shadow:0 2px 6px #1b3c2b25}
 .hn-text-dock-switches button span{font-size:10px;line-height:1.05;font-weight:700;white-space:nowrap}
-.hn-text-dock-expanded{padding:7px 10px 11px;border-top:1px solid #e0e8dd;max-height:min(48dvh,390px);overflow:auto;overscroll-behavior:contain}
+.hn-text-dock-expanded{padding:7px 10px 11px;border-top:0;max-height:min(48dvh,390px);overflow:auto;overscroll-behavior:contain}
 .hn-text-color-panel{display:flex;flex-direction:column;gap:11px}
 .hn-text-color-swatches{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;padding:6px 4px}
 .hn-text-color-swatches button{justify-self:center;width:34px;height:34px;border-radius:50%;border:2px solid #dde4dc;display:grid;place-items:center;cursor:pointer}
@@ -54,7 +54,6 @@
 /* Exactly one text tool is visible at a time; its back arrow restores the rail. */
 .hn-text-dock-title .hn-text-dock-close{margin-left:auto}
 .hn-text-dock-title>button:first-child:not(.hn-text-dock-close){margin-left:0}
-.hn-text-dock-expanded{border-top:0}
 .hn-text-dock:has(.hn-text-dock-expanded) .hn-text-dock-title{
   border-bottom:1px solid #e0e8dd;padding-bottom:11px
 }

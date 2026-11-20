@@ -12,7 +12,8 @@
   color:#254937;font:700 12px 'DM Sans',sans-serif;padding:8px 11px;cursor:pointer}
 .hn-photo-workspace-close:focus-visible{outline:2px solid #bd9860;outline-offset:2px}
 .hn-photo-workspace-stage{flex:1 1 auto;min-height:0;min-width:0;display:grid;place-items:center;
-  padding:9px 12px 10px;background:#e7ede7;container-type:size;overflow:hidden}
+  padding:9px 12px 10px;background:#e7ede7;container-type:size;overflow:hidden;overflow-y:auto;
+  overscroll-behavior-y:contain;touch-action:pan-y;scrollbar-width:thin}
 .hn-photo-workspace-frame{--photo-aspect:.75;position:relative;box-sizing:border-box;
   width:min(100cqw,calc(100cqh * var(--photo-aspect)));
   height:min(100cqh,calc(100cqw / var(--photo-aspect)));
@@ -22,7 +23,7 @@
 .hn-photo-workspace-frame>.hn-carolina-photo,
 .hn-photo-workspace-frame>.hn-carolina-cover-photo{position:absolute;inset:0;width:100%;height:100%;max-width:none;
   transform:none;pointer-events:none;box-sizing:border-box}
-.hn-photo-workspace-frame.editing-effect{outline:2px solid #b9a278;outline-offset:2px;cursor:crosshair}
+.hn-photo-workspace-frame.editing-effect{outline:2px solid #b9a278;outline-offset:2px;cursor:crosshair;touch-action:none}
 .hn-photo-workspace-frame .hn-carolina-image-fill,
 .hn-photo-workspace-frame .hn-carolina-image-vignette{pointer-events:none}
 .hn-photo-workspace .hn-photo-dock{position:relative;flex:0 0 auto;left:auto;bottom:auto;transform:none;
@@ -30,11 +31,12 @@
   border-radius:16px 16px 0 0;box-shadow:0 -6px 25px #142e2518;
   display:flex;flex-direction:column;overflow:hidden;background:#fafcf9;margin:0}
 .hn-photo-workspace .hn-photo-expanded{flex:0 1 auto;min-height:0;max-height:min(27dvh,225px);
-  overflow-y:auto;overscroll-behavior:contain;padding:7px 12px 9px;scrollbar-width:thin}
-.hn-photo-workspace .hn-photo-tools-rail{position:relative;flex:0 0 auto;border-top:1px solid #e1e8e0}
+  overflow-y:auto;overscroll-behavior:contain;overscroll-behavior-y:contain;
+  touch-action:pan-y;-webkit-overflow-scrolling:touch;padding:7px 12px 9px;scrollbar-width:thin}
+.hn-photo-workspace .hn-photo-tools-rail{position:relative;flex:0 0 auto;flex-shrink:0;border-top:1px solid #e1e8e0}
 .hn-photo-workspace .hn-photo-switches{display:flex;grid-template-columns:none;flex-wrap:nowrap;
   gap:4px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;
-  padding:6px 19px 7px 7px;scroll-snap-type:x proximity;justify-content:flex-start}
+  padding:6px 19px 7px 7px;scroll-snap-type:x proximity;justify-content:flex-start;touch-action:pan-x}
 .hn-photo-workspace .hn-photo-switches::-webkit-scrollbar{display:none}
 .hn-photo-workspace .hn-photo-switches button{flex:0 0 65px;min-height:47px;min-width:0;
   gap:3px;padding:5px 3px;border-radius:9px;scroll-snap-align:start}
@@ -95,12 +97,7 @@
 .hn-photo-crop-footer .hn-photo-reset{flex:0 0 auto;text-decoration:none;font-size:10px}
 
 /* Independent vertical scrolling: image area scrolls, tool selector stays docked. */
-.hn-photo-workspace-stage{overflow-y:auto;overscroll-behavior-y:contain;touch-action:pan-y;scrollbar-width:thin}
 .hn-photo-workspace-frame:not(.editing-effect){touch-action:pan-y}
-.hn-photo-workspace-frame.editing-effect{touch-action:none}
-.hn-photo-workspace .hn-photo-expanded{overscroll-behavior-y:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
-.hn-photo-workspace .hn-photo-tools-rail{flex-shrink:0}
-.hn-photo-workspace .hn-photo-switches{touch-action:pan-x}
 .hn-photo-crop-turn{display:flex;gap:6px}
 .hn-photo-crop-turn button{flex:1;border:1px solid #d6e2d6;border-radius:8px;background:#fff;color:#315741;min-height:31px;font-size:11px;font-weight:700}
 
