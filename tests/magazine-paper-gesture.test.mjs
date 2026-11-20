@@ -36,13 +36,14 @@ test('Releasing a short fold returns; releasing a deliberate turn completes',()=
  assert.match(hook,/flip\.getBoundsRect\(\)/);
 });
 test('Exactly one PageFlip motor manages the gesture and V2 option defaults',()=>{
- assert.match(book,/disableFlipByClick: true/);
+ assert.match(book,/flipOnClick: 'never'/);
  assert.match(book,/autoSize: false/);
  assert.match(book,/flippingTime: 650/);
- assert.match(book,/showPageCorners: window\.matchMedia/);
+ assert.match(book,/foldCornerOnHover: window\.matchMedia/);
  assert.match(book,/onPointerDown=\{paperGesture\.onPointerDown\}/);
  assert.match(book,/onPointerCancel=\{paperGesture\.onPointerCancel\}/);
- assert.match(book,/flip\.getFlipController\(\)\.flip\(/);
+ assert.match(book,/flip\.canTurn\('prev'\)/);
+ assert.match(book,/flip\.flipPrev\('bottom'\)/);
  assert.match(book,/drawShadow: true/);
  assert.match(book,/maxShadowOpacity: 0\.72/);
  assert.match(book,/const pages = Array\.from\(source\.children\)\.map\(node => node\.cloneNode\(true\)\)/);

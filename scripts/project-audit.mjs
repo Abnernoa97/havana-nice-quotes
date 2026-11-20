@@ -236,9 +236,11 @@ if (fileSet.has(magazinePath)) {
   const magazine = fs.readFileSync(path.join(ROOT, magazinePath), 'utf8');
   const paperGesture=fs.readFileSync(path.join(ROOT,'src/features/magazine/useMagazinePaperGesture.ts'),'utf8');
   check('PageFlip V2: parámetros y doblez manipulable protegidos',
-    ['flippingTime: 650', 'maxShadowOpacity: 0.72', 'showCover: false',
-      'usePortrait: true', 'autoSize: false', 'disableFlipByClick: true',
-      'flip.loadFromHTML(', 'onPointerMove={paperGesture.onPointerMove}'].every(x=>magazine.includes(x)) &&
+    ["from '@gullabs/flipbook-core'", 'flippingTime: 650', 'maxShadowOpacity: 0.72',
+      'hardCovers: false', 'usePortrait: true', 'autoSize: false',
+      "flipOnClick: 'never'", "pointerInput: ['mouse']", 'flip.loadFromHTML(',
+      "flip.canTurn('prev')", "flip.flipPrev('bottom')",
+      'onPointerMove={paperGesture.onPointerMove}'].every(x=>magazine.includes(x)) &&
     ['flip.startUserTouch(', 'flip.userMove(', 'flip.userStop('].every(x=>paperGesture.includes(x)),
     'Revisar gestos de pliegue 3D: se perdió un parámetro o el arrastre V2');
 }

@@ -540,7 +540,7 @@ test('Edición móvil con caret nativo y 3D con scroll vertical', () => {
   assert.match(editCss,/-webkit-touch-callout:none/);
   assert.match(magazineCss,/touch-action:pan-y pinch-zoom!important/);
   const magazine=src('features/magazine/FlipMagazine.tsx');
-  assert.match(magazine,/mobileScrollSupport: true/);
+  assert.match(magazine,/allowTouchScroll: true/);
 });
 
 

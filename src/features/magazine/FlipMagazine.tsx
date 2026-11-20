@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import type { Quote } from '../quotes/types';
-import { PageFlip } from 'page-flip';
+import { PageFlip } from '@gullabs/flipbook-core';
 import { useMagazinePaperGesture } from './useMagazinePaperGesture';
 import type { InteractiveMagazineFlip } from './useMagazinePaperGesture';
 import { ArrowLeft, ArrowRight, Hand } from 'lucide-react';
@@ -97,7 +97,7 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
       flip = new PageFlip(host, {
         width: 410,
         height: 580,
-        size: 'stretch',
+        sizing: 'responsive',
         minWidth: 270,
         maxWidth: 560,
         minHeight: 382,
@@ -108,31 +108,31 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
         flippingTime: 650,
         usePortrait: true,
         autoSize: false,
-        showCover: false,
+        hardCovers: false,
+        pageBackground: '#f8f6f0',
         // Keep vertical touch scrolling available while horizontal swipes still turn pages.
-        mobileScrollSupport: true,
+        allowTouchScroll: true,
+        // Pointer controls are owned by the live React drag on phones.
+        pointerInput: ['mouse'],
         swipeDistance: 25,
         // On touch devices a controlled finger drag owns the live fold.
-        showPageCorners: window.matchMedia('(hover:hover) and (pointer:fine)').matches,
-        disableFlipByClick: true,
+        foldCornerOnHover: window.matchMedia('(hover:hover) and (pointer:fine)').matches,
+        flipOnClick: 'never',
       });
       flip.loadFromHTML(host.querySelectorAll<HTMLElement>('.hn-leaf'));
       flip.on('flip', e => {
-        const next=Number(e.data||0);
+        const next=e.data.page;
         activePageIndex=next;
         // Stop old leaves; resume the muted infinite loop when cover returns.
         syncCoverVideos(next);
         setPage(next);
       });
-      flip.on('changeOrientation', e => setOrientation(String(e.data)));
-      // StPageFlip 2.0.7 emits changeState at runtime; its bundled TS event
-      // union omits that event even though the working V2 reader uses it.
-      (flip as unknown as {on:(name:'changeState',listener:(e:{data:string})=>void)=>void})
-        .on('changeState',e=>{
-          const busy=e.data==='flipping';
-          turningRef.current=busy;
-          setTurning(busy);
-        });
+      flip.on('changeOrientation', e => setOrientation(e.data.orientation));
+      flip.on('changeState',e=>{
+        const busy=e.data.state==='flipping';
+        turningRef.current=busy;
+        setTurning(busy);
+      });
       flipRef.current = flip;
       setPage(0);
       setFailure(false);
@@ -155,14 +155,10 @@ export default function FlipMagazine({ item, clientView=false }: { item: Quote; 
   const changePage = (direction: 'next' | 'prev') => {
     const flip=flipRef.current as InteractiveMagazineFlip | null;
     if(!flip||turningRef.current)return;
-    const collection=flip.getPageCollection();
-    const spread=collection.getCurrentSpreadIndex();
-    const last=collection.getSpreadIndexByPage(Math.max(0,total-1));
-    if(direction==='next'&&spread<last)flip.flipNext('bottom');
-    else if(direction==='prev'&&spread>0){
-      // V2 works around the page-flip 2.0.7 fixed x=10 previous-corner bug.
-      const rect=flip.getBoundsRect();
-      flip.getFlipController().flip({x:rect.left+10,y:rect.top+rect.height-2});
+    if(direction==='next'&&flip.canTurn('next'))flip.flipNext('bottom');
+    else if(direction==='prev'&&flip.canTurn('prev')){
+      // Fixed at the engine layer: previous leaf peels from the binding.
+      flip.flipPrev('bottom');
     }
   };
   const paperGesture=useMagazinePaperGesture({mountRef,flipRef,turningRef,

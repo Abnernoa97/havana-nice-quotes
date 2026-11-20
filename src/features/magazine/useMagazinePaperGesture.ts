@@ -1,18 +1,11 @@
 import {useRef} from 'react';
 import type {RefObject,PointerEvent as ReactPointerEvent} from 'react';
-import type {PageFlip} from 'page-flip';
+import type {PageFlip} from '@gullabs/flipbook-core';
 import {inPaperCorner,startsPaperFold,isVerticalReadingScroll,
   completesPaperTurn,isQuickPaperTap} from './magazine-gesture-intent';
 
 type Point={x:number;y:number};
-export type InteractiveMagazineFlip=PageFlip & {
-  startUserTouch:(point:Point)=>void;
-  userMove:(point:Point,touch:boolean)=>void;
-  userStop:(point:Point)=>void;
-  getBoundsRect:()=>{left:number;top:number;pageWidth:number;height:number};
-  getFlipController:()=>{flip:(point:Point)=>void};
-  getPageCollection:()=>{getCurrentSpreadIndex:()=>number;getSpreadIndexByPage:(page:number)=>number};
-};
+export type InteractiveMagazineFlip=PageFlip;
 type TouchStart=Point&{id:number;at:number;corner:boolean;vertical:boolean;dragging:boolean};
 type Args={
  mountRef:RefObject<HTMLDivElement|null>;
@@ -28,7 +21,8 @@ export function useMagazinePaperGesture({mountRef,flipRef,turningRef,orientation
  const touch=useRef<TouchStart|null>(null);
  const engine=()=>flipRef.current as InteractiveMagazineFlip|null;
  const relativePoint=(x:number,y:number):Point=>{
-   const rect=mountRef.current?.querySelector('.stf__block')?.getBoundingClientRect();
+   const flip=engine();
+   const rect=flip?.getBlockElement().getBoundingClientRect();
    return {x:rect?x-rect.left:0,y:rect?y-rect.top:0};
  };
  const onPointerDown=(event:ReactPointerEvent<HTMLDivElement>)=>{

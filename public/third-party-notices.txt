@@ -1,0 +1,7 @@
+HAVANA NICE Quotes — Third-party software notices
+
+This application includes @gullabs/flipbook-core, version 3.2.2.
+License: Mozilla Public License 2.0 (MPL-2.0).
+Source code and license: https://github.com/gul-labs/flipbook/tree/main/packages/core
+The project is based on StPageFlip by Nodlik (MIT); see upstream copyright notices in the linked source.
+The client application is separate software and uses the library through its public API.
