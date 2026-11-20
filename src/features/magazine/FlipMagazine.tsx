@@ -167,7 +167,12 @@ export default function FlipMagazine({ item }: { item: Quote; clientView?:boolea
 
   return (
     <section className={'hn-magazine hn-v2-book-paper hn-font-' + item.font + ' hn-style-' + (item.style || 'carolina')} style={{ '--paper-accent': item.color } as CSSProperties} aria-label="Propuesta de música en vivo en formato revista">
-      <div className="hn-magazine-stage">
+      <div className={'hn-magazine-stage'+(total>1?' hn-magazine-stage-bound':'')} style={{
+        '--hn-page-stack-depth': Math.min(14, Math.max(2, total - 1)) + 'px',
+        '--hn-page-stack-count': String(Math.max(0, total - 1)),
+        '--hn-page-stack-left': String(Math.min(page, total - 1)),
+        '--hn-page-stack-right': String(Math.max(0, total - page - 1)),
+      } as CSSProperties}>
         <div className="hn-magazine-surface" ref={mountRef}
           aria-label={'Revista interactiva de ' + total + ' páginas'}
           onTouchStartCapture={event=>event.stopPropagation()}
