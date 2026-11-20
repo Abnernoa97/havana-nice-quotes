@@ -6,6 +6,7 @@ import {validCarolinaLayout,carolinaPageOrder,MAX_DESIGN_PAGES,cleanEmptyExtraTe
 import {insertBlankPage,duplicateBlankPage,shiftPage,removeDesignPage} from '../src/features/templates/blank-pages.ts';
 import {pageBackgroundMediaId} from '../src/features/templates/page-background.ts';
 const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx"].map(p=>src('features/editor/canvas/'+p)).join('\n');
 const one='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',two='bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 test('Crear plantilla desde cero abre una sola hoja blanca persistente',()=>{
  const tpl=createOwnTemplate('hn-new');
@@ -78,11 +79,12 @@ test('No permite borrar última página o duplicar las hojas estructurales',()=>
  assert.equal(validCarolinaLayout(current),true);
 });
 test('Scroll y revista 3D pintan hojas blancas con los mismos nodos',()=>{
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const carolina=src('features/templates/CarolinaTemplate.tsx');
  const editorial=src('features/templates/EditorialTemplate.tsx');
  const flip=src('features/magazine/FlipMagazine.tsx');
- assert.match(canvas,/onClick=\{\(\)=>addPage\('chat'\)\}/);
+ assert.match(canvas,/onAddPage=\{addPage\}/);
+ assert.match(canvas,/onClick=\{\(\)=>onAddPage\('chat'\)\}/);
  assert.match(canvas,/\(isBlankPage\(page\)\|\|cleanCarolina\) && <CarolinaBlankPage/);
  assert.match(carolina,/export function CarolinaBlankPage/);
  assert.match(carolina,/<ExtraPhotos item=\{item\} page=\{page\}/);
@@ -111,7 +113,7 @@ test('Videos privados convertidos son medios válidos de hojas libres',()=>{
   [video.extraPhotos[0].url,video.extraPhotos[0].url]);
 });
 test('Selección de archivo es requisito para persistir un nuevo recuadro',()=>{
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const picker=src('features/editor/photos/PhotoSourcePicker.tsx');
  const node=src('features/templates/CarolinaPhotoNode.tsx');
  const start=canvas.split('const addPhotoAnywhere=()=>{')[1].split('const addPhotoBlock')[0];
@@ -143,7 +145,7 @@ test('El primer archivo confirmado es fondo de la hoja libre y cada página es i
 test('Un solo motor pinta el fondo completo y el texto encima en Diseño, Scroll y 3D',()=>{
  const page=src('features/templates/CarolinaTemplate.tsx');
  const media=src('features/templates/CarolinaPhotoNode.tsx');
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const css=src('features/templates/carolina-template.css');
  const styles=src('features/editor/canvas/template-canvas.css');
  assert.match(page,/pageBackgroundMediaId\(item\.designLayout,page\)/);
@@ -155,7 +157,7 @@ test('Un solo motor pinta el fondo completo y el texto encima en Diseño, Scroll
  assert.match(canvas,/isPageBackground=\{selectedPhotoId==='photo-extra:'\+pageBackgroundId\}/);
 });
 test('Video se edita como foto con opacidad, colores, recorte y viñeta',()=>{
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const workspace=src('features/editor/photos/PhotoEditingWorkspace.tsx');
  const dock=src('features/editor/photos/PhotoStyleDock.tsx');
  const media=src('features/templates/CarolinaPhotoNode.tsx');
@@ -173,7 +175,7 @@ test('Video se edita como foto con opacidad, colores, recorte y viñeta',()=>{
  assert.match(cover,/item\.coverVideo\|\|item\.cover/);
 });
 test('Tocar la hoja cierra la transformación y Capas aparece solo al editar',()=>{
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const gesture=src('features/templates/useCarolinaGesture.ts');
  const workspace=src('features/editor/photos/PhotoEditingWorkspace.tsx');
  assert.match(gesture,/selectedAtPress\.current/);
@@ -206,7 +208,7 @@ test('Solo se guardan textos no vacíos; limpieza elimina textos fantasma y sus 
  assert.equal(cleanEmptyExtraTexts(cleaned),cleaned);
 });
 test('Crear texto no persiste cuadros vacíos ni genera cajas invisibles en Scroll o Libro 3D',()=>{
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const page=src('features/templates/CarolinaTemplate.tsx');
  const node=src('features/templates/CarolinaTextNode.tsx');
  const gesture=src('features/templates/useCarolinaGesture.ts');
@@ -222,7 +224,7 @@ test('Crear texto no persiste cuadros vacíos ni genera cajas invisibles en Scro
 });
 test('Movimiento inmediato desde la hoja: texto activo, fotos y videos comparten un solo gesto',()=>{
  const hook=src('features/templates/useCarolinaGesture.ts');
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const css=src('features/editor/canvas/template-canvas.css');
  assert.match(hook,/page\.addEventListener\('pointerdown',down\)/);
  assert.match(hook,/page\.setPointerCapture\(event\.pointerId\)/);
@@ -243,7 +245,7 @@ test('Texto nuevo: centrado blanco Playfair y sin recolocar textos históricos',
  assert.equal(duplicate.layout.extras[1].centered,true);
  const node=src('features/templates/CarolinaTemplate.tsx');
  const css=src('features/templates/carolina-template.css');
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  assert.match(node,/hn-centered-extra-text/);
  assert.match(node,/extra\.centered\?'playfair-display'/);
  assert.match(css,/\.hn-carolina-added-text\.hn-centered-extra-text/);
@@ -254,7 +256,7 @@ test('Texto nuevo: centrado blanco Playfair y sin recolocar textos históricos',
 });
 test('Texto tecleado se mueve arrastrando el mismo texto o el fondo y cierra teclado',()=>{
  const gesture=src('features/templates/useCarolinaGesture.ts');
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  assert.match(gesture,/beginEditDrag\(event\.pointerId,event\.clientX,event\.clientY\)/);
  assert.match(gesture,/if\(disabled && editingHere\)/);
  assert.match(gesture,/interactionRef\.current\?\.onSelectTransform\(id\)/);
@@ -281,7 +283,7 @@ test('El selector crea hojas blancas o chat sin alterar otras páginas',()=>{
  assert.equal(validCarolinaLayout({pageOrder:[3],pageKinds:{'3':'album'}}),false);
 });
 test('El chat comparte la hoja blanca en Diseñador y Scroll; en 3D usa panel externo real',()=>{
- const editor=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const editor=canvasSource();
  const page=src('features/templates/CarolinaTemplate.tsx');
  const magazine=src('features/magazine/FlipMagazine.tsx');
  const client=src('features/client/PublicQuotePage.tsx');

@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {TEMPLATE_IDS,isTemplateStyle,templateFamily} from '../src/features/templates/template-registry.ts';
 import {validCarolinaLayout} from '../src/features/templates/carolina-layout.ts';
 const src=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx"].map(p=>src('features/editor/canvas/'+p)).join('\n');
 const mockQuote=(changes={})=>({
  id:'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',name:'Test',client:'',email:'',location:'',
  date:'',price:15000,deposit:40,status:'Borrador',cover:'',font:'editorial',
@@ -30,7 +31,7 @@ test('Un único modelo universal; el diseño anterior no se lee ni mezcla',()=>{
  const draft=mockQuote({designLayout:layout});
  assert.deepEqual(draft.designLayout,layout);
  const types=src('features/quotes/types.ts');
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const proposal=src('features/client/Proposal.tsx');
  const magazine=src('features/magazine/FlipMagazine.tsx');
  assert.match(types,/designLayout\?: CarolinaLayout/);
@@ -42,7 +43,7 @@ test('Un único modelo universal; el diseño anterior no se lee ni mezcla',()=>{
  assert.match(magazine,/export default function FlipMagazine\(\{ item, clientView=false \}/);
 });
 test('Todos los estilos comparten el motor universal, con páginas originales y hojas libres',()=>{
- const canvas=src('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const doc=src('features/templates/EditorialTemplate.tsx');
  const carolina=src('features/templates/CarolinaTemplate.tsx');
  const scroll=src('features/client/Proposal.tsx');

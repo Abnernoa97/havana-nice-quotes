@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, Trash2, Plus, Copy, MessageCircle, FileText, MapPin, Images } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2, Copy } from 'lucide-react';
 import { isCarolinaCopyField } from '../../templates/carolina-edit-fields';
 import TextStyleDock from '../texts/TextStyleDock';
 import type { TextToolTab } from '../texts/TextStyleDock';
@@ -14,7 +14,7 @@ import type { CarolinaTextField } from '../../templates/carolina-edit-fields';
 import { parseWeddingDate } from '../../../shared/lib/wedding-date';
 import type { CarolinaTextInteraction } from '../../templates/CarolinaTextNode';
 import type { CarolinaFixedKey, CarolinaLayout, CarolinaTextStyle, CarolinaPhotoStyle, CarolinaTransform } from '../../templates/carolina-layout';
-import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts } from '../../templates/carolina-layout';
+import { carolinaPhotoOrder, carolinaPageOrder, photoSlotToAdd, CAROLINA_MAX_SLOTS, MAX_DESIGN_ELEMENTS, isBlankPage, cleanEmptyExtraTexts, CAROLINA_PAGE_TITLES } from '../../templates/carolina-layout';
 import { pageBackgroundMediaId } from '../../templates/page-background';
 import { insertBlankPage, duplicateBlankPage, removeDesignPage } from '../../templates/blank-pages';
 import type { CarolinaPageId,PageKind } from '../../templates/carolina-layout';
@@ -22,8 +22,10 @@ import { normalizePriceInput, safeQuotePrice } from '../../quotes/model';
 import type { Quote } from '../../quotes/types';
 import type { CloudPhoto } from '../../photos/useMediaLibrary';
 import { templateFamily } from '../../templates/template-registry';
-import { EditorialCover, EditorialCollage, EditorialTerms } from '../../templates/EditorialTemplate';
-import { CarolinaCover, CarolinaCollage, CarolinaTerms, CarolinaBlankPage, carolinaPhotos } from '../../templates/CarolinaTemplate';
+import CanvasPageToolbar from './components/CanvasPageToolbar';
+import CanvasPageContent from './components/CanvasPageContent';
+import { useCanvasTapConfirmation } from './hooks/useCanvasTapConfirmation';
+import { carolinaPhotos } from '../../templates/CarolinaTemplate';
 import './template-canvas.css';
 
 type Props = {
@@ -32,8 +34,7 @@ type Props = {
   photos: CloudPhoto[];
   onUploadPhoto: (file: File, target: PhotoTarget) => Promise<string>;
 };
-const pages = ['Portada', 'Collage', 'Propuesta'] as const;
-const pageTitle=(page:number,index:number)=>isBlankPage(page)?'Página '+(index+1):pages[page]||'Página '+(index+1);
+const pageTitle=(page:number,index:number)=>isBlankPage(page)?'Página '+(index+1):CAROLINA_PAGE_TITLES[page as 0|1|2]||'Página '+(index+1);
 
 /** The same real sheet is edited and displayed in Scroll and the 3D magazine. */
 export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto }: Props) {
@@ -423,92 +424,18 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
       setError(cause instanceof Error?cause.message:'No se pudo guardar la fotografía.');
     }finally{setBusy(false);}
   };
-  // A page transform is confirmed by a short tap anywhere on the app.
-  // Swiping to scroll or using a second finger must never confirm by accident.
-  const blockClickUntil=useRef(0);
-  useEffect(()=>{
-    const onClick=(event:MouseEvent)=>{
-      if(Date.now()>blockClickUntil.current)return;
-      blockClickUntil.current=0;
-      event.preventDefault();event.stopPropagation();
-    };
-    document.addEventListener('click',onClick,true);
-    return ()=>document.removeEventListener('click',onClick,true);
-  },[]);
-  useEffect(()=>{
-    if(!transformingId&&!activeTextTool)return;
-    let candidate:{id:number;x:number;y:number;insideSheet:boolean}|null=null;
-    const down=(event:PointerEvent)=>{
-      if(!(event.target instanceof Element)||event.button!==0)return;
-      const el=event.target;
-      // Switching tools uses the same tap: never swallow toolbar or navigation clicks.
-      // A tap on empty canvas still confirms the current transform.
-      if(el.closest('.hn-canvas-toolbar,.hn-canvas-pager,.hn-text-dock,.hn-photo-workspace,.edit-tabs,.editor-actions,[data-hn-text-trash]'))return;
-      if(candidate){candidate=null;return;} // multiple fingers are not a confirming tap
-      candidate={id:event.pointerId,x:event.clientX,y:event.clientY,
-        insideSheet:!!el.closest('.hn-canvas-sheet')};
-      if(activeTextTool){event.preventDefault();event.stopPropagation();}
-    };
-    const move=(event:PointerEvent)=>{
-      if(candidate?.id===event.pointerId&&
-        Math.hypot(event.clientX-candidate.x,event.clientY-candidate.y)>9)candidate=null;
-    };
-    const up=(event:PointerEvent)=>{
-      if(candidate?.id!==event.pointerId)return;
-      const original=candidate;candidate=null;
-      if(Math.hypot(event.clientX-original.x,event.clientY-original.y)>9)return;
-      if(editingId&&document.activeElement instanceof HTMLElement)document.activeElement.blur();
-      blockClickUntil.current=Date.now()+650;
-      clearSelection();
-      // Inside the page, allow the gesture hook to receive pointerup and release
-      // capture. Only swallow the eventual click so no other edit opens.
-      if(!original.insideSheet || activeTextTool){
-        event.preventDefault();event.stopPropagation();
-      }
-    };
-    const cancel=()=>{candidate=null;};
-    document.addEventListener('pointerdown',down,true);
-    document.addEventListener('pointermove',move,true);
-    document.addEventListener('pointerup',up,true);
-    document.addEventListener('pointercancel',cancel,true);
-    return ()=>{
-      document.removeEventListener('pointerdown',down,true);
-      document.removeEventListener('pointermove',move,true);
-      document.removeEventListener('pointerup',up,true);
-      document.removeEventListener('pointercancel',cancel,true);
-    };
-  },[transformingId,activeTextTool,editingId]);
+  useCanvasTapConfirmation(transformingId,activeTextTool,editingId,clearSelection);
   const pageMenuVisible=showPageMenu&&target===null&&!lastTextId&&!selectedPhotoId&&!transformingId&&!editingId;
   const renderItem:Quote=draftText?{...item,designLayout:{...item.designLayout,
     extras:[...(item.designLayout?.extras||[]),{id:draftText.id,page:draftText.page,text:'',centered:true as const}]}}:item;
   return (
     <section className={'hn-canvas'+(lastTextId && target===null?' hn-text-focus':'')+
       (activeTextTool?' hn-tool-open':'')}>
-      {<div className="hn-canvas-toolbar">
-        <button type="button" onClick={addFreeText}>+ Texto</button>
-        <button type="button" onClick={addPhotoAnywhere}
-          disabled={page===1&&!cleanCarolina&&photoOrder.length>=CAROLINA_MAX_SLOTS}>+ Foto</button>
-        <div className="hn-page-kind-wrap">
-          <button type="button" onClick={togglePageMenu}
-            className="hn-canvas-add-page" aria-expanded={pageMenuVisible}
-            aria-controls="hn-page-kind-menu"
-            aria-label="Elegir tipo de página"><Plus size={17}/> Página</button>
-          {pageMenuVisible&&<div className="hn-page-kind-menu" id="hn-page-kind-menu"
-            role="group" aria-label="Tipos de página">
-            <button type="button" onClick={()=>addPage()}>
-              <FileText size={18}/> Página en blanco</button>
-            <button type="button" onClick={()=>addPage('chat')}>
-              <MessageCircle size={18}/> Página chat</button>
-            <button type="button" disabled title="Próximamente">
-              <FileText size={18}/> Información <small>Próximamente</small></button>
-            <button type="button" disabled title="Próximamente">
-              <MapPin size={18}/> Localización <small>Próximamente</small></button>
-            <button type="button" disabled title="Próximamente">
-              <Images size={18}/> Álbum <small>Próximamente</small></button>
-          </div>}
-        </div>
-        {transformingId && <span>Un dedo: mover · Dos dedos: ampliar · Giro deliberado</span>}
-      </div>}
+      <CanvasPageToolbar
+        onAddText={addFreeText} onAddPhoto={addPhotoAnywhere}
+        addPhotoDisabled={page===1&&!cleanCarolina&&photoOrder.length>=CAROLINA_MAX_SLOTS}
+        onTogglePageMenu={togglePageMenu} pageMenuVisible={pageMenuVisible}
+        onAddPage={addPage} transformingId={transformingId}/>
       <div className="hn-canvas-stage" onClick={event=>{
         // A tap in the whitespace surrounding the sheet accepts the current edit.
         if(event.target===event.currentTarget && (lastTextId||transformingId||editingId)){
@@ -533,29 +460,9 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
           event.preventDefault();event.stopPropagation();
         }
       }}>
-        {page===0 && !cleanCarolina && <div className="hn-canvas-cover">
-          {editorial
-            ? <EditorialCover item={renderItem} interaction={textInteraction}
-                onSelectCover={()=>selectPhoto('photo:cover')}
-                onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
-            : <CarolinaCover item={renderItem} interaction={textInteraction}
-                onSelectCover={()=>selectPhoto('photo:cover')}
-                onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>}
-        </div>}
-        {page===1 && !cleanCarolina && (editorial
-          ? <EditorialCollage item={renderItem} interaction={textInteraction}
-              onSelectPhoto={index=>selectPhoto('photo:'+index)}
-              onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
-          : <CarolinaCollage item={renderItem} interaction={textInteraction}
-              onSelectPhoto={index=>selectPhoto('photo:'+index)}
-              onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>)}
-        {page===2 && !cleanCarolina && (editorial
-          ? <EditorialTerms item={renderItem} interaction={textInteraction}
-              onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>
-          : <CarolinaTerms item={renderItem} interaction={textInteraction}
-              onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>)}
-        {(isBlankPage(page)||cleanCarolina) && <CarolinaBlankPage item={renderItem} page={page}
-          interaction={textInteraction} onSelectExtraPhoto={id=>selectPhoto('photo-extra:'+id)}/>}
+        <CanvasPageContent page={page} cleanCarolina={cleanCarolina}
+          editorial={editorial} renderItem={renderItem}
+          textInteraction={textInteraction} selectPhoto={selectPhoto}/>
         {transformingId && !activeTextTool && (
           <button type="button" data-hn-text-trash
             className={'hn-canvas-trash'+(trashHovered?' hot':'')}

@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 const read=p=>readFileSync(new URL('../src/'+p,import.meta.url),'utf8');
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx"].map(p=>read('features/editor/canvas/'+p)).join('\n');
 test('Editor tiene una sola arquitectura activa y ningún archivo antiguo',()=>{
-  const main=read('features/editor/canvas/TemplateCanvasEditor.tsx');
+  const main=canvasSource();
   const workspace=read('features/editor/photos/PhotoEditingWorkspace.tsx');
   const dock=read('features/editor/photos/PhotoStyleDock.tsx');
   const layers=read('features/editor/photos/PhotoLayersPanel.tsx');
@@ -29,7 +30,7 @@ test('Editor tiene una sola arquitectura activa y ningún archivo antiguo',()=>{
 });
 
 test('Navegación inferior única y gesto de desplazamiento vertical seguro',()=>{
- const canvas=read('features/editor/canvas/TemplateCanvasEditor.tsx');
+ const canvas=canvasSource();
  const css=read('features/editor/canvas/template-canvas.css');
  const dock=read('features/editor/photos/PhotoStyleDock.tsx');
  assert.doesNotMatch(canvas,/hn-canvas-pages/);

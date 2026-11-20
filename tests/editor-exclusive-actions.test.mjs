@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
-const canvas=readFileSync(new URL('../src/features/editor/canvas/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
+const canvas=["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx"].map(p=>readFileSync(new URL('../src/features/editor/canvas/'+p,import.meta.url),'utf8')).join('\n');
 const block=(start,end)=>{
   const a=canvas.indexOf(start);
   const b=canvas.indexOf(end,a+start.length);
@@ -39,7 +39,8 @@ test('Opening pages closes photo/text tools; outside tap and Escape dismiss menu
   assert.match(toggle,/setShowPageMenu\(true\)/);
   assert.match(toggle,/!event\.target\.closest\('\.hn-page-kind-wrap'\)/);
   assert.match(toggle,/event\.key==='Escape'/);
-  assert.match(canvas,/onClick=\{togglePageMenu\}/);
+  assert.match(canvas,/onTogglePageMenu=\{togglePageMenu\}/);
+  assert.match(canvas,/onClick=\{onTogglePageMenu\}/);
   assert.match(canvas,/aria-expanded=\{pageMenuVisible\}/);
 });
 

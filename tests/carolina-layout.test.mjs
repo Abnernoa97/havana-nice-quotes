@@ -5,6 +5,8 @@ import {
   CAROLINA_FIXED, ZERO_TRANSFORM, fixedText, validCarolinaLayout, clampTransform,
 } from '../src/features/templates/carolina-layout.ts';
 
+const canvasSource=()=>["TemplateCanvasEditor.tsx","components/CanvasPageToolbar.tsx","components/CanvasPageContent.tsx"].map(p=>readFileSync(new URL('../src/features/editor/canvas/'+p,import.meta.url),'utf8')).join('\n');
+
 test('Textos originales de Carolina son editables y se conserva la plantilla sin cambios', () => {
   assert.equal(Object.keys(CAROLINA_FIXED).length, 18);
   assert.equal(fixedText(undefined, 'brand'), 'HAVANA NICE');
@@ -35,7 +37,7 @@ test('Diseño nuevo puede serializarse y validarse sin alterar otros campos', ()
 test('Edición directa, presión larga y gesto de dos dedos mantienen un solo guardado', () => {
   const gesture=readFileSync(new URL('../src/features/templates/useCarolinaGesture.ts',import.meta.url),'utf8');
   const node=readFileSync(new URL('../src/features/templates/CarolinaTextNode.tsx',import.meta.url),'utf8');
-  const canvas=readFileSync(new URL('../src/features/editor/canvas/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
+  const canvas=canvasSource();
   const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
   assert.match(gesture,/LONG_PRESS_MS = 550/);
   assert.match(node,/contentEditable=\{editing \? 'plaintext-only' : undefined\}/);
@@ -56,7 +58,7 @@ test('Fotografías de portada y collage comparten gestos, posiciones y escala pe
   const template=readFileSync(new URL('../src/features/templates/CarolinaTemplate.tsx',import.meta.url),'utf8');
   const photo=readFileSync(new URL('../src/features/templates/CarolinaPhotoNode.tsx',import.meta.url),'utf8');
   const gestures=readFileSync(new URL('../src/features/templates/useCarolinaGesture.ts',import.meta.url),'utf8');
-  const canvas=readFileSync(new URL('../src/features/editor/canvas/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
+  const canvas=canvasSource();
   assert.match(photo,/useCarolinaGesture\(id, element, transform, interaction\)/);
   assert.match(photo,/onPointerDown=\{gesture\.onPointerDown\}/);
   assert.match(photo,/onPointerMove=\{gesture\.onPointerMove\}/);
@@ -98,7 +100,7 @@ test('Collage variable conserva los seis originales y admite 1 a 12 recuadros co
 });
 
 test('El diseñador usa una sola barra de fotos sin acciones antiguas ni duplicación', () => {
-  const canvas=readFileSync(new URL('../src/features/editor/canvas/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
+  const canvas=canvasSource();
   const template=readFileSync(new URL('../src/features/templates/CarolinaTemplate.tsx',import.meta.url),'utf8');
   const worker=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
   const css=readFileSync(new URL('../src/features/editor/canvas/template-canvas.css',import.meta.url),'utf8');
@@ -175,7 +177,7 @@ test('Portada y condiciones permiten tipografías independientes al mostrar el m
     transforms:{'field:location:cover':{x:2,y:0,scale:1.2,rotation:0}}};
   assert.equal(validCarolinaLayout(value),true);
   const template=readFileSync(new URL('../src/features/templates/CarolinaTemplate.tsx',import.meta.url),'utf8');
-  const editor=readFileSync(new URL('../src/features/editor/canvas/TemplateCanvasEditor.tsx',import.meta.url),'utf8');
+  const editor=canvasSource();
   assert.match(template,/field="location" instance="cover"/);
   assert.match(template,/field="date" instance="cover"/);
   assert.match(editor,/id\.slice\(6\)\.split\(':'\)\[0\]/);
