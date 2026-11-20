@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/verify-canvas-presentation-once.yml'
+      - 'src/features/editor/canvas/TemplateCanvasEditor.tsx'
 permissions:
   contents: read
 jobs:

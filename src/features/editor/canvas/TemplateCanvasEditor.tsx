@@ -36,10 +36,10 @@ export default function TemplateCanvasEditor({ item, edit, photos, onUploadPhoto
   const {
     target,setTarget,editingId,setEditingId,draftText,setDraftText,newlyConfirmedText,
     lastGestureMoveAt,justMoved,selectedPhotoId,setSelectedPhotoId,
-    photoTool,setPhotoTool,photoAspect,setPhotoAspect,photoLayersOpen,setPhotoLayersOpen,
+    setPhotoTool,setPhotoAspect,setPhotoLayersOpen,
     lastTextId,setLastTextId,activeTextTool,setActiveTextTool,
-    showPageMenu,setShowPageMenu,trashHovered,setTrashHovered,transformingId,setTransformingId,
-    bank,setBank,busy,setBusy,error,setError,clearSelection,
+    showPageMenu,setShowPageMenu,setTrashHovered,transformingId,setTransformingId,
+    setBank,busy,setBusy,setError,clearSelection,
   }=selection;
   useEffect(()=>{
     if(!selectedPages.includes(page))setPage(selectedPages[0]);
