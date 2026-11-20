@@ -251,6 +251,13 @@
   .hn-magazine-page-block-side{right:-2px;width:3px}
 }
 
+/* Reserve actual room for the OUTBOARD cover. Otherwise the mobile
+   viewport clips the exterior board when the leaf fills the stage. */
+.hn-magazine-stage-bound[data-book-orientation="portrait"] {
+  box-sizing: border-box;
+  padding-inline: clamp(24px, 6vw, 32px);
+}
+
 /* HAVANA NICE · Flat laminated board + separate hinge, NOT a round tube.
    Positioned from PageFlip's actual bounding box. Most of the board projects
    outside the leaf; the narrow joint joins its cover. Moving pages stay native. */
